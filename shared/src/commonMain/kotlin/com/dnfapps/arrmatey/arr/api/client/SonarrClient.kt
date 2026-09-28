@@ -20,7 +20,6 @@ import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryResponse
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
 
@@ -81,11 +80,9 @@ class SonarrClient(
                 ),
         )
 
-    override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrSeries>> =
-        get("series/lookup", mapOf("term" to params.query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrSeries>> = get("series/lookup", mapOf("term" to params.query))
 
-    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrSeries> =
-        post<ArrMedia, ArrSeries>("series", item)
+    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrSeries> = post<ArrMedia, ArrSeries>("series", item)
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<SeriesRelease>> {
         if (params !is ReleaseParams.Series) {
@@ -137,10 +134,11 @@ class SonarrClient(
                     instanceName = instance.label,
                     instanceType = instance.type,
                     series = it.series?.withLocalImages(instance.url),
-                    episode = it.episode?.copy(
-                        images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
-                        series = it.series?.withLocalImages(instance.url),
-                    ),
+                    episode =
+                        it.episode?.copy(
+                            images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
+                            series = it.series?.withLocalImages(instance.url),
+                        ),
                 )
             }
         }
@@ -164,16 +162,16 @@ class SonarrClient(
                     instanceName = instance.label,
                     instanceType = instance.type,
                     series = it.series?.withLocalImages(instance.url),
-                    episode = it.episode?.copy(
-                        images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
-                        series = it.series?.withLocalImages(instance.url),
-                    ),
+                    episode =
+                        it.episode?.copy(
+                            images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
+                            series = it.series?.withLocalImages(instance.url),
+                        ),
                 )
             }
         }
 
-    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =
-        post("command", CommandPayload.Series(id))
+    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> = post("command", CommandPayload.Series(id))
 
     override suspend fun getCalendar(
         start: LocalDate,

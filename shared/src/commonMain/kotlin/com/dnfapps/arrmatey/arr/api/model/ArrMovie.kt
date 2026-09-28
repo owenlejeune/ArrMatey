@@ -70,8 +70,7 @@ data class ArrMovie(
     HasArrImages<ArrMovie>,
     CalendarItem,
     InstanceTypeIdentifiable {
-    override fun withLocalImages(instanceUrl: String): ArrMovie =
-        copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
+    override fun withLocalImages(instanceUrl: String): ArrMovie = copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
 
     override val calendarId: Long
         get() = tmdbId

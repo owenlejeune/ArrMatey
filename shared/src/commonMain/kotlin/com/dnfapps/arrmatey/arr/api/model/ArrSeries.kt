@@ -61,8 +61,7 @@ data class ArrSeries(
 ) : ArrMedia,
     HasArrImages<ArrSeries>,
     InstanceTypeIdentifiable {
-    override fun withLocalImages(instanceUrl: String): ArrSeries =
-        copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
+    override fun withLocalImages(instanceUrl: String): ArrSeries = copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
 
     override val guid: Long
         get() = id ?: tvdbId.plus(100_000)

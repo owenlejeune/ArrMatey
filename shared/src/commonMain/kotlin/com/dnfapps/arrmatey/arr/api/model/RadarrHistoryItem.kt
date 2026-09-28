@@ -25,4 +25,3 @@ data class RadarrHistoryItem(
     override val displayTitle: String?
         get() = movie?.title ?: super.displayTitle
 }
-

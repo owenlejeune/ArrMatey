@@ -279,11 +279,13 @@ class LibraryRepository(
             }
     }
 
-    suspend fun refreshHistory(page: Int = 1, pageSize: Int = 100): NetworkResult<List<HistoryItem>> {
-        return client.getHistory(page, pageSize).onSuccess {
+    suspend fun refreshHistory(
+        page: Int = 1,
+        pageSize: Int = 100,
+    ): NetworkResult<List<HistoryItem>> =
+        client.getHistory(page, pageSize).onSuccess {
             _history.value = it
         }
-    }
 
     suspend fun editMediaItem(
         item: ArrMedia,

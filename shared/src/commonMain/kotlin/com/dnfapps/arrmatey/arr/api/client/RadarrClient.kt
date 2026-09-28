@@ -15,7 +15,6 @@ import com.dnfapps.arrmatey.arr.api.model.RadarrHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
 

@@ -33,7 +33,6 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.model.OperationStatus
-import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.asSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,8 +40,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -165,7 +162,8 @@ class ActivityQueueViewModel(
                 )
 
             val filteredHistory =
-                history.filter { it.eventType in downloadedEvents }
+                history
+                    .filter { it.eventType in downloadedEvents }
                     .let { list ->
                         if (uiState.downloadedInstanceId != null) {
                             list.filter { it.instanceId == uiState.downloadedInstanceId }
@@ -177,7 +175,12 @@ class ActivityQueueViewModel(
             val historyItemsList =
                 filteredHistory.map { hist ->
                     val repo = hist.instanceId?.let { repoMap[it] }
-                    val library = repo?.library?.value?.asSuccess()?.data ?: emptyList()
+                    val library =
+                        repo
+                            ?.library
+                            ?.value
+                            ?.asSuccess()
+                            ?.data ?: emptyList()
                     val instType = hist.instanceType ?: repo?.instance?.type ?: InstanceType.Radarr
                     val instName = hist.instanceName ?: repo?.instance?.label ?: ""
                     val instId = hist.instanceId ?: repo?.instance?.id ?: 0L

@@ -417,4 +417,3 @@ fun ActivityFilterMenu(
         }
     }
 }
-
