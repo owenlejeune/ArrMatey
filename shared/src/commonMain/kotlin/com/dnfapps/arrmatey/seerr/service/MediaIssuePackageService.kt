@@ -19,7 +19,7 @@ class MediaIssuePackageService(
             when (issue.media?.mediaType) {
                 RequestType.Movie -> fetchMovieDetails(issue.media.tmdbId)
                 RequestType.Tv -> fetchTvDetails(issue.media.tmdbId)
-                else -> throw IllegalStateException("Issue media cannot be null")
+                else -> null
             }
 
         return MediaIssuePackage(issue, details)

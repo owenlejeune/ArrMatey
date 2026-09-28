@@ -4,13 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CastMember(
-    val id: Long,
+    val id: Long = 0L,
     val castId: Long? = null,
-    val character: String,
-    val creditId: String,
-    val gender: Int,
-    val name: String,
-    val order: Int,
+    val character: String = "",
+    val creditId: String = "",
+    val gender: Int = 0,
+    val name: String = "",
+    val order: Int = 0,
     val profilePath: String? = null,
 ) {
     val fullProfilePath: String?

@@ -134,14 +134,18 @@ struct SeerrRequestCard: View {
 
     private var requestMetadata: some View {
         VStack(alignment: .leading, spacing: 2) {
-            UserInfoLabel(
-                label: MR.strings().requested_by.localized(),
-                displayName: request.requestedBy.displayName,
-                avatarUrl: request.requestedBy.avatar
-            )
-            Text(request.createdAt.format(pattern: "HH:mm, MMM d, yyyy"))
-                .font(.caption2)
-                .foregroundColor(.white.opacity(0.7))
+            if let requestedBy = request.requestedBy {
+                UserInfoLabel(
+                    label: MR.strings().requested_by.localized(),
+                    displayName: requestedBy.displayName,
+                    avatarUrl: requestedBy.avatar
+                )
+            }
+            if let createdAt = request.createdAt {
+                Text(createdAt.format(pattern: "HH:mm, MMM d, yyyy"))
+                    .font(.caption2)
+                    .foregroundColor(.white.opacity(0.7))
+            }
 
             if let modifiedBy = request.modifiedBy {
                 Spacer().frame(height: 4)
@@ -150,9 +154,11 @@ struct SeerrRequestCard: View {
                     displayName: modifiedBy.displayName,
                     avatarUrl: modifiedBy.avatar
                 )
-                Text(request.updatedAt.format(pattern: "HH:mm, MMM d, yyyy"))
-                    .font(.caption2)
-                    .foregroundColor(.white.opacity(0.7))
+                if let updatedAt = request.updatedAt {
+                    Text(updatedAt.format(pattern: "HH:mm, MMM d, yyyy"))
+                        .font(.caption2)
+                        .foregroundColor(.white.opacity(0.7))
+                }
             }
         }
     }

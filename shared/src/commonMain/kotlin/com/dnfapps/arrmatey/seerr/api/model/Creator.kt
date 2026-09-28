@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Creator(
-    val id: Long,
-    val name: String,
-    val gender: Int,
+    val id: Long = 0L,
+    val name: String = "",
+    val gender: Int = 0,
     val profilePath: String? = null,
 )

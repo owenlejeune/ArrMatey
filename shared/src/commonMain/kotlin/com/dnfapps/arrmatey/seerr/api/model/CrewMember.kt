@@ -4,12 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CrewMember(
-    val id: Long,
-    val creditId: String,
-    val gender: Int,
-    val name: String,
-    val job: String,
-    val department: String,
+    val id: Long = 0L,
+    val creditId: String = "",
+    val gender: Int = 0,
+    val name: String = "",
+    val job: String = "",
+    val department: String = "",
     val profilePath: String? = null,
 ) {
     val fullProfilePath: String?

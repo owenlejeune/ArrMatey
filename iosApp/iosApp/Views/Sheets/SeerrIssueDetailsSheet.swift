@@ -154,7 +154,7 @@ struct SeerrIssueDetailsSheet: View {
                     Text(user.displayName)
                         .font(.caption.bold())
                     
-                    if let url = URL(string: user.avatar) {
+                    if let avatar = user.avatar, let url = URL(string: avatar) {
                         AsyncImage(url: url) { image in
                             image.resizable().aspectRatio(contentMode: .fill)
                         } placeholder: {

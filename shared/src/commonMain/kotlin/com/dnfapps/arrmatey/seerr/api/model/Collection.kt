@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Collection(
-    val id: Long,
-    val name: String,
+    val id: Long = 0L,
+    val name: String = "",
     val posterPath: String? = null,
     val backdropPath: String? = null,
 )

@@ -325,6 +325,7 @@ private fun AdvancedSection(
 
 @Composable
 private fun RequestedBySection(request: MediaRequest) {
+    val requestedBy = request.requestedBy ?: return
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = mokoString(MR.strings.requested_by).uppercase(),
@@ -337,7 +338,7 @@ private fun RequestedBySection(request: MediaRequest) {
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 AsyncImage(
-                    model = request.requestedBy.avatar,
+                    model = requestedBy.avatar,
                     contentDescription = null,
                     modifier =
                         Modifier
@@ -347,15 +348,17 @@ private fun RequestedBySection(request: MediaRequest) {
                 )
                 Column {
                     Text(
-                        text = request.requestedBy.displayName,
+                        text = requestedBy.displayName,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                     )
-                    Text(
-                        text = request.requestedBy.email,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    requestedBy.email?.let { email ->
+                        Text(
+                            text = email,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
         }

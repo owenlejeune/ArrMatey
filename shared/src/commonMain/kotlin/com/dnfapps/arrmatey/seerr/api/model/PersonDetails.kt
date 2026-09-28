@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PersonDetails(
-    override val id: Long,
-    val name: String,
+    override val id: Long = 0L,
+    val name: String = "",
     @Contextual val birthday: LocalDate? = null,
     @Contextual val deathday: LocalDate? = null,
     val knownForDepartment: String? = null,

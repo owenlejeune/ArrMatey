@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Provider(
-    val displayPriority: Int,
-    val logoPath: String,
-    val id: Long,
-    val name: String,
+    val displayPriority: Int = 0,
+    val logoPath: String = "",
+    val id: Long = 0L,
+    val name: String = "",
 )

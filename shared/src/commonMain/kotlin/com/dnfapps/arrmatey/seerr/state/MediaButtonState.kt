@@ -156,5 +156,5 @@ private fun getTrailerUrl(relatedVideos: List<Video>): String? {
 
 private fun buildJellyfinUrl(
     jellyfinMediaId: String,
-    mediaType: RequestType,
-): String = "jellyfin://media/${mediaType.name.lowercase()}/$jellyfinMediaId"
+    mediaType: RequestType?,
+): String = "jellyfin://media/${mediaType?.name?.lowercase() ?: "item"}/$jellyfinMediaId"

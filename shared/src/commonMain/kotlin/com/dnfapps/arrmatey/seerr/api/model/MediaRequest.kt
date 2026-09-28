@@ -6,23 +6,23 @@ import kotlin.time.Instant
 
 @Serializable
 data class MediaRequest(
-    val id: Long,
-    val status: Int,
-    @Contextual val createdAt: Instant,
-    @Contextual val updatedAt: Instant,
-    val type: RequestType,
-    val is4k: Boolean,
+    val id: Long = 0L,
+    val status: Int = 0,
+    @Contextual val createdAt: Instant? = null,
+    @Contextual val updatedAt: Instant? = null,
+    val type: RequestType = RequestType.Movie,
+    val is4k: Boolean = false,
     val serverId: Long? = null,
     val profileId: Long? = null,
     val rootFolder: String? = null,
     val languageProfileId: Long? = null,
     val tags: List<String>? = null,
-    val isAutoRequest: Boolean,
+    val isAutoRequest: Boolean = false,
     val media: RequestMedia,
     val seasons: List<RequestSeason> = emptyList(),
     val modifiedBy: RequestUser? = null,
-    val requestedBy: RequestUser,
-    val seasonCount: Int,
+    val requestedBy: RequestUser? = null,
+    val seasonCount: Int = 0,
     val canRemove: Boolean = false,
 ) {
     val isMovie: Boolean get() = type == RequestType.Movie

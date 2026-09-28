@@ -6,19 +6,19 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TvDetails(
-    override val id: Long,
+    override val id: Long = 0L,
     override val backdropPath: String? = null,
     override val posterPath: String? = null,
     override val genres: List<Genre> = emptyList(),
     override val homepage: String? = null,
-    override val originalLanguage: String,
+    override val originalLanguage: String = "",
     override val overview: String? = null,
     override val popularity: Double = 0.0,
     override val productionCompanies: List<ProductionCompany> = emptyList(),
     override val productionCountries: List<ProductionCountry> = emptyList(),
     override val spokenLanguages: List<SpokenLanguage> = emptyList(),
     override val keywords: List<Keyword> = emptyList(),
-    override val status: String,
+    override val status: String = "",
     override val tagline: String? = null,
     override val voteAverage: Double = 0.0,
     override val voteCount: Int = 0,
@@ -36,15 +36,15 @@ data class TvDetails(
     val languages: List<String> = emptyList(),
     @Contextual val lastAirDate: LocalDate? = null,
     val lastEpisodeToAir: Episode? = null,
-    val name: String,
+    val name: String = "",
     val nextEpisodeToAir: Episode? = null,
     val networks: List<Network> = emptyList(),
     val numberOfEpisodes: Int = 0,
     val numberOfSeasons: Int = 0,
     val originCountry: List<String> = emptyList(),
-    val originalName: String,
+    val originalName: String = "",
     val seasons: List<Season> = emptyList(),
-    val type: String,
+    val type: String = "",
 ) : RequestMediaDetails {
     override fun getCertification(localeCode: String): String? =
         contentRatings

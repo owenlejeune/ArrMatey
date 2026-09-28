@@ -128,23 +128,29 @@ struct SeerrViewRequestSheet: View {
                         }
                     }
 
-                    Section(header: Text(MR.strings().requested_by.localized())) {
-                        HStack(spacing: 12) {
-                            AsyncImage(url: URL(string: request.requestedBy.avatar)) { image in
-                                image.resizable()
-                            } placeholder: {
-                                Image(systemName: "person.circle.fill")
-                                    .foregroundColor(.secondary)
-                            }
-                            .frame(width: 40, height: 40)
-                            .clipShape(Circle())
+                    if let requestedBy = request.requestedBy {
+                        Section(header: Text(MR.strings().requested_by.localized())) {
+                            HStack(spacing: 12) {
+                                if let avatar = requestedBy.avatar, let avatarUrl = URL(string: avatar) {
+                                    AsyncImage(url: avatarUrl) { image in
+                                        image.resizable()
+                                    } placeholder: {
+                                        Image(systemName: "person.circle.fill")
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .frame(width: 40, height: 40)
+                                    .clipShape(Circle())
+                                }
 
-                            VStack(alignment: .leading) {
-                                Text(request.requestedBy.displayName)
-                                    .font(.body.bold())
-                                Text(request.requestedBy.email)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                VStack(alignment: .leading) {
+                                    Text(requestedBy.displayName)
+                                        .font(.body.bold())
+                                    if let email = requestedBy.email {
+                                        Text(email)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
                             }
                         }
                     }

@@ -250,12 +250,14 @@ private fun CompactRequestCard(
                 }
             }
 
-            UserInfoRow(
-                label = mokoString(MR.strings.requested_by),
-                displayName = request.requestedBy.displayName,
-                avatar = request.requestedBy.avatar,
-                textColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            request.requestedBy?.let { requestedBy ->
+                UserInfoRow(
+                    label = mokoString(MR.strings.requested_by),
+                    displayName = requestedBy.displayName,
+                    avatar = requestedBy.avatar,
+                    textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

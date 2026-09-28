@@ -6,12 +6,12 @@ import kotlin.time.Instant
 
 @Serializable
 data class DownloadStatus(
-    val externalId: Int,
-    val mediaType: RequestType,
-    val size: Long,
-    val sizeLeft: Long,
-    val status: String,
-    val title: String,
-    val downloadId: String,
+    val externalId: Int = 0,
+    val mediaType: RequestType = RequestType.Movie,
+    val size: Long = 0L,
+    val sizeLeft: Long = 0L,
+    val status: String = "",
+    val title: String = "",
+    val downloadId: String = "",
     @Contextual val estimatedCompletionTime: Instant? = null,
 )

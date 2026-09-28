@@ -1642,22 +1642,24 @@ struct CompactRequestCard: View {
                     }
                 }
 
-                HStack(spacing: 6) {
-                    if let avatarUrl = URL(string: request.requestedBy.avatar) {
-                        AsyncImage(url: avatarUrl) { image in
-                            image.resizable().aspectRatio(contentMode: .fill)
-                        } placeholder: {
-                            Image(systemName: "person.circle.fill")
-                                .foregroundColor(.secondary)
+                if let requestedBy = request.requestedBy {
+                    HStack(spacing: 6) {
+                        if let avatar = requestedBy.avatar, let avatarUrl = URL(string: avatar) {
+                            AsyncImage(url: avatarUrl) { image in
+                                image.resizable().aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                Image(systemName: "person.circle.fill")
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(width: 20, height: 20)
+                            .clipShape(Circle())
                         }
-                        .frame(width: 20, height: 20)
-                        .clipShape(Circle())
-                    }
 
-                    Text(request.requestedBy.displayName)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .lineLimit(1)
+                        Text(requestedBy.displayName)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .lineLimit(1)
+                    }
                 }
             }
             .padding(12)
@@ -1802,7 +1804,7 @@ struct CompactIssueCard: View {
 
                 if let createdBy = issue.createdBy {
                     HStack(spacing: 6) {
-                        if let avatarUrl = URL(string: createdBy.avatar) {
+                        if let avatar = createdBy.avatar, let avatarUrl = URL(string: avatar) {
                             AsyncImage(url: avatarUrl) { image in
                                 image.resizable().aspectRatio(contentMode: .fill)
                             } placeholder: {

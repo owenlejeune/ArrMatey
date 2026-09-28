@@ -6,9 +6,9 @@ import kotlin.time.Instant
 
 @Serializable
 data class RequestSeason(
-    val id: Long,
-    val seasonNumber: Int,
-    val status: Int,
-    @Contextual val createdAt: Instant,
-    @Contextual val updatedAt: Instant,
+    val id: Long = 0L,
+    val seasonNumber: Int = 0,
+    val status: Int = 0,
+    @Contextual val createdAt: Instant? = null,
+    @Contextual val updatedAt: Instant? = null,
 )

@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ProductionCompany(
-    val id: Long,
+    val id: Long = 0L,
     val logoPath: String? = null,
     val originCountry: String? = null,
-    val name: String,
+    val name: String = "",
 )

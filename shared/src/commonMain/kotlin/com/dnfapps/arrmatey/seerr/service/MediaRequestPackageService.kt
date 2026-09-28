@@ -28,10 +28,15 @@ class MediaRequestPackageService(
 
             val serverDetailsDeferred =
                 async {
-                    when (request.type) {
-                        RequestType.Movie -> fetchRadarrDetails(request.serverId ?: 0)
-                        RequestType.Tv -> fetchSonarrDetails(request.serverId ?: 0)
-                        RequestType.Person -> null
+                    val serverId = request.serverId
+                    if (serverId != null && serverId > 0) {
+                        when (request.type) {
+                            RequestType.Movie -> fetchRadarrDetails(serverId)
+                            RequestType.Tv -> fetchSonarrDetails(serverId)
+                            RequestType.Person -> null
+                        }
+                    } else {
+                        null
                     }
                 }
 

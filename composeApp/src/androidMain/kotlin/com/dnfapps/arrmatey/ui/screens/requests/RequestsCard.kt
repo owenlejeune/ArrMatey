@@ -163,17 +163,21 @@ private fun RequestCardHeader(
 @Composable
 private fun RequestMetadata(request: MediaRequest) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        UserInfoRow(
-            label = mokoString(MR.strings.requested_by),
-            displayName = request.requestedBy.displayName,
-            avatar = request.requestedBy.avatar,
-            textColor = Color.White.copy(alpha = 0.9f),
-        )
-        Text(
-            text = request.createdAt.format("HH:mm, MMM d, yyyy"),
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.7f),
-        )
+        request.requestedBy?.let { requestedBy ->
+            UserInfoRow(
+                label = mokoString(MR.strings.requested_by),
+                displayName = requestedBy.displayName,
+                avatar = requestedBy.avatar,
+                textColor = Color.White.copy(alpha = 0.9f),
+            )
+        }
+        request.createdAt?.let { createdAt ->
+            Text(
+                text = createdAt.format("HH:mm, MMM d, yyyy"),
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f),
+            )
+        }
 
         request.modifiedBy?.let { modifiedBy ->
             Spacer(Modifier.height(4.dp))
@@ -183,11 +187,13 @@ private fun RequestMetadata(request: MediaRequest) {
                 avatar = modifiedBy.avatar,
                 textColor = Color.White.copy(alpha = 0.9f),
             )
-            Text(
-                text = request.updatedAt.format("HH:mm, MMM d, yyyy"),
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.7f),
-            )
+            request.updatedAt?.let { updatedAt ->
+                Text(
+                    text = updatedAt.format("HH:mm, MMM d, yyyy"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.7f),
+                )
+            }
         }
     }
 }

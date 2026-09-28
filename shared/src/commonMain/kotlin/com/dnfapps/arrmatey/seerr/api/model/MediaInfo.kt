@@ -6,10 +6,10 @@ import kotlin.time.Instant
 
 @Serializable
 data class MediaInfo(
-    val id: Long,
-    val tmdbId: Long,
+    val id: Long = 0L,
+    val tmdbId: Long = 0L,
     val tvdbId: Long? = null,
-    val status: Int,
+    val status: Int = 0,
     val status4k: Int? = null,
     // Plex fields
     val mediaUrl: String? = null, // Plex web URL
@@ -26,7 +26,7 @@ data class MediaInfo(
     val serviceId4k: Long? = null,
     val externalServiceId: Long? = null,
     val externalServiceId4k: Long? = null,
-    val mediaType: RequestType,
+    val mediaType: RequestType? = null,
     val requests: List<MediaRequest> = emptyList(),
     val issues: List<Issue> = emptyList(),
     val seasons: List<SeasonInfo> = emptyList(),

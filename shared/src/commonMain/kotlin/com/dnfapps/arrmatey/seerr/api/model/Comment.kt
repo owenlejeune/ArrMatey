@@ -6,8 +6,8 @@ import kotlin.time.Instant
 
 @Serializable
 data class Comment(
-    val id: Int,
-    val message: String,
+    val id: Long = 0L,
+    val message: String = "",
     @Contextual val createdAt: Instant? = null,
     @Contextual val updatedAt: Instant? = null,
     val user: RequestUser? = null,

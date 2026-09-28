@@ -9,6 +9,6 @@ data class ReleaseDate(
     val certification: String? = null,
     val iso_639_1: String? = null,
     val note: String? = null,
-    @Contextual val release_date: Instant,
-    val type: Int,
+    @Contextual val release_date: Instant? = null,
+    val type: Int = 0,
 )
