@@ -74,8 +74,8 @@ sealed interface QueueItem {
 
     val progressPercent: Float
         get() =
-            if (sizeleft > 0f) {
-                (((size - sizeleft) / size) * 100)
+            if (size > 0f) {
+                (((size - sizeleft) / size) * 100f).coerceIn(0f, 100f)
             } else {
                 0f
             }
