@@ -279,7 +279,7 @@ fun CustomWebpageViewerScreen(
                                         override fun onReceivedSslError(
                                             view: WebView?,
                                             handler: SslErrorHandler?,
-                                            error: SslError?
+                                            error: SslError?,
                                         ) {
                                             if (webpage.allowSelfSignedCerts) {
                                                 handler?.proceed()

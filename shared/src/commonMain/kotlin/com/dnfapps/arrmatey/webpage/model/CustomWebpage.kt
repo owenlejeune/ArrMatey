@@ -11,5 +11,5 @@ data class CustomWebpage(
     val name: String,
     val url: String,
     val headers: List<InstanceHeader> = emptyList(),
-    val allowSelfSignedCerts: Boolean = false
+    val allowSelfSignedCerts: Boolean = false,
 )
