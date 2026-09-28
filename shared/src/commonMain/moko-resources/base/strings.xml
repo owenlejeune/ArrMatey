@@ -1067,4 +1067,6 @@
     <string name="simulate_crash">Simulate Crash</string>
     <string name="show_instance_info_card">Show %1$s info card</string>
     <string name="enable_activity_polling">Enable activity polling</string>
+    <string name="recently_downloaded">Recently Downloaded</string>
+    <string name="no_downloaded_media">No downloaded media</string>
 </resources>

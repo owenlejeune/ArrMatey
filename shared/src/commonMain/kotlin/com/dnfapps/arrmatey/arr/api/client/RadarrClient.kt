@@ -26,19 +26,9 @@ class RadarrClient(
     ArrClient {
     override suspend fun getLibrary(): NetworkResult<List<ArrMovie>> =
         get<List<ArrMovie>>("movie")
-            .onSuccess { movies ->
+            .map { movies ->
                 movies.map { movie ->
-                    movie.copy(
-                        instanceId = instance.id,
-                        images =
-                            movie.images.map { image ->
-                                if (image.remoteUrl?.startsWith("/") == true) {
-                                    image.copy(remoteUrl = "$baseUrl${image.remoteUrl}")
-                                } else {
-                                    image
-                                }
-                            },
-                    )
+                    movie.withLocalImages(instance.url).copy(instanceId = instance.id)
                 }
             }
 
@@ -119,9 +109,17 @@ class RadarrClient(
                 "page" to page,
                 "pageSize" to pageSize,
                 "movieId" to id,
+                "includeMovie" to true,
             ),
         ).map { list ->
-            list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+            list.map {
+                it.copy(
+                    instanceId = instance.id,
+                    instanceName = instance.label,
+                    instanceType = instance.type,
+                    movie = it.movie?.withLocalImages(instance.url),
+                )
+            }
         }
 
     override suspend fun getHistory(
@@ -133,9 +131,17 @@ class RadarrClient(
             mapOf<String, Any>(
                 "page" to page,
                 "pageSize" to pageSize,
+                "includeMovie" to true,
             ),
         ).map { response ->
-            response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+            response.records.map {
+                it.copy(
+                    instanceId = instance.id,
+                    instanceName = instance.label,
+                    instanceType = instance.type,
+                    movie = it.movie?.withLocalImages(instance.url),
+                )
+            }
         }
 
     override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =

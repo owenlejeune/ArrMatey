@@ -29,6 +29,9 @@ struct ActivityTabContent: View {
         case .history:
             guard !viewModel.historyItems.isEmpty else { return MR.strings().history.localized() }
             return "\(MR.strings().history.localized()) (\(viewModel.historyItems.count))"
+        case .downloaded:
+            guard !viewModel.downloadedItems.isEmpty else { return MR.strings().recently_downloaded.localized() }
+            return "\(MR.strings().recently_downloaded.localized()) (\(viewModel.downloadedItems.count))"
         default:
             return MR.strings().activity.localized()
         }
@@ -86,6 +89,10 @@ struct ActivityTabContent: View {
                         get: { viewModel.uiState.historyStateFilter },
                         set: { viewModel.setHistoryStateFilter($0) }
                     ),
+                    downloadedInstanceId: Binding(
+                        get: { viewModel.uiState.downloadedInstanceId?.int64Value },
+                        set: { viewModel.setDownloadedInstanceId($0) }
+                    ),
                     instances: viewModel.instances
                 )
             }
@@ -115,6 +122,8 @@ struct ActivityTabContent: View {
             queueItemContent
         case .history:
             historyContent
+        case .downloaded:
+            downloadedContent
         default:
             queueItemContent
         }
@@ -182,6 +191,37 @@ struct ActivityTabContent: View {
                     }
                 }
                 .onChange(of: viewModel.uiState.historyInstanceId) { _, _ in
+                    var transaction = Transaction()
+                    transaction.disablesAnimations = true
+                    withTransaction(transaction) {
+                        proxy.scrollTo(0, anchor: .top)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var downloadedContent: some View {
+        if viewModel.downloadedItems.isEmpty {
+            ContentUnavailableView(
+                MR.strings().no_downloaded_media.localized(),
+                systemImage: "arrow.down.circle"
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            ScrollViewReader { proxy in
+                List {
+                    ForEach(Array(viewModel.downloadedItems.enumerated()), id: \.offset) { index, item in
+                        DownloadedMediaItemView(item: item)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                            .id(index)
+                    }
+                }
+                .listStyle(.plain)
+                .onChange(of: viewModel.uiState.downloadedInstanceId) { _, _ in
                     var transaction = Transaction()
                     transaction.disablesAnimations = true
                     withTransaction(transaction) {

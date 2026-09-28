@@ -15,6 +15,7 @@ struct ActivityFilterMenu: View {
     @Binding var instanceId: Int64?
     @Binding var historyInstanceId: Int64?
     @Binding var historyStateFilter: HistoryStateFilter
+    @Binding var downloadedInstanceId: Int64?
     let instances: [Instance]
     
     private var instancePickerTitle: String {
@@ -26,6 +27,11 @@ struct ActivityFilterMenu: View {
         guard let id = historyInstanceId else { return MR.strings().instances.localized() }
         return instances.first(where: { $0.id == id })?.label ?? MR.strings().all.localized()
     }
+
+    private var downloadedInstancePickerTitle: String {
+        guard let id = downloadedInstanceId else { return MR.strings().instances.localized() }
+        return instances.first(where: { $0.id == id })?.label ?? MR.strings().all.localized()
+    }
     
     private var statePickerTitle: String {
         return historyStateFilter.resource.localized()
@@ -33,7 +39,8 @@ struct ActivityFilterMenu: View {
     
     var body: some View {
         Menu {
-            if selectedTab == .activity {
+            switch selectedTab {
+            case .activity:
                 Menu {
                     Picker(instancePickerTitle, selection: $instanceId) {
                         Text(MR.strings().all.localized()).tag(nil as Int64?)
@@ -63,7 +70,7 @@ struct ActivityFilterMenu: View {
                         }
                     }
                 }
-            } else {
+            case .history:
                 Menu {
                     Picker(historyInstancePickerTitle, selection: $historyInstanceId) {
                         Text(MR.strings().all.localized()).tag(nil as Int64?)
@@ -86,6 +93,20 @@ struct ActivityFilterMenu: View {
                 } label: {
                     Label(statePickerTitle, systemImage: "line.3.horizontal.decrease.circle")
                 }
+            case .downloaded:
+                Menu {
+                    Picker(downloadedInstancePickerTitle, selection: $downloadedInstanceId) {
+                        Text(MR.strings().all.localized()).tag(nil as Int64?)
+                        ForEach(instances, id: \.id) { instance in
+                            Text(instance.label).tag(instance.id as Int64?)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                } label: {
+                    Label(downloadedInstancePickerTitle, systemImage: "externaldrive.connected.to.line.below.fill")
+                }
+            default:
+                EmptyView()
             }
         } label: {
             Image(systemName: "line.3.horizontal.decrease")

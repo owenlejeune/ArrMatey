@@ -11,6 +11,7 @@ data class ActivityQueueUiState(
     val selectedTab: ActivityTabSegment = ActivityTabSegment.Activity,
     val historyStateFilter: HistoryStateFilter = HistoryStateFilter.All,
     val historyInstanceId: Long? = null,
+    val downloadedInstanceId: Long? = null,
 ) {
     constructor() : this(
         null,
@@ -18,6 +19,7 @@ data class ActivityQueueUiState(
         SortOrder.Asc,
         ActivityTabSegment.Activity,
         HistoryStateFilter.All,
-        null
+        null,
+        null,
     )
 }

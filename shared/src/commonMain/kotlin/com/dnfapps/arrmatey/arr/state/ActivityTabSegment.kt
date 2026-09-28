@@ -5,5 +5,6 @@ import dev.icerock.moko.resources.StringResource
 
 enum class ActivityTabSegment(val resource: StringResource) {
     Activity(MR.strings.activity),
-    History(MR.strings.history);
+    History(MR.strings.history),
+    Downloaded(MR.strings.recently_downloaded);
 }

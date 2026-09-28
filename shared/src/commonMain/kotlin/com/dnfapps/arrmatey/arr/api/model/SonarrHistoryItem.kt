@@ -21,5 +21,16 @@ data class SonarrHistoryItem(
     override val instanceType: InstanceType? = null,
     val seriesId: Long,
     val episodeId: Long? = null,
-) : HistoryItem
+    val series: ArrSeries? = null,
+    val episode: Episode? = null,
+) : HistoryItem {
+    override val displayTitle: String?
+        get() =
+            when {
+                series != null && episode != null -> "${series.title} - ${episode.seasonEpLabel}${if (!episode.title.isNullOrBlank()) " - ${episode.title}" else ""}"
+                series != null -> series.title
+                episode != null -> episode.title
+                else -> super.displayTitle
+            }
+}
 

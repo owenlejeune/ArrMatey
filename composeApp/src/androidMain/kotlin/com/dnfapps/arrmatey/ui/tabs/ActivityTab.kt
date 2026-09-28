@@ -29,6 +29,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -92,6 +93,7 @@ import androidx.compose.material3.Tab
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.state.ActivityTabSegment
 import com.dnfapps.arrmatey.entensions.PaddingValues
+import com.dnfapps.arrmatey.ui.components.DownloadedMediaItemView
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalTime::class)
@@ -103,6 +105,7 @@ fun ActivityTab(
 ) {
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val historyItems by viewModel.historyItems.collectAsStateWithLifecycle()
+    val downloadedItems by viewModel.downloadedItems.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
     val uiState by viewModel.activityQueueUiState.collectAsStateWithLifecycle()
     val removeItemStatus by viewModel.removeItemState.collectAsStateWithLifecycle()
@@ -110,12 +113,19 @@ fun ActivityTab(
     val hasLoaded by viewModel.hasLoaded.collectAsStateWithLifecycle()
     val isHistoryLoading by viewModel.isHistoryLoading.collectAsStateWithLifecycle()
     val hasHistoryLoaded by viewModel.hasHistoryLoaded.collectAsStateWithLifecycle()
+    val isDownloadedLoading by viewModel.isDownloadedLoading.collectAsStateWithLifecycle()
+    val hasDownloadedLoaded by viewModel.hasDownloadedLoaded.collectAsStateWithLifecycle()
     val useColoredCards by preferences.useColoredActivityCards.collectAsStateWithLifecycle(false)
 
     val historyListState = rememberLazyListState()
+    val downloadedListState = rememberLazyListState()
 
     LaunchedEffect(uiState.historyStateFilter, uiState.historyInstanceId) {
         historyListState.scrollToItem(0)
+    }
+
+    LaunchedEffect(uiState.downloadedInstanceId) {
+        downloadedListState.scrollToItem(0)
     }
 
     var showConfirmRemove by remember { mutableStateOf(false) }
@@ -150,6 +160,8 @@ fun ActivityTab(
                         onHistoryInstanceChange = { viewModel.setHistoryInstanceId(it) },
                         historyStateFilter = uiState.historyStateFilter,
                         onHistoryStateFilterChanged = { viewModel.setHistoryStateFilter(it) },
+                        selectedDownloadedInstanceId = uiState.downloadedInstanceId,
+                        onDownloadedInstanceChange = { viewModel.setDownloadedInstanceId(it) },
                     )
                 },
                 navigationIcon = {
@@ -273,6 +285,52 @@ fun ActivityTab(
                                             key = { "${it.instanceId}_${it.id}_${it.eventType}_${it.date}" },
                                         ) { item ->
                                             HistoryItemView(item = item)
+                                        }
+                                        item {
+                                            Spacer(Modifier.height(LocalFloatingBarBottomPadding.current + 16.dp))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ActivityTabSegment.Downloaded -> {
+                        if (instances.isNotEmpty() && (!hasDownloadedLoaded && isDownloadedLoading)) {
+                            LoadingIndicator(
+                                modifier = Modifier.size(96.dp),
+                            )
+                        } else {
+                            PullToRefreshBox(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center,
+                                isRefreshing = isDownloadedLoading,
+                                onRefresh = { viewModel.refresh() },
+                            ) {
+                                if (downloadedItems.isEmpty()) {
+                                    EmptyDownloadedState(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .verticalScroll(rememberScrollState()),
+                                    )
+                                } else {
+                                    LazyColumn(
+                                        state = downloadedListState,
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentPadding = PaddingValues(
+                                            start = 16.dp,
+                                            end = 16.dp,
+                                            top = 16.dp,
+                                            bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+                                        ),
+                                    ) {
+                                        items(
+                                            items = downloadedItems,
+                                            key = { it.id },
+                                        ) { item ->
+                                            DownloadedMediaItemView(item = item)
                                         }
                                         item {
                                             Spacer(Modifier.height(LocalFloatingBarBottomPadding.current + 16.dp))
@@ -794,6 +852,26 @@ fun EmptyHistoryState(modifier: Modifier = Modifier) {
         )
         Text(
             text = mokoString(MR.strings.no_history),
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
+}
+
+@Composable
+fun EmptyDownloadedState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+    ) {
+        Icon(
+            imageVector = Icons.Default.DownloadDone,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = mokoString(MR.strings.no_downloaded_media),
             style = MaterialTheme.typography.titleMedium,
         )
     }

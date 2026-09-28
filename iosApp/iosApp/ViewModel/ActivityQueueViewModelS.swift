@@ -15,9 +15,11 @@ class ActivityQueueViewModelS: ObservableObject {
     
     @Published private(set) var queueItems: [QueueItem] = []
     @Published private(set) var historyItems: [HistoryItem] = []
+    @Published private(set) var downloadedItems: [DownloadedMediaItem] = []
     @Published private(set) var tasksWithIssues: Int = 0
     @Published private(set) var isPolling: Bool = false
     @Published private(set) var isHistoryLoading: Bool = false
+    @Published private(set) var isDownloadedLoading: Bool = false
     @Published private(set) var instances: [Instance] = []
     @Published private(set) var uiState: ActivityQueueUiState = ActivityQueueUiState()
     @Published private(set) var removeItemStatus: OperationStatus = OperationStatusIdle()
@@ -34,6 +36,7 @@ class ActivityQueueViewModelS: ObservableObject {
     private func startObserving() {
         viewModel.queueItems.observeAsync(on: self, to: \.queueItems)
         viewModel.historyItems.observeAsync(on: self, to: \.historyItems)
+        viewModel.downloadedItems.observeAsync(on: self, to: \.downloadedItems)
         viewModel.tasksWithIssues.observeAsync(on: self) { owner, tasks in
             owner.tasksWithIssues = tasks.intValue
         }
@@ -42,6 +45,9 @@ class ActivityQueueViewModelS: ObservableObject {
         }
         viewModel.isHistoryLoading.observeAsync(on: self) { owner, isHistoryLoading in
             owner.isHistoryLoading = isHistoryLoading.boolValue
+        }
+        viewModel.isDownloadedLoading.observeAsync(on: self) { owner, isDownloadedLoading in
+            owner.isDownloadedLoading = isDownloadedLoading.boolValue
         }
         viewModel.instances.observeAsync(on: self, to: \.instances)
         viewModel.activityQueueUiState.observeAsync(on: self, to: \.uiState)
@@ -85,6 +91,10 @@ class ActivityQueueViewModelS: ObservableObject {
     
     func setHistoryInstanceId(_ id: Int64?) {
         viewModel.setHistoryInstanceId(id: id?.asKotlinLong)
+    }
+    
+    func setDownloadedInstanceId(_ id: Int64?) {
+        viewModel.setDownloadedInstanceId(id: id?.asKotlinLong)
     }
     
     func getQueueItemForEpisode(_ episode: Episode) -> SonarrQueueItem? {

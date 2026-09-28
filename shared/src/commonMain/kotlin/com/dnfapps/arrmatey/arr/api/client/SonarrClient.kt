@@ -31,18 +31,9 @@ class SonarrClient(
     ArrClient {
     override suspend fun getLibrary(): NetworkResult<List<ArrSeries>> =
         get<List<ArrSeries>>("series")
-            .onSuccess { shows ->
+            .map { shows ->
                 shows.map { series ->
-                    series.copy(
-                        images =
-                            series.images.map { image ->
-                                if (image.remoteUrl?.startsWith("/") == true) {
-                                    image.copy(remoteUrl = "$baseUrl${image.remoteUrl}")
-                                } else {
-                                    image
-                                }
-                            },
-                    )
+                    series.withLocalImages(instance.url).copy(instanceId = instance.id)
                 }
             }
 
@@ -136,6 +127,8 @@ class SonarrClient(
                 "page" to page,
                 "pageSize" to pageSize,
                 "episodeId" to id,
+                "includeSeries" to true,
+                "includeEpisode" to true,
             ),
         ).map { response ->
             response.records.map {
@@ -143,6 +136,11 @@ class SonarrClient(
                     instanceId = instance.id,
                     instanceName = instance.label,
                     instanceType = instance.type,
+                    series = it.series?.withLocalImages(instance.url),
+                    episode = it.episode?.copy(
+                        images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
+                        series = it.series?.withLocalImages(instance.url),
+                    ),
                 )
             }
         }
@@ -156,6 +154,8 @@ class SonarrClient(
             mapOf<String, Any>(
                 "page" to page,
                 "pageSize" to pageSize,
+                "includeSeries" to true,
+                "includeEpisode" to true,
             ),
         ).map { response ->
             response.records.map {
@@ -163,6 +163,11 @@ class SonarrClient(
                     instanceId = instance.id,
                     instanceName = instance.label,
                     instanceType = instance.type,
+                    series = it.series?.withLocalImages(instance.url),
+                    episode = it.episode?.copy(
+                        images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
+                        series = it.series?.withLocalImages(instance.url),
+                    ),
                 )
             }
         }

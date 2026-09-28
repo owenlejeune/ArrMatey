@@ -20,5 +20,9 @@ data class RadarrHistoryItem(
     override val instanceName: String? = null,
     override val instanceType: InstanceType? = null,
     val movieId: Long,
-) : HistoryItem
+    val movie: ArrMovie? = null,
+) : HistoryItem {
+    override val displayTitle: String?
+        get() = movie?.title ?: super.displayTitle
+}
 

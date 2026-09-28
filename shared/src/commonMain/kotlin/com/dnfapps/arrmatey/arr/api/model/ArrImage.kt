@@ -8,10 +8,12 @@ data class ArrImage(
     val url: String? = null,
     val remoteUrl: String? = null,
 ) {
-    fun rebuildWithLocalUrls(instanceUrl: String): ArrImage =
-        if (remoteUrl?.startsWith("/") == true) {
-            copy(remoteUrl = "${instanceUrl}$url")
-        } else {
-            this
+    fun rebuildWithLocalUrls(instanceUrl: String): ArrImage {
+        val cleanInstanceUrl = instanceUrl.trimEnd('/')
+        return when {
+            url?.startsWith("/") == true -> copy(remoteUrl = "$cleanInstanceUrl$url")
+            remoteUrl?.startsWith("/") == true -> copy(remoteUrl = "$cleanInstanceUrl$remoteUrl")
+            else -> this
         }
+    }
 }
