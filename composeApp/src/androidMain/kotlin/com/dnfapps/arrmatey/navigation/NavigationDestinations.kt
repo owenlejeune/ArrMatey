@@ -173,6 +173,16 @@ sealed interface DashboardScreen : NavKey {
     data class ArrDashboard(
         val id: Long,
     ) : DashboardScreen
+
+    data object Activity : DashboardScreen
+
+    data object Downloads : DashboardScreen
+
+    data object Calendar : DashboardScreen
+
+    data object Prowlarr : DashboardScreen
+
+    data object Bazarr : DashboardScreen
 }
 
 sealed interface BazarrScreen : NavKey {

@@ -633,9 +633,12 @@ fun CombinedDashboard(
 
                                                     DashboardCards.SeerrOverview,
                                                     DashboardCards.PendingRequests,
-                                                    DashboardCards.PendingIssues,
                                                     -> {
-                                                        { onNavigateToRequestsTab() }
+                                                        { showSeerrRequestsSheet = true }
+                                                    }
+
+                                                    DashboardCards.PendingIssues -> {
+                                                        { showSeerrIssuesSheet = true }
                                                     }
 
                                                     DashboardCards.ProwlarrOverview -> {

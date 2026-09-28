@@ -53,6 +53,7 @@ import com.dnfapps.arrmatey.ui.components.downloads.DownloadSelectionTopBar
 import com.dnfapps.arrmatey.ui.components.downloads.DownloadTransferSpeedChips
 import com.dnfapps.arrmatey.ui.components.downloads.NoDownloadClientsView
 import com.dnfapps.arrmatey.ui.components.downloads.TorrentActionsCard
+import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.menu.DownloadQueueFilterMenu
@@ -70,6 +71,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun DownloadsTab(
     wideRailIsVisible: Boolean,
+    onBack: (() -> Unit)? = null,
     viewModel: DownloadQueueViewModel = koinViewModel(),
     clientsViewModel: DownloadClientsViewModel = koinViewModel(),
     navigationManager: NavigationManager = koinInject(),
@@ -156,7 +158,9 @@ fun DownloadsTab(
                     textFieldState = textFieldState,
                     searchPlaceholder = placeholderLabel,
                     navigationIcon = {
-                        if (!wideRailIsVisible) {
+                        if (onBack != null) {
+                            BackButton(onClick = onBack)
+                        } else if (!wideRailIsVisible) {
                             NavigationDrawerButton()
                         }
                     },

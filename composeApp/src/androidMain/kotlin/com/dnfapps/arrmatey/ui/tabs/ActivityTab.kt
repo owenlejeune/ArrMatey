@@ -33,6 +33,7 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
@@ -48,6 +49,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ActivityTab(
     wideRailIsVisible: Boolean,
+    onBack: (() -> Unit)? = null,
     viewModel: ActivityQueueViewModel = koinViewModel(),
     preferences: PreferencesStore = koinInject(),
 ) {
@@ -113,7 +115,9 @@ fun ActivityTab(
                     )
                 },
                 navigationIcon = {
-                    if (!wideRailIsVisible) {
+                    if (onBack != null) {
+                        BackButton(onClick = onBack)
+                    } else if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 },

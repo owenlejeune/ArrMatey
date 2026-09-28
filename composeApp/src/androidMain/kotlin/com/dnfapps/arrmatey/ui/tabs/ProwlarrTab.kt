@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.appbar.FullScreenSearchAppBar
+import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.IndexersSortMenu
 import com.dnfapps.arrmatey.ui.screens.ProwlarrIndexersContent
@@ -28,6 +29,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ProwlarrTab(
     wideRailIsVisible: Boolean,
+    onBack: (() -> Unit)? = null,
     indexersViewModel: ProwlarrIndexersViewModel = koinViewModel(),
     searchViewModel: ProwlarrSearchViewModel = koinViewModel(),
 ) {
@@ -46,7 +48,9 @@ fun ProwlarrTab(
                 textFieldState = textFieldState,
                 searchPlaceholder = mokoString(MR.strings.prowlarr_search_hint),
                 navigationIcon = {
-                    if (!wideRailIsVisible) {
+                    if (onBack != null) {
+                        BackButton(onClick = onBack)
+                    } else if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 },

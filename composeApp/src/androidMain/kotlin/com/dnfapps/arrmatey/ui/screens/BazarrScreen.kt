@@ -78,6 +78,7 @@ import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitleSearchSheet
 import com.dnfapps.arrmatey.ui.components.bazarr.SubtitleLanguageChip
+import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -93,6 +94,7 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun BazarrScreen(
     wideRailIsVisible: Boolean,
+    onBack: (() -> Unit)? = null,
     viewModel: BazarrViewModel = koinViewModel(),
     instancesViewModel: InstancesViewModel =
         koinViewModel(key = InstanceType.Bazarr.name, parameters = { parametersOf(InstanceType.Bazarr) }),
@@ -129,7 +131,9 @@ fun BazarrScreen(
                     )
                 },
                 navigationIcon = {
-                    if (!wideRailIsVisible) {
+                    if (onBack != null) {
+                        BackButton(onClick = onBack)
+                    } else if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 },

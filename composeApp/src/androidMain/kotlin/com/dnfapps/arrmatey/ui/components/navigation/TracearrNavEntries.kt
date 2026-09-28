@@ -17,11 +17,13 @@ fun EntryProviderScope<NavKey>.tracearrNavEntries(
     isExpanded: Boolean,
     isLargeScreen: Boolean,
     wideRailIsVisible: Boolean = false,
+    onNavigateBack: (() -> Unit)? = null,
 ) {
     entry<TracearrScreen.Main> {
         TracearrHomeScreen(
             wideRailIsVisible = wideRailIsVisible,
             isLargeScreen = isLargeScreen,
+            onNavigateBack = onNavigateBack,
             onNavigateToDetails = { type, tmdbId ->
                 navigation.toDetails(tmdbId = tmdbId, requestType = type?.requestType)
             },

@@ -50,6 +50,7 @@ import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.calendar.CalendarListView
 import com.dnfapps.arrmatey.ui.calendar.CalendarMonthView
+import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
@@ -151,11 +152,12 @@ fun CalendarTab(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun CalendarHomeScreen(
-    viewModel: CalendarViewModel,
+fun CalendarHomeScreen(
     wideRailIsVisible: Boolean,
     isExpanded: Boolean,
     onItemClick: (CalendarItem, Long?) -> Unit,
+    onBack: (() -> Unit)? = null,
+    viewModel: CalendarViewModel = koinViewModel(),
 ) {
     val calendarState by viewModel.calendarState.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
@@ -166,7 +168,9 @@ private fun CalendarHomeScreen(
             TopAppBar(
                 title = { Text(mokoString(MR.strings.schedule)) },
                 navigationIcon = {
-                    if (!wideRailIsVisible) {
+                    if (onBack != null) {
+                        BackButton(onClick = onBack)
+                    } else if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 },

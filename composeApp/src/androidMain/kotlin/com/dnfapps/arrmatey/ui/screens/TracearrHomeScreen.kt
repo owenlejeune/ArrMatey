@@ -46,6 +46,7 @@ import com.dnfapps.arrmatey.tracearr.state.TracearrState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.ui.components.InstancePicker
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
+import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrDashboardStatsSection
@@ -71,6 +72,7 @@ fun TracearrHomeScreen(
     onNavigateToHistory: () -> Unit,
     onNavigateToActivity: () -> Unit,
     isLargeScreen: Boolean = false,
+    onNavigateBack: (() -> Unit)? = null,
     viewModel: TracearrViewModel = koinViewModel(),
     instancesViewModel: InstancesViewModel =
         koinViewModel(
@@ -98,7 +100,9 @@ fun TracearrHomeScreen(
                     )
                 },
                 navigationIcon = {
-                    if (!wideRailIsVisible) {
+                    if (onNavigateBack != null) {
+                        BackButton(onClick = onNavigateBack)
+                    } else if (!wideRailIsVisible) {
                         NavigationDrawerButton()
                     }
                 },

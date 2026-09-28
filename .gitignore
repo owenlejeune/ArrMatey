@@ -126,3 +126,6 @@ composeApp/release/*
 .agents
 .agents/*
 skills-lock.json
+
+.vscode/
+.vscode/*
