@@ -28,11 +28,11 @@ fun BoxScope.DetailHeaderBanner(
 ) {
     Box(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .matchParentSize()
-                .background(MaterialTheme.colorScheme.background)
-                .clipToBounds(),
+        Modifier
+            .fillMaxWidth()
+            .matchParentSize()
+            .background(MaterialTheme.colorScheme.background)
+            .clipToBounds(),
     ) {
         AsyncImage(
             model = rememberRemoteImageData(bannerUrl),
@@ -43,62 +43,62 @@ fun BoxScope.DetailHeaderBanner(
 
         Box(
             modifier =
-                Modifier
-                    .height(120.dp)
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(
-                            colors =
-                                listOf(
-                                    Color.Black.copy(alpha = 0.7f),
-                                    Color.Black.copy(alpha = 0.3f),
-                                    Color.Transparent,
-                                ),
-                            startY = 0f,
-                            endY = Float.POSITIVE_INFINITY,
+            Modifier
+                .height(120.dp)
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        colors =
+                        listOf(
+                            Color.Black.copy(alpha = 0.7f),
+                            Color.Black.copy(alpha = 0.3f),
+                            Color.Transparent,
                         ),
+                        startY = 0f,
+                        endY = Float.POSITIVE_INFINITY,
                     ),
+                ),
         )
 
         Box(
             modifier =
-                Modifier
-                    .height(gradientHeight)
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(
-                            colors =
-                                listOf(
-                                    Color.Transparent,
-                                    MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
-                                    MaterialTheme.colorScheme.background,
-                                ),
-                            startY = 0f,
-                            endY = Float.POSITIVE_INFINITY,
+            Modifier
+                .height(gradientHeight)
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        colors =
+                        listOf(
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                            MaterialTheme.colorScheme.background,
                         ),
+                        startY = 0f,
+                        endY = Float.POSITIVE_INFINITY,
                     ),
+                ),
         )
 
         if (startGradient) {
             Box(
                 modifier =
-                    Modifier
-                        .fillMaxHeight()
-                        .width(100.dp)
-                        .background(
-                            Brush.horizontalGradient(
-                                colors =
-                                    listOf(
-                                        MaterialTheme.colorScheme.background,
-                                        MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
-                                        Color.Transparent,
-                                    ),
-                                startX = 0f,
-                                endX = Float.POSITIVE_INFINITY,
+                Modifier
+                    .fillMaxHeight()
+                    .width(100.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors =
+                            listOf(
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                                Color.Transparent,
                             ),
+                            startX = 0f,
+                            endX = Float.POSITIVE_INFINITY,
                         ),
+                    ),
             )
         }
     }

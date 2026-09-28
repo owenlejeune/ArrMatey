@@ -25,10 +25,10 @@ fun ViewTypeMenuButton(
     ) {
         Icon(
             imageVector =
-                when (viewType) {
-                    ViewType.Grid -> Icons.AutoMirrored.Default.List
-                    ViewType.List -> Icons.Default.GridView
-                },
+            when (viewType) {
+                ViewType.Grid -> Icons.AutoMirrored.Default.List
+                ViewType.List -> Icons.Default.GridView
+            },
             contentDescription = "Switch to ${newType.name} view",
         )
     }

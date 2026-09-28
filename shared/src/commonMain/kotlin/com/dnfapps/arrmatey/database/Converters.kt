@@ -129,14 +129,13 @@ class Converters : KoinComponent {
     fun fromHeaderList(headers: List<InstanceHeader>): String = Json.encodeToString(headers)
 
     @TypeConverter
-    fun toHeaderList(headersString: String): List<InstanceHeader> =
-        if (headersString.isEmpty()) {
+    fun toHeaderList(headersString: String): List<InstanceHeader> = if (headersString.isEmpty()) {
+        emptyList()
+    } else {
+        try {
+            Json.decodeFromString(headersString)
+        } catch (e: Exception) {
             emptyList()
-        } else {
-            try {
-                Json.decodeFromString(headersString)
-            } catch (e: Exception) {
-                emptyList()
-            }
         }
+    }
 }

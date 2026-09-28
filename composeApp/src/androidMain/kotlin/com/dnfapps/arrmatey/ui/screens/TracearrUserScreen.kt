@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserAccount
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
@@ -122,9 +123,9 @@ fun TracearrUserScreen(
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refresh() },
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             when (val currentState = state) {
                 is TracearrUserState.Initial,
@@ -188,20 +189,20 @@ fun TracearrUserScreen(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding =
-                            PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 16.dp,
-                                bottom =
-                                    16.dp +
-                                        if (LocalFloatingBarBottomPadding.current >
-                                            0.dp
-                                        ) {
-                                            LocalFloatingBarBottomPadding.current
-                                        } else {
-                                            navigationBarBottomInset()
-                                        },
-                            ),
+                        PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom =
+                            16.dp +
+                                if (LocalFloatingBarBottomPadding.current >
+                                    0.dp
+                                ) {
+                                    LocalFloatingBarBottomPadding.current
+                                } else {
+                                    navigationBarBottomInset()
+                                },
+                        ),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         currentState.userDetail?.let { detail ->
@@ -228,9 +229,9 @@ fun TracearrUserScreen(
                             item {
                                 Box(
                                     modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 24.dp),
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 24.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
@@ -263,9 +264,9 @@ fun TracearrUserScreen(
                             item {
                                 Box(
                                     modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     LoadingIndicator()
@@ -304,9 +305,9 @@ private fun UserInfoCard(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -324,10 +325,10 @@ private fun UserInfoCard(
             ) {
                 Box(
                     modifier =
-                        Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.secondaryContainer),
+                    Modifier
+                        .size(64.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.secondaryContainer),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -410,15 +411,15 @@ private fun AccountChip(
             )
         },
         border =
-            AssistChipDefaults.assistChipBorder(
-                enabled = true,
-                borderColor = serverColor.copy(alpha = 0.5f),
-            ),
+        AssistChipDefaults.assistChipBorder(
+            enabled = true,
+            borderColor = serverColor.copy(alpha = 0.5f),
+        ),
         colors =
-            AssistChipDefaults.assistChipColors(
-                containerColor = serverColor.copy(alpha = 0.12f),
-                labelColor = serverColor,
-            ),
+        AssistChipDefaults.assistChipColors(
+            containerColor = serverColor.copy(alpha = 0.12f),
+            labelColor = serverColor,
+        ),
         modifier = modifier,
     )
 }
@@ -434,9 +435,9 @@ private fun UserStatsCard(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),

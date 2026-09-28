@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrViolation
 import com.dnfapps.arrmatey.tracearr.api.model.ViolationSeverity
@@ -47,15 +48,15 @@ fun TracearrViolationCard(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(
@@ -87,9 +88,9 @@ fun TracearrViolationCard(
                                 model = rememberRemoteImageData(avatarUrl, trim = false),
                                 contentDescription = null,
                                 modifier =
-                                    Modifier
-                                        .size(18.dp)
-                                        .clip(CircleShape),
+                                Modifier
+                                    .size(18.dp)
+                                    .clip(CircleShape),
                                 contentScale = ContentScale.Crop,
                             )
                         } else {

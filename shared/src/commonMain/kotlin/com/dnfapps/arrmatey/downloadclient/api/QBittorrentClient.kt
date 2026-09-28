@@ -35,51 +35,46 @@ class QBittorrentClient(
         }
     }
 
-    override suspend fun getDownloads(): NetworkResult<List<DownloadItem>> =
-        authenticatedCall {
-            httpClient
-                .safeGet<List<QBittorrentTorrent>>("api/v2/torrents/info")
-                .map { torrents -> torrents.map { it.toDownloadItem() } }
-        }
+    override suspend fun getDownloads(): NetworkResult<List<DownloadItem>> = authenticatedCall {
+        httpClient
+            .safeGet<List<QBittorrentTorrent>>("api/v2/torrents/info")
+            .map { torrents -> torrents.map { it.toDownloadItem() } }
+    }
 
-    override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> =
-        authenticatedCall { postTorrentAction("api/v2/torrents/stop", ids) }
+    override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> = authenticatedCall { postTorrentAction("api/v2/torrents/stop", ids) }
 
-    override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> =
-        authenticatedCall { postTorrentAction("api/v2/torrents/start", ids) }
+    override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> = authenticatedCall { postTorrentAction("api/v2/torrents/start", ids) }
 
     override suspend fun deleteDownload(
         ids: List<String>,
         deleteFiles: Boolean,
-    ): NetworkResult<Unit> =
-        authenticatedCall {
-            httpClient.safeCall {
-                post("api/v2/torrents/delete") {
-                    setBody(
-                        FormDataContent(
-                            Parameters.build {
-                                append("hashes", ids.joinToString("|"))
-                                append("deleteFiles", deleteFiles.toString())
-                            },
-                        ),
-                    )
-                }
-                Unit
+    ): NetworkResult<Unit> = authenticatedCall {
+        httpClient.safeCall {
+            post("api/v2/torrents/delete") {
+                setBody(
+                    FormDataContent(
+                        Parameters.build {
+                            append("hashes", ids.joinToString("|"))
+                            append("deleteFiles", deleteFiles.toString())
+                        },
+                    ),
+                )
             }
+            Unit
         }
+    }
 
-    override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> =
-        authenticatedCall {
-            httpClient
-                .safeGet<QBittorrentTransferInfoResponse>("api/v2/transfer/info")
-                .map { info ->
-                    DownloadTransferInfo(
-                        client = downloadClient,
-                        downloadSpeed = info.downloadSpeed,
-                        uploadSpeed = info.uploadSpeed,
-                    )
-                }
-        }
+    override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> = authenticatedCall {
+        httpClient
+            .safeGet<QBittorrentTransferInfoResponse>("api/v2/transfer/info")
+            .map { info ->
+                DownloadTransferInfo(
+                    client = downloadClient,
+                    downloadSpeed = info.downloadSpeed,
+                    uploadSpeed = info.uploadSpeed,
+                )
+            }
+    }
 
     // Re-login and retry once on 401/403 so an expired session cookie recovers automatically.
     private suspend fun <T> authenticatedCall(block: suspend () -> NetworkResult<T>): NetworkResult<T> {
@@ -146,33 +141,31 @@ class QBittorrentClient(
     private suspend fun postTorrentAction(
         endpoint: String,
         hashes: List<String>,
-    ): NetworkResult<Unit> =
-        httpClient.safeCall {
-            post(endpoint) {
-                setBody(
-                    FormDataContent(
-                        Parameters.build {
-                            append("hashes", hashes.joinToString("|"))
-                        },
-                    ),
-                )
-            }
+    ): NetworkResult<Unit> = httpClient.safeCall {
+        post(endpoint) {
+            setBody(
+                FormDataContent(
+                    Parameters.build {
+                        append("hashes", hashes.joinToString("|"))
+                    },
+                ),
+            )
         }
+    }
 
-    private fun QBittorrentTorrent.toDownloadItem(): DownloadItem =
-        DownloadItem(
-            client = downloadClient,
-            id = hash,
-            name = name,
-            size = size,
-            downloaded = downloaded,
-            progress = progress,
-            downloadSpeed = downloadSpeed,
-            uploadSpeed = uploadSpeed,
-            eta = eta,
-            status = DownloadItemStatus.from(state),
-            category = category,
-            addedOn = addedOn,
-            tags = tags.split(",").map { it.trim() }.filter { it.isNotBlank() },
-        )
+    private fun QBittorrentTorrent.toDownloadItem(): DownloadItem = DownloadItem(
+        client = downloadClient,
+        id = hash,
+        name = name,
+        size = size,
+        downloaded = downloaded,
+        progress = progress,
+        downloadSpeed = downloadSpeed,
+        uploadSpeed = uploadSpeed,
+        eta = eta,
+        status = DownloadItemStatus.from(state),
+        category = category,
+        addedOn = addedOn,
+        tags = tags.split(",").map { it.trim() }.filter { it.isNotBlank() },
+    )
 }

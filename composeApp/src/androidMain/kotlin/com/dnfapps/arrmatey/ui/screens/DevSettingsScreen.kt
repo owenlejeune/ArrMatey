@@ -49,6 +49,7 @@ import com.dnfapps.arrmatey.arr.api.client.LoggerLevel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.logging.LogReader
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
@@ -135,22 +136,22 @@ fun DevSettingsScreen(
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
             ) {
                 ContainerCard {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         InstanceType.entries.forEach { instanceType ->
                             Row(
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .toggleable(
-                                            value = showInfoCardMap[instanceType] ?: true,
-                                            onValueChange = { preferenceStore.setInfoCardVisibility(instanceType, it) },
-                                        ),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .toggleable(
+                                        value = showInfoCardMap[instanceType] ?: true,
+                                        onValueChange = { preferenceStore.setInfoCardVisibility(instanceType, it) },
+                                    ),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
@@ -190,27 +191,27 @@ fun DevSettingsScreen(
 
                 Box(
                     modifier =
-                        Modifier
-                            .height(250.dp)
-                            .fillMaxWidth()
-                            .clip(MaterialTheme.shapes.large)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                    Modifier
+                        .height(250.dp)
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.large)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 ) {
                     SelectionContainer {
                         Column(
                             modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(logsScrollState)
-                                    .horizontalScroll(rememberScrollState())
-                                    .padding(16.dp),
+                            Modifier
+                                .fillMaxSize()
+                                .verticalScroll(logsScrollState)
+                                .horizontalScroll(rememberScrollState())
+                                .padding(16.dp),
                         ) {
                             Text(
                                 text = logContent,
                                 style =
-                                    MaterialTheme.typography.bodySmall.copy(
-                                        fontFamily = FontFamily.Monospace,
-                                    ),
+                                MaterialTheme.typography.bodySmall.copy(
+                                    fontFamily = FontFamily.Monospace,
+                                ),
                                 modifier = Modifier.fillMaxWidth(),
                                 color = MaterialTheme.colorScheme.onSurface,
                             )

@@ -107,14 +107,13 @@ sealed interface CombinedDashboardState {
                 (trendingMedia + popularMovies + popularTv)
                     .distinctBy { "${it.mediaType.name}_${it.id}" }
 
-        fun getDiscoverFeedItems(category: DiscoverCategory): List<DiscoverResult> =
-            when (category) {
-                DiscoverCategory.TRENDING -> trendingMedia
-                DiscoverCategory.POPULAR_MOVIES -> popularMovies
-                DiscoverCategory.POPULAR_SERIES -> popularTv
-                DiscoverCategory.UPCOMING_MOVIES -> upcomingMovies
-                DiscoverCategory.UPCOMING_SERIES -> upcomingTv
-            }
+        fun getDiscoverFeedItems(category: DiscoverCategory): List<DiscoverResult> = when (category) {
+            DiscoverCategory.TRENDING -> trendingMedia
+            DiscoverCategory.POPULAR_MOVIES -> popularMovies
+            DiscoverCategory.POPULAR_SERIES -> popularTv
+            DiscoverCategory.UPCOMING_MOVIES -> upcomingMovies
+            DiscoverCategory.UPCOMING_SERIES -> upcomingTv
+        }
 
         fun isLoadingDiscoverFeed(category: DiscoverCategory): Boolean = isLoadingMoreDiscover[category] == true
 
@@ -220,11 +219,11 @@ sealed interface CombinedDashboardState {
                     title = "A Totally Awesome Movie",
                     originalTitle = "A Totally Awesome Movie",
                     overview =
-                        """
+                    """
                         Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur deserunt
                         commodo ex. Commodo commodo cupidatat quis minim est est nisi aliqua eiusmod reprehenderit
                         sit qui cillum esse.,
-                        """.trimIndent(),
+                    """.trimIndent(),
                     posterPath = null,
                     backdropPath = null,
                     releaseDate = LocalDate(2026, 3, 8),
@@ -293,14 +292,14 @@ sealed interface CombinedDashboardState {
                         instance = it,
                         softwareStatus = ArrSoftwareStatus(version = "1.0.0", appName = it.label),
                         disks =
-                            listOf(
-                                ArrDiskSpace(
-                                    freeSpace = 500_000_000_000L,
-                                    totalSpace = 1_000_000_000_000L,
-                                    label = "Root",
-                                    path = "/",
-                                ),
+                        listOf(
+                            ArrDiskSpace(
+                                freeSpace = 500_000_000_000L,
+                                totalSpace = 1_000_000_000_000L,
+                                label = "Root",
+                                path = "/",
                             ),
+                        ),
                         healthItems = emptyList(),
                         totalItems = 100,
                         sizeOnDisk = 250_000_000_000L,
@@ -343,14 +342,14 @@ sealed interface CombinedDashboardState {
                     TracearrDashboardState(
                         instance = it,
                         stats =
-                            TracearrTodayStats(
-                                activeStreams = 1,
-                                todayPlays = 15,
-                                todaySessions = 18,
-                                watchTimeHours = 4.5f,
-                                alertsLast24h = 0,
-                                activeUsersToday = 3,
-                            ),
+                        TracearrTodayStats(
+                            activeStreams = 1,
+                            todayPlays = 15,
+                            todaySessions = 18,
+                            watchTimeHours = 4.5f,
+                            alertsLast24h = 0,
+                            activeUsersToday = 3,
+                        ),
                         activeStreams = listOf(mockStreamSession),
                     )
                 }
@@ -359,12 +358,12 @@ sealed interface CombinedDashboardState {
                 listOf(
                     DownloadClientDashboardState(
                         client =
-                            DownloadClient(
-                                id = 1,
-                                type = DownloadClientType.QBittorrent,
-                                label = "qBittorrent",
-                                url = "http://localhost:8080",
-                            ),
+                        DownloadClient(
+                            id = 1,
+                            type = DownloadClientType.QBittorrent,
+                            label = "qBittorrent",
+                            url = "http://localhost:8080",
+                        ),
                         isOnline = true,
                         activeDownloadsCount = 2,
                     ),
@@ -394,21 +393,21 @@ sealed interface CombinedDashboardState {
                     runtime = 30,
                     instanceId = 1,
                     series =
-                        ArrSeries(
-                            title = "A Totally Awesome Series",
-                            originalLanguage = Language(0),
-                            year = 2026,
-                            qualityProfileId = 1,
-                            monitored = true,
-                            runtime = 22,
-                            status = MediaStatus.Continuing,
-                            ended = false,
-                            seasonFolder = true,
-                            monitorNewItems = MonitorNewItems.All,
-                            useSceneNumbering = false,
-                            tvdbId = 0,
-                            seriesType = SeriesType.Standard,
-                        ),
+                    ArrSeries(
+                        title = "A Totally Awesome Series",
+                        originalLanguage = Language(0),
+                        year = 2026,
+                        qualityProfileId = 1,
+                        monitored = true,
+                        runtime = 22,
+                        status = MediaStatus.Continuing,
+                        ended = false,
+                        seasonFolder = true,
+                        monitorNewItems = MonitorNewItems.All,
+                        useSceneNumbering = false,
+                        tvdbId = 0,
+                        seriesType = SeriesType.Standard,
+                    ),
                 )
 
             val mockQueueItem =
@@ -434,11 +433,11 @@ sealed interface CombinedDashboardState {
                         mediaType = RequestType.Movie,
                         title = "A Totally Awesome Movie",
                         overview =
-                            """
+                        """
                             Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur
                             deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi
                             aliqua eiusmod reprehenderit sit qui cillum esse.
-                            """.trimIndent(),
+                        """.trimIndent(),
                         releaseDate = "2026-03-08",
                         voteAverage = 8.5,
                         backdropPath = null,
@@ -446,22 +445,22 @@ sealed interface CombinedDashboardState {
                         productionCompanies = listOf(ProductionCompany(id = 1, name = "Big Bay Pictures")),
                         contentRating = "PG-13",
                         keywords =
-                            listOf(
-                                Keyword(id = 1, name = "Action"),
-                                Keyword(id = 2, name = "Sci-Fi"),
-                                Keyword(id = 3, name = "Space"),
-                            ),
+                        listOf(
+                            Keyword(id = 1, name = "Action"),
+                            Keyword(id = 2, name = "Sci-Fi"),
+                            Keyword(id = 3, name = "Space"),
+                        ),
                     ),
                     DiscoverResult(
                         id = 2,
                         mediaType = RequestType.Tv,
                         name = "A Totally Awesome Series",
                         overview =
-                            """
+                        """
                             Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur
                             deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi
                             aliqua eiusmod reprehenderit sit qui cillum esse.
-                            """.trimIndent(),
+                        """.trimIndent(),
                         firstAirDate = "2026-01-18",
                         voteAverage = 9.0,
                         backdropPath = null,
@@ -469,22 +468,22 @@ sealed interface CombinedDashboardState {
                         networks = listOf(Network(id = 1, name = "TBO")),
                         contentRating = "TV-MA",
                         keywords =
-                            listOf(
-                                Keyword(id = 4, name = "Drama"),
-                                Keyword(id = 5, name = "Mystery"),
-                                Keyword(id = 6, name = "Thriller"),
-                            ),
+                        listOf(
+                            Keyword(id = 4, name = "Drama"),
+                            Keyword(id = 5, name = "Mystery"),
+                            Keyword(id = 6, name = "Thriller"),
+                        ),
                     ),
                     DiscoverResult(
                         id = 3,
                         mediaType = RequestType.Movie,
                         title = "Another Awesome Movie",
                         overview =
-                            """
+                        """
                             Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur
                             deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi
                             aliqua eiusmod reprehenderit sit qui cillum esse.
-                            """.trimIndent(),
+                        """.trimIndent(),
                         releaseDate = "2026-05-20",
                         voteAverage = 7.8,
                         backdropPath = null,
@@ -492,21 +491,21 @@ sealed interface CombinedDashboardState {
                         productionCompanies = listOf(ProductionCompany(id = 2, name = "Solar System Pictures")),
                         contentRating = "R",
                         keywords =
-                            listOf(
-                                Keyword(id = 7, name = "Adventure"),
-                                Keyword(id = 8, name = "Comedy"),
-                            ),
+                        listOf(
+                            Keyword(id = 7, name = "Adventure"),
+                            Keyword(id = 8, name = "Comedy"),
+                        ),
                     ),
                     DiscoverResult(
                         id = 4,
                         mediaType = RequestType.Tv,
                         name = "Another Awesome Series",
                         overview =
-                            """
+                        """
                             Pariatur et eiusmod cillum veniam Lorem anim ea ea consectetur pariatur
                             deserunt commodo ex. Commodo commodo cupidatat quis minim est est nisi
                             aliqua eiusmod reprehenderit sit qui cillum esse.
-                            """.trimIndent(),
+                        """.trimIndent(),
                         firstAirDate = "2026-04-10",
                         voteAverage = 8.2,
                         backdropPath = null,
@@ -514,10 +513,10 @@ sealed interface CombinedDashboardState {
                         networks = listOf(Network(id = 2, name = "Notflix")),
                         contentRating = "TV-14",
                         keywords =
-                            listOf(
-                                Keyword(id = 9, name = "Fantasy"),
-                                Keyword(id = 10, name = "Animation"),
-                            ),
+                        listOf(
+                            Keyword(id = 9, name = "Fantasy"),
+                            Keyword(id = 10, name = "Animation"),
+                        ),
                     ),
                 )
 
@@ -537,48 +536,48 @@ sealed interface CombinedDashboardState {
                 upcomingTv = mockDiscover.filter { it.mediaType == RequestType.Tv },
                 quickPickItem = mockDiscover.firstOrNull(),
                 downloadTransfers =
-                    listOf(
-                        DownloadTransferInfo(
-                            client = downloadClients.first().client,
-                            downloadSpeed = 10_000_000,
-                            uploadSpeed = 1_000_000,
-                        ),
+                listOf(
+                    DownloadTransferInfo(
+                        client = downloadClients.first().client,
+                        downloadSpeed = 10_000_000,
+                        uploadSpeed = 1_000_000,
                     ),
+                ),
                 activeDownloads =
-                    listOf(
-                        DownloadItem(
-                            client = downloadClients.first().client,
-                            id = "1",
-                            name = "Mock Download",
-                            size = 1_000_000_000,
-                            downloaded = 500_000_000,
-                            progress = 0.5,
-                            downloadSpeed = 5_000_000,
-                            uploadSpeed = 500_000,
-                            status = DownloadItemStatus.Downloading,
-                            category = "tv-sonarr",
-                            addedOn = now.toEpochMilliseconds(),
-                            eta = 100,
-                        ),
+                listOf(
+                    DownloadItem(
+                        client = downloadClients.first().client,
+                        id = "1",
+                        name = "Mock Download",
+                        size = 1_000_000_000,
+                        downloaded = 500_000_000,
+                        progress = 0.5,
+                        downloadSpeed = 5_000_000,
+                        uploadSpeed = 500_000,
+                        status = DownloadItemStatus.Downloading,
+                        category = "tv-sonarr",
+                        addedOn = now.toEpochMilliseconds(),
+                        eta = 100,
                     ),
+                ),
                 calendarItems = listOf(DashboardCalendarItem(mockEpisode, today)),
                 upcomingCalendarItems = listOf(DashboardCalendarItem(mockEpisode, today)),
                 networkStatus =
-                    NetworkStatusState(
-                        ssid = "Mock-WiFi",
-                        isWifi = true,
-                        instanceStatuses =
-                            instances.map {
-                                InstanceNetworkStatus(
-                                    instanceName = it.label,
-                                    isLocal = true,
-                                    currentEndpoint = it.url,
-                                    icon = it.type.icon,
-                                    isOnline = true,
-                                    isLocalSwitchingEnabled = true,
-                                )
-                            },
-                    ),
+                NetworkStatusState(
+                    ssid = "Mock-WiFi",
+                    isWifi = true,
+                    instanceStatuses =
+                    instances.map {
+                        InstanceNetworkStatus(
+                            instanceName = it.label,
+                            isLocal = true,
+                            currentEndpoint = it.url,
+                            icon = it.type.icon,
+                            isOnline = true,
+                            isLocalSwitchingEnabled = true,
+                        )
+                    },
+                ),
             )
         }
     }

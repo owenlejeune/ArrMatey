@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.datastore.AndroidPreferencesStore
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import com.dnfapps.arrmatey.ui.components.ContainerCard
@@ -86,9 +87,9 @@ fun ShortcutsCustomizationScreen(
     ) { padding ->
         Box(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+            Modifier
+                .fillMaxSize()
+                .padding(padding),
         ) {
             val enabledShortcuts =
                 remember(shortcutItems, disabledShortcuts) {
@@ -155,9 +156,9 @@ fun ShortcutsList(
 ) {
     LazyColumn(
         modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
+        Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
         contentPadding = PaddingValues(bottom = 16.dp + LocalFloatingBarBottomPadding.current),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {

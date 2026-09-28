@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.datastore.QueueRemovalPreferences
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.utils.mokoString
@@ -51,18 +52,18 @@ fun ConfirmDeleteItemSheet(
             }
         },
         sheetState =
-            rememberModalBottomSheetState(
-                skipPartiallyExpanded = true,
-                confirmValueChange = { !deleteInProgress },
-            ),
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !deleteInProgress },
+        ),
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.client_remove_title),
@@ -96,10 +97,10 @@ fun ConfirmDeleteItemSheet(
                     onDelete(removeFromClient, blocklistRelease, blocklistRelease && skipRedownload)
                 },
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    ),
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                ),
                 enabled = !deleteInProgress,
             ) {
                 if (deleteInProgress) {

@@ -69,6 +69,7 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.BazarrSection
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.BannerView
@@ -140,9 +141,9 @@ fun BazarrScreen(
         if (instancesState.selectedInstance == null) {
             Box(
                 modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
                 contentAlignment = Alignment.Center,
             ) {
                 NoInstanceView(InstanceType.Bazarr)
@@ -150,9 +151,9 @@ fun BazarrScreen(
         } else {
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
             ) {
                 SecondaryScrollableTabRow(
                     selectedTabIndex = section.ordinal,
@@ -328,12 +329,12 @@ private fun <T> WantedList(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding =
-            PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 16.dp + LocalFloatingBarBottomPadding.current,
-            ),
+        PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+        ),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(items, key = { key(it) }) { item ->
@@ -367,9 +368,9 @@ private fun ProvidersContent(
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.End,
         ) {
             TextButton(onClick = onReset) {
@@ -379,12 +380,12 @@ private fun ProvidersContent(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding =
-                PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 8.dp,
-                    bottom = 8.dp + LocalFloatingBarBottomPadding.current,
-                ),
+            PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 8.dp,
+                bottom = 8.dp + LocalFloatingBarBottomPadding.current,
+            ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(providers, key = { it.name }) { provider ->
@@ -406,9 +407,9 @@ private fun ProviderRow(provider: ProviderStatus) {
     ) {
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
@@ -438,12 +439,12 @@ private fun BazarrSeriesList(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding =
-            PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 16.dp + LocalFloatingBarBottomPadding.current,
-            ),
+        PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+        ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(series) { item ->
@@ -459,12 +460,12 @@ private fun BazarrSeriesList(
                 val totalEpisodes = item.episodeFileCount + item.episodeMissingCount
                 Text(
                     text =
-                        mokoPlural(
-                            MR.plurals.bazarr_series_subtitle_count,
-                            totalEpisodes,
-                            item.episodeFileCount,
-                            totalEpisodes,
-                        ),
+                    mokoPlural(
+                        MR.plurals.bazarr_series_subtitle_count,
+                        totalEpisodes,
+                        item.episodeFileCount,
+                        totalEpisodes,
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -480,12 +481,12 @@ private fun BazarrMoviesList(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding =
-            PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 16.dp + LocalFloatingBarBottomPadding.current,
-            ),
+        PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+        ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(movies) { item ->
@@ -525,17 +526,17 @@ private fun BazarrItem(
 ) {
     Card(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .clickable { onClick() },
+        modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clickable { onClick() },
         shape = MaterialTheme.shapes.large,
     ) {
         Box(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
+            Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
         ) {
             BannerView(
                 bannerModel = fanart?.let { rememberRemoteImageData(it) },
@@ -543,26 +544,26 @@ private fun BazarrItem(
             )
             Box(
                 modifier =
-                    Modifier
-                        .matchParentSize()
-                        .background(TranslucentBlack),
+                Modifier
+                    .matchParentSize()
+                    .background(TranslucentBlack),
             )
 
             CompositionLocalProvider(LocalContentColor provides Color.White) {
                 Column(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(),
+                    Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(18.dp),
                         verticalAlignment = Alignment.Top,
                         modifier =
-                            Modifier
-                                .padding(12.dp)
-                                .fillMaxWidth()
-                                .wrapContentHeight(),
+                        Modifier
+                            .padding(12.dp)
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
                     ) {
                         BasePosterItem(
                             model = rememberRemoteImageData(poster),
@@ -572,9 +573,9 @@ private fun BazarrItem(
 
                         Column(
                             modifier =
-                                Modifier
-                                    .weight(1f)
-                                    .wrapContentHeight(),
+                            Modifier
+                                .weight(1f)
+                                .wrapContentHeight(),
                             verticalArrangement = Arrangement.Top,
                         ) {
                             Row(
@@ -583,10 +584,10 @@ private fun BazarrItem(
                             ) {
                                 Text(
                                     text =
-                                        buildString {
-                                            append(title)
-                                            append(" ($year)")
-                                        },
+                                    buildString {
+                                        append(title)
+                                        append(" ($year)")
+                                    },
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 2,

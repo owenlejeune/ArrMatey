@@ -40,6 +40,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.mokoString
@@ -76,7 +77,7 @@ fun UnifiedMediaDetailsToolbarMenu(
                     buttonState.showRemoveFromServiceButton ||
                     buttonState.showClearDataButton ||
                     buttonState.showMarkAsAvailableButton
-            )
+                )
     val showMissingInstances = success.missingInstances.isNotEmpty()
     val showMenuButton = showArrActions || showSeerrActions || showMissingInstances
 

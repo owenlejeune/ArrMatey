@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.seerr.api.model.Credits
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.mokoString
@@ -108,12 +109,12 @@ fun CastCrewItem(
 ) {
     ContainerCard(
         modifier =
-            modifier
-                .width(132.dp),
+        modifier
+            .width(132.dp),
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)),
         shape = MaterialTheme.shapes.large,
         contentPadding = PaddingValues(10.dp),
@@ -161,10 +162,10 @@ fun PersonProfileImage(
 ) {
     Box(
         modifier =
-            modifier
-                .size(size)
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+        modifier
+            .size(size)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -178,9 +179,9 @@ fun PersonProfileImage(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier =
-                Modifier
-                    .size(size)
-                    .clip(shape),
+            Modifier
+                .size(size)
+                .clip(shape),
         )
     }
 }

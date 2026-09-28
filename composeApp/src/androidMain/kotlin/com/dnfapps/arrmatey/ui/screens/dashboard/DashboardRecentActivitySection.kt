@@ -32,6 +32,7 @@ import com.dnfapps.arrmatey.arr.api.model.QueueDownloadState
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.entensions.bullet
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -46,9 +47,9 @@ fun DashboardActivityQueueSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         val activity = state.activityQueue
@@ -74,9 +75,9 @@ fun DashboardActivityQueueSection(
                 Text(
                     text = mokoString(MR.strings.no_type_instances_message, "Arr"),
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 2.dp, bottom = 8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -85,9 +86,9 @@ fun DashboardActivityQueueSection(
                 Text(
                     text = mokoString(MR.strings.no_activity),
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 2.dp, bottom = 8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                 )

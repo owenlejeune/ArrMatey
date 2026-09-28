@@ -1,7 +1,14 @@
 package com.dnfapps.arrmatey.arr.state
 
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.albums_header
+import com.dnfapps.arrmatey.shared.all
+import com.dnfapps.arrmatey.shared.audiobooks
+import com.dnfapps.arrmatey.shared.books
+import com.dnfapps.arrmatey.shared.episodes
+import com.dnfapps.arrmatey.shared.movies
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Serializable
 

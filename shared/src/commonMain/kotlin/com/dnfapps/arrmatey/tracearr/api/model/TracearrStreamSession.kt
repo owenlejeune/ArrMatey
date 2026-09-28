@@ -128,10 +128,10 @@ data class TracearrStreamSession(
             userThumb = fixUrl(userThumb),
             userAvatarUrl = fixUrl(userAvatarUrl),
             user =
-                user?.copy(
-                    thumbUrl = fixUrl(user.thumbUrl),
-                    avatarUrl = fixUrl(user.avatarUrl),
-                ),
+            user?.copy(
+                thumbUrl = fixUrl(user.thumbUrl),
+                avatarUrl = fixUrl(user.avatarUrl),
+            ),
         )
     }
 }

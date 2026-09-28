@@ -39,127 +39,125 @@ class UnifiedMediaDetailsInstanceHandlerTest {
     private val activityQueueService: ActivityQueueService = mockk(relaxed = true)
 
     @Test
-    fun testSetAddSheetTargetInstance() =
-        runTest(UnconfinedTestDispatcher()) {
-            val mockRepo = mockk<ArrInstanceRepository>(relaxed = true)
-            val mockProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
-            val mockFolders = MutableStateFlow<List<RootFolder>>(emptyList())
-            val mockTags = MutableStateFlow<List<Tag>>(emptyList())
+    fun testSetAddSheetTargetInstance() = runTest(UnconfinedTestDispatcher()) {
+        val mockRepo = mockk<ArrInstanceRepository>(relaxed = true)
+        val mockProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
+        val mockFolders = MutableStateFlow<List<RootFolder>>(emptyList())
+        val mockTags = MutableStateFlow<List<Tag>>(emptyList())
 
-            every { mockRepo.qualityProfiles } returns mockProfiles
-            every { mockRepo.rootFolders } returns mockFolders
-            every { mockRepo.tags } returns mockTags
-            every { getArrInstanceRepositoryUseCase(10L) } returns mockRepo
+        every { mockRepo.qualityProfiles } returns mockProfiles
+        every { mockRepo.rootFolders } returns mockFolders
+        every { mockRepo.tags } returns mockTags
+        every { getArrInstanceRepositoryUseCase(10L) } returns mockRepo
 
-            val testScope = TestScope(UnconfinedTestDispatcher())
+        val testScope = TestScope(UnconfinedTestDispatcher())
 
-            every { observeScopedReposByTypeUseCase(InstanceType.Radarr) } returns flowOf(emptyList())
-            every { getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Radarr) } returns flowOf(null)
-            every { observeInstancePreferencesUseCase(any<Long>()) } returns flowOf(InstancePreferences())
+        every { observeScopedReposByTypeUseCase(InstanceType.Radarr) } returns flowOf(emptyList())
+        every { getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Radarr) } returns flowOf(null)
+        every { observeInstancePreferencesUseCase(any<Long>()) } returns flowOf(InstancePreferences())
 
-            val handler =
-                UnifiedMediaDetailsInstanceHandler(
-                    initialForcedInstanceId = 10L,
-                    arrId = 1L,
-                    resolvedInstanceType = InstanceType.Radarr,
-                    resolvedRequestType = null,
-                    scope = testScope,
-                    getArrInstanceRepositoryUseCase = getArrInstanceRepositoryUseCase,
-                    getSeerrInstanceRepositoryUseCase = getSeerrInstanceRepositoryUseCase,
-                    getBazarrInstanceRepositoryUseCase = getBazarrInstanceRepositoryUseCase,
-                    observeInstancePreferencesUseCase = observeInstancePreferencesUseCase,
-                    updateInstancePreferencesUseCase = updateInstancePreferencesUseCase,
-                    observeScopedReposByTypeUseCase = observeScopedReposByTypeUseCase,
-                    preferencesStore = preferencesStore,
-                    activityQueueService = activityQueueService,
-                )
+        val handler =
+            UnifiedMediaDetailsInstanceHandler(
+                initialForcedInstanceId = 10L,
+                arrId = 1L,
+                resolvedInstanceType = InstanceType.Radarr,
+                resolvedRequestType = null,
+                scope = testScope,
+                getArrInstanceRepositoryUseCase = getArrInstanceRepositoryUseCase,
+                getSeerrInstanceRepositoryUseCase = getSeerrInstanceRepositoryUseCase,
+                getBazarrInstanceRepositoryUseCase = getBazarrInstanceRepositoryUseCase,
+                observeInstancePreferencesUseCase = observeInstancePreferencesUseCase,
+                updateInstancePreferencesUseCase = updateInstancePreferencesUseCase,
+                observeScopedReposByTypeUseCase = observeScopedReposByTypeUseCase,
+                preferencesStore = preferencesStore,
+                activityQueueService = activityQueueService,
+            )
 
-            val targetInstance = mockk<Instance>()
-            every { targetInstance.id } returns 10L
+        val targetInstance = mockk<Instance>()
+        every { targetInstance.id } returns 10L
 
-            handler.setAddSheetTargetInstance(targetInstance)
+        handler.setAddSheetTargetInstance(targetInstance)
 
-            assertEquals(targetInstance, handler.addSheetUiState.value.targetInstance)
-            coVerify { mockRepo.refreshAllMetadata() }
-        }
+        assertEquals(targetInstance, handler.addSheetUiState.value.targetInstance)
+        coVerify { mockRepo.refreshAllMetadata() }
+    }
 
     @Test
-    fun testSelectInstanceUpdatesAddSheetTargetInstance() =
-        runTest(UnconfinedTestDispatcher()) {
-            val mockRepoA = mockk<ArrInstanceRepository>(relaxed = true)
-            val mockRepoB = mockk<ArrInstanceRepository>(relaxed = true)
-            val mockProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
-            val mockFolders = MutableStateFlow<List<RootFolder>>(emptyList())
-            val mockTags = MutableStateFlow<List<Tag>>(emptyList())
+    fun testSelectInstanceUpdatesAddSheetTargetInstance() = runTest(UnconfinedTestDispatcher()) {
+        val mockRepoA = mockk<ArrInstanceRepository>(relaxed = true)
+        val mockRepoB = mockk<ArrInstanceRepository>(relaxed = true)
+        val mockProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
+        val mockFolders = MutableStateFlow<List<RootFolder>>(emptyList())
+        val mockTags = MutableStateFlow<List<Tag>>(emptyList())
 
-            every { mockRepoA.qualityProfiles } returns mockProfiles
-            every { mockRepoA.rootFolders } returns mockFolders
-            every { mockRepoA.tags } returns mockTags
-            every { mockRepoB.qualityProfiles } returns mockProfiles
-            every { mockRepoB.rootFolders } returns mockFolders
-            every { mockRepoB.tags } returns mockTags
+        every { mockRepoA.qualityProfiles } returns mockProfiles
+        every { mockRepoA.rootFolders } returns mockFolders
+        every { mockRepoA.tags } returns mockTags
+        every { mockRepoB.qualityProfiles } returns mockProfiles
+        every { mockRepoB.rootFolders } returns mockFolders
+        every { mockRepoB.tags } returns mockTags
 
-            every { getArrInstanceRepositoryUseCase(10L) } returns mockRepoA
-            every { getArrInstanceRepositoryUseCase(20L) } returns mockRepoB
+        every { getArrInstanceRepositoryUseCase(10L) } returns mockRepoA
+        every { getArrInstanceRepositoryUseCase(20L) } returns mockRepoB
 
-            val instanceA =
-                mockk<Instance> {
-                    every { id } returns 10L
-                    every { label } returns "Sonarr A"
-                }
-            val instanceB =
-                mockk<Instance> {
-                    every { id } returns 20L
-                    every { label } returns "Sonarr B"
-                }
-            every { mockRepoA.instance } returns instanceA
-            every { mockRepoB.instance } returns instanceB
+        val instanceA =
+            mockk<Instance> {
+                every { id } returns 10L
+                every { label } returns "Sonarr A"
+            }
+        val instanceB =
+            mockk<Instance> {
+                every { id } returns 20L
+                every { label } returns "Sonarr B"
+            }
+        every { mockRepoA.instance } returns instanceA
+        every { mockRepoB.instance } returns instanceB
 
-            val testScope = TestScope(UnconfinedTestDispatcher())
-            every { observeScopedReposByTypeUseCase(InstanceType.Sonarr) } returns flowOf(listOf(mockRepoA, mockRepoB))
-            every { getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Sonarr) } returns flowOf(mockRepoA)
-            every { observeInstancePreferencesUseCase(any<Long>()) } returns flowOf(InstancePreferences())
+        val testScope = TestScope(UnconfinedTestDispatcher())
+        every { observeScopedReposByTypeUseCase(InstanceType.Sonarr) } returns flowOf(listOf(mockRepoA, mockRepoB))
+        every { getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Sonarr) } returns flowOf(mockRepoA)
+        every { observeInstancePreferencesUseCase(any<Long>()) } returns flowOf(InstancePreferences())
 
-            val handler =
-                UnifiedMediaDetailsInstanceHandler(
-                    initialForcedInstanceId = 10L,
-                    arrId = null,
-                    resolvedInstanceType = InstanceType.Sonarr,
-                    resolvedRequestType = null,
-                    scope = testScope,
-                    getArrInstanceRepositoryUseCase = getArrInstanceRepositoryUseCase,
-                    getSeerrInstanceRepositoryUseCase = getSeerrInstanceRepositoryUseCase,
-                    getBazarrInstanceRepositoryUseCase = getBazarrInstanceRepositoryUseCase,
-                    observeInstancePreferencesUseCase = observeInstancePreferencesUseCase,
-                    updateInstancePreferencesUseCase = updateInstancePreferencesUseCase,
-                    observeScopedReposByTypeUseCase = observeScopedReposByTypeUseCase,
-                    preferencesStore = preferencesStore,
-                    activityQueueService = activityQueueService,
-                )
-
-            handler.setAddSheetTargetInstance(instanceA)
-            assertEquals(
-                10L,
-                handler.addSheetUiState.value.targetInstance
-                    ?.id,
+        val handler =
+            UnifiedMediaDetailsInstanceHandler(
+                initialForcedInstanceId = 10L,
+                arrId = null,
+                resolvedInstanceType = InstanceType.Sonarr,
+                resolvedRequestType = null,
+                scope = testScope,
+                getArrInstanceRepositoryUseCase = getArrInstanceRepositoryUseCase,
+                getSeerrInstanceRepositoryUseCase = getSeerrInstanceRepositoryUseCase,
+                getBazarrInstanceRepositoryUseCase = getBazarrInstanceRepositoryUseCase,
+                observeInstancePreferencesUseCase = observeInstancePreferencesUseCase,
+                updateInstancePreferencesUseCase = updateInstancePreferencesUseCase,
+                observeScopedReposByTypeUseCase = observeScopedReposByTypeUseCase,
+                preferencesStore = preferencesStore,
+                activityQueueService = activityQueueService,
             )
 
-            val mockUiState = mockk<com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState.Success>(relaxed = true)
-            every { mockUiState.availableInstances } returns listOf(instanceA, instanceB)
-            every { mockUiState.instancePresences } returns emptyList()
+        handler.setAddSheetTargetInstance(instanceA)
+        assertEquals(
+            10L,
+            handler.addSheetUiState.value.targetInstance
+                ?.id,
+        )
 
-            handler.selectInstance(
-                instanceId = 20L,
-                currentUiState = mockUiState,
-                onUiStateUpdated = {},
-                onIsMonitoredUpdated = {},
-            )
+        val mockUiState = mockk<com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState.Success>(relaxed = true)
+        every { mockUiState.availableInstances } returns listOf(instanceA, instanceB)
+        every { mockUiState.instancePresences } returns emptyList()
 
-            assertEquals(20L, handler.selectedInstanceId.value)
-            assertEquals(
-                20L,
-                handler.addSheetUiState.value.targetInstance
-                    ?.id,
-            )
-        }
+        handler.selectInstance(
+            instanceId = 20L,
+            currentUiState = mockUiState,
+            onUiStateUpdated = {},
+            onIsMonitoredUpdated = {},
+        )
+
+        assertEquals(20L, handler.selectedInstanceId.value)
+        assertEquals(
+            20L,
+            handler.addSheetUiState.value.targetInstance
+                ?.id,
+        )
+    }
 }

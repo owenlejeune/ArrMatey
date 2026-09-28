@@ -42,73 +42,71 @@ class GetLibraryUseCase(
     fun byType(
         instanceType: InstanceType,
         searchQuery: Flow<String>? = null,
-    ): Flow<ArrLibrary> =
-        instanceManager
-            .getSelectedArrRepository(instanceType)
-            .filterNotNull()
-            .flatMapLatest {
-                invoke(it.instance.id, searchQuery)
-            }
+    ): Flow<ArrLibrary> = instanceManager
+        .getSelectedArrRepository(instanceType)
+        .filterNotNull()
+        .flatMapLatest {
+            invoke(it.instance.id, searchQuery)
+        }
 
     operator fun invoke(
         instanceId: Long,
         searchQuery: Flow<String>? = null,
-    ): Flow<ArrLibrary> =
-        flow {
-            val repository = instanceManager.getArrRepository(instanceId)
-            if (repository == null) {
-                logger.error { "Instance not found: $instanceId" }
-                emit(ArrLibrary.Error("Instance not found", HttpErrorType.Unexpected))
-                return@flow
-            }
-            val preferencesRepository = preferencesStoreRepository.getInstancePreferences(instanceId)
-
-            if (repository.library.value == null) {
-                emit(ArrLibrary.Loading)
-                coroutineScope {
-                    launch {
-                        repository.refreshLibrary()
-                    }
-                }
-            }
-
-            val preferencesFlow =
-                preferencesRepository
-                    .observePreferences()
-                    .distinctUntilChanged { old, new ->
-                        old.sortBy == new.sortBy &&
-                            old.sortOrder == new.sortOrder &&
-                            old.filterBy == new.filterBy &&
-                            old.customFilterId == new.customFilterId
-                    }
-
-            val queryFlow = searchQuery ?: flowOf("")
-
-            combine(
-                repository.library,
-                preferencesFlow,
-                repository.customFilters,
-                queryFlow,
-            ) { libraryResult, preferences, customFilters, query ->
-                when (libraryResult) {
-                    is NetworkResult.Loading -> ArrLibrary.Loading
-                    is NetworkResult.Error -> ArrLibrary.Error(libraryResult.message ?: "")
-                    is NetworkResult.Success -> {
-                        val sorted = applySorting(libraryResult.data, preferences)
-                        val filtered = applyFiltering(sorted, preferences, customFilters)
-                        val searched =
-                            if (query.isNotBlank()) {
-                                filtered.filter { it.title?.contains(query, ignoreCase = true) == true }
-                            } else {
-                                filtered
-                            }
-                        ArrLibrary.Success(searched, preferences)
-                    }
-                    null -> ArrLibrary.Initial
-                }
-            }.flowOn(Dispatchers.Default)
-                .collect { emit(it) }
+    ): Flow<ArrLibrary> = flow {
+        val repository = instanceManager.getArrRepository(instanceId)
+        if (repository == null) {
+            logger.error { "Instance not found: $instanceId" }
+            emit(ArrLibrary.Error("Instance not found", HttpErrorType.Unexpected))
+            return@flow
         }
+        val preferencesRepository = preferencesStoreRepository.getInstancePreferences(instanceId)
+
+        if (repository.library.value == null) {
+            emit(ArrLibrary.Loading)
+            coroutineScope {
+                launch {
+                    repository.refreshLibrary()
+                }
+            }
+        }
+
+        val preferencesFlow =
+            preferencesRepository
+                .observePreferences()
+                .distinctUntilChanged { old, new ->
+                    old.sortBy == new.sortBy &&
+                        old.sortOrder == new.sortOrder &&
+                        old.filterBy == new.filterBy &&
+                        old.customFilterId == new.customFilterId
+                }
+
+        val queryFlow = searchQuery ?: flowOf("")
+
+        combine(
+            repository.library,
+            preferencesFlow,
+            repository.customFilters,
+            queryFlow,
+        ) { libraryResult, preferences, customFilters, query ->
+            when (libraryResult) {
+                is NetworkResult.Loading -> ArrLibrary.Loading
+                is NetworkResult.Error -> ArrLibrary.Error(libraryResult.message ?: "")
+                is NetworkResult.Success -> {
+                    val sorted = applySorting(libraryResult.data, preferences)
+                    val filtered = applyFiltering(sorted, preferences, customFilters)
+                    val searched =
+                        if (query.isNotBlank()) {
+                            filtered.filter { it.title?.contains(query, ignoreCase = true) == true }
+                        } else {
+                            filtered
+                        }
+                    ArrLibrary.Success(searched, preferences)
+                }
+                null -> ArrLibrary.Initial
+            }
+        }.flowOn(Dispatchers.Default)
+            .collect { emit(it) }
+    }
 
     private fun applySorting(
         items: List<ArrMedia>,

@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.extensions.pxToDp
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryItem
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
@@ -103,14 +104,14 @@ fun TracearrHistoryTableRow(
     Card(
         onClick = onClick,
         modifier =
-            modifier
-                .fillMaxWidth()
-                .onGloballyPositioned { rowHeight = it.size.height },
+        modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { rowHeight = it.size.height },
         shape = MaterialTheme.shapes.medium,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -118,17 +119,17 @@ fun TracearrHistoryTableRow(
         ) {
             Box(
                 modifier =
-                    Modifier
-                        .width(4.dp)
-                        .height(rowHeight.pxToDp())
-                        .background(edgeColor),
+                Modifier
+                    .width(4.dp)
+                    .height(rowHeight.pxToDp())
+                    .background(edgeColor),
             )
 
             Row(
                 modifier =
-                    Modifier
-                        .padding(horizontal = 12.dp, vertical = 12.dp)
-                        .fillMaxWidth(),
+                Modifier
+                    .padding(horizontal = 12.dp, vertical = 12.dp)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -148,9 +149,9 @@ fun TracearrHistoryTableRow(
                                 model = rememberRemoteImageData(avatarUrl, trim = false),
                                 contentDescription = null,
                                 modifier =
-                                    Modifier
-                                        .size(20.dp)
-                                        .clip(CircleShape),
+                                Modifier
+                                    .size(20.dp)
+                                    .clip(CircleShape),
                                 contentScale = ContentScale.Crop,
                             )
                         } else {
@@ -277,10 +278,10 @@ fun TracearrHistoryTableRow(
                             LinearProgressIndicator(
                                 progress = { progressFraction },
                                 modifier =
-                                    Modifier
-                                        .weight(1f)
-                                        .height(4.dp)
-                                        .clip(RoundedCornerShape(2.dp)),
+                                Modifier
+                                    .weight(1f)
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(2.dp)),
                                 color = TracearrBlue,
                                 trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                             )
@@ -303,10 +304,10 @@ fun TracearrHistoryTableRow(
                     ) {
                         Box(
                             modifier =
-                                Modifier
-                                    .size(6.dp)
-                                    .clip(CircleShape)
-                                    .background(edgeColor),
+                            Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(edgeColor),
                         )
                         Text(
                             text = item.effectiveServerName.ifEmpty { mokoString(MR.strings.server) },

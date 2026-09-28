@@ -142,10 +142,10 @@ class EpisodeWrapperTest {
                 size = 100,
                 qualityCutoffNotMet = false,
                 quality =
-                    QualityInfo(
-                        quality = Quality(id = 1, name = "1080p"),
-                        revision = Revision(version = 1, real = 0, isRepack = false),
-                    ),
+                QualityInfo(
+                    quality = Quality(id = 1, name = "1080p"),
+                    revision = Revision(version = 1, real = 0, isRepack = false),
+                ),
                 seriesId = 7,
                 seasonNumber = 1,
             )

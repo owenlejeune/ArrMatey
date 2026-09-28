@@ -32,32 +32,31 @@ class MetadataRepositoryTest {
     private val fakeLogger = LoggerFactory.get("test")
 
     @Test
-    fun testRefreshStatus() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(
-                        content = """{"version": "4.0.0.648"}""",
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
+    fun testRefreshStatus() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content = """{"version": "4.0.0.648"}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                        },
                     )
                 }
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json(
-                            Json {
-                                ignoreUnknownKeys = true
-                            },
-                        )
-                    }
-                }
-            val client = SonarrClient(fakeInstance, httpClient)
-            val metadataRepo = MetadataRepository(client, fakeLogger)
+            }
+        val client = SonarrClient(fakeInstance, httpClient)
+        val metadataRepo = MetadataRepository(client, fakeLogger)
 
-            metadataRepo.refreshStatus()
+        metadataRepo.refreshStatus()
 
-            assertNotNull(metadataRepo.softwareStatus.value)
-            assertEquals("4.0.0.648", metadataRepo.softwareStatus.value?.version)
-        }
+        assertNotNull(metadataRepo.softwareStatus.value)
+        assertEquals("4.0.0.648", metadataRepo.softwareStatus.value?.version)
+    }
 }

@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
 import com.dnfapps.arrmatey.seerr.state.MediaProvider
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.mokoString
@@ -97,9 +98,9 @@ fun MediaDetailsActions(
                         SplitButtonDefaults.LeadingButton(
                             onClick = onRequestClicked,
                             colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                ),
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                            ),
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Add, null)
@@ -113,9 +114,9 @@ fun MediaDetailsActions(
                             SplitButtonDefaults.TrailingButton(
                                 onClick = { showRequestMenu = true },
                                 colors =
-                                    ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                    ),
+                                ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                ),
                             ) {
                                 Icon(Icons.Default.ArrowDropDown, null)
                             }
@@ -188,9 +189,9 @@ private fun WatchButton(
                         }
                     },
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = serviceButtonColor,
-                        ),
+                    ButtonDefaults.buttonColors(
+                        containerColor = serviceButtonColor,
+                    ),
                 ) {
                     if (serviceIconRes is ImageResource) {
                         Image(
@@ -210,9 +211,9 @@ private fun WatchButton(
                     SplitButtonDefaults.TrailingButton(
                         onClick = { showWatchMenu = true },
                         colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor = serviceButtonColor,
-                            ),
+                        ButtonDefaults.buttonColors(
+                            containerColor = serviceButtonColor,
+                        ),
                     ) {
                         Icon(Icons.Default.ArrowDropDown, null)
                     }
@@ -253,9 +254,9 @@ private fun WatchButton(
                 }
             },
             colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = containerColor,
-                ),
+            ButtonDefaults.buttonColors(
+                containerColor = containerColor,
+            ),
             modifier = modifier,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -298,9 +299,9 @@ private fun ViewRequestButton(
                     buttonState.pendingRequestId?.let(onViewRequestClicked)
                 },
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                    ),
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                ),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Schedule, null)
@@ -314,9 +315,9 @@ private fun ViewRequestButton(
                 SplitButtonDefaults.TrailingButton(
                     onClick = { showRequestMenu = true },
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary,
-                        ),
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                    ),
                 ) {
                     Icon(Icons.Default.ArrowDropDown, null)
                 }

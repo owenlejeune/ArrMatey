@@ -69,16 +69,15 @@ object SearchResultWeaver {
     fun weave(
         query: String,
         results: List<SearchResult>,
-    ): List<SearchResult> =
-        results
-            .distinctBy { it.id }
-            .sortedWith(
-                compareByDescending<SearchResult> { calculateScore(it, query) }
-                    .thenByDescending { it.popularity }
-                    .thenByDescending { it.voteCount }
-                    .thenByDescending { it.voteAverage }
-                    .thenByDescending { it.year ?: DEFAULT_YEAR }
-                    .thenBy { it.title }
-                    .thenBy { it.id },
-            )
+    ): List<SearchResult> = results
+        .distinctBy { it.id }
+        .sortedWith(
+            compareByDescending<SearchResult> { calculateScore(it, query) }
+                .thenByDescending { it.popularity }
+                .thenByDescending { it.voteCount }
+                .thenByDescending { it.voteAverage }
+                .thenByDescending { it.year ?: DEFAULT_YEAR }
+                .thenBy { it.title }
+                .thenBy { it.id },
+        )
 }

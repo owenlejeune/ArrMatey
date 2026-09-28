@@ -35,6 +35,7 @@ import com.dnfapps.arrmatey.arr.api.model.InstanceTypeIdentifiable
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.utils.mokoString
@@ -52,9 +53,9 @@ fun RecentlyAddedSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Column(
@@ -82,9 +83,9 @@ fun RecentlyAddedSection(
                 Text(
                     text = mokoString(MR.strings.no_type_instances_message, "Arr"),
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 2.dp, bottom = 8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -93,9 +94,9 @@ fun RecentlyAddedSection(
                 Text(
                     text = mokoString(MR.strings.nothing_recently_added),
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 2.dp, bottom = 8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -129,9 +130,9 @@ fun RecentlyAddedSection(
                                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                                     shadowElevation = 2.dp,
                                     modifier =
-                                        Modifier
-                                            .align(Alignment.TopStart)
-                                            .padding(6.dp),
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(6.dp),
                                 ) {
                                     Box(
                                         modifier = Modifier.padding(4.dp),
@@ -139,21 +140,21 @@ fun RecentlyAddedSection(
                                     ) {
                                         Icon(
                                             imageVector =
-                                                if (item.monitored) {
-                                                    Icons.Default.Bookmark
-                                                } else {
-                                                    Icons.Default.BookmarkBorder
-                                                },
+                                            if (item.monitored) {
+                                                Icons.Default.Bookmark
+                                            } else {
+                                                Icons.Default.BookmarkBorder
+                                            },
                                             contentDescription =
-                                                mokoString(
-                                                    if (item.monitored) MR.strings.monitored else MR.strings.unmonitored,
-                                                ),
+                                            mokoString(
+                                                if (item.monitored) MR.strings.monitored else MR.strings.unmonitored,
+                                            ),
                                             tint =
-                                                if (item.monitored) {
-                                                    MaterialTheme.colorScheme.primary
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                                },
+                                            if (item.monitored) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            },
                                             modifier = Modifier.size(16.dp),
                                         )
                                     }
@@ -165,9 +166,9 @@ fun RecentlyAddedSection(
                                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                                     shadowElevation = 2.dp,
                                     modifier =
-                                        Modifier
-                                            .align(Alignment.TopEnd)
-                                            .padding(6.dp),
+                                    Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(6.dp),
                                 ) {
                                     Box(
                                         modifier = Modifier.padding(4.dp),

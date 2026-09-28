@@ -9,11 +9,10 @@ class GetDiscoverTvUseCase {
     fun createPagingController(
         repository: SeerrInstanceRepository,
         scope: CoroutineScope,
-    ): PagingController<DiscoverResult> =
-        PagingController(
-            scope = scope,
-            keySelector = { "${it.mediaType.name}_${it.id}" },
-        ) {
-            repository.getDiscoverTvPaging()
-        }
+    ): PagingController<DiscoverResult> = PagingController(
+        scope = scope,
+        keySelector = { "${it.mediaType.name}_${it.id}" },
+    ) {
+        repository.getDiscoverTvPaging()
+    }
 }

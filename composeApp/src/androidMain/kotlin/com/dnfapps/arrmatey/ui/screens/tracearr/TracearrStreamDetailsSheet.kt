@@ -64,6 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrDevicePlatform
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
@@ -173,11 +174,11 @@ fun TracearrStreamDetailsSheet(
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 32.dp),
+            Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
@@ -217,18 +218,18 @@ fun TracearrStreamDetailsSheet(
             ) {
                 Row(
                     modifier =
-                        Modifier.fillMaxWidth().clickable {
-                            onNavigateToDetails(session.mediaType, session.mediaDetails?.tmdbId)
-                        },
+                    Modifier.fillMaxWidth().clickable {
+                        onNavigateToDetails(session.mediaType, session.mediaDetails?.tmdbId)
+                    },
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Box(
                         modifier =
-                            Modifier
-                                .width(70.dp)
-                                .aspectRatio(AspectRatio.Poster.ratio)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        Modifier
+                            .width(70.dp)
+                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                         contentAlignment = Alignment.Center,
                     ) {
                         val imageUrl = session.posterUrl ?: session.thumbPath
@@ -315,10 +316,10 @@ fun TracearrStreamDetailsSheet(
                             LinearProgressIndicator(
                                 progress = { progressFraction },
                                 modifier =
-                                    Modifier
-                                        .weight(1f)
-                                        .height(4.dp)
-                                        .clip(RoundedCornerShape(2.dp)),
+                                Modifier
+                                    .weight(1f)
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(2.dp)),
                                 color = TracearrBlue,
                                 trackColor = MaterialTheme.colorScheme.surface,
                             )
@@ -339,13 +340,13 @@ fun TracearrStreamDetailsSheet(
             ) {
                 Row(
                     modifier =
-                        Modifier.fillMaxWidth().clickable {
-                            session.effectiveUserRef?.let { ref ->
-                                if (ref.isNotBlank()) {
-                                    onNavigateToUser(ref)
-                                }
+                    Modifier.fillMaxWidth().clickable {
+                        session.effectiveUserRef?.let { ref ->
+                            if (ref.isNotBlank()) {
+                                onNavigateToUser(ref)
                             }
-                        },
+                        }
+                    },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {

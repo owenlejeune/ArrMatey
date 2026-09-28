@@ -119,20 +119,19 @@ sealed interface QueueItem {
     val type: InstanceType
 }
 
-fun List<QueueItem>.groupByTask(): List<QueueItem> =
-    groupBy { it.taskGroup }
-        .map { (_, groupItems) ->
-            val first = groupItems.firstOrNull { it.hasIssue } ?: groupItems.first()
-            groupItems.size.takeIf { it > 0 }?.let { size ->
-                when (first) {
-                    is SonarrQueueItem -> first.copy(taskGroupCount = size)
-                    is RadarrQueueItem -> first.copy(taskGroupCount = size)
-                    is LidarrQueueItem -> first.copy(taskGroupCount = size)
-                    is ReadarrQueueItem -> first.copy(taskGroupCount = size)
-                    is ListenarrQueueItem -> first
-                }
-            } ?: first
-        }
+fun List<QueueItem>.groupByTask(): List<QueueItem> = groupBy { it.taskGroup }
+    .map { (_, groupItems) ->
+        val first = groupItems.firstOrNull { it.hasIssue } ?: groupItems.first()
+        groupItems.size.takeIf { it > 0 }?.let { size ->
+            when (first) {
+                is SonarrQueueItem -> first.copy(taskGroupCount = size)
+                is RadarrQueueItem -> first.copy(taskGroupCount = size)
+                is LidarrQueueItem -> first.copy(taskGroupCount = size)
+                is ReadarrQueueItem -> first.copy(taskGroupCount = size)
+                is ListenarrQueueItem -> first
+            }
+        } ?: first
+    }
 
 object QueueItemSerializer : JsonContentPolymorphicSerializer<QueueItem>(QueueItem::class) {
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<QueueItem> {

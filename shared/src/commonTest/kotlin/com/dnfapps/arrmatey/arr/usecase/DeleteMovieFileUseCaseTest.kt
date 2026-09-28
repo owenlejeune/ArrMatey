@@ -19,33 +19,31 @@ import kotlin.test.assertTrue
 class DeleteMovieFileUseCaseTest {
     private val logger = LoggerFactory.get("test")
 
-    private fun instance(type: InstanceType) =
-        Instance(
-            id = 1,
-            label = "Test",
-            url = "http://localhost",
-            apiKey = EncryptedString("k"),
-            type = type,
-            enabled = true,
-        )
+    private fun instance(type: InstanceType) = Instance(
+        id = 1,
+        label = "Test",
+        url = "http://localhost",
+        apiKey = EncryptedString("k"),
+        type = type,
+        enabled = true,
+    )
 
     @Test
-    fun testWrongInstanceTypeEmitsError() =
-        runTest {
-            val mockEngine = MockEngine { respond("", HttpStatusCode.OK) }
-            val repository = ArrInstanceRepository(instance(InstanceType.Sonarr), HttpClient(mockEngine), logger)
-            val useCase = DeleteMovieFileUseCase()
+    fun testWrongInstanceTypeEmitsError() = runTest {
+        val mockEngine = MockEngine { respond("", HttpStatusCode.OK) }
+        val repository = ArrInstanceRepository(instance(InstanceType.Sonarr), HttpClient(mockEngine), logger)
+        val useCase = DeleteMovieFileUseCase()
 
-            useCase(
-                movieId = 123,
-                movieFileId = 456,
-                repository = repository,
-            ).test {
-                assertTrue(awaitItem() is OperationStatus.InProgress)
-                val error = awaitItem()
-                assertTrue(error is OperationStatus.Error)
-                assertEquals("Not a Radarr instance", error.message)
-                awaitComplete()
-            }
+        useCase(
+            movieId = 123,
+            movieFileId = 456,
+            repository = repository,
+        ).test {
+            assertTrue(awaitItem() is OperationStatus.InProgress)
+            val error = awaitItem()
+            assertTrue(error is OperationStatus.Error)
+            assertEquals("Not a Radarr instance", error.message)
+            awaitComplete()
         }
+    }
 }

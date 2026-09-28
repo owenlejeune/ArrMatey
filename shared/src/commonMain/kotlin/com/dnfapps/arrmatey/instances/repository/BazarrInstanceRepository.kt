@@ -56,16 +56,14 @@ class BazarrInstanceRepository(
 
     override suspend fun testConnection(): NetworkResult<Unit> = bazarrClient.testConnection()
 
-    suspend fun getSystemSettings(): NetworkResult<BazarrSystem> =
-        bazarrClient
-            .getSystemSettings()
-            .onSuccess { _systemSettings.value = it }
+    suspend fun getSystemSettings(): NetworkResult<BazarrSystem> = bazarrClient
+        .getSystemSettings()
+        .onSuccess { _systemSettings.value = it }
 
-    suspend fun getSystemStatus(): NetworkResult<BazarrSystemStatus> =
-        bazarrClient
-            .getSystemStatus()
-            .onSuccess { _systemStatus.value = it }
-            .onError { _, _, _ -> _systemStatus.value = null }
+    suspend fun getSystemStatus(): NetworkResult<BazarrSystemStatus> = bazarrClient
+        .getSystemStatus()
+        .onSuccess { _systemStatus.value = it }
+        .onError { _, _, _ -> _systemStatus.value = null }
 
     suspend fun refreshBadges() {
         bazarrClient
@@ -87,60 +85,54 @@ class BazarrInstanceRepository(
 
     suspend fun getMovie(radarrId: Long): NetworkResult<BazarrMovie?> = bazarrClient.getMovie(radarrId).map { it.data.firstOrNull() }
 
-    suspend fun searchEpisodeSubtitles(episodeId: Long): NetworkResult<List<ProviderSubtitle>> =
-        bazarrClient.searchEpisodeSubtitles(episodeId)
+    suspend fun searchEpisodeSubtitles(episodeId: Long): NetworkResult<List<ProviderSubtitle>> = bazarrClient.searchEpisodeSubtitles(episodeId)
 
     suspend fun searchMovieSubtitles(radarrId: Long): NetworkResult<List<ProviderSubtitle>> = bazarrClient.searchMovieSubtitles(radarrId)
 
-    suspend fun getSeries(): NetworkResult<List<BazarrSeries>> =
-        bazarrClient
-            .getSeries()
-            .mapValues { it.withLocalImages(instance.url) as BazarrSeries }
-            .onSuccess { _series.value = NetworkResult.Success(it) }
+    suspend fun getSeries(): NetworkResult<List<BazarrSeries>> = bazarrClient
+        .getSeries()
+        .mapValues { it.withLocalImages(instance.url) as BazarrSeries }
+        .onSuccess { _series.value = NetworkResult.Success(it) }
 
-    suspend fun getMovies(): NetworkResult<List<BazarrMovie>> =
-        bazarrClient
-            .getMovies()
-            .mapValues { it.withLocalImages(instance.url) as BazarrMovie }
-            .onSuccess { _movies.value = NetworkResult.Success(it) }
+    suspend fun getMovies(): NetworkResult<List<BazarrMovie>> = bazarrClient
+        .getMovies()
+        .mapValues { it.withLocalImages(instance.url) as BazarrMovie }
+        .onSuccess { _movies.value = NetworkResult.Success(it) }
 
-    suspend fun getEpisodes(seriesId: Long): NetworkResult<List<BazarrEpisode>> =
-        bazarrClient
-            .getEpisodes(seriesId)
-            .map { it.data }
-            .onSuccess {
-                val current = _episodes.value.toMutableMap()
-                current[seriesId] = it
-                _episodes.value = current
-            }
+    suspend fun getEpisodes(seriesId: Long): NetworkResult<List<BazarrEpisode>> = bazarrClient
+        .getEpisodes(seriesId)
+        .map { it.data }
+        .onSuccess {
+            val current = _episodes.value.toMutableMap()
+            current[seriesId] = it
+            _episodes.value = current
+        }
 
     suspend fun downloadEpisodeSubtitle(
         seriesId: Long,
         episodeId: Long,
         result: ProviderSubtitle,
-    ): NetworkResult<Unit> =
-        bazarrClient.downloadEpisodeSubtitle(
-            seriesId = seriesId,
-            episodeId = episodeId,
-            hi = result.isHearingImpaired,
-            forced = result.isForced,
-            originalFormat = false,
-            provider = result.provider,
-            subtitle = result.subtitle,
-        )
+    ): NetworkResult<Unit> = bazarrClient.downloadEpisodeSubtitle(
+        seriesId = seriesId,
+        episodeId = episodeId,
+        hi = result.isHearingImpaired,
+        forced = result.isForced,
+        originalFormat = false,
+        provider = result.provider,
+        subtitle = result.subtitle,
+    )
 
     suspend fun downloadMovieSubtitle(
         radarrId: Long,
         result: ProviderSubtitle,
-    ): NetworkResult<Unit> =
-        bazarrClient.downloadMovieSubtitle(
-            radarrId = radarrId,
-            hi = result.isHearingImpaired,
-            forced = result.isForced,
-            originalFormat = false,
-            provider = result.provider,
-            subtitle = result.subtitle,
-        )
+    ): NetworkResult<Unit> = bazarrClient.downloadMovieSubtitle(
+        radarrId = radarrId,
+        hi = result.isHearingImpaired,
+        forced = result.isForced,
+        originalFormat = false,
+        provider = result.provider,
+        subtitle = result.subtitle,
+    )
 
     suspend fun autoSearchSeriesSubtitles(seriesId: Long): NetworkResult<Unit> = bazarrClient.autoSearchSeriesSubtitles(seriesId)
 

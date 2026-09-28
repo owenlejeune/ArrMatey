@@ -40,6 +40,7 @@ import com.dnfapps.arrmatey.arr.state.ArrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.model.InfoItem
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrHealthCard
 import com.dnfapps.arrmatey.ui.components.DiskSpaceSection
@@ -88,11 +89,11 @@ fun ArrInstanceDashboard(
 
     Scaffold(
         modifier =
-            if (isCompact) {
-                Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
-            } else {
-                Modifier
-            },
+        if (isCompact) {
+            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+        } else {
+            Modifier
+        },
         topBar = {
             TopAppBar(
                 title = {
@@ -131,9 +132,9 @@ fun ArrInstanceDashboard(
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refresh() },
             modifier =
-                Modifier
-                    .padding(top = contentPadding.calculateTopPadding())
-                    .fillMaxSize(),
+            Modifier
+                .padding(top = contentPadding.calculateTopPadding())
+                .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             when (val state = state) {
@@ -156,23 +157,23 @@ fun ArrInstanceDashboard(
                 is ArrDashboardState.Success -> {
                     Column(
                         modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 24.dp)
-                                .verticalScroll(rememberScrollState())
-                                .padding(
-                                    bottom =
-                                        (
-                                            if (LocalFloatingBarBottomPadding.current >
-                                                0.dp
-                                            ) {
-                                                LocalFloatingBarBottomPadding.current
-                                            } else {
-                                                navigationBarBottomInset()
-                                            }
-                                        ) +
-                                            12.dp,
-                                ),
+                        Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 24.dp)
+                            .verticalScroll(rememberScrollState())
+                            .padding(
+                                bottom =
+                                (
+                                    if (LocalFloatingBarBottomPadding.current >
+                                        0.dp
+                                    ) {
+                                        LocalFloatingBarBottomPadding.current
+                                    } else {
+                                        navigationBarBottomInset()
+                                    }
+                                    ) +
+                                    12.dp,
+                            ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text(
@@ -186,9 +187,9 @@ fun ArrInstanceDashboard(
                             Text(
                                 text = mokoString(MR.strings.no_issues),
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 6.dp),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
                             )

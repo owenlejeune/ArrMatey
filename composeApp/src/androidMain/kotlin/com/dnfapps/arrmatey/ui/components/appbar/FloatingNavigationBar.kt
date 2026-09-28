@@ -157,28 +157,28 @@ fun FloatingNavigationBar(
                 tonalElevation = tonalElevation,
                 shadowElevation = shadowElevation,
                 modifier =
-                    if (onLongClick != null) {
-                        Modifier.combinedClickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {},
-                            onLongClick = onLongClick,
-                        )
-                    } else {
-                        Modifier
-                    },
+                if (onLongClick != null) {
+                    Modifier.combinedClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {},
+                        onLongClick = onLongClick,
+                    )
+                } else {
+                    Modifier
+                },
             ) {
                 Row(
                     modifier =
-                        Modifier.padding(
-                            horizontal = if (compact) 4.dp else 6.dp,
-                            vertical = if (compact) 4.dp else 6.dp,
-                        ),
+                    Modifier.padding(
+                        horizontal = if (compact) 4.dp else 6.dp,
+                        vertical = if (compact) 4.dp else 6.dp,
+                    ),
                     horizontalArrangement =
-                        Arrangement.spacedBy(
-                            if (compact) 2.dp else 4.dp,
-                            Alignment.CenterHorizontally,
-                        ),
+                    Arrangement.spacedBy(
+                        if (compact) 2.dp else 4.dp,
+                        Alignment.CenterHorizontally,
+                    ),
                     verticalAlignment = Alignment.CenterVertically,
                     content = content,
                 )
@@ -192,39 +192,39 @@ fun FloatingNavigationBar(
             AnimatedVisibility(
                 visible = action != null,
                 enter =
-                    scaleIn(
-                        initialScale = 0.8f,
-                        transformOrigin = TransformOrigin.Center,
+                scaleIn(
+                    initialScale = 0.8f,
+                    transformOrigin = TransformOrigin.Center,
+                    animationSpec =
+                    tween(
+                        durationMillis = ANIMATION_DURATION_MILLIS,
+                        easing = FastOutSlowInEasing,
+                    ),
+                ) +
+                    fadeIn(
                         animationSpec =
-                            tween(
-                                durationMillis = ANIMATION_DURATION_MILLIS,
-                                easing = FastOutSlowInEasing,
-                            ),
-                    ) +
-                        fadeIn(
-                            animationSpec =
-                                tween(
-                                    durationMillis = ANIMATION_DURATION_MILLIS,
-                                    easing = FastOutSlowInEasing,
-                                ),
+                        tween(
+                            durationMillis = ANIMATION_DURATION_MILLIS,
+                            easing = FastOutSlowInEasing,
                         ),
+                    ),
                 exit =
-                    scaleOut(
-                        targetScale = 0.8f,
-                        transformOrigin = TransformOrigin.Center,
+                scaleOut(
+                    targetScale = 0.8f,
+                    transformOrigin = TransformOrigin.Center,
+                    animationSpec =
+                    tween(
+                        durationMillis = ANIMATION_DURATION_MILLIS / 2,
+                        easing = FastOutSlowInEasing,
+                    ),
+                ) +
+                    fadeOut(
                         animationSpec =
-                            tween(
-                                durationMillis = ANIMATION_DURATION_MILLIS / 2,
-                                easing = FastOutSlowInEasing,
-                            ),
-                    ) +
-                        fadeOut(
-                            animationSpec =
-                                tween(
-                                    durationMillis = ANIMATION_DURATION_MILLIS / 2,
-                                    easing = FastOutSlowInEasing,
-                                ),
+                        tween(
+                            durationMillis = ANIMATION_DURATION_MILLIS / 2,
+                            easing = FastOutSlowInEasing,
                         ),
+                    ),
                 label = "FloatingBarActionVisibility",
             ) {
                 val activeAction = action ?: lastNonNullAction
@@ -234,19 +234,19 @@ fun FloatingNavigationBar(
                 val animatedContainerColor by animateColorAsState(
                     targetValue = targetContainerColor,
                     animationSpec =
-                        tween(
-                            durationMillis = ANIMATION_DURATION_MILLIS,
-                            easing = FastOutSlowInEasing,
-                        ),
+                    tween(
+                        durationMillis = ANIMATION_DURATION_MILLIS,
+                        easing = FastOutSlowInEasing,
+                    ),
                     label = "FloatingBarActionContainerColor",
                 )
                 val animatedContentColor by animateColorAsState(
                     targetValue = targetContentColor,
                     animationSpec =
-                        tween(
-                            durationMillis = ANIMATION_DURATION_MILLIS,
-                            easing = FastOutSlowInEasing,
-                        ),
+                    tween(
+                        durationMillis = ANIMATION_DURATION_MILLIS,
+                        easing = FastOutSlowInEasing,
+                    ),
                     label = "FloatingBarActionContentColor",
                 )
 
@@ -265,36 +265,36 @@ fun FloatingNavigationBar(
                             (
                                 fadeIn(
                                     animationSpec =
-                                        tween(
-                                            durationMillis = ANIMATION_DURATION_MILLIS,
-                                            easing = FastOutSlowInEasing,
-                                        ),
+                                    tween(
+                                        durationMillis = ANIMATION_DURATION_MILLIS,
+                                        easing = FastOutSlowInEasing,
+                                    ),
                                 ) +
                                     scaleIn(
                                         initialScale = 0.7f,
                                         transformOrigin = TransformOrigin.Center,
                                         animationSpec =
-                                            tween(
-                                                durationMillis = ANIMATION_DURATION_MILLIS,
-                                                easing = FastOutSlowInEasing,
-                                            ),
-                                    )
-                            ).togetherWith(
-                                fadeOut(
-                                    animationSpec =
                                         tween(
-                                            durationMillis = ANIMATION_DURATION_MILLIS / 2,
+                                            durationMillis = ANIMATION_DURATION_MILLIS,
                                             easing = FastOutSlowInEasing,
                                         ),
+                                    )
+                                ).togetherWith(
+                                fadeOut(
+                                    animationSpec =
+                                    tween(
+                                        durationMillis = ANIMATION_DURATION_MILLIS / 2,
+                                        easing = FastOutSlowInEasing,
+                                    ),
                                 ) +
                                     scaleOut(
                                         targetScale = 0.7f,
                                         transformOrigin = TransformOrigin.Center,
                                         animationSpec =
-                                            tween(
-                                                durationMillis = ANIMATION_DURATION_MILLIS / 2,
-                                                easing = FastOutSlowInEasing,
-                                            ),
+                                        tween(
+                                            durationMillis = ANIMATION_DURATION_MILLIS / 2,
+                                            easing = FastOutSlowInEasing,
+                                        ),
                                     ),
                             )
                         },
@@ -345,56 +345,56 @@ fun FloatingNavigationBarItem(
     val horizontalPadding by animateDpAsState(
         targetValue = targetHorizontalPadding,
         animationSpec =
-            tween(
-                durationMillis = ANIMATION_DURATION_MILLIS,
-                easing = FastOutSlowInEasing,
-            ),
+        tween(
+            durationMillis = ANIMATION_DURATION_MILLIS,
+            easing = FastOutSlowInEasing,
+        ),
         label = "FloatingNavItemPadding",
     )
 
     val containerColor by animateColorAsState(
         targetValue = colors.containerColor(selected = selected, enabled = enabled),
         animationSpec =
-            tween(
-                durationMillis = ANIMATION_DURATION_MILLIS,
-                easing = FastOutSlowInEasing,
-            ),
+        tween(
+            durationMillis = ANIMATION_DURATION_MILLIS,
+            easing = FastOutSlowInEasing,
+        ),
         label = "FloatingNavItemContainerColor",
     )
 
     val contentColor by animateColorAsState(
         targetValue = colors.contentColor(selected = selected, enabled = enabled),
         animationSpec =
-            tween(
-                durationMillis = ANIMATION_DURATION_MILLIS,
-                easing = FastOutSlowInEasing,
-            ),
+        tween(
+            durationMillis = ANIMATION_DURATION_MILLIS,
+            easing = FastOutSlowInEasing,
+        ),
         label = "FloatingNavItemContentColor",
     )
 
     Box(
         modifier =
-            modifier
-                .semantics {
-                    this.selected = selected
-                    this.role = Role.Tab
-                }.clip(shape)
-                .background(containerColor)
-                .combinedClickable(
-                    enabled = enabled,
-                    interactionSource = interactionSource,
-                    indication = ripple(bounded = true),
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                ).padding(horizontal = horizontalPadding, vertical = verticalPadding),
+        modifier
+            .semantics {
+                this.selected = selected
+                this.role = Role.Tab
+            }.clip(shape)
+            .background(containerColor)
+            .combinedClickable(
+                enabled = enabled,
+                interactionSource = interactionSource,
+                indication = ripple(bounded = true),
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ).padding(horizontal = horizontalPadding, vertical = verticalPadding),
         contentAlignment = Alignment.Center,
     ) {
         CompositionLocalProvider(LocalContentColor provides contentColor) {
             ProvideTextStyle(
                 value =
-                    (if (isCompact) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge).copy(
-                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                    ),
+                (if (isCompact) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge).copy(
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                ),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -410,37 +410,37 @@ fun FloatingNavigationBarItem(
                     AnimatedVisibility(
                         visible = selected,
                         enter =
-                            fadeIn(
+                        fadeIn(
+                            animationSpec =
+                            tween(
+                                durationMillis = ANIMATION_DURATION_MILLIS,
+                                easing = LinearEasing,
+                            ),
+                        ) +
+                            expandHorizontally(
                                 animationSpec =
-                                    tween(
-                                        durationMillis = ANIMATION_DURATION_MILLIS,
-                                        easing = LinearEasing,
-                                    ),
-                            ) +
-                                expandHorizontally(
-                                    animationSpec =
-                                        tween(
-                                            durationMillis = ANIMATION_DURATION_MILLIS,
-                                            easing = FastOutSlowInEasing,
-                                        ),
-                                    expandFrom = Alignment.Start,
+                                tween(
+                                    durationMillis = ANIMATION_DURATION_MILLIS,
+                                    easing = FastOutSlowInEasing,
                                 ),
+                                expandFrom = Alignment.Start,
+                            ),
                         exit =
-                            fadeOut(
+                        fadeOut(
+                            animationSpec =
+                            tween(
+                                durationMillis = ANIMATION_DURATION_MILLIS / 2,
+                                easing = LinearEasing,
+                            ),
+                        ) +
+                            shrinkHorizontally(
                                 animationSpec =
-                                    tween(
-                                        durationMillis = ANIMATION_DURATION_MILLIS / 2,
-                                        easing = LinearEasing,
-                                    ),
-                            ) +
-                                shrinkHorizontally(
-                                    animationSpec =
-                                        tween(
-                                            durationMillis = ANIMATION_DURATION_MILLIS,
-                                            easing = FastOutSlowInEasing,
-                                        ),
-                                    shrinkTowards = Alignment.Start,
+                                tween(
+                                    durationMillis = ANIMATION_DURATION_MILLIS,
+                                    easing = FastOutSlowInEasing,
                                 ),
+                                shrinkTowards = Alignment.Start,
+                            ),
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Spacer(modifier = Modifier.width(if (isCompact) 6.dp else 8.dp))
@@ -485,16 +485,15 @@ object FloatingNavigationBarItemDefaults {
         unselectedTextColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
         disabledIconColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
         disabledTextColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-    ): FloatingNavigationBarItemColors =
-        FloatingNavigationBarItemColors(
-            selectedIconColor = selectedIconColor,
-            selectedTextColor = selectedTextColor,
-            selectedContainerColor = selectedContainerColor,
-            unselectedIconColor = unselectedIconColor,
-            unselectedTextColor = unselectedTextColor,
-            disabledIconColor = disabledIconColor,
-            disabledTextColor = disabledTextColor,
-        )
+    ): FloatingNavigationBarItemColors = FloatingNavigationBarItemColors(
+        selectedIconColor = selectedIconColor,
+        selectedTextColor = selectedTextColor,
+        selectedContainerColor = selectedContainerColor,
+        unselectedIconColor = unselectedIconColor,
+        unselectedTextColor = unselectedTextColor,
+        disabledIconColor = disabledIconColor,
+        disabledTextColor = disabledTextColor,
+    )
 }
 
 /**
@@ -513,32 +512,29 @@ class FloatingNavigationBarItemColors(
     fun containerColor(
         selected: Boolean,
         enabled: Boolean,
-    ): Color =
-        when {
-            !enabled -> Color.Transparent
-            selected -> selectedContainerColor
-            else -> Color.Transparent
-        }
+    ): Color = when {
+        !enabled -> Color.Transparent
+        selected -> selectedContainerColor
+        else -> Color.Transparent
+    }
 
     fun contentColor(
         selected: Boolean,
         enabled: Boolean,
-    ): Color =
-        when {
-            !enabled -> disabledTextColor
-            selected -> selectedTextColor
-            else -> unselectedTextColor
-        }
+    ): Color = when {
+        !enabled -> disabledTextColor
+        selected -> selectedTextColor
+        else -> unselectedTextColor
+    }
 
     fun iconColor(
         selected: Boolean,
         enabled: Boolean,
-    ): Color =
-        when {
-            !enabled -> disabledIconColor
-            selected -> selectedIconColor
-            else -> unselectedIconColor
-        }
+    ): Color = when {
+        !enabled -> disabledIconColor
+        selected -> selectedIconColor
+        else -> unselectedIconColor
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

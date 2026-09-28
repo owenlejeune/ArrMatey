@@ -15,26 +15,25 @@ import kotlinx.coroutines.flow.map
 class GetAuthorFilesUseCase(
     private val instanceManager: InstanceManager,
 ) {
-    operator fun invoke(authorId: Long): Flow<AuthorFilesState> =
-        channelFlow {
-            instanceManager
-                .getSelectedArrRepository(InstanceType.Bookshelf)
-                .filterNotNull()
-                .collectLatest { repository ->
-                    repository.getAuthorBookFiles(authorId)
-                    combine(
-                        repository.authorBookFiles.map { it[authorId] ?: emptyList() },
-                        repository.observeItemHistory(authorId),
-                        repository.historyStatus,
-                    ) { bookFiles, history, status ->
-                        AuthorFilesState(
-                            files = bookFiles,
-                            history = history,
-                            isRefreshing = status is OperationStatus.InProgress,
-                        )
-                    }.collect { send(it) }
-                }
-        }
+    operator fun invoke(authorId: Long): Flow<AuthorFilesState> = channelFlow {
+        instanceManager
+            .getSelectedArrRepository(InstanceType.Bookshelf)
+            .filterNotNull()
+            .collectLatest { repository ->
+                repository.getAuthorBookFiles(authorId)
+                combine(
+                    repository.authorBookFiles.map { it[authorId] ?: emptyList() },
+                    repository.observeItemHistory(authorId),
+                    repository.historyStatus,
+                ) { bookFiles, history, status ->
+                    AuthorFilesState(
+                        files = bookFiles,
+                        history = history,
+                        isRefreshing = status is OperationStatus.InProgress,
+                    )
+                }.collect { send(it) }
+            }
+    }
 
     suspend fun refreshHistory(authorId: Long) {
         instanceManager

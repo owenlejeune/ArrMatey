@@ -38,10 +38,9 @@ data class ArrAlbum(
     override val notificationMessage: String
         get() = "${artist?.title ?: "Unknown Artist"} - ${title ?: "Unknown Album"}"
 
-    fun getCover() =
-        images.firstOrNull {
-            it.coverType == CoverType.Cover
-        }
+    fun getCover() = images.firstOrNull {
+        it.coverType == CoverType.Cover
+    }
 
     val downloadedTrackCount: Int
         get() = statistics?.trackFileCount ?: 0

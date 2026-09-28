@@ -1,6 +1,21 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.all
+import com.dnfapps.arrmatey.shared.existing
+import com.dnfapps.arrmatey.shared.first_season
+import com.dnfapps.arrmatey.shared.future
+import com.dnfapps.arrmatey.shared.last_season
+import com.dnfapps.arrmatey.shared.latest_seasons
+import com.dnfapps.arrmatey.shared.missing
+import com.dnfapps.arrmatey.shared.monitor_specials
+import com.dnfapps.arrmatey.shared.none
+import com.dnfapps.arrmatey.shared.pilot
+import com.dnfapps.arrmatey.shared.recent
+import com.dnfapps.arrmatey.shared.skip
+import com.dnfapps.arrmatey.shared.unknown
+import com.dnfapps.arrmatey.shared.unmonitor_specials
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
 

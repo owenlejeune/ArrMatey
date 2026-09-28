@@ -45,43 +45,39 @@ class ProwlarrClient(
 
     suspend fun getIndexerStatus(): NetworkResult<List<IndexerStatus>> = httpClient.safeGet("$baseUrl/indexerStatus")
 
-    suspend fun testIndexer(indexer: ProwlarrIndexer): NetworkResult<Unit> =
-        httpClient.safePost("$baseUrl/indexer/${indexer.id}/test") {
-            contentType(ContentType.Application.Json)
-            setBody(indexer)
-        }
+    suspend fun testIndexer(indexer: ProwlarrIndexer): NetworkResult<Unit> = httpClient.safePost("$baseUrl/indexer/${indexer.id}/test") {
+        contentType(ContentType.Application.Json)
+        setBody(indexer)
+    }
 
-    suspend fun updateIndexer(indexer: ProwlarrIndexer): NetworkResult<ProwlarrIndexer> =
-        httpClient.safePut("$baseUrl/indexer/${indexer.id}") {
-            contentType(ContentType.Application.Json)
-            setBody(indexer)
-        }
+    suspend fun updateIndexer(indexer: ProwlarrIndexer): NetworkResult<ProwlarrIndexer> = httpClient.safePut("$baseUrl/indexer/${indexer.id}") {
+        contentType(ContentType.Application.Json)
+        setBody(indexer)
+    }
 
     suspend fun search(
         query: String,
         type: String = "search",
         categories: List<Int> = emptyList(),
         indexerIds: List<Long> = emptyList(),
-    ): NetworkResult<List<ProwlarrSearchResult>> =
-        httpClient.safeGet("$baseUrl/search") {
-            url {
-                parameters.append("query", query)
-                parameters.append("type", type)
-                if (categories.isNotEmpty()) {
-                    parameters.append("categories", categories.joinToString(","))
-                }
-                if (indexerIds.isNotEmpty()) {
-                    parameters.append("indexerIds", indexerIds.joinToString(","))
-                }
+    ): NetworkResult<List<ProwlarrSearchResult>> = httpClient.safeGet("$baseUrl/search") {
+        url {
+            parameters.append("query", query)
+            parameters.append("type", type)
+            if (categories.isNotEmpty()) {
+                parameters.append("categories", categories.joinToString(","))
+            }
+            if (indexerIds.isNotEmpty()) {
+                parameters.append("indexerIds", indexerIds.joinToString(","))
             }
         }
+    }
 
     suspend fun grab(
         guid: String,
         indexerId: Long,
-    ): NetworkResult<ProwlarrSearchResult> =
-        httpClient.safePost("$baseUrl/release") {
-            contentType(ContentType.Application.Json)
-            setBody(ProwlarrGrabPayload(guid = guid, indexerId = indexerId.toInt()))
-        }
+    ): NetworkResult<ProwlarrSearchResult> = httpClient.safePost("$baseUrl/release") {
+        contentType(ContentType.Application.Json)
+        setBody(ProwlarrGrabPayload(guid = guid, indexerId = indexerId.toInt()))
+    }
 }

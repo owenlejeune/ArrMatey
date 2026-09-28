@@ -1,6 +1,24 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.added
+import com.dnfapps.arrmatey.shared.audiobook_file_added
+import com.dnfapps.arrmatey.shared.audiobook_file_deleted
+import com.dnfapps.arrmatey.shared.book_file_deleted
+import com.dnfapps.arrmatey.shared.book_file_imported
+import com.dnfapps.arrmatey.shared.book_file_renamed
+import com.dnfapps.arrmatey.shared.download_failed
+import com.dnfapps.arrmatey.shared.download_folder_imported
+import com.dnfapps.arrmatey.shared.download_ignored
+import com.dnfapps.arrmatey.shared.episode_file_deleted
+import com.dnfapps.arrmatey.shared.episode_file_renamed
+import com.dnfapps.arrmatey.shared.grabbed
+import com.dnfapps.arrmatey.shared.movie_file_deleted
+import com.dnfapps.arrmatey.shared.movie_file_renamed
+import com.dnfapps.arrmatey.shared.movie_folder_imported
+import com.dnfapps.arrmatey.shared.series_folder_imported
+import com.dnfapps.arrmatey.shared.unknown
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
 

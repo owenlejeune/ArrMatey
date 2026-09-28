@@ -56,55 +56,55 @@ fun CalendarDayCell(
 
     Surface(
         modifier =
-            modifier
-                .aspectRatio(1f)
-                .padding(2.dp),
+        modifier
+            .aspectRatio(1f)
+            .padding(2.dp),
         onClick = onClick,
         color =
-            when {
-                isSelected -> MaterialTheme.colorScheme.inversePrimary
-                isToday -> MaterialTheme.colorScheme.surfaceContainerHigh
-                else -> Color.Transparent
-            },
+        when {
+            isSelected -> MaterialTheme.colorScheme.inversePrimary
+            isToday -> MaterialTheme.colorScheme.surfaceContainerHigh
+            else -> Color.Transparent
+        },
         shape = MaterialTheme.shapes.medium,
         border =
-            when {
-                isSelected -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
-                isToday -> BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                else -> null
-            },
+        when {
+            isSelected -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+            isToday -> BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            else -> null
+        },
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 4.dp, horizontal = 2.dp),
+            Modifier
+                .fillMaxSize()
+                .padding(vertical = 4.dp, horizontal = 2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Day Number Pill / Capsule
             Box(
                 modifier =
-                    Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(
-                            when {
-                                isSelected -> MaterialTheme.colorScheme.primary
-                                isToday -> MaterialTheme.colorScheme.primaryContainer
-                                else -> Color.Transparent
-                            },
-                        ),
+                Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(
+                        when {
+                            isSelected -> MaterialTheme.colorScheme.primary
+                            isToday -> MaterialTheme.colorScheme.primaryContainer
+                            else -> Color.Transparent
+                        },
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = date.day.toString(),
                     style = MaterialTheme.typography.labelMedium,
                     color =
-                        when {
-                            isSelected -> MaterialTheme.colorScheme.onPrimary
-                            isToday -> MaterialTheme.colorScheme.primary
-                            else -> MaterialTheme.colorScheme.onSurface
-                        },
+                    when {
+                        isSelected -> MaterialTheme.colorScheme.onPrimary
+                        isToday -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onSurface
+                    },
                     fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
                 )
             }
@@ -130,20 +130,20 @@ fun CalendarDayCell(
                 // Multi-colored media indicator strips / capsules
                 Row(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp, vertical = 2.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
                     horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     activeMediaTypes.take(5).forEach { color ->
                         Box(
                             modifier =
-                                Modifier
-                                    .weight(1f)
-                                    .height(3.5.dp)
-                                    .clip(CircleShape)
-                                    .background(color),
+                            Modifier
+                                .weight(1f)
+                                .height(3.5.dp)
+                                .clip(CircleShape)
+                                .background(color),
                         )
                     }
                 }

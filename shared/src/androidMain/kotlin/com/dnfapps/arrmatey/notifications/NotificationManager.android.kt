@@ -7,7 +7,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.icon
+import com.dnfapps.arrmatey.shared.instance_notification_channel
 import com.dnfapps.arrmatey.utils.MokoStrings
 import kotlin.time.Instant
 import android.app.NotificationManager as AndroidNotificationManager

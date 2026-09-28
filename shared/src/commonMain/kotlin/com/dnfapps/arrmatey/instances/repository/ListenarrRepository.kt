@@ -57,14 +57,13 @@ class ListenarrRepository(
         return libraryRepository.directLookup(query, language, region)
     }
 
-    override suspend fun getAudiobookFiles(audiobookId: Long): NetworkResult<List<AudiobookFile>> =
-        listenarrClient
-            .getDetail(audiobookId)
-            .onSuccess { result ->
-                val currentMap = _audiobookFiles.value.toMutableMap()
-                currentMap[audiobookId] = result.files
-                _audiobookFiles.value = currentMap
-            }.map { it.files }
+    override suspend fun getAudiobookFiles(audiobookId: Long): NetworkResult<List<AudiobookFile>> = listenarrClient
+        .getDetail(audiobookId)
+        .onSuccess { result ->
+            val currentMap = _audiobookFiles.value.toMutableMap()
+            currentMap[audiobookId] = result.files
+            _audiobookFiles.value = currentMap
+        }.map { it.files }
 
     override suspend fun getMetadata(
         asin: String,

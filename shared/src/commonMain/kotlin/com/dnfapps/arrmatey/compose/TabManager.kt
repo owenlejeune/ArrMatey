@@ -78,20 +78,17 @@ class TabManager(
         }
     }
 
-    fun getVisibleTabs(): Flow<List<TabItem>> =
-        combine(tabPreferencesFlow, customWebpagesFlow) { prefs, webpages ->
-            buildVisibleTabs(prefs, webpages)
-        }
+    fun getVisibleTabs(): Flow<List<TabItem>> = combine(tabPreferencesFlow, customWebpagesFlow) { prefs, webpages ->
+        buildVisibleTabs(prefs, webpages)
+    }
 
-    fun getHiddenTabs(): Flow<List<TabItem>> =
-        combine(tabPreferencesFlow, customWebpagesFlow) { prefs, webpages ->
-            buildDrawerTabs(prefs, webpages)
-        }
+    fun getHiddenTabs(): Flow<List<TabItem>> = combine(tabPreferencesFlow, customWebpagesFlow) { prefs, webpages ->
+        buildDrawerTabs(prefs, webpages)
+    }
 
-    fun getAllTabs(): Flow<List<TabItem>> =
-        combine(getVisibleTabs(), getHiddenTabs()) { visible, hidden ->
-            visible + hidden
-        }
+    fun getAllTabs(): Flow<List<TabItem>> = combine(getVisibleTabs(), getHiddenTabs()) { visible, hidden ->
+        visible + hidden
+    }
 
     private fun buildVisibleTabs(
         prefs: TabPreferences,

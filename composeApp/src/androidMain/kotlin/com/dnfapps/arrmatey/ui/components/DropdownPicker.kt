@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -60,25 +61,25 @@ fun <T> DropdownPicker(
             label()
             OutlinedTextField(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                 readOnly = true,
                 value =
-                    when {
-                        selectedOption != null -> getOptionLabel(selectedOption)
-                        includeAllOption -> allLabel
-                        else -> unknownValueLabel
-                    },
+                when {
+                    selectedOption != null -> getOptionLabel(selectedOption)
+                    includeAllOption -> allLabel
+                    else -> unknownValueLabel
+                },
                 onValueChange = {},
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropDownExpanded) },
                 colors =
-                    OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                        disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    ),
+                OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                ),
                 shape = MaterialTheme.shapes.large,
                 singleLine = singleLine,
                 enabled = enabled,
@@ -104,9 +105,9 @@ fun <T> DropdownPicker(
                     },
                     modifier = Modifier.padding(horizontal = 8.dp),
                     colors =
-                        MenuDefaults.itemColors(
-                            textColor = MaterialTheme.colorScheme.onSurface,
-                        ),
+                    MenuDefaults.itemColors(
+                        textColor = MaterialTheme.colorScheme.onSurface,
+                    ),
                 )
                 allDivider?.invoke()
             }
@@ -120,23 +121,23 @@ fun <T> DropdownPicker(
                         )
                     },
                     leadingIcon =
-                        when {
-                            selectedOption == t -> {
-                                { Icon(Icons.Default.Check, null) }
-                            }
-                            getOptionIcon != null -> {
-                                { Icon(getOptionIcon(t), null) }
-                            }
-                            else -> null
-                        },
+                    when {
+                        selectedOption == t -> {
+                            { Icon(Icons.Default.Check, null) }
+                        }
+                        getOptionIcon != null -> {
+                            { Icon(getOptionIcon(t), null) }
+                        }
+                        else -> null
+                    },
                     onClick = {
                         isDropDownExpanded = false
                         onOptionSelected(t)
                     },
                     colors =
-                        MenuDefaults.itemColors(
-                            textColor = MaterialTheme.colorScheme.onSurface,
-                        ),
+                    MenuDefaults.itemColors(
+                        textColor = MaterialTheme.colorScheme.onSurface,
+                    ),
                 )
             }
         }
@@ -168,20 +169,20 @@ fun <T> MultiSelectDropdownPicker(
             label()
             OutlinedTextField(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                 readOnly = true,
                 value = valueLabel,
                 onValueChange = {},
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropDownExpanded) },
                 colors =
-                    OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                        disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    ),
+                OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                ),
                 shape = MaterialTheme.shapes.large,
                 singleLine = true,
                 enabled = enabled,
@@ -212,9 +213,9 @@ fun <T> MultiSelectDropdownPicker(
                         onOptionSelected(option, !isSelected)
                     },
                     colors =
-                        MenuDefaults.itemColors(
-                            textColor = MaterialTheme.colorScheme.onSurface,
-                        ),
+                    MenuDefaults.itemColors(
+                        textColor = MaterialTheme.colorScheme.onSurface,
+                    ),
                 )
             }
         }

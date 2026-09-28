@@ -135,10 +135,9 @@ data class SearchAudiobook(
     )
 }
 
-fun createSearchAudiobook(audiobook: Audiobook): SearchAudiobook =
-    SearchAudiobook(
-        asin = audiobook.asin ?: "",
-        title = audiobook.title ?: "",
-        summary = audiobook.overview,
-        authors = audiobook.authors.map { SearchAuthor(name = it) },
-    )
+fun createSearchAudiobook(audiobook: Audiobook): SearchAudiobook = SearchAudiobook(
+    asin = audiobook.asin ?: "",
+    title = audiobook.title ?: "",
+    summary = audiobook.overview,
+    authors = audiobook.authors.map { SearchAuthor(name = it) },
+)

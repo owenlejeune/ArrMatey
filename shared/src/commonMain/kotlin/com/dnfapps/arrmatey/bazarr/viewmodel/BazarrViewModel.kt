@@ -66,10 +66,10 @@ class BazarrViewModel(
                         series = library.series.filter { it.title.contains(query, ignoreCase = true) },
                         movies = library.movies.filter { it.title.contains(query, ignoreCase = true) },
                         wantedEpisodes =
-                            library.wantedEpisodes.filter {
-                                it.seriesTitle.contains(query, ignoreCase = true) ||
-                                    it.episodeTitle.contains(query, ignoreCase = true)
-                            },
+                        library.wantedEpisodes.filter {
+                            it.seriesTitle.contains(query, ignoreCase = true) ||
+                                it.episodeTitle.contains(query, ignoreCase = true)
+                        },
                         wantedMovies = library.wantedMovies.filter { it.title.contains(query, ignoreCase = true) },
                         providers = library.providers.filter { it.name.contains(query, ignoreCase = true) },
                     )

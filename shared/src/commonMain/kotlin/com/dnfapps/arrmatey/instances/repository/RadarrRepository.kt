@@ -21,14 +21,13 @@ class RadarrRepository(
     private val _movieExtraFiles = MutableStateFlow<Map<Long, List<ExtraFile>>>(emptyMap())
     override val movieExtraFiles: StateFlow<Map<Long, List<ExtraFile>>> = _movieExtraFiles.asStateFlow()
 
-    override suspend fun getMovieExtraFiles(movieId: Long): NetworkResult<List<ExtraFile>> =
-        radarrClient
-            .getMovieExtraFile(movieId)
-            .onSuccess { files ->
-                val currentMap = _movieExtraFiles.value.toMutableMap()
-                currentMap[movieId] = files
-                _movieExtraFiles.value = currentMap
-            }
+    override suspend fun getMovieExtraFiles(movieId: Long): NetworkResult<List<ExtraFile>> = radarrClient
+        .getMovieExtraFile(movieId)
+        .onSuccess { files ->
+            val currentMap = _movieExtraFiles.value.toMutableMap()
+            currentMap[movieId] = files
+            _movieExtraFiles.value = currentMap
+        }
 
     override suspend fun deleteMovieFile(movieFileId: Long): NetworkResult<Unit> = radarrClient.deleteMovieFile(movieFileId)
 }

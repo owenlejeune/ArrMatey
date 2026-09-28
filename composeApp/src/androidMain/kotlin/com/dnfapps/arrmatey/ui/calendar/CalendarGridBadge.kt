@@ -35,14 +35,14 @@ fun GridBadge(
                     fontSize = 8.sp,
                     color = contentColor,
                     style =
-                        LocalTextStyle.current.copy(
-                            platformStyle =
-                                PlatformTextStyle(
-                                    includeFontPadding = false,
-                                ),
-                            lineHeight = 8.sp,
-                            textAlign = TextAlign.Center,
+                    LocalTextStyle.current.copy(
+                        platformStyle =
+                        PlatformTextStyle(
+                            includeFontPadding = false,
                         ),
+                        lineHeight = 8.sp,
+                        textAlign = TextAlign.Center,
+                    ),
                 )
             }
         }

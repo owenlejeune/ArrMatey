@@ -155,8 +155,7 @@ class BazarrClientImpl(
 
     override suspend fun getWantedMovies(): NetworkResult<WantedMoviesResponse> = get("movies/wanted")
 
-    override suspend fun getEpisodes(seriesId: Long): NetworkResult<BazarrEpisodesResponse> =
-        get("episodes", mapOf("seriesid[]" to seriesId))
+    override suspend fun getEpisodes(seriesId: Long): NetworkResult<BazarrEpisodesResponse> = get("episodes", mapOf("seriesid[]" to seriesId))
 
     override suspend fun getMovie(radarrId: Long): NetworkResult<BazarrMoviesResponse> = get("movies", mapOf("radarrid[]" to radarrId))
 
@@ -168,19 +167,17 @@ class BazarrClientImpl(
 
     override suspend fun resetProviders(): NetworkResult<Unit> = post("providers", mapOf("action" to "reset"))
 
-    override suspend fun searchEpisodeSubtitles(episodeId: Long): NetworkResult<List<ProviderSubtitle>> =
-        get<ProviderSubtitlesResponse>(
-            "providers/episodes",
-            mapOf("episodeid" to episodeId),
-            timeoutMillis = SEARCH_TIMEOUT_MS,
-        ).map { it.data }
+    override suspend fun searchEpisodeSubtitles(episodeId: Long): NetworkResult<List<ProviderSubtitle>> = get<ProviderSubtitlesResponse>(
+        "providers/episodes",
+        mapOf("episodeid" to episodeId),
+        timeoutMillis = SEARCH_TIMEOUT_MS,
+    ).map { it.data }
 
-    override suspend fun searchMovieSubtitles(radarrId: Long): NetworkResult<List<ProviderSubtitle>> =
-        get<ProviderSubtitlesResponse>(
-            "providers/movies",
-            mapOf("radarrid" to radarrId),
-            timeoutMillis = SEARCH_TIMEOUT_MS,
-        ).map { it.data }
+    override suspend fun searchMovieSubtitles(radarrId: Long): NetworkResult<List<ProviderSubtitle>> = get<ProviderSubtitlesResponse>(
+        "providers/movies",
+        mapOf("radarrid" to radarrId),
+        timeoutMillis = SEARCH_TIMEOUT_MS,
+    ).map { it.data }
 
     override suspend fun downloadEpisodeSubtitle(
         seriesId: Long,
@@ -190,20 +187,19 @@ class BazarrClientImpl(
         originalFormat: Boolean,
         provider: String,
         subtitle: String,
-    ): NetworkResult<Unit> =
-        post(
-            "providers/episodes",
-            mapOf(
-                "seriesid" to seriesId,
-                "episodeid" to episodeId,
-                "hi" to hi.asPyBool(),
-                "forced" to forced.asPyBool(),
-                "original_format" to originalFormat.asPyBool(),
-                "provider" to provider,
-                "subtitle" to subtitle,
-            ),
-            timeoutMillis = SEARCH_TIMEOUT_MS,
-        )
+    ): NetworkResult<Unit> = post(
+        "providers/episodes",
+        mapOf(
+            "seriesid" to seriesId,
+            "episodeid" to episodeId,
+            "hi" to hi.asPyBool(),
+            "forced" to forced.asPyBool(),
+            "original_format" to originalFormat.asPyBool(),
+            "provider" to provider,
+            "subtitle" to subtitle,
+        ),
+        timeoutMillis = SEARCH_TIMEOUT_MS,
+    )
 
     override suspend fun downloadMovieSubtitle(
         radarrId: Long,
@@ -212,19 +208,18 @@ class BazarrClientImpl(
         originalFormat: Boolean,
         provider: String,
         subtitle: String,
-    ): NetworkResult<Unit> =
-        post(
-            "providers/movies",
-            mapOf(
-                "radarrid" to radarrId,
-                "hi" to hi.asPyBool(),
-                "forced" to forced.asPyBool(),
-                "original_format" to originalFormat.asPyBool(),
-                "provider" to provider,
-                "subtitle" to subtitle,
-            ),
-            timeoutMillis = SEARCH_TIMEOUT_MS,
-        )
+    ): NetworkResult<Unit> = post(
+        "providers/movies",
+        mapOf(
+            "radarrid" to radarrId,
+            "hi" to hi.asPyBool(),
+            "forced" to forced.asPyBool(),
+            "original_format" to originalFormat.asPyBool(),
+            "provider" to provider,
+            "subtitle" to subtitle,
+        ),
+        timeoutMillis = SEARCH_TIMEOUT_MS,
+    )
 
     override suspend fun autoSearchEpisodeSubtitles(
         seriesId: Long,
@@ -232,41 +227,37 @@ class BazarrClientImpl(
         language: String,
         forced: Boolean,
         hi: Boolean,
-    ): NetworkResult<Unit> =
-        patch(
-            "episodes/subtitles",
-            mapOf(
-                "seriesid" to seriesId,
-                "episodeid" to episodeId,
-                "language" to language,
-                "forced" to forced.asPyBool(),
-                "hi" to hi.asPyBool(),
-            ),
-            timeoutMillis = SEARCH_TIMEOUT_MS,
-        )
+    ): NetworkResult<Unit> = patch(
+        "episodes/subtitles",
+        mapOf(
+            "seriesid" to seriesId,
+            "episodeid" to episodeId,
+            "language" to language,
+            "forced" to forced.asPyBool(),
+            "hi" to hi.asPyBool(),
+        ),
+        timeoutMillis = SEARCH_TIMEOUT_MS,
+    )
 
     override suspend fun autoSearchMovieSubtitles(
         radarrId: Long,
         language: String,
         forced: Boolean,
         hi: Boolean,
-    ): NetworkResult<Unit> =
-        patch(
-            "movies/subtitles",
-            mapOf(
-                "radarrid" to radarrId,
-                "language" to language,
-                "forced" to forced.asPyBool(),
-                "hi" to hi.asPyBool(),
-            ),
-            timeoutMillis = SEARCH_TIMEOUT_MS,
-        )
+    ): NetworkResult<Unit> = patch(
+        "movies/subtitles",
+        mapOf(
+            "radarrid" to radarrId,
+            "language" to language,
+            "forced" to forced.asPyBool(),
+            "hi" to hi.asPyBool(),
+        ),
+        timeoutMillis = SEARCH_TIMEOUT_MS,
+    )
 
-    override suspend fun autoSearchSeriesSubtitles(seriesId: Long): NetworkResult<Unit> =
-        patch("series", body = AutoSearchBody(seriesid = seriesId))
+    override suspend fun autoSearchSeriesSubtitles(seriesId: Long): NetworkResult<Unit> = patch("series", body = AutoSearchBody(seriesid = seriesId))
 
-    override suspend fun autoSearchMovieSubtitles(radarrId: Long): NetworkResult<Unit> =
-        patch("movies", body = AutoSearchBody(radarrid = radarrId))
+    override suspend fun autoSearchMovieSubtitles(radarrId: Long): NetworkResult<Unit> = patch("movies", body = AutoSearchBody(radarrid = radarrId))
 
     override suspend fun deleteEpisodeSubtitle(
         seriesId: Long,
@@ -275,18 +266,17 @@ class BazarrClientImpl(
         forced: Boolean,
         hi: Boolean,
         path: String,
-    ): NetworkResult<Unit> =
-        delete(
-            "episodes/subtitles",
-            mapOf(
-                "seriesid" to seriesId,
-                "episodeid" to episodeId,
-                "language" to language,
-                "forced" to forced.asPyBool(),
-                "hi" to hi.asPyBool(),
-                "path" to path,
-            ),
-        )
+    ): NetworkResult<Unit> = delete(
+        "episodes/subtitles",
+        mapOf(
+            "seriesid" to seriesId,
+            "episodeid" to episodeId,
+            "language" to language,
+            "forced" to forced.asPyBool(),
+            "hi" to hi.asPyBool(),
+            "path" to path,
+        ),
+    )
 
     override suspend fun deleteMovieSubtitle(
         radarrId: Long,
@@ -294,17 +284,16 @@ class BazarrClientImpl(
         forced: Boolean,
         hi: Boolean,
         path: String,
-    ): NetworkResult<Unit> =
-        delete(
-            "movies/subtitles",
-            mapOf(
-                "radarrid" to radarrId,
-                "language" to language,
-                "forced" to forced.asPyBool(),
-                "hi" to hi.asPyBool(),
-                "path" to path,
-            ),
-        )
+    ): NetworkResult<Unit> = delete(
+        "movies/subtitles",
+        mapOf(
+            "radarrid" to radarrId,
+            "language" to language,
+            "forced" to forced.asPyBool(),
+            "hi" to hi.asPyBool(),
+            "path" to path,
+        ),
+    )
 
     override suspend fun getSubtitleFile(
         path: String,
@@ -336,10 +325,9 @@ class BazarrClientImpl(
         params: Map<String, Any> = emptyMap(),
         timeoutMillis: Long? = null,
         crossinline onProgress: (Float) -> Unit = {},
-    ): NetworkResult<T> =
-        httpClient.safeGet<T>("$baseUrl/$endpoint", onProgress = onProgress) {
-            applyParams(params, timeoutMillis)
-        }
+    ): NetworkResult<T> = httpClient.safeGet<T>("$baseUrl/$endpoint", onProgress = onProgress) {
+        applyParams(params, timeoutMillis)
+    }
 
     private suspend inline fun <reified T> post(
         endpoint: String,
@@ -352,20 +340,18 @@ class BazarrClientImpl(
         params: Map<String, Any> = emptyMap(),
         body: Any? = null,
         timeoutMillis: Long? = null,
-    ): NetworkResult<T> =
-        httpClient.safePatch("$baseUrl/$endpoint") {
-            applyParams(params, timeoutMillis)
-            body?.let {
-                contentType(ContentType.Application.Json)
-                setBody(it)
-            }
+    ): NetworkResult<T> = httpClient.safePatch("$baseUrl/$endpoint") {
+        applyParams(params, timeoutMillis)
+        body?.let {
+            contentType(ContentType.Application.Json)
+            setBody(it)
         }
+    }
 
     private suspend inline fun <reified T> delete(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
-    ): NetworkResult<T> =
-        httpClient.safeDelete<T>("$baseUrl/$endpoint") {
-            url { params.forEach { (key, value) -> parameters.append(key, value.toString()) } }
-        }
+    ): NetworkResult<T> = httpClient.safeDelete<T>("$baseUrl/$endpoint") {
+        url { params.forEach { (key, value) -> parameters.append(key, value.toString()) } }
+    }
 }

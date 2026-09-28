@@ -12,12 +12,11 @@ class GetBazarrEpisodesUseCase(
     private val getBazarrRespositoryUseCase: GetBazarrInstanceRepositoryUseCase,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    operator fun invoke(sonarrSeriesId: Long): Flow<List<BazarrEpisode>> =
-        getBazarrRespositoryUseCase
-            .observeSelected()
-            .filterNotNull()
-            .flatMapLatest { repo ->
-                repo.getEpisodes(sonarrSeriesId)
-                repo.episodes.map { it[sonarrSeriesId] ?: emptyList() }
-            }
+    operator fun invoke(sonarrSeriesId: Long): Flow<List<BazarrEpisode>> = getBazarrRespositoryUseCase
+        .observeSelected()
+        .filterNotNull()
+        .flatMapLatest { repo ->
+            repo.getEpisodes(sonarrSeriesId)
+            repo.episodes.map { it[sonarrSeriesId] ?: emptyList() }
+        }
 }

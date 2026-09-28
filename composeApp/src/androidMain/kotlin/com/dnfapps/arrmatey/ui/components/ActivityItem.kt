@@ -62,10 +62,10 @@ fun ActivityItem(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors =
-            CardDefaults.cardColors(
-                containerColor = containerColor,
-                contentColor = contentColor,
-            ),
+        CardDefaults.cardColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+        ),
         shape = MaterialTheme.shapes.large,
     ) {
         Box(
@@ -77,21 +77,21 @@ fun ActivityItem(
                 ) {
                     Box(
                         modifier =
-                            Modifier
-                                .width(6.dp)
-                                .fillMaxHeight()
-                                .background(item.type.associatedColor)
-                                .align(Alignment.CenterStart),
+                        Modifier
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .background(item.type.associatedColor)
+                            .align(Alignment.CenterStart),
                     )
                 }
             }
 
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(start = if (!useFullColorCards) 6.dp else 0.dp)
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = if (!useFullColorCards) 6.dp else 0.dp)
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Row(
@@ -125,13 +125,13 @@ fun ActivityItem(
                         Surface(
                             shape = MaterialTheme.shapes.extraSmall,
                             color =
-                                if (useFullColorCards) {
-                                    surfaceDark.copy(
-                                        alpha = 0.15f,
-                                    )
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceContainerHighest
-                                },
+                            if (useFullColorCards) {
+                                surfaceDark.copy(
+                                    alpha = 0.15f,
+                                )
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHighest
+                            },
                         ) {
                             Text(
                                 text = instanceName,
@@ -145,26 +145,26 @@ fun ActivityItem(
                     Surface(
                         shape = MaterialTheme.shapes.extraSmall,
                         color =
-                            if (item.hasIssue) {
-                                MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
-                            } else if (useFullColorCards) {
-                                surfaceDark.copy(alpha = 0.15f)
-                            } else {
-                                MaterialTheme.colorScheme.secondaryContainer
-                            },
+                        if (item.hasIssue) {
+                            MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
+                        } else if (useFullColorCards) {
+                            surfaceDark.copy(alpha = 0.15f)
+                        } else {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        },
                     ) {
                         Text(
                             text = item.statusLabel,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
                             color =
-                                if (item.hasIssue) {
-                                    MaterialTheme.colorScheme.error
-                                } else if (useFullColorCards) {
-                                    surfaceDark
-                                } else {
-                                    MaterialTheme.colorScheme.onSecondaryContainer
-                                },
+                            if (item.hasIssue) {
+                                MaterialTheme.colorScheme.error
+                            } else if (useFullColorCards) {
+                                surfaceDark
+                            } else {
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            },
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                         )
                     }
@@ -172,13 +172,13 @@ fun ActivityItem(
                     Surface(
                         shape = MaterialTheme.shapes.extraSmall,
                         color =
-                            if (useFullColorCards) {
-                                surfaceDark.copy(
-                                    alpha = 0.15f,
-                                )
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainerHighest
-                            },
+                        if (useFullColorCards) {
+                            surfaceDark.copy(
+                                alpha = 0.15f,
+                            )
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHighest
+                        },
                     ) {
                         Text(
                             text = item.quality.qualityLabel,
@@ -192,13 +192,13 @@ fun ActivityItem(
                         Surface(
                             shape = MaterialTheme.shapes.extraSmall,
                             color =
-                                if (useFullColorCards) {
-                                    surfaceDark.copy(
-                                        alpha = 0.15f,
-                                    )
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceContainerHighest
-                                },
+                            if (useFullColorCards) {
+                                surfaceDark.copy(
+                                    alpha = 0.15f,
+                                )
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHighest
+                            },
                         ) {
                             Text(
                                 text = item.size.toLong().bytesAsFileSizeString(),
@@ -214,13 +214,13 @@ fun ActivityItem(
                             Surface(
                                 shape = MaterialTheme.shapes.extraSmall,
                                 color =
-                                    if (useFullColorCards) {
-                                        surfaceDark.copy(
-                                            alpha = 0.15f,
-                                        )
-                                    } else {
-                                        MaterialTheme.colorScheme.tertiaryContainer
-                                    },
+                                if (useFullColorCards) {
+                                    surfaceDark.copy(
+                                        alpha = 0.15f,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.tertiaryContainer
+                                },
                             ) {
                                 Text(
                                     text = "$remainingTimeLabel left",
@@ -242,13 +242,13 @@ fun ActivityItem(
                             strokeCap = StrokeCap.Round,
                             color = if (useFullColorCards) surfaceDark else MaterialTheme.colorScheme.primary,
                             trackColor =
-                                if (useFullColorCards) {
-                                    surfaceDark.copy(
-                                        alpha = 0.2f,
-                                    )
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceVariant
-                                },
+                            if (useFullColorCards) {
+                                surfaceDark.copy(
+                                    alpha = 0.2f,
+                                )
+                            } else {
+                                MaterialTheme.colorScheme.surfaceVariant
+                            },
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth(),

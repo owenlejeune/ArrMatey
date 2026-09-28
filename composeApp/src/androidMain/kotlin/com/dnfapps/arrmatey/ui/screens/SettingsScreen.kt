@@ -58,6 +58,7 @@ import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
 import com.dnfapps.arrmatey.permissions.rememberLocalNetworkPermissionHandler
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
@@ -113,24 +114,24 @@ fun SettingsScreen(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(
-                        bottom =
-                            (
-                                if (LocalFloatingBarBottomPadding.current >
-                                    0.dp
-                                ) {
-                                    LocalFloatingBarBottomPadding.current
-                                } else {
-                                    navigationBarBottomInset()
-                                }
-                            ) +
-                                16.dp,
-                    ),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(
+                    bottom =
+                    (
+                        if (LocalFloatingBarBottomPadding.current >
+                            0.dp
+                        ) {
+                            LocalFloatingBarBottomPadding.current
+                        } else {
+                            navigationBarBottomInset()
+                        }
+                        ) +
+                        16.dp,
+                ),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (
@@ -142,10 +143,10 @@ fun SettingsScreen(
                     shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier.fillMaxWidth(),
                     colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        ),
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
                 ) {
                     Column(
                         modifier = Modifier.padding(20.dp),
@@ -182,10 +183,10 @@ fun SettingsScreen(
                             },
                             modifier = Modifier.align(Alignment.End),
                             colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error,
-                                    contentColor = MaterialTheme.colorScheme.onError,
-                                ),
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError,
+                            ),
                         ) {
                             Text(mokoString(MR.strings.open_settings))
                         }
@@ -195,44 +196,44 @@ fun SettingsScreen(
 
             SettingsGroup(
                 items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Hard_drive),
-                            title = mokoString(MR.strings.services),
-                            subtitle = mokoString(MR.strings.services_description),
-                            onClick = onNavigateToServices,
-                            trailingContent = {
-                                Icon(Icons.Default.ChevronRight, null)
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Palette),
-                            title = mokoString(MR.strings.user_interface),
-                            subtitle = mokoString(MR.strings.user_interface_description),
-                            onClick = onNavigateToUserInterface,
-                            trailingContent = {
-                                Icon(Icons.Default.ChevronRight, null)
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Share),
-                            title = mokoString(MR.strings.integrations),
-                            subtitle = mokoString(MR.strings.integrations_description),
-                            onClick = onNavigateToIntegrations,
-                            trailingContent = {
-                                Icon(Icons.Default.ChevronRight, null)
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Restore),
-                            title = mokoString(MR.strings.backup_restore),
-                            subtitle = mokoString(MR.strings.backup_restore_description),
-                            onClick = onNavigateToBackupRestore,
-                            trailingContent = {
-                                Icon(Icons.Default.ChevronRight, null)
-                            },
-                        ),
+                listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Hard_drive),
+                        title = mokoString(MR.strings.services),
+                        subtitle = mokoString(MR.strings.services_description),
+                        onClick = onNavigateToServices,
+                        trailingContent = {
+                            Icon(Icons.Default.ChevronRight, null)
+                        },
                     ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Palette),
+                        title = mokoString(MR.strings.user_interface),
+                        subtitle = mokoString(MR.strings.user_interface_description),
+                        onClick = onNavigateToUserInterface,
+                        trailingContent = {
+                            Icon(Icons.Default.ChevronRight, null)
+                        },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Share),
+                        title = mokoString(MR.strings.integrations),
+                        subtitle = mokoString(MR.strings.integrations_description),
+                        onClick = onNavigateToIntegrations,
+                        trailingContent = {
+                            Icon(Icons.Default.ChevronRight, null)
+                        },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Restore),
+                        title = mokoString(MR.strings.backup_restore),
+                        subtitle = mokoString(MR.strings.backup_restore_description),
+                        onClick = onNavigateToBackupRestore,
+                        trailingContent = {
+                            Icon(Icons.Default.ChevronRight, null)
+                        },
+                    ),
+                ),
             )
 
             AboutCard(
@@ -269,9 +270,9 @@ fun SettingsScreen(
                         onNavigateToDev()
                     },
                     colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        ),
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 ) {
                     Text(
@@ -298,9 +299,9 @@ fun SettingsScreen(
                     libraries = libraries,
                     modifier = Modifier.fillMaxSize(),
                     colors =
-                        LibraryDefaults.libraryColors(
-                            libraryBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                        ),
+                    LibraryDefaults.libraryColors(
+                        libraryBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    ),
                     contentPadding = PaddingValues(16.dp),
                     header = {
                         item {

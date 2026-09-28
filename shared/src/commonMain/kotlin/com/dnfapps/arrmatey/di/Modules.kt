@@ -592,15 +592,14 @@ val resourcesModule =
 
 expect fun platformModules(): List<Module>
 
-fun appModules() =
-    listOf(
-        logging,
-        networkModule,
-        databaseModule,
-        preferencesModule,
-        repositoryModule,
-        serviceModule,
-        useCaseModule,
-        viewModelModule,
-        resourcesModule,
-    ) + platformModules()
+fun appModules() = listOf(
+    logging,
+    networkModule,
+    databaseModule,
+    preferencesModule,
+    repositoryModule,
+    serviceModule,
+    useCaseModule,
+    viewModelModule,
+    resourcesModule,
+) + platformModules()

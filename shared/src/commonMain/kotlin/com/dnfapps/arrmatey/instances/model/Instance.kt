@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBazarr
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
@@ -67,16 +68,15 @@ data class Instance(
         }
     }
 
-    fun isUsingLocalNetwork(): Boolean =
-        try {
-            val currentSsid = getNetworkUtils().getCurrentWifiSsid()
-            localNetworkEnabled &&
-                !localNetworkEndpoint.isNullOrBlank() &&
-                currentSsid != null &&
-                localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }
-        } catch (e: Exception) {
-            false
-        }
+    fun isUsingLocalNetwork(): Boolean = try {
+        val currentSsid = getNetworkUtils().getCurrentWifiSsid()
+        localNetworkEnabled &&
+            !localNetworkEndpoint.isNullOrBlank() &&
+            currentSsid != null &&
+            localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }
+    } catch (e: Exception) {
+        false
+    }
 }
 
 @Serializable

@@ -39,6 +39,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -93,12 +94,12 @@ fun AlbumsArea(
                         ) {
                             Text(
                                 text =
-                                    buildString {
-                                        append(album.title)
-                                        album.releaseDate?.format("YYYY")?.let { year ->
-                                            append(" ($year)")
-                                        }
-                                    },
+                                buildString {
+                                    append(album.title)
+                                    album.releaseDate?.format("YYYY")?.let { year ->
+                                        append(" ($year)")
+                                    }
+                                },
                                 style = MaterialTheme.typography.titleMediumEmphasized,
                                 maxLines = 2,
                                 overflow = TextOverflow.MiddleEllipsis,
@@ -121,27 +122,27 @@ fun AlbumsArea(
                             imageVector = Icons.Default.Edit,
                             contentDescription = mokoString(MR.strings.edit),
                             modifier =
-                                Modifier.clickable {
-                                    onEditAlbum(album)
-                                },
+                            Modifier.clickable {
+                                onEditAlbum(album)
+                            },
                         )
                         Icon(
                             imageVector =
-                                if (album.monitored) {
-                                    Icons.Default.Bookmark
-                                } else {
-                                    Icons.Default.BookmarkBorder
-                                },
+                            if (album.monitored) {
+                                Icons.Default.Bookmark
+                            } else {
+                                Icons.Default.BookmarkBorder
+                            },
                             contentDescription =
-                                if (album.monitored) {
-                                    mokoString(MR.strings.monitored)
-                                } else {
-                                    mokoString(MR.strings.unmonitored)
-                                },
+                            if (album.monitored) {
+                                mokoString(MR.strings.monitored)
+                            } else {
+                                mokoString(MR.strings.unmonitored)
+                            },
                             modifier =
-                                Modifier.clickable {
-                                    onToggleAlbumMonitor(album)
-                                },
+                            Modifier.clickable {
+                                onToggleAlbumMonitor(album)
+                            },
                         )
                     }
                 }
@@ -174,13 +175,13 @@ fun AlbumsArea(
                             TrackRow(
                                 track = track,
                                 trackFile =
-                                    if (track.hasFile) {
-                                        albumTrackFiles.firstOrNull { file ->
-                                            track.trackFileId?.let { it == file.id } ?: false
-                                        }
-                                    } else {
-                                        null
-                                    },
+                                if (track.hasFile) {
+                                    albumTrackFiles.firstOrNull { file ->
+                                        track.trackFileId?.let { it == file.id } ?: false
+                                    }
+                                } else {
+                                    null
+                                },
                             )
                             if (index < albumTracks.size - 1) {
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))

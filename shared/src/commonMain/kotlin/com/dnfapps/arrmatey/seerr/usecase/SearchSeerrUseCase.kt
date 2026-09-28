@@ -10,11 +10,10 @@ class SearchSeerrUseCase {
         query: String,
         repository: SeerrInstanceRepository,
         scope: CoroutineScope,
-    ): PagingController<DiscoverResult> =
-        PagingController(
-            scope = scope,
-            keySelector = { "${it.mediaType.name}_${it.id}" },
-        ) {
-            repository.searchPaging(query)
-        }
+    ): PagingController<DiscoverResult> = PagingController(
+        scope = scope,
+        keySelector = { "${it.mediaType.name}_${it.id}" },
+    ) {
+        repository.searchPaging(query)
+    }
 }

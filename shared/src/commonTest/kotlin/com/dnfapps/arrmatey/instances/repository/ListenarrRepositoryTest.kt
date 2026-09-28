@@ -31,13 +31,12 @@ class ListenarrRepositoryTest {
     private val fakeLogger = LoggerFactory.get("test")
 
     @Test
-    fun testGetAudiobookFiles() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(
-                        content =
-                            """
+    fun testGetAudiobookFiles() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content =
+                    """
                             {
                                 "id": 3,
                                 "title": "Audiobook Title",
@@ -49,26 +48,26 @@ class ListenarrRepositoryTest {
                                     }
                                 ]
                             }
-                            """.trimIndent(),
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                        },
                     )
                 }
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json(
-                            Json {
-                                ignoreUnknownKeys = true
-                            },
-                        )
-                    }
-                }
-            val repository = ListenarrRepository(fakeInstance, httpClient, fakeLogger)
+            }
+        val repository = ListenarrRepository(fakeInstance, httpClient, fakeLogger)
 
-            repository.getAudiobookFiles(audiobookId = 3)
+        repository.getAudiobookFiles(audiobookId = 3)
 
-            assertNotNull(repository.audiobookFiles.value[3])
-            assertEquals(1, repository.audiobookFiles.value[3]?.size)
-        }
+        assertNotNull(repository.audiobookFiles.value[3])
+        assertEquals(1, repository.audiobookFiles.value[3]?.size)
+    }
 }

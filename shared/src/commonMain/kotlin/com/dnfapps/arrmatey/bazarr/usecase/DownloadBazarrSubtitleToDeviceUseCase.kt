@@ -3,7 +3,11 @@ package com.dnfapps.arrmatey.bazarr.usecase
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitle
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.notifications.NotificationManager
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.download_complete
+import com.dnfapps.arrmatey.shared.downloading_file
+import com.dnfapps.arrmatey.shared.downloading_progress
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess

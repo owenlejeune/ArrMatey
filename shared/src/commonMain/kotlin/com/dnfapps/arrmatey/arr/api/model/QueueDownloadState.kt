@@ -32,9 +32,8 @@ enum class QueueDownloadState {
 
     ;
 
-    fun isManualImport(): Boolean =
-        when (this) {
-            ImportBlocked, ImportPending -> true
-            else -> false
-        }
+    fun isManualImport(): Boolean = when (this) {
+        ImportBlocked, ImportPending -> true
+        else -> false
+    }
 }

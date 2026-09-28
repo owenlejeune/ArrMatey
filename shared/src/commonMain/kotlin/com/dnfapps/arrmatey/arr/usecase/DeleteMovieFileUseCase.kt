@@ -12,17 +12,16 @@ class DeleteMovieFileUseCase {
         movieId: Long,
         movieFileId: Long,
         repository: ArrInstanceRepository,
-    ): Flow<OperationStatus> =
-        flow {
-            emit(OperationStatus.InProgress)
-            repository
-                .deleteMovieFile(movieFileId)
-                .onSuccess {
-                    repository.getMediaDetails(movieId)
-                    repository.getMovieExtraFiles(movieId)
-                    emit(OperationStatus.Success("Movie file deleted successfully"))
-                }.onError { code, message, cause ->
-                    emit(OperationStatus.Error(code, message, cause))
-                }
-        }
+    ): Flow<OperationStatus> = flow {
+        emit(OperationStatus.InProgress)
+        repository
+            .deleteMovieFile(movieFileId)
+            .onSuccess {
+                repository.getMediaDetails(movieId)
+                repository.getMovieExtraFiles(movieId)
+                emit(OperationStatus.Success("Movie file deleted successfully"))
+            }.onError { code, message, cause ->
+                emit(OperationStatus.Error(code, message, cause))
+            }
+    }
 }

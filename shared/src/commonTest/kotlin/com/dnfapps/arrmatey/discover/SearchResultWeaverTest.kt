@@ -16,44 +16,42 @@ class SearchResultWeaverTest {
         tmdbId: Long = 1L,
         popularity: Double = 10.0,
         inLibrary: Boolean = false,
-    ): ArrMovie =
-        ArrMovie(
-            id = if (inLibrary) 100L else null,
-            title = title,
-            cleanTitle = title.lowercase().replace("[^a-z0-9]".toRegex(), ""),
-            originalLanguage = Language(1, "English"),
-            year = 2000,
-            qualityProfileId = 1,
-            monitored = false,
-            runtime = 100,
-            status = MediaStatus.Released,
-            tmdbId = tmdbId,
-            secondaryYearSourceId = 0,
-            minimumAvailability = MediaStatus.Released,
-            popularity = popularity,
-        )
+    ): ArrMovie = ArrMovie(
+        id = if (inLibrary) 100L else null,
+        title = title,
+        cleanTitle = title.lowercase().replace("[^a-z0-9]".toRegex(), ""),
+        originalLanguage = Language(1, "English"),
+        year = 2000,
+        qualityProfileId = 1,
+        monitored = false,
+        runtime = 100,
+        status = MediaStatus.Released,
+        tmdbId = tmdbId,
+        secondaryYearSourceId = 0,
+        minimumAvailability = MediaStatus.Released,
+        popularity = popularity,
+    )
 
     private fun createMockSeries(
         title: String,
         tvdbId: Long = 2L,
-    ): ArrSeries =
-        ArrSeries(
-            id = null,
-            title = title,
-            cleanTitle = title.lowercase().replace("[^a-z0-9]".toRegex(), ""),
-            originalLanguage = Language(1, "English"),
-            year = 2011,
-            qualityProfileId = 1,
-            monitored = false,
-            runtime = 30,
-            status = MediaStatus.Ended,
-            seriesType = SeriesType.Standard,
-            ended = true,
-            seasonFolder = true,
-            monitorNewItems = com.dnfapps.arrmatey.arr.api.model.MonitorNewItems.None,
-            useSceneNumbering = false,
-            tvdbId = tvdbId,
-        )
+    ): ArrSeries = ArrSeries(
+        id = null,
+        title = title,
+        cleanTitle = title.lowercase().replace("[^a-z0-9]".toRegex(), ""),
+        originalLanguage = Language(1, "English"),
+        year = 2011,
+        qualityProfileId = 1,
+        monitored = false,
+        runtime = 30,
+        status = MediaStatus.Ended,
+        seriesType = SeriesType.Standard,
+        ended = true,
+        seasonFolder = true,
+        monitorNewItems = com.dnfapps.arrmatey.arr.api.model.MonitorNewItems.None,
+        useSceneNumbering = false,
+        tvdbId = tvdbId,
+    )
 
     @Test
     fun testExactMatchScoresHigherThanPrefixMatch() {

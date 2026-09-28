@@ -8,10 +8,9 @@ import androidx.datastore.preferences.core.Preferences
 import com.dnfapps.arrmatey.model.AppColor
 import okio.Path.Companion.toPath
 
-fun createDataStore(producePath: () -> String): DataStore<Preferences> =
-    PreferenceDataStoreFactory.createWithPath {
-        producePath().toPath()
-    }
+fun createDataStore(producePath: () -> String): DataStore<Preferences> = PreferenceDataStoreFactory.createWithPath {
+    producePath().toPath()
+}
 
 internal const val DATA_STORE_FILE_NAME = "arrmatey.preferences_pb"
 

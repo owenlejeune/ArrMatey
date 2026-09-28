@@ -43,6 +43,7 @@ import com.dnfapps.arrmatey.arr.state.ActivityTabSegment
 import com.dnfapps.arrmatey.compose.utils.QueueSortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
@@ -105,12 +106,12 @@ fun ActivityFilterMenu(
             ) {
                 Column(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                            .padding(bottom = 32.dp)
-                            .navigationBarsPadding()
-                            .verticalScroll(rememberScrollState()),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 32.dp)
+                        .navigationBarsPadding()
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     Row(
@@ -164,11 +165,11 @@ fun ActivityFilterMenu(
                                             onClick = { onInstanceChange(null) },
                                             label = { Text(mokoString(MR.strings.all)) },
                                             leadingIcon =
-                                                if (isAllSelected) {
-                                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                                } else {
-                                                    null
-                                                },
+                                            if (isAllSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
                                             shape = MaterialTheme.shapes.small,
                                         )
                                         instances.forEach { instance ->
@@ -234,11 +235,11 @@ fun ActivityFilterMenu(
                                         leadingIcon = {
                                             Icon(
                                                 imageVector =
-                                                    if (sortOrder == SortOrder.Asc) {
-                                                        Icons.Default.ArrowUpward
-                                                    } else {
-                                                        Icons.Default.ArrowDownward
-                                                    },
+                                                if (sortOrder == SortOrder.Asc) {
+                                                    Icons.Default.ArrowUpward
+                                                } else {
+                                                    Icons.Default.ArrowDownward
+                                                },
                                                 contentDescription = null,
                                                 modifier = Modifier.size(16.dp),
                                             )
@@ -258,11 +259,11 @@ fun ActivityFilterMenu(
                                             onClick = { onSortByChanged(sort) },
                                             label = { Text(mokoString(sort.resource)) },
                                             leadingIcon =
-                                                if (isSelected) {
-                                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                                } else {
-                                                    null
-                                                },
+                                            if (isSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
                                             shape = MaterialTheme.shapes.small,
                                         )
                                     }
@@ -289,11 +290,11 @@ fun ActivityFilterMenu(
                                             onClick = { onHistoryInstanceChange(null) },
                                             label = { Text(mokoString(MR.strings.all)) },
                                             leadingIcon =
-                                                if (isAllSelected) {
-                                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                                } else {
-                                                    null
-                                                },
+                                            if (isAllSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
                                             shape = MaterialTheme.shapes.small,
                                         )
                                         instances.forEach { instance ->
@@ -344,11 +345,11 @@ fun ActivityFilterMenu(
                                             onClick = { onHistoryStateFilterChanged(stateFilter) },
                                             label = { Text(mokoString(stateFilter.resource)) },
                                             leadingIcon =
-                                                if (isSelected) {
-                                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                                } else {
-                                                    null
-                                                },
+                                            if (isSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
                                             shape = MaterialTheme.shapes.small,
                                         )
                                     }
@@ -375,11 +376,11 @@ fun ActivityFilterMenu(
                                             onClick = { onDownloadedInstanceChange(null) },
                                             label = { Text(mokoString(MR.strings.all)) },
                                             leadingIcon =
-                                                if (isAllSelected) {
-                                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                                } else {
-                                                    null
-                                                },
+                                            if (isAllSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
                                             shape = MaterialTheme.shapes.small,
                                         )
                                         instances.forEach { instance ->

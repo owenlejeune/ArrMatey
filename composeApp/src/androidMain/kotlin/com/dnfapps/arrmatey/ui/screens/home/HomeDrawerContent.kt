@@ -46,6 +46,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
@@ -87,15 +88,15 @@ fun HomeDrawerContent(
 
     Column(
         modifier =
-            modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onLongPress = {
-                            showHiddenSection = true
-                        },
-                    )
-                }.padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onLongPress = {
+                        showHiddenSection = true
+                    },
+                )
+            }.padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         NavigationDrawerItem(
@@ -108,9 +109,9 @@ fun HomeDrawerContent(
 
         Column(
             modifier =
-                Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
+            Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             drawerTabs.forEach { item ->
@@ -182,10 +183,10 @@ fun HomeDrawerContent(
             )
             Box(
                 modifier =
-                    Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .clickable { isEditMode = !isEditMode },
+                Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .clickable { isEditMode = !isEditMode },
                 contentAlignment = Alignment.Center,
             ) {
                 AnimatedContent(

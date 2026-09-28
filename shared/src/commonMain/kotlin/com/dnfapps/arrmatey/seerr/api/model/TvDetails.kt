@@ -46,10 +46,9 @@ data class TvDetails(
     val seasons: List<Season> = emptyList(),
     val type: String = "",
 ) : RequestMediaDetails {
-    override fun getCertification(localeCode: String): String? =
-        contentRatings
-            ?.results
-            ?.firstOrNull {
-                it.iso_3166_1 == localeCode
-            }?.rating
+    override fun getCertification(localeCode: String): String? = contentRatings
+        ?.results
+        ?.firstOrNull {
+            it.iso_3166_1 == localeCode
+        }?.rating
 }

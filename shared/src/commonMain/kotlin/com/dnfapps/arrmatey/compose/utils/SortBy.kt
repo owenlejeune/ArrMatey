@@ -1,7 +1,30 @@
 package com.dnfapps.arrmatey.compose.utils
 
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.added
+import com.dnfapps.arrmatey.shared.digital_release
+import com.dnfapps.arrmatey.shared.download_speed
+import com.dnfapps.arrmatey.shared.eta
+import com.dnfapps.arrmatey.shared.file_size
+import com.dnfapps.arrmatey.shared.grabbed
+import com.dnfapps.arrmatey.shared.name
+import com.dnfapps.arrmatey.shared.next_airing
+import com.dnfapps.arrmatey.shared.previous_airing
+import com.dnfapps.arrmatey.shared.priority
+import com.dnfapps.arrmatey.shared.privacy
+import com.dnfapps.arrmatey.shared.progress
+import com.dnfapps.arrmatey.shared.protocol
+import com.dnfapps.arrmatey.shared.rating
+import com.dnfapps.arrmatey.shared.relevance
+import com.dnfapps.arrmatey.shared.size
+import com.dnfapps.arrmatey.shared.sort_ascending
+import com.dnfapps.arrmatey.shared.sort_descending
+import com.dnfapps.arrmatey.shared.title
+import com.dnfapps.arrmatey.shared.title_last_first
+import com.dnfapps.arrmatey.shared.upload_speed
+import com.dnfapps.arrmatey.shared.year
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Serializable
 
@@ -62,15 +85,14 @@ enum class SortBy(
             listOf(TitleLastFirst, Title, Added, Rating, FileSize)
         }
 
-        fun typeEntries(type: InstanceType) =
-            when (type) {
-                InstanceType.Sonarr -> sonarrOps
-                InstanceType.Radarr -> radarrOps
-                InstanceType.Lidarr -> lidarrOps
-                InstanceType.Bookshelf -> readarrOps
-                InstanceType.Prowlarr -> prowlarrOps
-                else -> emptyList()
-            }
+        fun typeEntries(type: InstanceType) = when (type) {
+            InstanceType.Sonarr -> sonarrOps
+            InstanceType.Radarr -> radarrOps
+            InstanceType.Lidarr -> lidarrOps
+            InstanceType.Bookshelf -> readarrOps
+            InstanceType.Prowlarr -> prowlarrOps
+            else -> emptyList()
+        }
 
         fun lookupEntries() = listOf(Relevance, Year, Rating)
 

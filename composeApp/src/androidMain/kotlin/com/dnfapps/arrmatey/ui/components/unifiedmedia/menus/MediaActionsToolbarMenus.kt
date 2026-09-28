@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
 import com.dnfapps.arrmatey.seerr.state.MediaProvider
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.ImageResource
@@ -192,10 +193,10 @@ fun MediaActionsToolbarMenus(
             onClick = onAddClicked,
             enabled = !isAddOrRequestInProgress,
             colors =
-                IconButtonDefaults.headerBarColors(
-                    disabledContainerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                    disabledContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
+            IconButtonDefaults.headerBarColors(
+                disabledContainerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                disabledContentColor = MaterialTheme.colorScheme.onBackground,
+            ),
         ) {
             if (isAddOrRequestInProgress) {
                 CircularProgressIndicator(

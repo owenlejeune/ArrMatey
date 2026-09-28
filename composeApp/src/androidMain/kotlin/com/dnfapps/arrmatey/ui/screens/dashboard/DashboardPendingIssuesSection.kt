@@ -48,6 +48,7 @@ import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -76,9 +77,9 @@ fun DashboardPendingIssuesSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Column(
@@ -106,9 +107,9 @@ fun DashboardPendingIssuesSection(
                 Text(
                     text = mokoString(MR.strings.no_type_instances_message, InstanceType.Seerr.name),
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -132,9 +133,9 @@ fun DashboardPendingIssuesSection(
                     Text(
                         text = mokoString(MR.strings.no_issues_found),
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -169,14 +170,14 @@ private fun CompactIssueCard(
 
     Card(
         modifier =
-            Modifier
-                .width(280.dp)
-                .clickable(onClick = onClick),
+        Modifier
+            .width(280.dp)
+            .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
     ) {
         Column(
@@ -199,20 +200,20 @@ private fun CompactIssueCard(
                         model = posterModel,
                         contentDescription = null,
                         modifier =
-                            Modifier
-                                .width(60.dp)
-                                .aspectRatio(AspectRatio.Poster.ratio)
-                                .clip(MaterialTheme.shapes.medium),
+                        Modifier
+                            .width(60.dp)
+                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .clip(MaterialTheme.shapes.medium),
                         contentScale = ContentScale.Crop,
                     )
                 } else {
                     Box(
                         modifier =
-                            Modifier
-                                .width(60.dp)
-                                .aspectRatio(AspectRatio.Poster.ratio)
-                                .clip(MaterialTheme.shapes.medium)
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                        Modifier
+                            .width(60.dp)
+                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(

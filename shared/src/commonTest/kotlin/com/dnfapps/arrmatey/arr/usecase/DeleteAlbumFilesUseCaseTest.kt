@@ -19,29 +19,27 @@ import kotlin.test.assertTrue
 class DeleteAlbumFilesUseCaseTest {
     private val logger = LoggerFactory.get("test")
 
-    private fun instance(type: InstanceType) =
-        Instance(
-            id = 1,
-            label = "Test",
-            url = "http://localhost",
-            apiKey = EncryptedString("k"),
-            type = type,
-            enabled = true,
-        )
+    private fun instance(type: InstanceType) = Instance(
+        id = 1,
+        label = "Test",
+        url = "http://localhost",
+        apiKey = EncryptedString("k"),
+        type = type,
+        enabled = true,
+    )
 
     @Test
-    fun testWrongInstanceTypeEmitsError() =
-        runTest {
-            val mockEngine = MockEngine { respond("", HttpStatusCode.OK) }
-            val repository = ArrInstanceRepository(instance(InstanceType.Sonarr), HttpClient(mockEngine), logger)
-            val useCase = DeleteAlbumFilesUseCase()
+    fun testWrongInstanceTypeEmitsError() = runTest {
+        val mockEngine = MockEngine { respond("", HttpStatusCode.OK) }
+        val repository = ArrInstanceRepository(instance(InstanceType.Sonarr), HttpClient(mockEngine), logger)
+        val useCase = DeleteAlbumFilesUseCase()
 
-            useCase(artistId = 1, albumId = 2, repository = repository).test {
-                assertTrue(awaitItem() is OperationStatus.InProgress)
-                val error = awaitItem()
-                assertTrue(error is OperationStatus.Error)
-                assertEquals("Not a Lidarr instance", error.message)
-                awaitComplete()
-            }
+        useCase(artistId = 1, albumId = 2, repository = repository).test {
+            assertTrue(awaitItem() is OperationStatus.InProgress)
+            val error = awaitItem()
+            assertTrue(error is OperationStatus.Error)
+            assertEquals("Not a Lidarr instance", error.message)
+            awaitComplete()
         }
+    }
 }

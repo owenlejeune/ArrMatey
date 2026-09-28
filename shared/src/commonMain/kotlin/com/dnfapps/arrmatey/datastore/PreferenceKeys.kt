@@ -63,16 +63,15 @@ internal object PreferenceKeys {
     val USE_COLORED_ACTIVITY_CARDS = booleanPreferencesKey("useColoredActivityCards")
     val USE_COLORED_CALENDAR_CARDS = booleanPreferencesKey("useColoredCalendarCards")
 
-    fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> =
-        when (type) {
-            InstanceType.Sonarr -> SONARR_INFO_CARD
-            InstanceType.Radarr -> RADARR_INFO_CARD
-            InstanceType.Lidarr -> LIDARR_INFO_CARD
-            InstanceType.Seerr -> SEERR_INFO_CARD
-            InstanceType.Bookshelf -> BOOKSHELF_INFO_CARD
-            InstanceType.Prowlarr -> PROWLARR_INFO_CARD
-            InstanceType.Listenarr -> LISTENARR_INFO_CARD
-            InstanceType.Bazarr -> BAZARR_INFO_CARD
-            InstanceType.Tracearr -> TRACEARR_INFO_CARD
-        }
+    fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
+        InstanceType.Sonarr -> SONARR_INFO_CARD
+        InstanceType.Radarr -> RADARR_INFO_CARD
+        InstanceType.Lidarr -> LIDARR_INFO_CARD
+        InstanceType.Seerr -> SEERR_INFO_CARD
+        InstanceType.Bookshelf -> BOOKSHELF_INFO_CARD
+        InstanceType.Prowlarr -> PROWLARR_INFO_CARD
+        InstanceType.Listenarr -> LISTENARR_INFO_CARD
+        InstanceType.Bazarr -> BAZARR_INFO_CARD
+        InstanceType.Tracearr -> TRACEARR_INFO_CARD
+    }
 }

@@ -19,13 +19,12 @@ class SABnzbdClient(
     private val downloadClient: DownloadClient,
     private val httpClient: HttpClient,
 ) : DownloadClientApi {
-    override suspend fun testConnection(): NetworkResult<Unit> =
-        httpClient
-            .safeGet<SABnzbdQueueResponse>("api") {
-                parameter("mode", "queue")
-                parameter("apikey", downloadClient.apiKey.value)
-                parameter("output", "json")
-            }.map { }
+    override suspend fun testConnection(): NetworkResult<Unit> = httpClient
+        .safeGet<SABnzbdQueueResponse>("api") {
+            parameter("mode", "queue")
+            parameter("apikey", downloadClient.apiKey.value)
+            parameter("output", "json")
+        }.map { }
 
     override suspend fun getDownloads(): NetworkResult<List<DownloadItem>> {
         val queueResult =
@@ -156,10 +155,9 @@ class SABnzbdClient(
         }
     }
 
-    suspend fun getHistory(): NetworkResult<SABnzbdHistoryResponse> =
-        httpClient.safeGet("api") {
-            parameter("mode", "history")
-            parameter("apikey", downloadClient.apiKey.value)
-            parameter("output", "json")
-        }
+    suspend fun getHistory(): NetworkResult<SABnzbdHistoryResponse> = httpClient.safeGet("api") {
+        parameter("mode", "history")
+        parameter("apikey", downloadClient.apiKey.value)
+        parameter("output", "json")
+    }
 }

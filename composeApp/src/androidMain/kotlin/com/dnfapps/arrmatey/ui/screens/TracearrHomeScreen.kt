@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
 import com.dnfapps.arrmatey.tracearr.state.TracearrState
@@ -119,9 +120,9 @@ fun TracearrHomeScreen(
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refresh() },
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             when (val currentState = state) {
                 is TracearrState.Initial,
@@ -156,20 +157,20 @@ fun TracearrHomeScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding =
-                            PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 16.dp,
-                                bottom =
-                                    16.dp +
-                                        if (LocalFloatingBarBottomPadding.current >
-                                            0.dp
-                                        ) {
-                                            LocalFloatingBarBottomPadding.current
-                                        } else {
-                                            navigationBarBottomInset()
-                                        },
-                            ),
+                        PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom =
+                            16.dp +
+                                if (LocalFloatingBarBottomPadding.current >
+                                    0.dp
+                                ) {
+                                    LocalFloatingBarBottomPadding.current
+                                } else {
+                                    navigationBarBottomInset()
+                                },
+                        ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         currentState.stats?.let { stats ->
@@ -188,9 +189,9 @@ fun TracearrHomeScreen(
                         item {
                             Row(
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = if (currentState.stats != null) 12.dp else 0.dp),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = if (currentState.stats != null) 12.dp else 0.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
@@ -254,9 +255,9 @@ fun TracearrHomeScreen(
                         item {
                             Row(
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 12.dp),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {

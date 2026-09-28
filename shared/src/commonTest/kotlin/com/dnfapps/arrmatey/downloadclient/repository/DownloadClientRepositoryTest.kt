@@ -79,33 +79,31 @@ class DownloadClientRepositoryTest {
     private val repository = DownloadClientRepository(fakeDao)
 
     @Test
-    fun testCreateDownloadClientSuccess() =
-        runTest {
-            val client =
-                DownloadClient(
-                    label = "Test Client",
-                    url = "http://localhost:8080",
-                    type = DownloadClientType.QBittorrent,
-                    apiKey = EncryptedString(""),
-                )
-            val result = repository.createDownloadClient(client)
-            assertTrue(result is DownloadClientInsertResult.Success)
-            assertEquals(1, result.id)
-        }
+    fun testCreateDownloadClientSuccess() = runTest {
+        val client =
+            DownloadClient(
+                label = "Test Client",
+                url = "http://localhost:8080",
+                type = DownloadClientType.QBittorrent,
+                apiKey = EncryptedString(""),
+            )
+        val result = repository.createDownloadClient(client)
+        assertTrue(result is DownloadClientInsertResult.Success)
+        assertEquals(1, result.id)
+    }
 
     @Test
-    fun testCreateDownloadClientConflict() =
-        runTest {
-            val client =
-                DownloadClient(
-                    label = "Test Client",
-                    url = "http://localhost:8080",
-                    type = DownloadClientType.QBittorrent,
-                    apiKey = EncryptedString(""),
-                )
-            repository.createDownloadClient(client)
+    fun testCreateDownloadClientConflict() = runTest {
+        val client =
+            DownloadClient(
+                label = "Test Client",
+                url = "http://localhost:8080",
+                type = DownloadClientType.QBittorrent,
+                apiKey = EncryptedString(""),
+            )
+        repository.createDownloadClient(client)
 
-            val result = repository.createDownloadClient(client)
-            assertTrue(result is DownloadClientInsertResult.Conflict)
-        }
+        val result = repository.createDownloadClient(client)
+        assertTrue(result is DownloadClientInsertResult.Conflict)
+    }
 }

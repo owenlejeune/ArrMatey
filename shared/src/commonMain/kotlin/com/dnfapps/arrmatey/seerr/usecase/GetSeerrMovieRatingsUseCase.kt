@@ -11,19 +11,18 @@ import kotlinx.coroutines.flow.flow
 class GetSeerrMovieRatingsUseCase(
     private val instanceManager: InstanceManager,
 ) {
-    operator fun invoke(tmdbId: Long): Flow<CombinedRatings?> =
-        flow {
-            val repository =
-                instanceManager
-                    .getSelectedSeerrRepository()
-                    .firstOrNull()
-            if (repository != null) {
-                repository
-                    .getMovieRatings(tmdbId)
-                    .onSuccess { emit(it) }
-                    .onError { _, _, _ -> emit(null) }
-            } else {
-                emit(null)
-            }
+    operator fun invoke(tmdbId: Long): Flow<CombinedRatings?> = flow {
+        val repository =
+            instanceManager
+                .getSelectedSeerrRepository()
+                .firstOrNull()
+        if (repository != null) {
+            repository
+                .getMovieRatings(tmdbId)
+                .onSuccess { emit(it) }
+                .onError { _, _, _ -> emit(null) }
+        } else {
+            emit(null)
         }
+    }
 }

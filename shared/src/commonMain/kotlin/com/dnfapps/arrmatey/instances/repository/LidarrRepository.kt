@@ -32,32 +32,29 @@ class LidarrRepository(
     private val _artistTrackFiles = MutableStateFlow<Map<Long, Map<Long, List<LidarrTrackFile>>>>(emptyMap())
     override val artistTrackFiles: StateFlow<Map<Long, Map<Long, List<LidarrTrackFile>>>> = _artistTrackFiles.asStateFlow()
 
-    override suspend fun getArtistAlbums(artistId: Long): NetworkResult<List<ArrAlbum>> =
-        lidarrClient
-            .getAlbums(artistId)
-            .onSuccess { albums ->
-                val currentMap = _artistAlbums.value.toMutableMap()
-                currentMap[artistId] = albums.sortedByDescending { it.releaseDate }
-                _artistAlbums.value = currentMap
-            }
+    override suspend fun getArtistAlbums(artistId: Long): NetworkResult<List<ArrAlbum>> = lidarrClient
+        .getAlbums(artistId)
+        .onSuccess { albums ->
+            val currentMap = _artistAlbums.value.toMutableMap()
+            currentMap[artistId] = albums.sortedByDescending { it.releaseDate }
+            _artistAlbums.value = currentMap
+        }
 
-    override suspend fun getArtistTracks(artistId: Long): NetworkResult<List<LidarrTrack>> =
-        lidarrClient
-            .getTracks(artistId = artistId)
-            .onSuccess { tracks ->
-                val currentMap = _artistTracks.value.toMutableMap()
-                currentMap[artistId] = tracks.groupBy { it.albumId }
-                _artistTracks.value = currentMap
-            }
+    override suspend fun getArtistTracks(artistId: Long): NetworkResult<List<LidarrTrack>> = lidarrClient
+        .getTracks(artistId = artistId)
+        .onSuccess { tracks ->
+            val currentMap = _artistTracks.value.toMutableMap()
+            currentMap[artistId] = tracks.groupBy { it.albumId }
+            _artistTracks.value = currentMap
+        }
 
-    override suspend fun getArtistTrackFiles(artistId: Long): NetworkResult<List<LidarrTrackFile>> =
-        lidarrClient
-            .getTrackFiles(artistId = artistId)
-            .onSuccess { trackFiles ->
-                val currentMap = _artistTrackFiles.value.toMutableMap()
-                currentMap[artistId] = trackFiles.groupBy { it.albumId }
-                _artistTrackFiles.value = currentMap
-            }
+    override suspend fun getArtistTrackFiles(artistId: Long): NetworkResult<List<LidarrTrackFile>> = lidarrClient
+        .getTrackFiles(artistId = artistId)
+        .onSuccess { trackFiles ->
+            val currentMap = _artistTrackFiles.value.toMutableMap()
+            currentMap[artistId] = trackFiles.groupBy { it.albumId }
+            _artistTrackFiles.value = currentMap
+        }
 
     override suspend fun deleteAlbumFiles(
         artistId: Long,

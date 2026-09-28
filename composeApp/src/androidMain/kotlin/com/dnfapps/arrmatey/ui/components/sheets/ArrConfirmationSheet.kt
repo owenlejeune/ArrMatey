@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -49,10 +50,10 @@ fun ArrConfirmationSheet(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
         ) {
             if (icon != null || title != null) {
                 Column(
@@ -113,10 +114,10 @@ fun ArrDestructiveConfirmationSheet(
         },
         modifier = modifier,
         sheetState =
-            rememberModalBottomSheetState(
-                skipPartiallyExpanded = true,
-                confirmValueChange = { !inProgress },
-            ),
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !inProgress },
+        ),
         title = title,
         text = text,
         content = content,
@@ -125,10 +126,10 @@ fun ArrDestructiveConfirmationSheet(
                 onClick = onConfirm,
                 enabled = confirmEnabled && !inProgress,
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError,
-                    ),
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                ),
                 modifier = Modifier.weight(1f),
             ) {
                 if (inProgress) {
@@ -150,16 +151,16 @@ fun ArrDestructiveConfirmationSheet(
             }
         },
         dismissButton =
-            dismissText?.let {
-                {
-                    Button(
-                        onClick = onDismissRequest,
-                        enabled = !inProgress,
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Text(text = it)
-                    }
+        dismissText?.let {
+            {
+                Button(
+                    onClick = onDismissRequest,
+                    enabled = !inProgress,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(text = it)
                 }
-            },
+            }
+        },
     )
 }

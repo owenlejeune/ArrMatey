@@ -20,16 +20,15 @@ sealed class PagingState<out T> {
     ) : PagingState<Nothing>()
 }
 
-fun <T> PagedData<T>.toPagingState(): PagingState<T> =
-    when {
-        error != null -> PagingState.Error(error)
-        isLoading && items.isEmpty() -> PagingState.Loading
-        isLoadingMore -> PagingState.LoadingMore(items)
-        items.isNotEmpty() ->
-            PagingState.Success(
-                items = items,
-                currentPage = currentPage,
-                hasMore = hasMore,
-            )
-        else -> PagingState.Initial
-    }
+fun <T> PagedData<T>.toPagingState(): PagingState<T> = when {
+    error != null -> PagingState.Error(error)
+    isLoading && items.isEmpty() -> PagingState.Loading
+    isLoadingMore -> PagingState.LoadingMore(items)
+    items.isNotEmpty() ->
+        PagingState.Success(
+            items = items,
+            currentPage = currentPage,
+            hasMore = hasMore,
+        )
+    else -> PagingState.Initial
+}

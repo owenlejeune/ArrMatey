@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -47,17 +48,17 @@ fun ConfirmDeleteAlert(
             }
         },
         sheetState =
-            rememberModalBottomSheetState(
-                skipPartiallyExpanded = true,
-                confirmValueChange = { !deleteInProgress },
-            ),
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !deleteInProgress },
+        ),
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             modifier =
-                Modifier
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp),
+            Modifier
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
         ) {
             if (instanceLabel != null) {
                 Text(
@@ -81,10 +82,10 @@ fun ConfirmDeleteAlert(
             Button(
                 onClick = { onDelete(deleteFiles, addExclusion) },
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError,
-                    ),
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !deleteInProgress,
             ) {

@@ -49,99 +49,92 @@ class DownloadClientManagerTest {
     ): Map<Long, DownloadClientApi> = withTimeout(5_000) { downloadClientApis.first(predicate) }
 
     @Test
-    fun testAddingClientsCreatesApis(): Unit =
-        runBlocking {
-            val manager = DownloadClientManager(repository, httpClientFactory)
+    fun testAddingClientsCreatesApis(): Unit = runBlocking {
+        val manager = DownloadClientManager(repository, httpClientFactory)
 
-            fakeDao.emit(listOf(client(1), client(2)))
-            val apis = manager.awaitApis { it.keys == setOf(1L, 2L) }
+        fakeDao.emit(listOf(client(1), client(2)))
+        val apis = manager.awaitApis { it.keys == setOf(1L, 2L) }
 
-            assertNotNull(apis[1])
-            assertNotNull(apis[2])
-        }
-
-    @Test
-    fun testRemovingClientRemovesItsApi(): Unit =
-        runBlocking {
-            val manager = DownloadClientManager(repository, httpClientFactory)
-            fakeDao.emit(listOf(client(1), client(2)))
-            manager.awaitApis { it.keys == setOf(1L, 2L) }
-
-            fakeDao.emit(listOf(client(1)))
-            val apis = manager.awaitApis { it.keys == setOf(1L) }
-
-            assertNull(apis[2])
-        }
+        assertNotNull(apis[1])
+        assertNotNull(apis[2])
+    }
 
     @Test
-    fun testCredentialChangeRebuildsApi(): Unit =
-        runBlocking {
-            val manager = DownloadClientManager(repository, httpClientFactory)
-            fakeDao.emit(listOf(client(id = 1, password = "old")))
-            val original = manager.awaitApis { 1L in it.keys }[1]
-            assertNotNull(original)
+    fun testRemovingClientRemovesItsApi(): Unit = runBlocking {
+        val manager = DownloadClientManager(repository, httpClientFactory)
+        fakeDao.emit(listOf(client(1), client(2)))
+        manager.awaitApis { it.keys == setOf(1L, 2L) }
 
-            fakeDao.emit(listOf(client(id = 1, password = "new")))
-            val rebuilt = manager.awaitApis { it[1] !== original }[1]
+        fakeDao.emit(listOf(client(1)))
+        val apis = manager.awaitApis { it.keys == setOf(1L) }
 
-            assertNotNull(rebuilt)
-            assertNotSame(original, rebuilt)
-        }
+        assertNull(apis[2])
+    }
 
     @Test
-    fun testUnchangedClientKeepsSameApiInstance(): Unit =
-        runBlocking {
-            val manager = DownloadClientManager(repository, httpClientFactory)
-            val unchanged = client(id = 1, password = "same")
-            fakeDao.emit(listOf(unchanged))
-            val first = manager.awaitApis { 1L in it.keys }[1]
+    fun testCredentialChangeRebuildsApi(): Unit = runBlocking {
+        val manager = DownloadClientManager(repository, httpClientFactory)
+        fakeDao.emit(listOf(client(id = 1, password = "old")))
+        val original = manager.awaitApis { 1L in it.keys }[1]
+        assertNotNull(original)
 
-            fakeDao.emit(listOf(unchanged))
-            delay(50)
-            val second = manager.downloadClientApis.value[1]
+        fakeDao.emit(listOf(client(id = 1, password = "new")))
+        val rebuilt = manager.awaitApis { it[1] !== original }[1]
 
-            assertNotNull(first)
-            assertSame(first, second)
-        }
+        assertNotNull(rebuilt)
+        assertNotSame(original, rebuilt)
+    }
 
     @Test
-    fun testRefreshApiCreatesNewInstance(): Unit =
-        runBlocking {
-            val manager = DownloadClientManager(repository, httpClientFactory)
-            fakeDao.emit(listOf(client(1)))
-            manager.awaitApis { 1L in it.keys }
-            val first = manager.getOrCreateApi(1)
+    fun testUnchangedClientKeepsSameApiInstance(): Unit = runBlocking {
+        val manager = DownloadClientManager(repository, httpClientFactory)
+        val unchanged = client(id = 1, password = "same")
+        fakeDao.emit(listOf(unchanged))
+        val first = manager.awaitApis { 1L in it.keys }[1]
 
-            val refreshed = manager.refreshApi(1)
+        fakeDao.emit(listOf(unchanged))
+        delay(50)
+        val second = manager.downloadClientApis.value[1]
 
-            assertNotNull(first)
-            assertNotNull(refreshed)
-            assertNotSame(first, refreshed)
-        }
-
-    @Test
-    fun testRefreshApiReturnsNullForUnknownId(): Unit =
-        runBlocking {
-            val manager = DownloadClientManager(repository, httpClientFactory)
-
-            val api = manager.refreshApi(999)
-
-            assertNull(api)
-        }
+        assertNotNull(first)
+        assertSame(first, second)
+    }
 
     @Test
-    fun testGetOrCreateApiReturnsCachedInstance(): Unit =
-        runBlocking {
-            val manager = DownloadClientManager(repository, httpClientFactory)
-            fakeDao.emit(listOf(client(1)))
-            manager.awaitApis { 1L in it.keys }
+    fun testRefreshApiCreatesNewInstance(): Unit = runBlocking {
+        val manager = DownloadClientManager(repository, httpClientFactory)
+        fakeDao.emit(listOf(client(1)))
+        manager.awaitApis { 1L in it.keys }
+        val first = manager.getOrCreateApi(1)
 
-            val a: DownloadClientApi? = manager.getOrCreateApi(1)
-            val b: DownloadClientApi? = manager.getOrCreateApi(1)
+        val refreshed = manager.refreshApi(1)
 
-            assertNotNull(a)
-            assertTrue(a === b)
-        }
+        assertNotNull(first)
+        assertNotNull(refreshed)
+        assertNotSame(first, refreshed)
+    }
+
+    @Test
+    fun testRefreshApiReturnsNullForUnknownId(): Unit = runBlocking {
+        val manager = DownloadClientManager(repository, httpClientFactory)
+
+        val api = manager.refreshApi(999)
+
+        assertNull(api)
+    }
+
+    @Test
+    fun testGetOrCreateApiReturnsCachedInstance(): Unit = runBlocking {
+        val manager = DownloadClientManager(repository, httpClientFactory)
+        fakeDao.emit(listOf(client(1)))
+        manager.awaitApis { 1L in it.keys }
+
+        val a: DownloadClientApi? = manager.getOrCreateApi(1)
+        val b: DownloadClientApi? = manager.getOrCreateApi(1)
+
+        assertNotNull(a)
+        assertTrue(a === b)
+    }
 }
 
 private class FakeDownloadClientDao : DownloadClientDao {

@@ -60,10 +60,10 @@ fun PersonDetailsHeader(
 
         Box(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 170.dp)
-                    .padding(horizontal = 12.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 170.dp)
+                .padding(horizontal = 12.dp),
         ) {
             PosterItem(
                 item = item,

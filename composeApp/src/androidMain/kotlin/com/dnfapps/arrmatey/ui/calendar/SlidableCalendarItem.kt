@@ -56,23 +56,23 @@ fun SlidableCalendarItem(
 
     Box(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .clickable {
-                    if (instanceIds.size > 1) {
-                        isExpanded = !isExpanded
-                    } else {
-                        onInstanceSelected(instanceIds.firstOrNull())
-                    }
-                },
+        modifier
+            .fillMaxWidth()
+            .clickable {
+                if (instanceIds.size > 1) {
+                    isExpanded = !isExpanded
+                } else {
+                    onInstanceSelected(instanceIds.firstOrNull())
+                }
+            },
     ) {
         // Options Layer (Hidden behind content)
         Row(
             modifier =
-                Modifier
-                    .align(Alignment.CenterEnd)
-                    .fillMaxHeight()
-                    .padding(end = 8.dp),
+            Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(end = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -85,14 +85,14 @@ fun SlidableCalendarItem(
                     relevantInstances.forEach { instance ->
                         Box(
                             modifier =
-                                Modifier
-                                    .size(80.dp)
-                                    .clip(MaterialTheme.shapes.small)
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                    .clickable {
-                                        onInstanceSelected(instance.id)
-                                        isExpanded = false
-                                    },
+                            Modifier
+                                .size(80.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                .clickable {
+                                    onInstanceSelected(instance.id)
+                                    isExpanded = false
+                                },
                         ) {
                             Column(
                                 modifier = Modifier.align(Alignment.Center).padding(4.dp),
@@ -122,11 +122,11 @@ fun SlidableCalendarItem(
         // Content Layer
         Box(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .graphicsLayer {
-                        translationX = offset.dp.toPx()
-                    },
+            Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    translationX = offset.dp.toPx()
+                },
         ) {
             content()
         }

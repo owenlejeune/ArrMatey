@@ -23,13 +23,12 @@ class RadarrClient(
     httpClient: HttpClient,
 ) : BaseArrClient(httpClient),
     ArrClient {
-    override suspend fun getLibrary(): NetworkResult<List<ArrMovie>> =
-        get<List<ArrMovie>>("movie")
-            .map { movies ->
-                movies.map { movie ->
-                    movie.withLocalImages(instance.url).copy(instanceId = instance.id)
-                }
+    override suspend fun getLibrary(): NetworkResult<List<ArrMovie>> = get<List<ArrMovie>>("movie")
+        .map { movies ->
+            movies.map { movie ->
+                movie.withLocalImages(instance.url).copy(instanceId = instance.id)
             }
+        }
 
     override suspend fun getDetail(id: Long): NetworkResult<ArrMovie> = get("movie/$id")
 
@@ -63,27 +62,25 @@ class RadarrClient(
         id: Long,
         deleteFiles: Boolean,
         addImportExclusion: Boolean,
-    ): NetworkResult<Unit> =
-        delete(
-            endpoint = "movie/$id",
-            params =
-                mapOf(
-                    "deleteFiles" to deleteFiles,
-                    "addImportExclusion" to addImportExclusion,
-                ),
-        )
+    ): NetworkResult<Unit> = delete(
+        endpoint = "movie/$id",
+        params =
+        mapOf(
+            "deleteFiles" to deleteFiles,
+            "addImportExclusion" to addImportExclusion,
+        ),
+    )
 
     override suspend fun setMonitorStatus(
         id: Long,
         monitorStatus: Boolean,
-    ): NetworkResult<List<MonitoredResponse>> =
-        put(
-            "movie/editor",
-            mapOf(
-                "monitored" to monitorStatus,
-                "movieIds" to listOf(id),
-            ),
-        )
+    ): NetworkResult<List<MonitoredResponse>> = put(
+        "movie/editor",
+        mapOf(
+            "monitored" to monitorStatus,
+            "movieIds" to listOf(id),
+        ),
+    )
 
     override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrMovie>> = get("movie/lookup", mapOf("term" to params.query))
 
@@ -101,64 +98,60 @@ class RadarrClient(
         page: Int,
         pageSize: Int,
         altId: Long?,
-    ): NetworkResult<List<RadarrHistoryItem>> =
-        get<List<RadarrHistoryItem>>(
-            "history/movie",
-            mapOf<String, Any>(
-                "page" to page,
-                "pageSize" to pageSize,
-                "movieId" to id,
-                "includeMovie" to true,
-            ),
-        ).map { list ->
-            list.map {
-                it.copy(
-                    instanceId = instance.id,
-                    instanceName = instance.label,
-                    instanceType = instance.type,
-                    movie = it.movie?.withLocalImages(instance.url),
-                )
-            }
+    ): NetworkResult<List<RadarrHistoryItem>> = get<List<RadarrHistoryItem>>(
+        "history/movie",
+        mapOf<String, Any>(
+            "page" to page,
+            "pageSize" to pageSize,
+            "movieId" to id,
+            "includeMovie" to true,
+        ),
+    ).map { list ->
+        list.map {
+            it.copy(
+                instanceId = instance.id,
+                instanceName = instance.label,
+                instanceType = instance.type,
+                movie = it.movie?.withLocalImages(instance.url),
+            )
         }
+    }
 
     override suspend fun getHistory(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<List<HistoryItem>> =
-        get<RadarrHistoryResponse>(
-            "history",
-            mapOf<String, Any>(
-                "page" to page,
-                "pageSize" to pageSize,
-                "includeMovie" to true,
-            ),
-        ).map { response ->
-            response.records.map {
-                it.copy(
-                    instanceId = instance.id,
-                    instanceName = instance.label,
-                    instanceType = instance.type,
-                    movie = it.movie?.withLocalImages(instance.url),
-                )
-            }
+    ): NetworkResult<List<HistoryItem>> = get<RadarrHistoryResponse>(
+        "history",
+        mapOf<String, Any>(
+            "page" to page,
+            "pageSize" to pageSize,
+            "includeMovie" to true,
+        ),
+    ).map { response ->
+        response.records.map {
+            it.copy(
+                instanceId = instance.id,
+                instanceName = instance.label,
+                instanceType = instance.type,
+                movie = it.movie?.withLocalImages(instance.url),
+            )
         }
+    }
 
-    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =
-        post("command", CommandPayload.Movie(listOf(id)))
+    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> = post("command", CommandPayload.Movie(listOf(id)))
 
     override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate,
-    ): NetworkResult<List<ArrMovie>> =
-        get<List<ArrMovie>>(
-            "calendar",
-            mapOf(
-                "start" to start.toString(),
-                "end" to end.toString(),
-                "unmonitored" to true,
-                "includeMoveiFile" to true,
-            ),
-        ).map { it.map { movie -> movie.copy(instanceId = instance.id) } }
+    ): NetworkResult<List<ArrMovie>> = get<List<ArrMovie>>(
+        "calendar",
+        mapOf(
+            "start" to start.toString(),
+            "end" to end.toString(),
+            "unmonitored" to true,
+            "includeMoveiFile" to true,
+        ),
+    ).map { it.map { movie -> movie.copy(instanceId = instance.id) } }
 
     suspend fun getMovieExtraFile(id: Long): NetworkResult<List<ExtraFile>> = get("extrafile", mapOf("movieId" to id))
 

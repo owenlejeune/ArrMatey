@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
@@ -57,25 +58,25 @@ fun EditAlbumSheet(
             }
         },
         sheetState =
-            rememberModalBottomSheetState(
-                skipPartiallyExpanded = true,
-                confirmValueChange = { !editInProgress },
-            ),
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !editInProgress },
+        ),
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f, fill = false)
-                        .verticalScroll(rememberScrollState()),
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Text(
@@ -147,12 +148,12 @@ fun EditAlbumSheet(
                             duration = selectedRelease?.duration ?: album.duration,
                             profileId = album.profileId,
                             statistics =
-                                album.statistics?.let { stats ->
-                                    stats.copy(
-                                        trackCount = selectedRelease?.trackCount ?: stats.trackCount,
-                                        totalTrackCount = selectedRelease?.trackCount ?: stats.totalTrackCount,
-                                    )
-                                },
+                            album.statistics?.let { stats ->
+                                stats.copy(
+                                    trackCount = selectedRelease?.trackCount ?: stats.trackCount,
+                                    totalTrackCount = selectedRelease?.trackCount ?: stats.totalTrackCount,
+                                )
+                            },
                         )
                     onEditAlbum(updatedAlbum)
                 },

@@ -63,35 +63,30 @@ class GetReleasesUseCase(
             }
     }
 
-    private fun parseLanguages(items: List<ArrRelease>): Set<Language> =
-        items
-            .flatMap { it.languages.filter { l -> l.name != null } }
-            .sortedBy { it.name }
-            .toSet()
+    private fun parseLanguages(items: List<ArrRelease>): Set<Language> = items
+        .flatMap { it.languages.filter { l -> l.name != null } }
+        .sortedBy { it.name }
+        .toSet()
 
-    private fun parseProtocols(items: List<ArrRelease>): Set<ReleaseProtocol> =
-        items
-            .map { it.protocol }
-            .sortedBy { it.name }
-            .toSet()
+    private fun parseProtocols(items: List<ArrRelease>): Set<ReleaseProtocol> = items
+        .map { it.protocol }
+        .sortedBy { it.name }
+        .toSet()
 
-    private fun parseQualities(items: List<ArrRelease>): Set<QualityInfo> =
-        items
-            .mapNotNull { it.quality }
-            .sortedBy { it.quality.resolution }
-            .toSet()
+    private fun parseQualities(items: List<ArrRelease>): Set<QualityInfo> = items
+        .mapNotNull { it.quality }
+        .sortedBy { it.quality.resolution }
+        .toSet()
 
-    private fun parseIndexers(items: List<ArrRelease>): Set<String> =
-        items
-            .map { it.indexerLabel }
-            .sorted()
-            .toSet()
+    private fun parseIndexers(items: List<ArrRelease>): Set<String> = items
+        .map { it.indexerLabel }
+        .sorted()
+        .toSet()
 
-    private fun parseCustomFormats(items: List<ArrRelease>): Set<CustomFormat> =
-        items
-            .flatMap { it.customFormats }
-            .sortedBy { it.name }
-            .toSet()
+    private fun parseCustomFormats(items: List<ArrRelease>): Set<CustomFormat> = items
+        .flatMap { it.customFormats }
+        .sortedBy { it.name }
+        .toSet()
 
     suspend fun fetch(
         type: InstanceType,

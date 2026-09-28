@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.seerr.api.model
 
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 
@@ -14,8 +15,7 @@ enum class IssueType(
     ;
 
     companion object {
-        fun fromValue(value: Int): IssueType =
-            entries.firstOrNull { it.value == value }
-                ?: throw IllegalStateException("Unknown issue type: $value")
+        fun fromValue(value: Int): IssueType = entries.firstOrNull { it.value == value }
+            ?: throw IllegalStateException("Unknown issue type: $value")
     }
 }

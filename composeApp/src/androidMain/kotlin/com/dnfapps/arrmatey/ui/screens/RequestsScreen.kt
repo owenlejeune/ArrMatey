@@ -33,6 +33,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
@@ -109,9 +110,9 @@ fun RequestsScreen(
             isRefreshing = pagedData.isLoading && pagedData.items.isNotEmpty(),
             onRefresh = { viewModel.refresh() },
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
             contentAlignment = Alignment.Center,
         ) {
             if (instancesState.selectedInstance == null) {
@@ -128,12 +129,12 @@ fun RequestsScreen(
                                 text = {
                                     Text(
                                         text =
-                                            buildString {
-                                                append(mokoString(MR.strings.requests))
-                                                if (pendingRequestsCount > 0) {
-                                                    append(" ($pendingRequestsCount)")
-                                                }
-                                            },
+                                        buildString {
+                                            append(mokoString(MR.strings.requests))
+                                            if (pendingRequestsCount > 0) {
+                                                append(" ($pendingRequestsCount)")
+                                            }
+                                        },
                                     )
                                 },
                             )
@@ -143,12 +144,12 @@ fun RequestsScreen(
                                 text = {
                                     Text(
                                         text =
-                                            buildString {
-                                                append(mokoString(MR.strings.issues))
-                                                if (openIssuesCount > 0) {
-                                                    append(" ($openIssuesCount)")
-                                                }
-                                            },
+                                        buildString {
+                                            append(mokoString(MR.strings.issues))
+                                            if (openIssuesCount > 0) {
+                                                append(" ($openIssuesCount)")
+                                            }
+                                        },
                                     )
                                 },
                             )

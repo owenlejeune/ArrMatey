@@ -14,11 +14,11 @@ data class QueuePage(
         name: String,
     ) = copy(
         records =
-            records.apply {
-                forEach { r ->
-                    r.instanceId = id
-                    r.instanceName = name
-                }
-            },
+        records.apply {
+            forEach { r ->
+                r.instanceId = id
+                r.instanceName = name
+            }
+        },
     )
 }

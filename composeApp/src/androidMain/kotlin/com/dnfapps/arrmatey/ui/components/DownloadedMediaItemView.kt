@@ -52,19 +52,19 @@ fun DownloadedMediaItemView(
         ) {
             Box(
                 modifier =
-                    Modifier
-                        .width(6.dp)
-                        .fillMaxHeight()
-                        .background(item.instanceType.associatedColor)
-                        .align(Alignment.CenterStart),
+                Modifier
+                    .width(6.dp)
+                    .fillMaxHeight()
+                    .background(item.instanceType.associatedColor)
+                    .align(Alignment.CenterStart),
             )
 
             Row(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(start = 6.dp)
-                        .padding(12.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 6.dp)
+                    .padding(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

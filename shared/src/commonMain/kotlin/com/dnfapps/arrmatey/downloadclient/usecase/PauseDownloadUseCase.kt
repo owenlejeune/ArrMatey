@@ -14,26 +14,25 @@ class PauseDownloadUseCase(
     operator fun invoke(
         clientId: Long,
         ids: List<String>,
-    ): Flow<OperationStatus> =
-        flow {
-            emit(OperationStatus.InProgress)
+    ): Flow<OperationStatus> = flow {
+        emit(OperationStatus.InProgress)
 
-            val api = downloadClientManager.getOrCreateApi(clientId)
-            if (api == null) {
-                logger.error { "Pause failed: no download-client API for id $clientId" }
-                emit(OperationStatus.Error(message = "Download client not available"))
-                return@flow
-            }
-
-            when (val result = api.pauseDownload(ids)) {
-                is NetworkResult.Success -> emit(OperationStatus.Success("Downloads paused"))
-                is NetworkResult.Error -> {
-                    logger.error(result.cause) {
-                        "Pause failed on client $clientId (ids=$ids): ${result.message} (code=${result.code})"
-                    }
-                    emit(OperationStatus.Error(result.code, result.message, result.cause))
-                }
-                is NetworkResult.Loading -> emit(OperationStatus.InProgress)
-            }
+        val api = downloadClientManager.getOrCreateApi(clientId)
+        if (api == null) {
+            logger.error { "Pause failed: no download-client API for id $clientId" }
+            emit(OperationStatus.Error(message = "Download client not available"))
+            return@flow
         }
+
+        when (val result = api.pauseDownload(ids)) {
+            is NetworkResult.Success -> emit(OperationStatus.Success("Downloads paused"))
+            is NetworkResult.Error -> {
+                logger.error(result.cause) {
+                    "Pause failed on client $clientId (ids=$ids): ${result.message} (code=${result.code})"
+                }
+                emit(OperationStatus.Error(result.code, result.message, result.cause))
+            }
+            is NetworkResult.Loading -> emit(OperationStatus.InProgress)
+        }
+    }
 }

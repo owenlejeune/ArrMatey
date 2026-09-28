@@ -5,8 +5,7 @@ class InstancePreferenceStoreRepository(
 ) {
     private val dataStoreMap = mutableMapOf<Long, InstancePreferenceStore>()
 
-    fun getInstancePreferences(instanceId: Long) =
-        dataStoreMap.getOrPut(instanceId) {
-            InstancePreferenceStore(instanceId, dataStoreFactory)
-        }
+    fun getInstancePreferences(instanceId: Long) = dataStoreMap.getOrPut(instanceId) {
+        InstancePreferenceStore(instanceId, dataStoreFactory)
+    }
 }

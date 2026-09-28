@@ -42,6 +42,7 @@ import com.dnfapps.arrmatey.arr.state.CalendarFilterState
 import com.dnfapps.arrmatey.arr.state.ContentFilter
 import com.dnfapps.arrmatey.entensions.imageVector
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -98,12 +99,12 @@ fun CalendarFilterMenu(
             ) {
                 Column(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                            .padding(bottom = 32.dp)
-                            .navigationBarsPadding()
-                            .verticalScroll(rememberScrollState()),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 32.dp)
+                        .navigationBarsPadding()
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     // Header
@@ -222,11 +223,11 @@ fun CalendarFilterMenu(
                                 leadingIcon = {
                                     Icon(
                                         imageVector =
-                                            if (filterState.showFinalesOnly) {
-                                                Icons.Default.Check
-                                            } else {
-                                                Icons.Default.CurtainsClosed
-                                            },
+                                        if (filterState.showFinalesOnly) {
+                                            Icons.Default.Check
+                                        } else {
+                                            Icons.Default.CurtainsClosed
+                                        },
                                         contentDescription = null,
                                         modifier = Modifier.size(16.dp),
                                     )

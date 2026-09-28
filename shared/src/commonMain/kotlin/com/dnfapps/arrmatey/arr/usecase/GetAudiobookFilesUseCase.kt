@@ -15,26 +15,25 @@ import kotlinx.coroutines.flow.map
 class GetAudiobookFilesUseCase(
     private val instanceManager: InstanceManager,
 ) {
-    operator fun invoke(audiobookId: Long): Flow<AudiobookFilesState> =
-        channelFlow {
-            instanceManager
-                .getSelectedArrRepository(InstanceType.Listenarr)
-                .filterNotNull()
-                .collectLatest { repository ->
-                    repository.getAudiobookFiles(audiobookId)
-                    combine(
-                        repository.audiobookFiles.map { it[audiobookId] ?: emptyList() },
-                        repository.observeItemHistory(audiobookId),
-                        repository.historyStatus,
-                    ) { audiobookFiles, history, status ->
-                        AudiobookFilesState(
-                            files = audiobookFiles,
-                            history = history,
-                            isRefreshing = status is OperationStatus.InProgress,
-                        )
-                    }.collect { send(it) }
-                }
-        }
+    operator fun invoke(audiobookId: Long): Flow<AudiobookFilesState> = channelFlow {
+        instanceManager
+            .getSelectedArrRepository(InstanceType.Listenarr)
+            .filterNotNull()
+            .collectLatest { repository ->
+                repository.getAudiobookFiles(audiobookId)
+                combine(
+                    repository.audiobookFiles.map { it[audiobookId] ?: emptyList() },
+                    repository.observeItemHistory(audiobookId),
+                    repository.historyStatus,
+                ) { audiobookFiles, history, status ->
+                    AudiobookFilesState(
+                        files = audiobookFiles,
+                        history = history,
+                        isRefreshing = status is OperationStatus.InProgress,
+                    )
+                }.collect { send(it) }
+            }
+    }
 
     suspend fun refreshHistory(audiobookId: Long) {
         instanceManager

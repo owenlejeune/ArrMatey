@@ -11,11 +11,10 @@ class GetRequestsUseCase {
         repository: SeerrInstanceRepository,
         scope: CoroutineScope,
         filter: RequestState = RequestState.All,
-    ): PagingController<MediaRequestPackage> =
-        PagingController(
-            scope = scope,
-            keySelector = { it.request.id },
-        ) {
-            repository.getRequestsPaging(filter)
-        }
+    ): PagingController<MediaRequestPackage> = PagingController(
+        scope = scope,
+        keySelector = { it.request.id },
+    ) {
+        repository.getRequestsPaging(filter)
+    }
 }

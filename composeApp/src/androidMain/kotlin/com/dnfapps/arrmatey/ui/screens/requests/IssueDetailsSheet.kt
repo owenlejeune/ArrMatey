@@ -44,6 +44,7 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.sheets.ArrDestructiveConfirmationSheet
@@ -105,15 +106,15 @@ fun IssueDetailsSheet(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier =
-                Modifier
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp),
+            Modifier
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
         ) {
             LazyColumn(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f, fill = false),
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 commentsList.minByOrNull { it.id }?.let { description ->
@@ -209,10 +210,10 @@ fun IssueDetailsSheet(
                     onClick = { confirmCloseIssue = true },
                     modifier = Modifier.size(48.dp),
                     colors =
-                        IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        ),
+                    IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
                 ) {
                     Icon(Icons.Default.CheckCircleOutline, null)
                 }

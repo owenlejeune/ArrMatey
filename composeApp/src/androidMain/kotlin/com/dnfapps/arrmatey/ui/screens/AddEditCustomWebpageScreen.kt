@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.database.dao.InsertResult
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
@@ -96,10 +97,10 @@ fun AddEditCustomWebpageScreen(
                                 confirmDelete = true
                             },
                             colors =
-                                IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                                ),
+                            IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                            ),
                             modifier = Modifier.padding(end = 4.dp),
                         ) {
                             Icon(
@@ -123,11 +124,11 @@ fun AddEditCustomWebpageScreen(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState()),
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Spacer(Modifier.height(8.dp))
@@ -153,10 +154,10 @@ fun AddEditCustomWebpageScreen(
                 singleLine = true,
                 isError = uiState.endpointError,
                 errorMessage =
-                    when {
-                        uiState.endpointError -> mokoString(MR.strings.invalid_host)
-                        else -> null
-                    },
+                when {
+                    uiState.endpointError -> mokoString(MR.strings.invalid_host)
+                    else -> null
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             )
 

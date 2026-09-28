@@ -64,22 +64,22 @@ fun HomeBottomNavBar(
         contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = NavigationBarDefaults.Elevation,
         modifier =
-            modifier
-                .fillMaxWidth()
-                .combinedClickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {},
-                    onLongClick = handleLongPress,
-                ),
+        modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {},
+                onLongClick = handleLongPress,
+            ),
     ) {
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .windowInsetsPadding(NavigationBarDefaults.windowInsets)
-                    .height(80.dp)
-                    .padding(horizontal = 8.dp),
+            Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(NavigationBarDefaults.windowInsets)
+                .height(80.dp)
+                .padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -117,59 +117,59 @@ fun HomeBottomNavItem(
 
     val indicatorColor by animateColorAsState(
         targetValue =
-            if (selected) {
-                MaterialTheme.colorScheme.secondaryContainer
-            } else {
-                Color.Transparent
-            },
+        if (selected) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            Color.Transparent
+        },
         animationSpec = animationSpec,
         label = "BottomNavIndicatorColor",
     )
 
     val iconColor by animateColorAsState(
         targetValue =
-            if (selected) {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
+        if (selected) {
+            MaterialTheme.colorScheme.onSecondaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
         animationSpec = animationSpec,
         label = "BottomNavIconColor",
     )
 
     val textColor by animateColorAsState(
         targetValue =
-            if (selected) {
-                MaterialTheme.colorScheme.onSurface
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
+        if (selected) {
+            MaterialTheme.colorScheme.onSurface
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
         animationSpec = animationSpec,
         label = "BottomNavTextColor",
     )
 
     Column(
         modifier =
-            modifier
-                .semantics {
-                    this.selected = selected
-                    this.role = Role.Tab
-                }.clip(CircleShape)
-                .combinedClickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = ripple(bounded = true),
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                ).padding(vertical = 8.dp),
+        modifier
+            .semantics {
+                this.selected = selected
+                this.role = Role.Tab
+            }.clip(CircleShape)
+            .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(bounded = true),
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ).padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         Box(
             modifier =
-                Modifier
-                    .size(width = 64.dp, height = 32.dp)
-                    .clip(CircleShape)
-                    .background(indicatorColor),
+            Modifier
+                .size(width = 64.dp, height = 32.dp)
+                .clip(CircleShape)
+                .background(indicatorColor),
             contentAlignment = Alignment.Center,
         ) {
             CompositionLocalProvider(LocalContentColor provides iconColor) {
@@ -182,9 +182,9 @@ fun HomeBottomNavItem(
         CompositionLocalProvider(LocalContentColor provides textColor) {
             ProvideTextStyle(
                 value =
-                    MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                    ),
+                MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                ),
             ) {
                 label()
             }

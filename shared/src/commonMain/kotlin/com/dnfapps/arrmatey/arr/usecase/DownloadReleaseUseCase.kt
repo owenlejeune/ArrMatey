@@ -42,44 +42,39 @@ class DownloadReleaseUseCase(
     private fun buildSonarrPayload(
         release: SeriesRelease,
         force: Boolean,
-    ): DownloadReleasePayload =
-        DownloadReleasePayload.Series(
-            guid = release.guid,
-            indexerId = release.indexerId,
-            seriesId = release.seriesId,
-            seasonNumber = release.seasonNumber,
-            episodeId = release.episodeId,
-        )
+    ): DownloadReleasePayload = DownloadReleasePayload.Series(
+        guid = release.guid,
+        indexerId = release.indexerId,
+        seriesId = release.seriesId,
+        seasonNumber = release.seasonNumber,
+        episodeId = release.episodeId,
+    )
 
     private fun buildRadarrPayload(
         release: MovieRelease,
         force: Boolean,
-    ): DownloadReleasePayload =
-        DownloadReleasePayload.Movie(
-            guid = release.guid,
-            indexerId = release.indexerId,
-            movieId = if (force) release.movieId else null,
-        )
+    ): DownloadReleasePayload = DownloadReleasePayload.Movie(
+        guid = release.guid,
+        indexerId = release.indexerId,
+        movieId = if (force) release.movieId else null,
+    )
 
     private fun buildLidarrPayload(
         release: LidarrRelease,
         force: Boolean,
-    ): DownloadReleasePayload =
-        DownloadReleasePayload.Album(
-            guid = release.guid,
-            indexerId = release.indexerId,
-            albumId = if (force) release.albumId else null,
-        )
+    ): DownloadReleasePayload = DownloadReleasePayload.Album(
+        guid = release.guid,
+        indexerId = release.indexerId,
+        albumId = if (force) release.albumId else null,
+    )
 
-    private fun buildBookshelfPayload(release: BookshelfRelease): DownloadReleasePayload =
-        DownloadReleasePayload.Book(
-            guid = release.guid,
-            indexerId = release.indexerId,
-        )
+    private fun buildBookshelfPayload(release: BookshelfRelease): DownloadReleasePayload = DownloadReleasePayload.Book(
+        guid = release.guid,
+        indexerId = release.indexerId,
+    )
 
-    private fun buildListenarrPayload(release: ListenarrRelease): DownloadReleasePayload =
-        DownloadReleasePayload.AudioBook(
-            audiobookId = release.mediaId ?: -1,
-            searchResult = release,
-        )
+    private fun buildListenarrPayload(release: ListenarrRelease): DownloadReleasePayload = DownloadReleasePayload.AudioBook(
+        audiobookId = release.mediaId ?: -1,
+        searchResult = release,
+    )
 }

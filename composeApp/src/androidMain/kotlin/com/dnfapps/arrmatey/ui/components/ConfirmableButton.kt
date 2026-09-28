@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -47,11 +48,11 @@ fun ConfirmableButton(
                 (
                     fadeIn(animationSpec = tween(300)) +
                         scaleIn(initialScale = 0.9f, animationSpec = tween(300))
-                ) togetherWith
+                    ) togetherWith
                     (
                         fadeOut(animationSpec = tween(200)) +
                             scaleOut(targetScale = 0.9f, animationSpec = tween(200))
-                    )
+                        )
             },
             label = "ConfirmableButtonContent",
         ) { confirm ->

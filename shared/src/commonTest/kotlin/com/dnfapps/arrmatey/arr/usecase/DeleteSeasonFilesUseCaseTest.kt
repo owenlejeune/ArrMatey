@@ -19,29 +19,27 @@ import kotlin.test.assertTrue
 class DeleteSeasonFilesUseCaseTest {
     private val logger = LoggerFactory.get("test")
 
-    private fun instance(type: InstanceType) =
-        Instance(
-            id = 1,
-            label = "Test",
-            url = "http://localhost",
-            apiKey = EncryptedString("k"),
-            type = type,
-            enabled = true,
-        )
+    private fun instance(type: InstanceType) = Instance(
+        id = 1,
+        label = "Test",
+        url = "http://localhost",
+        apiKey = EncryptedString("k"),
+        type = type,
+        enabled = true,
+    )
 
     @Test
-    fun testWrongInstanceTypeEmitsError() =
-        runTest {
-            val mockEngine = MockEngine { respond("", HttpStatusCode.OK) }
-            val repository = ArrInstanceRepository(instance(InstanceType.Radarr), HttpClient(mockEngine), logger)
-            val useCase = DeleteSeasonFilesUseCase()
+    fun testWrongInstanceTypeEmitsError() = runTest {
+        val mockEngine = MockEngine { respond("", HttpStatusCode.OK) }
+        val repository = ArrInstanceRepository(instance(InstanceType.Radarr), HttpClient(mockEngine), logger)
+        val useCase = DeleteSeasonFilesUseCase()
 
-            useCase(seriesId = 7, seasonNumber = 1, repository = repository).test {
-                assertTrue(awaitItem() is OperationStatus.InProgress)
-                val error = awaitItem()
-                assertTrue(error is OperationStatus.Error)
-                assertEquals("Not a Sonarr instance", error.message)
-                awaitComplete()
-            }
+        useCase(seriesId = 7, seasonNumber = 1, repository = repository).test {
+            assertTrue(awaitItem() is OperationStatus.InProgress)
+            val error = awaitItem()
+            assertTrue(error is OperationStatus.Error)
+            assertEquals("Not a Sonarr instance", error.message)
+            awaitComplete()
         }
+    }
 }

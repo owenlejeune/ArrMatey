@@ -9,11 +9,10 @@ class GetTrendingUseCase {
     fun createPagingController(
         repository: SeerrInstanceRepository,
         scope: CoroutineScope,
-    ): PagingController<DiscoverResult> =
-        PagingController(
-            scope = scope,
-            keySelector = { "${it.mediaType.name}_${it.id}" },
-        ) {
-            repository.getTrendingPaging()
-        }
+    ): PagingController<DiscoverResult> = PagingController(
+        scope = scope,
+        keySelector = { "${it.mediaType.name}_${it.id}" },
+    ) {
+        repository.getTrendingPaging()
+    }
 }

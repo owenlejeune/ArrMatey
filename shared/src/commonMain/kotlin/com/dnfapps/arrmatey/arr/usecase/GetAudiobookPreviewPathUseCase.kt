@@ -15,26 +15,25 @@ class GetAudiobookPreviewPathUseCase(
     operator fun invoke(
         rootPath: String,
         metadataResponse: AudiobookMetadataResponse,
-    ): Flow<String> =
-        channelFlow {
-            val repository =
-                instanceManager
-                    .getSelectedArrRepository(InstanceType.Listenarr)
-                    .firstOrNull()
+    ): Flow<String> = channelFlow {
+        val repository =
+            instanceManager
+                .getSelectedArrRepository(InstanceType.Listenarr)
+                .firstOrNull()
 
-            if (repository == null) {
-                send("")
-                return@channelFlow
-            }
-
-            val (source, _, metadata) = metadataResponse
-            val body = metadata.toBody(source)
-            repository
-                .getPreviewPath(rootPath, body)
-                .onSuccess { (_, relativePath, _) ->
-                    send(relativePath)
-                }.onError { _, _, _ ->
-                    send("")
-                }
+        if (repository == null) {
+            send("")
+            return@channelFlow
         }
+
+        val (source, _, metadata) = metadataResponse
+        val body = metadata.toBody(source)
+        repository
+            .getPreviewPath(rootPath, body)
+            .onSuccess { (_, relativePath, _) ->
+                send(relativePath)
+            }.onError { _, _, _ ->
+                send("")
+            }
+    }
 }

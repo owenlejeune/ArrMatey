@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.settings.ImportDialog
 import com.dnfapps.arrmatey.utils.MokoStrings
@@ -105,10 +106,10 @@ fun OnboardingScreen(
         bottomBar = {
             Box(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
             ) {
                 Row(
                     modifier = Modifier.align(Alignment.CenterStart),
@@ -138,17 +139,17 @@ fun OnboardingScreen(
                         val isSelected = pagerState.currentPage == index
                         Box(
                             modifier =
-                                Modifier
-                                    .height(6.dp)
-                                    .width(if (isSelected) 24.dp else 6.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (isSelected) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.outlineVariant
-                                        },
-                                    ),
+                            Modifier
+                                .height(6.dp)
+                                .width(if (isSelected) 24.dp else 6.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isSelected) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.outlineVariant
+                                    },
+                                ),
                         )
                     }
                 }
@@ -175,9 +176,9 @@ fun OnboardingScreen(
                         Button(
                             onClick = onComplete,
                             colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                ),
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                            ),
                         ) {
                             Text(mokoString(MR.strings.onboarding_get_started))
                         }
@@ -190,9 +191,9 @@ fun OnboardingScreen(
             userScrollEnabled = false,
             state = pagerState,
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
         ) { page ->
             when (page) {
                 0 -> WelcomePage()

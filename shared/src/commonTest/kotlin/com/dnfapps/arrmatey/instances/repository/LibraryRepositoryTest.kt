@@ -31,31 +31,30 @@ class LibraryRepositoryTest {
     private val fakeLogger = LoggerFactory.get("test")
 
     @Test
-    fun testRefreshLibrary() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(
-                        content = "[]",
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
+    fun testRefreshLibrary() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content = "[]",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                        },
                     )
                 }
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json(
-                            Json {
-                                ignoreUnknownKeys = true
-                            },
-                        )
-                    }
-                }
-            val client = SonarrClient(fakeInstance, httpClient)
-            val libraryRepo = LibraryRepository(client, fakeLogger)
+            }
+        val client = SonarrClient(fakeInstance, httpClient)
+        val libraryRepo = LibraryRepository(client, fakeLogger)
 
-            libraryRepo.refreshLibrary()
+        libraryRepo.refreshLibrary()
 
-            assertNotNull(libraryRepo.library.value)
-        }
+        assertNotNull(libraryRepo.library.value)
+    }
 }

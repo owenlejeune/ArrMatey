@@ -13,53 +13,51 @@ class TestDownloadClientConnectionUseCase(
     operator fun invoke(
         id: Long,
         forceRefresh: Boolean = false,
-    ): Flow<OperationStatus> =
-        flow {
-            emit(OperationStatus.InProgress)
+    ): Flow<OperationStatus> = flow {
+        emit(OperationStatus.InProgress)
 
-            val api =
-                if (forceRefresh) {
-                    downloadClientManager.refreshApi(id)
-                } else {
-                    downloadClientManager.getOrCreateApi(id)
-                }
-
-            if (api == null) {
-                emit(OperationStatus.Error(message = "Download client not found in database"))
-                return@flow
+        val api =
+            if (forceRefresh) {
+                downloadClientManager.refreshApi(id)
+            } else {
+                downloadClientManager.getOrCreateApi(id)
             }
 
-            when (val result = api.testConnection()) {
-                is NetworkResult.Success -> emit(OperationStatus.Success())
-                is NetworkResult.Error ->
-                    emit(
-                        OperationStatus.Error(
-                            code = result.code,
-                            message = result.message ?: "Connection test failed",
-                            cause = result.cause,
-                        ),
-                    )
-                is NetworkResult.Loading -> emit(OperationStatus.InProgress)
-            }
+        if (api == null) {
+            emit(OperationStatus.Error(message = "Download client not found in database"))
+            return@flow
         }
 
-    operator fun invoke(client: DownloadClient): Flow<OperationStatus> =
-        flow {
-            emit(OperationStatus.InProgress)
-
-            val api = downloadClientManager.createApiFromClient(client)
-
-            when (val result = api.testConnection()) {
-                is NetworkResult.Success -> emit(OperationStatus.Success())
-                is NetworkResult.Error ->
-                    emit(
-                        OperationStatus.Error(
-                            code = result.code,
-                            message = result.message ?: "Connection test failed",
-                            cause = result.cause,
-                        ),
-                    )
-                is NetworkResult.Loading -> emit(OperationStatus.InProgress)
-            }
+        when (val result = api.testConnection()) {
+            is NetworkResult.Success -> emit(OperationStatus.Success())
+            is NetworkResult.Error ->
+                emit(
+                    OperationStatus.Error(
+                        code = result.code,
+                        message = result.message ?: "Connection test failed",
+                        cause = result.cause,
+                    ),
+                )
+            is NetworkResult.Loading -> emit(OperationStatus.InProgress)
         }
+    }
+
+    operator fun invoke(client: DownloadClient): Flow<OperationStatus> = flow {
+        emit(OperationStatus.InProgress)
+
+        val api = downloadClientManager.createApiFromClient(client)
+
+        when (val result = api.testConnection()) {
+            is NetworkResult.Success -> emit(OperationStatus.Success())
+            is NetworkResult.Error ->
+                emit(
+                    OperationStatus.Error(
+                        code = result.code,
+                        message = result.message ?: "Connection test failed",
+                        cause = result.cause,
+                    ),
+                )
+            is NetworkResult.Loading -> emit(OperationStatus.InProgress)
+        }
+    }
 }

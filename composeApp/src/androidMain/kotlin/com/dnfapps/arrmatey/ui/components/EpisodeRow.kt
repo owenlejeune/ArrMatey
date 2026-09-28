@@ -48,6 +48,7 @@ import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.extensions.isToday
 import com.dnfapps.arrmatey.extensions.isTodayOrAfter
 import com.dnfapps.arrmatey.model.EpisodeWrapper
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.bazarr.EpisodeSubtitlesRow
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -73,13 +74,13 @@ fun EpisodeRow(
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier =
-            modifier
-                .padding(vertical = 4.dp)
-                .combinedClickable(
-                    enabled = onClick != null || onLongClick != null,
-                    onClick = onClick ?: {},
-                    onLongClick = onLongClick,
-                ),
+        modifier
+            .padding(vertical = 4.dp)
+            .combinedClickable(
+                enabled = onClick != null || onLongClick != null,
+                onClick = onClick ?: {},
+                onLongClick = onLongClick,
+            ),
     ) {
         Row(
             verticalAlignment = Alignment.Top,
@@ -225,11 +226,11 @@ fun EpisodeRow(
                             ) { monitored ->
                                 Icon(
                                     imageVector =
-                                        if (monitored) {
-                                            Icons.Default.Bookmark
-                                        } else {
-                                            Icons.Default.BookmarkBorder
-                                        },
+                                    if (monitored) {
+                                        Icons.Default.Bookmark
+                                    } else {
+                                        Icons.Default.BookmarkBorder
+                                    },
                                     contentDescription = null,
                                     modifier = Modifier.size(20.dp),
                                 )
@@ -250,11 +251,11 @@ fun EpisodeRow(
                 AsyncImage(
                     model = rememberRemoteImageData(stillUrl),
                     modifier =
-                        Modifier
-                            .height(70.dp)
-                            .aspectRatio(1.77f)
-                            .clip(MaterialTheme.shapes.small)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                    Modifier
+                        .height(70.dp)
+                        .aspectRatio(1.77f)
+                        .clip(MaterialTheme.shapes.small)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                     contentDescription = null,
                 )
 

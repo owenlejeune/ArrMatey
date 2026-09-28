@@ -14,10 +14,9 @@ data class ListenarrSystemInfo(
     @Serializable(with = ListenarrInstantSerializer::class)
     val startTime: Instant,
 ) {
-    fun toArrSoftwareStatus(): ArrSoftwareStatus =
-        ArrSoftwareStatus(
-            version = version,
-            osName = operatingSystem,
-            runtimeName = runtime,
-        )
+    fun toArrSoftwareStatus(): ArrSoftwareStatus = ArrSoftwareStatus(
+        version = version,
+        osName = operatingSystem,
+        runtimeName = runtime,
+    )
 }

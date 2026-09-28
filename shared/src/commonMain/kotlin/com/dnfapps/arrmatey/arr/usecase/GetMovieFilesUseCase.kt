@@ -15,26 +15,25 @@ import kotlinx.coroutines.flow.map
 class GetMovieFilesUseCase(
     private val instanceManager: InstanceManager,
 ) {
-    operator fun invoke(movieId: Long): Flow<MovieFilesState> =
-        channelFlow {
-            instanceManager
-                .getSelectedArrRepository(InstanceType.Radarr)
-                .filterNotNull()
-                .collectLatest { repository ->
-                    repository.getMovieExtraFiles(movieId)
-                    combine(
-                        repository.movieExtraFiles.map { it[movieId] ?: emptyList() },
-                        repository.observeItemHistory(movieId),
-                        repository.historyStatus,
-                    ) { extraFiles, history, status ->
-                        MovieFilesState(
-                            extraFiles = extraFiles,
-                            history = history,
-                            isRefreshing = status is OperationStatus.InProgress,
-                        )
-                    }.collect { send(it) }
-                }
-        }
+    operator fun invoke(movieId: Long): Flow<MovieFilesState> = channelFlow {
+        instanceManager
+            .getSelectedArrRepository(InstanceType.Radarr)
+            .filterNotNull()
+            .collectLatest { repository ->
+                repository.getMovieExtraFiles(movieId)
+                combine(
+                    repository.movieExtraFiles.map { it[movieId] ?: emptyList() },
+                    repository.observeItemHistory(movieId),
+                    repository.historyStatus,
+                ) { extraFiles, history, status ->
+                    MovieFilesState(
+                        extraFiles = extraFiles,
+                        history = history,
+                        isRefreshing = status is OperationStatus.InProgress,
+                    )
+                }.collect { send(it) }
+            }
+    }
 
     suspend fun refreshHistory(movieId: Long) {
         instanceManager

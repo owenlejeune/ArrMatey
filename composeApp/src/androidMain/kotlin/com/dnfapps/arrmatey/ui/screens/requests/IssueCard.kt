@@ -34,6 +34,7 @@ import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BannerView
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
@@ -55,18 +56,18 @@ fun IssueCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = Color.White,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = Color.White,
+        ),
         onClick = onClick,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             BannerView(
                 bannerModel =
-                    (details?.fullBackdropPath ?: details?.fullPosterPath)?.let {
-                        rememberRemoteImageData(it)
-                    },
+                (details?.fullBackdropPath ?: details?.fullPosterPath)?.let {
+                    rememberRemoteImageData(it)
+                },
                 modifier = Modifier.matchParentSize(),
             )
             Box(modifier = Modifier.matchParentSize().background(TranslucentBlack))
@@ -99,10 +100,10 @@ fun IssueCard(
                         ) {
                             Text(
                                 text =
-                                    issue.problemSeason
-                                        .takeUnless { it == 0 }
-                                        ?.toString()
-                                        ?: mokoString(MR.strings.all),
+                                issue.problemSeason
+                                    .takeUnless { it == 0 }
+                                    ?.toString()
+                                    ?: mokoString(MR.strings.all),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
@@ -119,10 +120,10 @@ fun IssueCard(
                         ) {
                             Text(
                                 text =
-                                    issue.problemEpisode
-                                        .takeUnless { it == 0 }
-                                        ?.toString()
-                                        ?: mokoString(MR.strings.all),
+                                issue.problemEpisode
+                                    .takeUnless { it == 0 }
+                                    ?.toString()
+                                    ?: mokoString(MR.strings.all),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
@@ -162,10 +163,10 @@ private fun IssueCardHeader(
             model = rememberRemoteImageData(posterUrl),
             contentDescription = null,
             modifier =
-                Modifier
-                    .height(110.dp)
-                    .aspectRatio(AspectRatio.Poster.ratio, true)
-                    .clip(MaterialTheme.shapes.medium),
+            Modifier
+                .height(110.dp)
+                .aspectRatio(AspectRatio.Poster.ratio, true)
+                .clip(MaterialTheme.shapes.medium),
             contentScale = ContentScale.Fit,
         )
 
@@ -204,13 +205,13 @@ private fun IssueCardHeader(
             )
             Text(
                 text =
-                    buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
-                            append(mokoString(MR.strings.type))
-                        }
-                        append(" ")
-                        append(mokoString(issueType.label))
-                    },
+                buildAnnotatedString {
+                    withStyle(SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(mokoString(MR.strings.type))
+                    }
+                    append(" ")
+                    append(mokoString(issueType.label))
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.9f),
             )

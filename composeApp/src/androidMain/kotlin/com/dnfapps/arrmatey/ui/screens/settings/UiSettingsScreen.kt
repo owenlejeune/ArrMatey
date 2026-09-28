@@ -50,6 +50,7 @@ import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
@@ -92,7 +93,7 @@ fun UiSettingsScreen(
                 (
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
                         context.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_HINGE_ANGLE)
-                )
+                    )
         }
 
     val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()
@@ -114,227 +115,227 @@ fun UiSettingsScreen(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = navigationBarBottomInset() + 16.dp),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = navigationBarBottomInset() + 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             SettingsGroup(
                 title = mokoString(MR.strings.appearance),
                 items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Contrast),
-                            title = mokoString(MR.strings.theme),
-                            subtitle = mokoString(appTheme.resource),
-                            onClick = { showThemeDropdown = true },
-                            trailingContent = {
-                                Box {
-                                    DropdownMenu(
-                                        expanded = showThemeDropdown,
-                                        onDismissRequest = { showThemeDropdown = false },
-                                    ) {
-                                        AppTheme.entries.forEach { theme ->
+                listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Contrast),
+                        title = mokoString(MR.strings.theme),
+                        subtitle = mokoString(appTheme.resource),
+                        onClick = { showThemeDropdown = true },
+                        trailingContent = {
+                            Box {
+                                DropdownMenu(
+                                    expanded = showThemeDropdown,
+                                    onDismissRequest = { showThemeDropdown = false },
+                                ) {
+                                    AppTheme.entries.forEach { theme ->
+                                        DropdownMenuItem(
+                                            text = { Text(mokoString(theme.resource)) },
+                                            onClick = {
+                                                viewModel.setAppTheme(theme)
+                                                showThemeDropdown = false
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Palette),
+                        title = mokoString(MR.strings.color),
+                        subtitle = mokoString(appColor.resource),
+                        onClick = { showColorDropdown = true },
+                        trailingContent = {
+                            Box {
+                                DropdownMenu(
+                                    expanded = showColorDropdown,
+                                    onDismissRequest = { showColorDropdown = false },
+                                ) {
+                                    AppColor.entries
+                                        .filter { it != AppColor.Dynamic || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S }
+                                        .forEach { color ->
                                             DropdownMenuItem(
-                                                text = { Text(mokoString(theme.resource)) },
+                                                text = { Text(mokoString(color.resource)) },
                                                 onClick = {
-                                                    viewModel.setAppTheme(theme)
-                                                    showThemeDropdown = false
+                                                    viewModel.setAppColor(color)
+                                                    showColorDropdown = false
                                                 },
                                             )
                                         }
-                                    }
                                 }
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Palette),
-                            title = mokoString(MR.strings.color),
-                            subtitle = mokoString(appColor.resource),
-                            onClick = { showColorDropdown = true },
-                            trailingContent = {
-                                Box {
-                                    DropdownMenu(
-                                        expanded = showColorDropdown,
-                                        onDismissRequest = { showColorDropdown = false },
-                                    ) {
-                                        AppColor.entries
-                                            .filter { it != AppColor.Dynamic || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S }
-                                            .forEach { color ->
-                                                DropdownMenuItem(
-                                                    text = { Text(mokoString(color.resource)) },
-                                                    onClick = {
-                                                        viewModel.setAppColor(color)
-                                                        showColorDropdown = false
-                                                    },
-                                                )
-                                            }
-                                    }
-                                }
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.MiscellaneousServices),
-                            title = mokoString(MR.strings.service_icons_title),
-                            subtitle = mokoString(MR.strings.service_icons_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = useServiceNavLogos,
-                                    onCheckedChange = { viewModel.toggleUseServiceNavLogos() },
-                                )
-                            },
-                            onClick = { viewModel.toggleUseServiceNavLogos() },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.ColorLens),
-                            title = mokoString(MR.strings.use_colored_activity_cards),
-                            subtitle = mokoString(MR.strings.use_colored_activity_cards_desc),
-                            trailingContent = {
-                                Switch(
-                                    checked = useColoredActivityCards,
-                                    onCheckedChange = { viewModel.toggleUseColoredActivityCards() },
-                                )
-                            },
-                            onClick = { viewModel.toggleUseColoredActivityCards() },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.ColorLens),
-                            title = mokoString(MR.strings.use_colored_calendar_cards),
-                            subtitle = mokoString(MR.strings.use_colored_calendar_cards_desc),
-                            trailingContent = {
-                                Switch(
-                                    checked = useColoredCalendarCards,
-                                    onCheckedChange = { viewModel.toggleUseColoredCalendarCards() },
-                                )
-                            },
-                            onClick = { viewModel.toggleUseColoredCalendarCards() },
-                        ),
+                            }
+                        },
                     ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.MiscellaneousServices),
+                        title = mokoString(MR.strings.service_icons_title),
+                        subtitle = mokoString(MR.strings.service_icons_description),
+                        trailingContent = {
+                            Switch(
+                                checked = useServiceNavLogos,
+                                onCheckedChange = { viewModel.toggleUseServiceNavLogos() },
+                            )
+                        },
+                        onClick = { viewModel.toggleUseServiceNavLogos() },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.ColorLens),
+                        title = mokoString(MR.strings.use_colored_activity_cards),
+                        subtitle = mokoString(MR.strings.use_colored_activity_cards_desc),
+                        trailingContent = {
+                            Switch(
+                                checked = useColoredActivityCards,
+                                onCheckedChange = { viewModel.toggleUseColoredActivityCards() },
+                            )
+                        },
+                        onClick = { viewModel.toggleUseColoredActivityCards() },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.ColorLens),
+                        title = mokoString(MR.strings.use_colored_calendar_cards),
+                        subtitle = mokoString(MR.strings.use_colored_calendar_cards_desc),
+                        trailingContent = {
+                            Switch(
+                                checked = useColoredCalendarCards,
+                                onCheckedChange = { viewModel.toggleUseColoredCalendarCards() },
+                            )
+                        },
+                        onClick = { viewModel.toggleUseColoredCalendarCards() },
+                    ),
+                ),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.navigation),
                 items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Navigation),
-                            title = mokoString(MR.strings.navigation_bar_configuration),
-                            onClick = {
-                                onNavigateToTabPreferences()
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.AutoMirrored.Default.Shortcut),
-                            title = mokoString(MR.strings.shortcuts_configuration),
-                            onClick = {
-                                onNavigateToShortcutsPreferences()
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Hard_drive),
-                            title = mokoString(MR.strings.instance_switcher_toggle_title),
-                            subtitle = mokoString(MR.strings.instance_switcher_toggle_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = hideInstanceSwitcher,
-                                    onCheckedChange = { viewModel.toggleInstanceSwitcher() },
-                                )
-                            },
-                            onClick = { viewModel.toggleInstanceSwitcher() },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.MoreHoriz),
-                            title = mokoString(MR.strings.floating_navigation_bar_toggle_title),
-                            subtitle = mokoString(MR.strings.floating_navigation_bar_toggle_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = useFloatingNavigationBar,
-                                    onCheckedChange = { viewModel.toggleUseFloatingNavigationBar() },
-                                )
-                            },
-                            onClick = { viewModel.toggleUseFloatingNavigationBar() },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.AutoMirrored.Default.ArrowBack),
-                            title = mokoString(MR.strings.overlay_tab_back_opens_drawer_title),
-                            subtitle = mokoString(MR.strings.overlay_tab_back_opens_drawer_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = overlayTabBackOpensDrawer,
-                                    onCheckedChange = { viewModel.toggleOverlayTabBackOpensDrawer() },
-                                )
-                            },
-                            onClick = { viewModel.toggleOverlayTabBackOpensDrawer() },
-                        ),
+                listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Navigation),
+                        title = mokoString(MR.strings.navigation_bar_configuration),
+                        onClick = {
+                            onNavigateToTabPreferences()
+                        },
                     ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.AutoMirrored.Default.Shortcut),
+                        title = mokoString(MR.strings.shortcuts_configuration),
+                        onClick = {
+                            onNavigateToShortcutsPreferences()
+                        },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Hard_drive),
+                        title = mokoString(MR.strings.instance_switcher_toggle_title),
+                        subtitle = mokoString(MR.strings.instance_switcher_toggle_description),
+                        trailingContent = {
+                            Switch(
+                                checked = hideInstanceSwitcher,
+                                onCheckedChange = { viewModel.toggleInstanceSwitcher() },
+                            )
+                        },
+                        onClick = { viewModel.toggleInstanceSwitcher() },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.MoreHoriz),
+                        title = mokoString(MR.strings.floating_navigation_bar_toggle_title),
+                        subtitle = mokoString(MR.strings.floating_navigation_bar_toggle_description),
+                        trailingContent = {
+                            Switch(
+                                checked = useFloatingNavigationBar,
+                                onCheckedChange = { viewModel.toggleUseFloatingNavigationBar() },
+                            )
+                        },
+                        onClick = { viewModel.toggleUseFloatingNavigationBar() },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.AutoMirrored.Default.ArrowBack),
+                        title = mokoString(MR.strings.overlay_tab_back_opens_drawer_title),
+                        subtitle = mokoString(MR.strings.overlay_tab_back_opens_drawer_description),
+                        trailingContent = {
+                            Switch(
+                                checked = overlayTabBackOpensDrawer,
+                                onCheckedChange = { viewModel.toggleOverlayTabBackOpensDrawer() },
+                            )
+                        },
+                        onClick = { viewModel.toggleOverlayTabBackOpensDrawer() },
+                    ),
+                ),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.view_customization),
                 items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Tune),
-                            title = mokoString(MR.strings.discover_sections),
-                            subtitle = mokoString(MR.strings.reorganize_hide_sections),
-                            onClick = { showDiscoverCustomizationSheet = true },
-                        ),
+                listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Tune),
+                        title = mokoString(MR.strings.discover_sections),
+                        subtitle = mokoString(MR.strings.reorganize_hide_sections),
+                        onClick = { showDiscoverCustomizationSheet = true },
                     ),
+                ),
             )
 
             if (isLargeScreenSupported) {
                 SettingsGroup(
                     title = mokoString(MR.strings.large_screen_settings_title),
                     items =
-                        listOf(
-                            SettingItem(
-                                icon = IconSource.Vector(Icons.Default.Splitscreen, rotation = 90f),
-                                title = mokoString(MR.strings.dual_panel_support_title),
-                                subtitle = mokoString(MR.strings.dual_panel_support_description),
-                                trailingContent = {
-                                    Switch(
-                                        checked = dualPanelSupport,
-                                        onCheckedChange = { viewModel.toggleDualPanelSupport() },
-                                    )
-                                },
-                                onClick = { viewModel.toggleDualPanelSupport() },
-                            ),
+                    listOf(
+                        SettingItem(
+                            icon = IconSource.Vector(Icons.Default.Splitscreen, rotation = 90f),
+                            title = mokoString(MR.strings.dual_panel_support_title),
+                            subtitle = mokoString(MR.strings.dual_panel_support_description),
+                            trailingContent = {
+                                Switch(
+                                    checked = dualPanelSupport,
+                                    onCheckedChange = { viewModel.toggleDualPanelSupport() },
+                                )
+                            },
+                            onClick = { viewModel.toggleDualPanelSupport() },
                         ),
+                    ),
                 )
             }
 
             SettingsGroup(
                 title = mokoString(MR.strings.search_results),
                 items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Image),
-                            title = mokoString(MR.strings.search_show_banners),
-                            subtitle = mokoString(MR.strings.search_show_banners_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = searchShowBanners,
-                                    onCheckedChange = { viewModel.toggleSearchShowBanners() },
-                                )
-                            },
-                            onClick = { viewModel.toggleSearchShowBanners() },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Search),
-                            title = mokoString(MR.strings.unified_library_search_all_instances_title),
-                            subtitle = mokoString(MR.strings.unified_library_search_all_instances_description),
-                            trailingContent = {
-                                Switch(
-                                    checked = unifiedLibrarySearchAllInstances,
-                                    onCheckedChange = { viewModel.toggleUnifiedLibrarySearchAllInstances() },
-                                )
-                            },
-                            onClick = { viewModel.toggleUnifiedLibrarySearchAllInstances() },
-                        ),
+                listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Image),
+                        title = mokoString(MR.strings.search_show_banners),
+                        subtitle = mokoString(MR.strings.search_show_banners_description),
+                        trailingContent = {
+                            Switch(
+                                checked = searchShowBanners,
+                                onCheckedChange = { viewModel.toggleSearchShowBanners() },
+                            )
+                        },
+                        onClick = { viewModel.toggleSearchShowBanners() },
                     ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Search),
+                        title = mokoString(MR.strings.unified_library_search_all_instances_title),
+                        subtitle = mokoString(MR.strings.unified_library_search_all_instances_description),
+                        trailingContent = {
+                            Switch(
+                                checked = unifiedLibrarySearchAllInstances,
+                                onCheckedChange = { viewModel.toggleUnifiedLibrarySearchAllInstances() },
+                            )
+                        },
+                        onClick = { viewModel.toggleUnifiedLibrarySearchAllInstances() },
+                    ),
+                ),
             )
         }
     }

@@ -48,14 +48,13 @@ data class DownloadClient(
         }
     }
 
-    fun isUsingLocalNetwork(): Boolean =
-        try {
-            val currentSsid = getNetworkUtils().getCurrentWifiSsid()
-            localNetworkEnabled &&
-                !localNetworkEndpoint.isNullOrBlank() &&
-                currentSsid != null &&
-                localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }
-        } catch (e: Exception) {
-            false
-        }
+    fun isUsingLocalNetwork(): Boolean = try {
+        val currentSsid = getNetworkUtils().getCurrentWifiSsid()
+        localNetworkEnabled &&
+            !localNetworkEndpoint.isNullOrBlank() &&
+            currentSsid != null &&
+            localNetworkSsids.any { it.equals(currentSsid, ignoreCase = true) }
+    } catch (e: Exception) {
+        false
+    }
 }

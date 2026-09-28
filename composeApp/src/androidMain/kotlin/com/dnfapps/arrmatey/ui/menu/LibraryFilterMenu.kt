@@ -42,6 +42,7 @@ import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -90,12 +91,12 @@ fun LibraryFilterMenu(
             ) {
                 Column(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                            .padding(bottom = 32.dp)
-                            .navigationBarsPadding()
-                            .verticalScroll(rememberScrollState()),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 32.dp)
+                        .navigationBarsPadding()
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     // Header
@@ -152,11 +153,11 @@ fun LibraryFilterMenu(
                                     },
                                     label = { Text(mokoString(filter.resource)) },
                                     leadingIcon =
-                                        if (isSelected) {
-                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                        } else {
-                                            null
-                                        },
+                                    if (isSelected) {
+                                        { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                    } else {
+                                        null
+                                    },
                                     shape = MaterialTheme.shapes.small,
                                 )
                             }
@@ -185,11 +186,11 @@ fun LibraryFilterMenu(
                                         },
                                         label = { Text(filter.label) },
                                         leadingIcon =
-                                            if (isSelected) {
-                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                            } else {
-                                                null
-                                            },
+                                        if (isSelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
                                         shape = MaterialTheme.shapes.small,
                                     )
                                 }
@@ -231,11 +232,11 @@ fun LibraryFilterMenu(
                                 leadingIcon = {
                                     Icon(
                                         imageVector =
-                                            if (sortOrder == SortOrder.Asc) {
-                                                Icons.Default.ArrowUpward
-                                            } else {
-                                                Icons.Default.ArrowDownward
-                                            },
+                                        if (sortOrder == SortOrder.Asc) {
+                                            Icons.Default.ArrowUpward
+                                        } else {
+                                            Icons.Default.ArrowDownward
+                                        },
                                         contentDescription = null,
                                         modifier = Modifier.size(16.dp),
                                     )
@@ -255,11 +256,11 @@ fun LibraryFilterMenu(
                                     onClick = { onSortByChanged(sort) },
                                     label = { Text(mokoString(sort.resource)) },
                                     leadingIcon =
-                                        if (isSelected) {
-                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                        } else {
-                                            null
-                                        },
+                                    if (isSelected) {
+                                        { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                    } else {
+                                        null
+                                    },
                                     shape = MaterialTheme.shapes.small,
                                 )
                             }

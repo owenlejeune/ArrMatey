@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.utils.mokoString
@@ -36,9 +37,9 @@ fun BoxScope.ScrollToTodayButton(
         enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
         exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
         modifier =
-            modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = fabBottomPadding),
+        modifier
+            .align(Alignment.BottomCenter)
+            .padding(bottom = fabBottomPadding),
     ) {
         if (extended) {
             ExtendedFloatingActionButton(

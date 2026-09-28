@@ -68,7 +68,7 @@ class EpisodeDetailsViewModel(
                         (
                             task.calcEpisodeId == episode.id ||
                                 (task.calcSeriesId == seriesId && task.seasonNumber == episode.seasonNumber && task.calcEpisodeId == null)
-                        )
+                            )
                 }
             }.stateIn(
                 scope = viewModelScope,

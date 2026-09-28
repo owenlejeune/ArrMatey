@@ -61,64 +61,61 @@ class UnifiedMediaDetailsSeerrHandlerTest {
     }
 
     @Test
-    fun testSubmitRequestSuccess() =
-        runTest(UnconfinedTestDispatcher()) {
-            val mockRepo = mockk<SeerrInstanceRepository>()
-            coEvery { submitRequestUseCase(any(), mockRepo) } returns NetworkResult.Success(mockk())
+    fun testSubmitRequestSuccess() = runTest(UnconfinedTestDispatcher()) {
+        val mockRepo = mockk<SeerrInstanceRepository>()
+        coEvery { submitRequestUseCase(any(), mockRepo) } returns NetworkResult.Success(mockk())
 
-            var refreshed = false
-            handler.showRequestSheet(is4k = false)
+        var refreshed = false
+        handler.showRequestSheet(is4k = false)
 
-            handler.submitRequest(
-                scope = TestScope(UnconfinedTestDispatcher()),
-                repositoryProvider = { mockRepo },
-                resolvedRequestType = RequestType.Movie,
-                tmdbId = 12345L,
-                onSuccessRefresh = { refreshed = true },
-            )
+        handler.submitRequest(
+            scope = TestScope(UnconfinedTestDispatcher()),
+            repositoryProvider = { mockRepo },
+            resolvedRequestType = RequestType.Movie,
+            tmdbId = 12345L,
+            onSuccessRefresh = { refreshed = true },
+        )
 
-            assertTrue(handler.requestStatus.value is OperationStatus.Success)
-            assertFalse(handler.isRequestSheetVisible.value)
-            assertTrue(refreshed)
-        }
-
-    @Test
-    fun testCancelRequest() =
-        runTest(UnconfinedTestDispatcher()) {
-            val mockRepo = mockk<SeerrInstanceRepository>()
-            coEvery { cancelRequestUseCase(100L, mockRepo) } returns NetworkResult.Success(Unit)
-
-            var refreshed = false
-            handler.cancelRequest(
-                scope = TestScope(UnconfinedTestDispatcher()),
-                repositoryProvider = { mockRepo },
-                requestId = 100L,
-                onSuccessRefresh = { refreshed = true },
-            )
-
-            assertTrue(handler.requestStatus.value is OperationStatus.Success)
-            assertTrue(refreshed)
-            coVerify { cancelRequestUseCase(100L, mockRepo) }
-        }
+        assertTrue(handler.requestStatus.value is OperationStatus.Success)
+        assertFalse(handler.isRequestSheetVisible.value)
+        assertTrue(refreshed)
+    }
 
     @Test
-    fun testDeclineRequest() =
-        runTest(UnconfinedTestDispatcher()) {
-            val mockRepo = mockk<SeerrInstanceRepository>()
-            coEvery { setRequestApprovalStatusUseCase(200L, ApprovalStatus.Decline, mockRepo) } returns NetworkResult.Success(mockk())
+    fun testCancelRequest() = runTest(UnconfinedTestDispatcher()) {
+        val mockRepo = mockk<SeerrInstanceRepository>()
+        coEvery { cancelRequestUseCase(100L, mockRepo) } returns NetworkResult.Success(Unit)
 
-            handler.showViewRequestSheet()
-            var refreshed = false
+        var refreshed = false
+        handler.cancelRequest(
+            scope = TestScope(UnconfinedTestDispatcher()),
+            repositoryProvider = { mockRepo },
+            requestId = 100L,
+            onSuccessRefresh = { refreshed = true },
+        )
 
-            handler.declineRequest(
-                scope = TestScope(UnconfinedTestDispatcher()),
-                repositoryProvider = { mockRepo },
-                requestId = 200L,
-                onSuccessRefresh = { refreshed = true },
-            )
+        assertTrue(handler.requestStatus.value is OperationStatus.Success)
+        assertTrue(refreshed)
+        coVerify { cancelRequestUseCase(100L, mockRepo) }
+    }
 
-            assertTrue(handler.requestStatus.value is OperationStatus.Success)
-            assertFalse(handler.isViewRequestSheetVisible.value)
-            assertTrue(refreshed)
-        }
+    @Test
+    fun testDeclineRequest() = runTest(UnconfinedTestDispatcher()) {
+        val mockRepo = mockk<SeerrInstanceRepository>()
+        coEvery { setRequestApprovalStatusUseCase(200L, ApprovalStatus.Decline, mockRepo) } returns NetworkResult.Success(mockk())
+
+        handler.showViewRequestSheet()
+        var refreshed = false
+
+        handler.declineRequest(
+            scope = TestScope(UnconfinedTestDispatcher()),
+            repositoryProvider = { mockRepo },
+            requestId = 200L,
+            onSuccessRefresh = { refreshed = true },
+        )
+
+        assertTrue(handler.requestStatus.value is OperationStatus.Success)
+        assertFalse(handler.isViewRequestSheetVisible.value)
+        assertTrue(refreshed)
+    }
 }

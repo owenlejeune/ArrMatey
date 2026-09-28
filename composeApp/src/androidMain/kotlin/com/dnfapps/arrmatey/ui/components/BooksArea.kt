@@ -57,6 +57,7 @@ import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.extensions.isToday
 import com.dnfapps.arrmatey.extensions.isTodayOrAfter
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.format
@@ -90,8 +91,8 @@ fun BooksArea(
             SecondaryTabRow(
                 selectedTabIndex = selectedTabIndex,
                 modifier =
-                    Modifier
-                        .weight(1.5f),
+                Modifier
+                    .weight(1.5f),
             ) {
                 Tab(
                     selected = selectedTabIndex == 0,
@@ -283,11 +284,11 @@ fun BookRow(
         ) {
             Icon(
                 imageVector =
-                    if (book.monitored) {
-                        Icons.Default.Bookmark
-                    } else {
-                        Icons.Default.BookmarkBorder
-                    },
+                if (book.monitored) {
+                    Icons.Default.Bookmark
+                } else {
+                    Icons.Default.BookmarkBorder
+                },
                 contentDescription = null,
             )
         }
@@ -335,9 +336,9 @@ private fun SeriesView(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
                     shape = MaterialTheme.shapes.large,
                     modifier =
-                        Modifier.clickable {
-                            expanded = !expanded
-                        },
+                    Modifier.clickable {
+                        expanded = !expanded
+                    },
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -361,21 +362,21 @@ private fun SeriesView(
                         )
                         Icon(
                             imageVector =
-                                if (wholeSeriesMonitored) {
-                                    Icons.Default.Bookmark
-                                } else {
-                                    Icons.Default.BookmarkBorder
-                                },
+                            if (wholeSeriesMonitored) {
+                                Icons.Default.Bookmark
+                            } else {
+                                Icons.Default.BookmarkBorder
+                            },
                             contentDescription =
-                                if (wholeSeriesMonitored) {
-                                    mokoString(MR.strings.monitored)
-                                } else {
-                                    mokoString(MR.strings.unmonitored)
-                                },
+                            if (wholeSeriesMonitored) {
+                                mokoString(MR.strings.monitored)
+                            } else {
+                                mokoString(MR.strings.unmonitored)
+                            },
                             modifier =
-                                Modifier.clickable {
-                                    onToggleSeriesMonitor(seriesBooks)
-                                },
+                            Modifier.clickable {
+                                onToggleSeriesMonitor(seriesBooks)
+                            },
                         )
                     }
                 }

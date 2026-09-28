@@ -12,15 +12,14 @@ class DeleteEpisodeFileUseCase {
         seriesId: Long,
         episodeFileId: Long,
         repository: ArrInstanceRepository,
-    ): Flow<OperationStatus> =
-        flow {
-            emit(OperationStatus.InProgress)
-            repository
-                .deleteEpisodeFile(seriesId, episodeFileId)
-                .onSuccess {
-                    emit(OperationStatus.Success("Episode deleted successfully"))
-                }.onError { code, message, cause ->
-                    emit(OperationStatus.Error(code, message, cause))
-                }
-        }
+    ): Flow<OperationStatus> = flow {
+        emit(OperationStatus.InProgress)
+        repository
+            .deleteEpisodeFile(seriesId, episodeFileId)
+            .onSuccess {
+                emit(OperationStatus.Success("Episode deleted successfully"))
+            }.onError { code, message, cause ->
+                emit(OperationStatus.Error(code, message, cause))
+            }
+    }
 }

@@ -44,6 +44,7 @@ import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
@@ -79,10 +80,10 @@ fun AddSeriesSheet(
             }
         },
         sheetState =
-            rememberModalBottomSheetState(
-                skipPartiallyExpanded = true,
-                confirmValueChange = { !addInProgress },
-            ),
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !addInProgress },
+        ),
     ) {
         AddSeriesSheetContent(
             item = item,
@@ -147,18 +148,18 @@ fun AddSeriesSheetContent(
 
     Column(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
+        modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f, fill = false)
-                    .verticalScroll(rememberScrollState()),
+            Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = false)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column {
@@ -311,11 +312,11 @@ fun SeriesAddConfigurationContent(
         ) {
             DropdownPicker(
                 options =
-                    SeriesMonitorType.entries.filter {
-                        it != SeriesMonitorType.Unknown &&
-                            it != SeriesMonitorType.LatestSeason &&
-                            it != SeriesMonitorType.Skip
-                    },
+                SeriesMonitorType.entries.filter {
+                    it != SeriesMonitorType.Unknown &&
+                        it != SeriesMonitorType.LatestSeason &&
+                        it != SeriesMonitorType.Skip
+                },
                 modifier = Modifier.fillMaxWidth(),
                 selectedOption = monitor,
                 onOptionSelected = onMonitorChange,
@@ -349,10 +350,10 @@ fun SeriesAddConfigurationContent(
                 MultiSelectDropdownPicker(
                     options = tags.map { it.id },
                     selectedOptions =
-                        mutableTags
-                            ?: androidx.compose.runtime.remember(
-                                selectedTags,
-                            ) { androidx.compose.runtime.mutableStateListOf(*selectedTags.toTypedArray()) },
+                    mutableTags
+                        ?: androidx.compose.runtime.remember(
+                            selectedTags,
+                        ) { androidx.compose.runtime.mutableStateListOf(*selectedTags.toTypedArray()) },
                     valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
                     onOptionSelected = { tag, isSelected ->
                         if (mutableTags != null) {

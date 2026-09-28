@@ -31,6 +31,7 @@ import com.dnfapps.arrmatey.arr.state.ActivityTabSegment
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
@@ -122,9 +123,9 @@ fun ActivityTab(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             PrimaryScrollableTabRow(
                 selectedTabIndex = ActivityTabSegment.entries.indexOf(uiState.selectedTab),

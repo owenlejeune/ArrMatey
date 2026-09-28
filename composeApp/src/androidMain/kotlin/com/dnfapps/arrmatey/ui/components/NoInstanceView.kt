@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -47,9 +48,9 @@ fun NoInstanceView(
         ) {
             Box(
                 modifier =
-                    Modifier
-                        .size(96.dp)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
+                Modifier
+                    .size(96.dp)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -82,10 +83,10 @@ fun NoInstanceView(
                     navManager.openNewInstanceScreen(type)
                 },
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
             ) {
                 Icon(
                     imageVector = Icons.Default.AddCircle,

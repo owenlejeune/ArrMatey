@@ -36,6 +36,7 @@ import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
@@ -67,10 +68,10 @@ fun SeerrRequestSheet(
             }
         },
         sheetState =
-            rememberModalBottomSheetState(
-                skipPartiallyExpanded = true,
-                confirmValueChange = { !requestInProgress },
-            ),
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !requestInProgress },
+        ),
     ) {
         SeerrRequestSheetContent(
             details = details,
@@ -137,20 +138,20 @@ fun SeerrRequestSheetContent(
 
     Column(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
-                .animateContentSize()
-                .verticalScroll(rememberScrollState()),
+        modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 24.dp)
+            .animateContentSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         Column {
             Text(
                 text =
-                    mokoString(
-                        if (details is TvDetails) MR.strings.type_series else MR.strings.type_movie,
-                    ).uppercase(),
+                mokoString(
+                    if (details is TvDetails) MR.strings.type_series else MR.strings.type_movie,
+                ).uppercase(),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
@@ -363,11 +364,11 @@ private fun SeasonSelector(
 
             LabelledSwitch(
                 label =
-                    if (season.seasonNumber == 0) {
-                        mokoString(MR.strings.specials)
-                    } else {
-                        mokoString(MR.strings.season_label, season.seasonNumber)
-                    },
+                if (season.seasonNumber == 0) {
+                    mokoString(MR.strings.specials)
+                } else {
+                    mokoString(MR.strings.season_label, season.seasonNumber)
+                },
                 sublabel = mokoPlural(MR.plurals.episodes, season.episodeCount),
                 checked = isSelected,
                 onCheckedChange = { checked ->

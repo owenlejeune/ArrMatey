@@ -86,6 +86,5 @@ fun initializeNetworkUtils(context: Context) {
     networkUtilsInstance = AndroidNetworkUtils(context.applicationContext)
 }
 
-actual fun getNetworkUtils(): NetworkUtils =
-    networkUtilsInstance
-        ?: throw IllegalStateException("NetworkUtils not initialized. Call initializeNetworkUtils(context) first.")
+actual fun getNetworkUtils(): NetworkUtils = networkUtilsInstance
+    ?: throw IllegalStateException("NetworkUtils not initialized. Call initializeNetworkUtils(context) first.")

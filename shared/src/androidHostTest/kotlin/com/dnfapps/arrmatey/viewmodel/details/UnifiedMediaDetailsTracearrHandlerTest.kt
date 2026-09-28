@@ -26,23 +26,22 @@ class UnifiedMediaDetailsTracearrHandlerTest {
     }
 
     @Test
-    fun testObserveTracearrDataWhenDisabled() =
-        runTest(UnconfinedTestDispatcher()) {
-            val repoUseCase = mockk<GetTracearrInstanceRepositoryUseCase>()
-            every { repoUseCase.observeSelected() } returns flowOf(null)
+    fun testObserveTracearrDataWhenDisabled() = runTest(UnconfinedTestDispatcher()) {
+        val repoUseCase = mockk<GetTracearrInstanceRepositoryUseCase>()
+        every { repoUseCase.observeSelected() } returns flowOf(null)
 
-            val prefsStore = mockk<PreferencesStore>()
-            every { prefsStore.tracearrDetailsIntegration } returns flowOf(false)
+        val prefsStore = mockk<PreferencesStore>()
+        every { prefsStore.tracearrDetailsIntegration } returns flowOf(false)
 
-            handler.observeTracearrData(
-                scope = TestScope(UnconfinedTestDispatcher()),
-                uiStateFlow = flowOf(UnifiedMediaDetailsUiState.Initial),
-                getTracearrInstanceRepositoryUseCase = repoUseCase,
-                preferencesStore = prefsStore,
-                initialTmdbId = 100L,
-                initialRequestType = null,
-            )
+        handler.observeTracearrData(
+            scope = TestScope(UnconfinedTestDispatcher()),
+            uiStateFlow = flowOf(UnifiedMediaDetailsUiState.Initial),
+            getTracearrInstanceRepositoryUseCase = repoUseCase,
+            preferencesStore = prefsStore,
+            initialTmdbId = 100L,
+            initialRequestType = null,
+        )
 
-            assertFalse(handler.tracearrState.value.isTracearrConfigured)
-        }
+        assertFalse(handler.tracearrState.value.isTracearrConfigured)
+    }
 }

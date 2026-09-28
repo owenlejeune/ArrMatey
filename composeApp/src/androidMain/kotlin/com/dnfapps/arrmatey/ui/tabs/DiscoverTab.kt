@@ -38,6 +38,7 @@ import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toPersonDetails
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.MediaInstanceFilterRow
 import com.dnfapps.arrmatey.ui.components.SearchResultList
@@ -65,55 +66,55 @@ fun DiscoverTab(
         wideRailIsVisible = wideRailIsVisible,
         isMasterScreen = { it is DiscoverScreen.Home },
         entryProvider =
-            entryProvider {
-                entry<DiscoverScreen.Home> {
-                    DiscoverHomeScreen(
-                        viewModel = viewModel,
-                        wideRailIsVisible = wideRailIsVisible,
-                        onSeeMore = { category ->
-                            navigation.navigateTo(DiscoverScreen.Category(category))
-                        },
-                        onItemClick = { result ->
-                            when (result) {
-                                is SearchResult.ArrMediaResult -> {
-                                    navigation.toArrDetailsOrPreview(result.media, result.instanceType)
-                                }
-                                is SearchResult.SeerrMediaResult -> {
-                                    navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
-                                }
-                                is SearchResult.SeerrPersonResult -> {
-                                    navigation.toPersonDetails(result.result.id)
-                                }
-                            }
-                        },
-                    )
-                }
-                entry<DiscoverScreen.Category> { entry ->
-                    DiscoverCategoryScreen(
-                        category = entry.category,
-                        viewModel = viewModel,
-                        onBack = { navigation.popBackStack() },
-                        onItemClick = { result ->
-                            when (result) {
-                                is SearchResult.ArrMediaResult -> {
-                                    navigation.toArrDetailsOrPreview(result.media, result.instanceType)
-                                }
-                                is SearchResult.SeerrMediaResult -> {
-                                    navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
-                                }
-                                is SearchResult.SeerrPersonResult -> {
-                                    navigation.toPersonDetails(result.result.id)
-                                }
-                            }
-                        },
-                    )
-                }
-                mediaNavEntries(
-                    navigation = navigation,
-                    isExpanded = isExpanded,
+        entryProvider {
+            entry<DiscoverScreen.Home> {
+                DiscoverHomeScreen(
+                    viewModel = viewModel,
                     wideRailIsVisible = wideRailIsVisible,
+                    onSeeMore = { category ->
+                        navigation.navigateTo(DiscoverScreen.Category(category))
+                    },
+                    onItemClick = { result ->
+                        when (result) {
+                            is SearchResult.ArrMediaResult -> {
+                                navigation.toArrDetailsOrPreview(result.media, result.instanceType)
+                            }
+                            is SearchResult.SeerrMediaResult -> {
+                                navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
+                            }
+                            is SearchResult.SeerrPersonResult -> {
+                                navigation.toPersonDetails(result.result.id)
+                            }
+                        }
+                    },
                 )
-            },
+            }
+            entry<DiscoverScreen.Category> { entry ->
+                DiscoverCategoryScreen(
+                    category = entry.category,
+                    viewModel = viewModel,
+                    onBack = { navigation.popBackStack() },
+                    onItemClick = { result ->
+                        when (result) {
+                            is SearchResult.ArrMediaResult -> {
+                                navigation.toArrDetailsOrPreview(result.media, result.instanceType)
+                            }
+                            is SearchResult.SeerrMediaResult -> {
+                                navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
+                            }
+                            is SearchResult.SeerrPersonResult -> {
+                                navigation.toPersonDetails(result.result.id)
+                            }
+                        }
+                    },
+                )
+            }
+            mediaNavEntries(
+                navigation = navigation,
+                isExpanded = isExpanded,
+                wideRailIsVisible = wideRailIsVisible,
+            )
+        },
     )
 }
 
@@ -166,9 +167,9 @@ fun DiscoverSearchOverlay(
             if (filteredItems.isEmpty() && selectedFilter != null) {
                 Column(
                     modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
+                    Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {

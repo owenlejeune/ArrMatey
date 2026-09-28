@@ -45,6 +45,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
@@ -74,11 +75,11 @@ fun DetailsHeader(
 
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = topPadding)
-                    .padding(horizontal = 12.dp)
-                    .align(Alignment.BottomCenter),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = topPadding)
+                .padding(horizontal = 12.dp)
+                .align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             verticalAlignment = Alignment.Bottom,
         ) {
@@ -95,9 +96,9 @@ fun DetailsHeader(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     modifier =
-                        Modifier.onGloballyPositioned {
-                            detailHeight = it.size.height
-                        },
+                    Modifier.onGloballyPositioned {
+                        detailHeight = it.size.height
+                    },
                 ) {
                     val ratings = item.toRatingItems()
                     RatingsSection(ratings)
@@ -105,11 +106,11 @@ fun DetailsHeader(
                     if (item !is Arrtist && item !is Author) {
                         Text(
                             text =
-                                listOfNotNull(
-                                    item.year,
-                                    item.runtimeString,
-                                    item.certification,
-                                ).joinToString(BULLET),
+                            listOfNotNull(
+                                item.year,
+                                item.runtimeString,
+                                item.certification,
+                            ).joinToString(BULLET),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                         item.releasedBy?.let { releasedBy ->
@@ -146,11 +147,11 @@ fun RatingsSection(ratings: List<RatingItem>) {
                     color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.95f),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)),
                     modifier =
-                        Modifier
-                            .clip(MaterialTheme.shapes.small)
-                            .clickable(enabled = rating.url != null) {
-                                rating.url?.let { context.openLink(it) }
-                            },
+                    Modifier
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable(enabled = rating.url != null) {
+                            rating.url?.let { context.openLink(it) }
+                        },
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -193,10 +194,10 @@ fun DetailsHeader(item: RequestMediaDetails) {
         )
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 170.dp)
-                    .padding(horizontal = 12.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 170.dp)
+                .padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             verticalAlignment = Alignment.Bottom,
         ) {
@@ -208,21 +209,21 @@ fun DetailsHeader(item: RequestMediaDetails) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier =
-                    Modifier.onGloballyPositioned {
-                        detailHeight = it.size.height
-                    },
+                Modifier.onGloballyPositioned {
+                    detailHeight = it.size.height
+                },
             ) {
                 Text(
                     text =
-                        listOfNotNull(
-                            item.displayDate?.format("MMM d, yyyy"),
-                            (item as? MovieDetails)?.runtime?.formatMinutesAsRuntime(),
-                            (item as? TvDetails)?.let { tv ->
-                                val count = if (tv.numberOfSeasons > 0) tv.numberOfSeasons else tv.seasons.count { it.seasonNumber != 0 }
-                                mokoPlural(MR.plurals.seasons, count)
-                            },
-                            item.getCertification(LocalLocale.current.platformLocale.country),
-                        ).joinToString(BULLET),
+                    listOfNotNull(
+                        item.displayDate?.format("MMM d, yyyy"),
+                        (item as? MovieDetails)?.runtime?.formatMinutesAsRuntime(),
+                        (item as? TvDetails)?.let { tv ->
+                            val count = if (tv.numberOfSeasons > 0) tv.numberOfSeasons else tv.seasons.count { it.seasonNumber != 0 }
+                            mokoPlural(MR.plurals.seasons, count)
+                        },
+                        item.getCertification(LocalLocale.current.platformLocale.country),
+                    ).joinToString(BULLET),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 6.dp),
                 )

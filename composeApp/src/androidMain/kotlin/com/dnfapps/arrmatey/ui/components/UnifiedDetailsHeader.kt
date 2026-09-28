@@ -68,11 +68,11 @@ fun UnifiedDetailsHeader(
 
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = topPadding)
-                    .padding(horizontal = 12.dp)
-                    .align(Alignment.BottomCenter),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = topPadding)
+                .padding(horizontal = 12.dp)
+                .align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.Bottom,
         ) {
@@ -84,9 +84,9 @@ fun UnifiedDetailsHeader(
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier =
-                    Modifier.onGloballyPositioned {
-                        detailHeight = it.size.height
-                    },
+                Modifier.onGloballyPositioned {
+                    detailHeight = it.size.height
+                },
             ) {
                 clearLogo?.let { clearLogo ->
                     Box(modifier = Modifier.wrapContentSize()) {
@@ -95,22 +95,22 @@ fun UnifiedDetailsHeader(
                             contentDescription = null,
                             colorFilter = ColorFilter.tint(Color.Black.copy(alpha = 0.75f)),
                             modifier =
-                                Modifier
-                                    .align(Alignment.CenterStart)
-                                    .height(120.dp)
-                                    .padding(horizontal = 6.dp)
-                                    .offset(y = 1.5.dp)
-                                    .blur(2.5.dp),
+                            Modifier
+                                .align(Alignment.CenterStart)
+                                .height(120.dp)
+                                .padding(horizontal = 6.dp)
+                                .offset(y = 1.5.dp)
+                                .blur(2.5.dp),
                             contentScale = ContentScale.Fit,
                         )
                         AsyncImage(
                             model = rememberRemoteImageData(clearLogo),
                             contentDescription = null,
                             modifier =
-                                Modifier
-                                    .align(Alignment.CenterStart)
-                                    .height(120.dp)
-                                    .padding(horizontal = 6.dp),
+                            Modifier
+                                .align(Alignment.CenterStart)
+                                .height(120.dp)
+                                .padding(horizontal = 6.dp),
                             contentScale = ContentScale.Fit,
                         )
                     }

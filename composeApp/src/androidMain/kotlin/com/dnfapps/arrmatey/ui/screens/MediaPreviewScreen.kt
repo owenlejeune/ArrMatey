@@ -43,6 +43,7 @@ import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
@@ -128,9 +129,9 @@ fun MediaPreviewScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
+                .fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier.verticalScroll(scrollState),
@@ -146,10 +147,10 @@ fun MediaPreviewScreen(
 
                 Column(
                     modifier =
-                        Modifier
-                            .padding(horizontal = 24.dp)
-                            .padding(bottom = 24.dp)
-                            .padding(top = 12.dp),
+                    Modifier
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 24.dp)
+                        .padding(top = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     item.overview?.let { overview ->

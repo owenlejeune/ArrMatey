@@ -48,22 +48,21 @@ abstract class BaseArrClient(
     override suspend fun fetchActivityTasks(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<QueuePage> =
-        get<QueuePage>(
-            "queue",
-            mapOf(
-                "page" to page,
-                "pageSize" to pageSize,
-                "includeMovie" to true,
-                "includeSeries" to true,
-                "includeEpisode" to true,
-                "includeAlbum" to true,
-                "includeArtist" to true,
-                "includeUnknownAuthorItems" to true,
-                "includeBook" to true,
-                "includeAuthor" to true,
-            ),
-        ).map { it.setInstance(instance.id, instance.label) }
+    ): NetworkResult<QueuePage> = get<QueuePage>(
+        "queue",
+        mapOf(
+            "page" to page,
+            "pageSize" to pageSize,
+            "includeMovie" to true,
+            "includeSeries" to true,
+            "includeEpisode" to true,
+            "includeAlbum" to true,
+            "includeArtist" to true,
+            "includeUnknownAuthorItems" to true,
+            "includeBook" to true,
+            "includeAuthor" to true,
+        ),
+    ).map { it.setInstance(instance.id, instance.label) }
 
     override suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> = post("release", payload)
 
@@ -72,15 +71,14 @@ abstract class BaseArrClient(
         removeFromClient: Boolean,
         blocklist: Boolean,
         skipRedownload: Boolean,
-    ): NetworkResult<Unit> =
-        delete(
-            "queue/$id",
-            mapOf(
-                "removeFromClient" to removeFromClient,
-                "blocklist" to blocklist,
-                "skipRedownload" to skipRedownload,
-            ),
-        )
+    ): NetworkResult<Unit> = delete(
+        "queue/$id",
+        mapOf(
+            "removeFromClient" to removeFromClient,
+            "blocklist" to blocklist,
+            "skipRedownload" to skipRedownload,
+        ),
+    )
 
     override suspend fun getStatus(): NetworkResult<ArrSoftwareStatus> = get("system/status")
 
@@ -105,73 +103,67 @@ abstract class BaseArrClient(
     protected suspend inline fun <reified T> get(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
-    ): NetworkResult<T> =
-        httpClient
-            .safeGet<T>("$baseUrl/$endpoint") {
-                url {
-                    params.forEach { (key, value) ->
-                        parameters.append(key, value.toString())
-                    }
+    ): NetworkResult<T> = httpClient
+        .safeGet<T>("$baseUrl/$endpoint") {
+            url {
+                params.forEach { (key, value) ->
+                    parameters.append(key, value.toString())
                 }
-            }.rebuild()
+            }
+        }.rebuild()
 
     protected suspend inline fun <reified T, reified R> post(
         endpoint: String,
         body: T,
-    ): NetworkResult<R> =
-        httpClient
-            .safePost<R>("$baseUrl/$endpoint") {
-                contentType(ContentType.Application.Json)
-                setBody(body)
-            }.rebuild()
+    ): NetworkResult<R> = httpClient
+        .safePost<R>("$baseUrl/$endpoint") {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+        }.rebuild()
 
     protected suspend inline fun <reified T, reified R> put(
         endpoint: String,
         body: T,
-    ): NetworkResult<R> =
-        httpClient
-            .safePut<R>("$baseUrl/$endpoint") {
-                contentType(ContentType.Application.Json)
-                setBody(body)
-            }.rebuild()
+    ): NetworkResult<R> = httpClient
+        .safePut<R>("$baseUrl/$endpoint") {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+        }.rebuild()
 
     protected suspend inline fun <reified T, reified R> delete(
         endpoint: String,
         body: T,
         params: Map<String, Any> = emptyMap(),
-    ): NetworkResult<R> =
-        httpClient.safeDelete("$baseUrl/$endpoint") {
-            contentType(ContentType.Application.Json)
-            url {
-                params.forEach { (key, value) ->
-                    parameters.append(key, value.toString())
-                }
+    ): NetworkResult<R> = httpClient.safeDelete("$baseUrl/$endpoint") {
+        contentType(ContentType.Application.Json)
+        url {
+            params.forEach { (key, value) ->
+                parameters.append(key, value.toString())
             }
-            setBody(body)
         }
+        setBody(body)
+    }
 
     protected suspend inline fun <reified T> delete(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
-    ): NetworkResult<T> =
-        httpClient.safeDelete("$baseUrl/$endpoint") {
-            url {
-                params.forEach { (key, value) ->
-                    parameters.append(key, value.toString())
-                }
+    ): NetworkResult<T> = httpClient.safeDelete("$baseUrl/$endpoint") {
+        url {
+            params.forEach { (key, value) ->
+                parameters.append(key, value.toString())
             }
         }
+    }
 
     @Suppress("UNCHECKED_CAST")
-    protected fun <T> NetworkResult<T>.rebuild(): NetworkResult<T> =
-        this.map { data ->
-            when (data) {
-                is HasArrImages<*> -> data.withLocalImages(instance.url) as T
-                is List<*> ->
-                    data.map { item ->
-                        if (item is HasArrImages<*>) item.withLocalImages(instance.url) else item
-                    } as T
-                else -> data
-            }
+    protected fun <T> NetworkResult<T>.rebuild(): NetworkResult<T> = this.map { data ->
+        when (data) {
+            is HasArrImages<*> -> data.withLocalImages(instance.url) as T
+            is List<*> ->
+                data.map { item ->
+                    if (item is HasArrImages<*>) item.withLocalImages(instance.url) else item
+                } as T
+            else -> data
         }
+    }
 }

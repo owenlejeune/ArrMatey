@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -90,9 +91,9 @@ fun IssuesContent(
                     onRetry = onRetry,
                     onDismiss = onClearError,
                     modifier =
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(16.dp),
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
                 )
             }
         }

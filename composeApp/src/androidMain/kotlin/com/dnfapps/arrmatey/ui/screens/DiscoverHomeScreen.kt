@@ -60,6 +60,7 @@ import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.DiscoverSection
@@ -116,21 +117,21 @@ fun DiscoverHomeScreen(
     ProvideFloatingBarAction(
         visible = useFloatingNavigationBar && showFab,
         action =
-            FloatingBarAction(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = mokoString(MR.strings.search),
-                    )
-                },
-                onClick = {
-                    scope.launch {
-                        focusRequester.requestFocus()
-                        searchBarState.animateToExpanded()
-                        focusRequester.requestFocus()
-                    }
-                },
-            ),
+        FloatingBarAction(
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = mokoString(MR.strings.search),
+                )
+            },
+            onClick = {
+                scope.launch {
+                    focusRequester.requestFocus()
+                    searchBarState.animateToExpanded()
+                    focusRequester.requestFocus()
+                }
+            },
+        ),
     )
 
     Scaffold(
@@ -208,9 +209,9 @@ fun DiscoverHomeScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             if (selectedInstance == null) {
@@ -237,9 +238,9 @@ fun DiscoverHomeScreen(
                 ) {
                     Column(
                         modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .verticalScroll(rememberScrollState()),
+                        Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
                         sectionPreferences.visibleCategories.forEach { category ->

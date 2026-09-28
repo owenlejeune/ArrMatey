@@ -49,11 +49,10 @@ fun LocalDate.isBeforeToday(timeZone: TimeZone = TimeZone.currentSystemDefault()
 fun LocalDate.isBeforeToday(): Boolean = isBeforeToday(TimeZone.currentSystemDefault())
 
 @OptIn(ExperimentalTime::class)
-fun Clock.Companion.localToday(): LocalDate =
-    Clock.System
-        .now()
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-        .date
+fun Clock.Companion.localToday(): LocalDate = Clock.System
+    .now()
+    .toLocalDateTime(TimeZone.currentSystemDefault())
+    .date
 
 fun Instant.isTodayOrAfter(): Boolean {
     val today =

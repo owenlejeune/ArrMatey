@@ -21,10 +21,10 @@ fun EpisodePosterItem(
     val url = episode.getPoster()?.remoteUrl
     Box(
         modifier =
-            modifier
-                .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .height(100.dp),
+        modifier
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .height(100.dp),
     ) {
         AsyncImage(
             model = rememberRemoteImageData(url),

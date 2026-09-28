@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
@@ -46,11 +47,11 @@ fun BazarrSection(
 
     val containerColor by animateColorAsState(
         targetValue =
-            if (isEditing || bazarrStats.isEmpty()) {
-                MaterialTheme.colorScheme.surfaceContainerHigh
-            } else {
-                Color.Transparent
-            },
+        if (isEditing || bazarrStats.isEmpty()) {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        } else {
+            Color.Transparent
+        },
         label = "BazarrCardBackgroundAnimation",
     )
 
@@ -63,17 +64,17 @@ fun BazarrSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = containerColor,
-            ),
+        CardDefaults.cardColors(
+            containerColor = containerColor,
+        ),
         border =
-            if (isEditing ||
-                bazarrStats.isEmpty()
-            ) {
-                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            } else {
-                null
-            },
+        if (isEditing ||
+            bazarrStats.isEmpty()
+        ) {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        } else {
+            null
+        },
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),

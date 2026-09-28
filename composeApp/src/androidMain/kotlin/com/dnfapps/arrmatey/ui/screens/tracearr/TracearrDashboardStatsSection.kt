@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.ui.screens.dashboard.CompactStatCard
@@ -63,11 +64,11 @@ fun DashboardTracearrSection(
 
     val containerColor by animateColorAsState(
         targetValue =
-            if (isEditing || tracearrStats.isEmpty()) {
-                MaterialTheme.colorScheme.surfaceContainerHigh
-            } else {
-                Color.Transparent
-            },
+        if (isEditing || tracearrStats.isEmpty()) {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        } else {
+            Color.Transparent
+        },
         label = "TracearrCardBackgroundAnimation",
     )
 
@@ -80,9 +81,9 @@ fun DashboardTracearrSection(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = containerColor,
-            ),
+        CardDefaults.cardColors(
+            containerColor = containerColor,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
@@ -180,11 +181,11 @@ fun TracearrDashboardStatsSection(
                 label = mokoString(MR.strings.alerts),
                 iconColor = if (hasAlerts) MaterialTheme.colorScheme.error else ArrGreen,
                 containerColor =
-                    if (hasAlerts) {
-                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerHigh
-                    },
+                if (hasAlerts) {
+                    MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh
+                },
                 modifier = Modifier.weight(1f),
                 onClick = onNavigateToViolations,
             )

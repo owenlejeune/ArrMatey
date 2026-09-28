@@ -105,102 +105,97 @@ class SeerrInstanceRepository(
             .onSuccess { _users.value = it.results }
     }
 
-    suspend fun refreshCounts() =
-        coroutineScope {
-            launch {
-                client
-                    .getRequests(page = 1, pageSize = 50, filter = RequestState.All)
-                    .onSuccess { response ->
-                        _isOnline.value = true
-                        val enrichedRequests = mediaPackageService.enrichRequests(response.results)
-                        _requests.value = enrichedRequests
-                    }.onError { _, _, _ ->
-                        _isOnline.value = false
-                        _requests.value = emptyList()
-                    }
-            }
-            launch {
-                client
-                    .getRequestCount()
-                    .onSuccess { count ->
-                        _pendingRequestsCount.value = count.pending
-                    }
-            }
-            launch {
-                client
-                    .getIssueCount()
-                    .onSuccess { count ->
-                        _openIssuesCount.value = count.open
-                    }
-            }
-            launch {
-                client
-                    .getIssues(page = 1, pageSize = 50, filter = IssueState.All)
-                    .onSuccess { response ->
-                        val enrichedIssues = issuePackageService.enrichIssues(response.results)
-                        _openIssues.value = enrichedIssues
-                    }.onError { _, _, _ ->
-                        _openIssues.value = emptyList()
-                    }
-            }
+    suspend fun refreshCounts() = coroutineScope {
+        launch {
+            client
+                .getRequests(page = 1, pageSize = 50, filter = RequestState.All)
+                .onSuccess { response ->
+                    _isOnline.value = true
+                    val enrichedRequests = mediaPackageService.enrichRequests(response.results)
+                    _requests.value = enrichedRequests
+                }.onError { _, _, _ ->
+                    _isOnline.value = false
+                    _requests.value = emptyList()
+                }
         }
+        launch {
+            client
+                .getRequestCount()
+                .onSuccess { count ->
+                    _pendingRequestsCount.value = count.pending
+                }
+        }
+        launch {
+            client
+                .getIssueCount()
+                .onSuccess { count ->
+                    _openIssuesCount.value = count.open
+                }
+        }
+        launch {
+            client
+                .getIssues(page = 1, pageSize = 50, filter = IssueState.All)
+                .onSuccess { response ->
+                    val enrichedIssues = issuePackageService.enrichIssues(response.results)
+                    _openIssues.value = enrichedIssues
+                }.onError { _, _, _ ->
+                    _openIssues.value = emptyList()
+                }
+        }
+    }
 
-    fun getRequestsPaging(filter: RequestState = RequestState.All): PagingSource<MediaRequestPackage> =
-        BasePagingSource(
-            fetcher = { page ->
-                client.getRequests(page = page, filter = filter)
-            },
-            processor = { response ->
-                val enrichedRequests = mediaPackageService.enrichRequests(response.results)
-                PageResult(
-                    items = enrichedRequests,
-                    totalItemCount = response.pageInfo.results,
-                    hasNextPage = response.pageInfo.page < response.pageInfo.pages,
-                )
-            },
-        )
+    fun getRequestsPaging(filter: RequestState = RequestState.All): PagingSource<MediaRequestPackage> = BasePagingSource(
+        fetcher = { page ->
+            client.getRequests(page = page, filter = filter)
+        },
+        processor = { response ->
+            val enrichedRequests = mediaPackageService.enrichRequests(response.results)
+            PageResult(
+                items = enrichedRequests,
+                totalItemCount = response.pageInfo.results,
+                hasNextPage = response.pageInfo.page < response.pageInfo.pages,
+            )
+        },
+    )
 
-    fun getTrendingPaging(): PagingSource<DiscoverResult> =
-        BasePagingSource(
-            fetcher = { page ->
-                client.getTrending(page = page)
-            },
-            processor = { response ->
-                PageResult(
-                    items = response.results,
-                    totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages,
-                )
-            },
-        )
+    fun getTrendingPaging(): PagingSource<DiscoverResult> = BasePagingSource(
+        fetcher = { page ->
+            client.getTrending(page = page)
+        },
+        processor = { response ->
+            PageResult(
+                items = response.results,
+                totalItemCount = response.totalResults,
+                hasNextPage = response.page < response.totalPages,
+            )
+        },
+    )
 
-    fun getDiscoverMoviesPaging(): PagingSource<DiscoverResult> =
-        BasePagingSource(
-            fetcher = { page ->
-                client.getDiscoverMovies(page = page)
-            },
-            processor = { response ->
-                PageResult(
-                    items = response.results,
-                    totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages,
-                )
-            },
-        )
+    fun getDiscoverMoviesPaging(): PagingSource<DiscoverResult> = BasePagingSource(
+        fetcher = { page ->
+            client.getDiscoverMovies(page = page)
+        },
+        processor = { response ->
+            PageResult(
+                items = response.results,
+                totalItemCount = response.totalResults,
+                hasNextPage = response.page < response.totalPages,
+            )
+        },
+    )
 
-    fun getDiscoverTvPaging(): PagingSource<DiscoverResult> =
-        BasePagingSource(
-            fetcher = { page ->
-                client.getDiscoverTv(page = page)
-            },
-            processor = { response ->
-                PageResult(
-                    items = response.results,
-                    totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages,
-                )
-            },
-        )
+    fun getDiscoverTvPaging(): PagingSource<DiscoverResult> = BasePagingSource(
+        fetcher = { page ->
+            client.getDiscoverTv(page = page)
+        },
+        processor = { response ->
+            PageResult(
+                items = response.results,
+                totalItemCount = response.totalResults,
+                hasNextPage = response.page < response.totalPages,
+            )
+        },
+    )
 
     fun getUpcomingMoviesPaging(): PagingSource<DiscoverResult> {
         val today =
@@ -244,75 +239,70 @@ class SeerrInstanceRepository(
         )
     }
 
-    fun searchPaging(query: String): PagingSource<DiscoverResult> =
-        BasePagingSource(
-            fetcher = { page ->
-                client.search(query = query, page = page)
-            },
-            processor = { response ->
-                PageResult(
-                    items = response.results,
-                    totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages,
-                )
-            },
-        )
+    fun searchPaging(query: String): PagingSource<DiscoverResult> = BasePagingSource(
+        fetcher = { page ->
+            client.search(query = query, page = page)
+        },
+        processor = { response ->
+            PageResult(
+                items = response.results,
+                totalItemCount = response.totalResults,
+                hasNextPage = response.page < response.totalPages,
+            )
+        },
+    )
 
-    fun getMovieRecommendationsPaging(movieId: Long): PagingSource<DiscoverResult> =
-        BasePagingSource(
-            fetcher = { page ->
-                client.getMovieRecommendations(movieId = movieId, page = page)
-            },
-            processor = { response ->
-                PageResult(
-                    items = response.results,
-                    totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages,
-                )
-            },
-        )
+    fun getMovieRecommendationsPaging(movieId: Long): PagingSource<DiscoverResult> = BasePagingSource(
+        fetcher = { page ->
+            client.getMovieRecommendations(movieId = movieId, page = page)
+        },
+        processor = { response ->
+            PageResult(
+                items = response.results,
+                totalItemCount = response.totalResults,
+                hasNextPage = response.page < response.totalPages,
+            )
+        },
+    )
 
-    fun getMovieSimilarPaging(movieId: Long): PagingSource<DiscoverResult> =
-        BasePagingSource(
-            fetcher = { page ->
-                client.getMovieSimilar(movieId = movieId, page = page)
-            },
-            processor = { response ->
-                PageResult(
-                    items = response.results,
-                    totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages,
-                )
-            },
-        )
+    fun getMovieSimilarPaging(movieId: Long): PagingSource<DiscoverResult> = BasePagingSource(
+        fetcher = { page ->
+            client.getMovieSimilar(movieId = movieId, page = page)
+        },
+        processor = { response ->
+            PageResult(
+                items = response.results,
+                totalItemCount = response.totalResults,
+                hasNextPage = response.page < response.totalPages,
+            )
+        },
+    )
 
-    fun getTvRecommendationsPaging(seriesId: Long): PagingSource<DiscoverResult> =
-        BasePagingSource(
-            fetcher = { page ->
-                client.getTvRecommendations(seriesId = seriesId, page = page)
-            },
-            processor = { response ->
-                PageResult(
-                    items = response.results,
-                    totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages,
-                )
-            },
-        )
+    fun getTvRecommendationsPaging(seriesId: Long): PagingSource<DiscoverResult> = BasePagingSource(
+        fetcher = { page ->
+            client.getTvRecommendations(seriesId = seriesId, page = page)
+        },
+        processor = { response ->
+            PageResult(
+                items = response.results,
+                totalItemCount = response.totalResults,
+                hasNextPage = response.page < response.totalPages,
+            )
+        },
+    )
 
-    fun getTvSimilarPaging(seriesId: Long): PagingSource<DiscoverResult> =
-        BasePagingSource(
-            fetcher = { page ->
-                client.getTvSimilar(seriesId = seriesId, page = page)
-            },
-            processor = { response ->
-                PageResult(
-                    items = response.results,
-                    totalItemCount = response.totalResults,
-                    hasNextPage = response.page < response.totalPages,
-                )
-            },
-        )
+    fun getTvSimilarPaging(seriesId: Long): PagingSource<DiscoverResult> = BasePagingSource(
+        fetcher = { page ->
+            client.getTvSimilar(seriesId = seriesId, page = page)
+        },
+        processor = { response ->
+            PageResult(
+                items = response.results,
+                totalItemCount = response.totalResults,
+                hasNextPage = response.page < response.totalPages,
+            )
+        },
+    )
 
     suspend fun getRequests(
         page: Int = 1,
@@ -435,41 +425,40 @@ class SeerrInstanceRepository(
     fun observeMediaDetails(
         tmdbId: Long,
         mediaType: RequestType,
-    ): Flow<NetworkResult<RequestMediaDetails>> =
-        flow {
-            emit(NetworkResult.Loading)
+    ): Flow<NetworkResult<RequestMediaDetails>> = flow {
+        emit(NetworkResult.Loading)
 
-            _mediaDetailsCache.value[tmdbId]?.let {
-                emit(NetworkResult.Success(it))
-            }
-
-            val result =
-                when (mediaType) {
-                    RequestType.Movie -> client.getMovieDetails(tmdbId)
-                    RequestType.Tv -> client.getTvDetails(tmdbId)
-                    RequestType.Person -> client.getPersonDetails(tmdbId)
-                }
-            when (result) {
-                is NetworkResult.Success<*> -> {
-                    val currentCache = _mediaDetailsCache.value.toMutableMap()
-                    currentCache[tmdbId] = (result as NetworkResult.Success<RequestMediaDetails>).data
-                    _mediaDetailsCache.value = currentCache
-                }
-
-                is NetworkResult.Error -> {
-                    emit(result)
-                    return@flow
-                }
-
-                is NetworkResult.Loading -> {}
-            }
-
-            _mediaDetailsCache
-                .map { cache ->
-                    cache[tmdbId]?.let { NetworkResult.Success(it) }
-                        ?: NetworkResult.Error(message = "Media not found in cache")
-                }.collect { emit(it) }
+        _mediaDetailsCache.value[tmdbId]?.let {
+            emit(NetworkResult.Success(it))
         }
+
+        val result =
+            when (mediaType) {
+                RequestType.Movie -> client.getMovieDetails(tmdbId)
+                RequestType.Tv -> client.getTvDetails(tmdbId)
+                RequestType.Person -> client.getPersonDetails(tmdbId)
+            }
+        when (result) {
+            is NetworkResult.Success<*> -> {
+                val currentCache = _mediaDetailsCache.value.toMutableMap()
+                currentCache[tmdbId] = (result as NetworkResult.Success<RequestMediaDetails>).data
+                _mediaDetailsCache.value = currentCache
+            }
+
+            is NetworkResult.Error -> {
+                emit(result)
+                return@flow
+            }
+
+            is NetworkResult.Loading -> {}
+        }
+
+        _mediaDetailsCache
+            .map { cache ->
+                cache[tmdbId]?.let { NetworkResult.Success(it) }
+                    ?: NetworkResult.Error(message = "Media not found in cache")
+            }.collect { emit(it) }
+    }
 
     suspend fun getTvRatings(tmdbId: Long): NetworkResult<RottenTomatoesRating> = client.getTvRatings(tmdbId)
 
@@ -482,20 +471,19 @@ class SeerrInstanceRepository(
 
     suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue> = client.submitIssue(issue)
 
-    fun getIssuesPaging(filter: IssueState = IssueState.All): PagingSource<MediaIssuePackage> =
-        BasePagingSource(
-            fetcher = { page ->
-                client.getIssues(page = page, filter = filter)
-            },
-            processor = { response ->
-                val enrichedIssues = issuePackageService.enrichIssues(response.results)
-                PageResult(
-                    items = enrichedIssues,
-                    totalItemCount = response.pageInfo.results,
-                    hasNextPage = response.pageInfo.page < response.pageInfo.pages,
-                )
-            },
-        )
+    fun getIssuesPaging(filter: IssueState = IssueState.All): PagingSource<MediaIssuePackage> = BasePagingSource(
+        fetcher = { page ->
+            client.getIssues(page = page, filter = filter)
+        },
+        processor = { response ->
+            val enrichedIssues = issuePackageService.enrichIssues(response.results)
+            PageResult(
+                items = enrichedIssues,
+                totalItemCount = response.pageInfo.results,
+                hasNextPage = response.pageInfo.page < response.pageInfo.pages,
+            )
+        },
+    )
 
     suspend fun submitIssueComment(
         issueId: Long,

@@ -44,6 +44,7 @@ import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
@@ -80,9 +81,9 @@ fun SeerrPersonDetailsScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
+                .fillMaxSize(),
         ) {
             when (val state = uiState) {
                 is SeerrDetailsState.Initial,
@@ -90,9 +91,9 @@ fun SeerrPersonDetailsScreen(
                 -> {
                     LoadingIndicator(
                         modifier =
-                            Modifier
-                                .size(96.dp)
-                                .align(Alignment.Center),
+                        Modifier
+                            .size(96.dp)
+                            .align(Alignment.Center),
                     )
                 }
                 is SeerrDetailsState.Error -> {
@@ -119,18 +120,18 @@ fun SeerrPersonDetailsScreen(
                     ) {
                         LazyVerticalGrid(
                             columns =
-                                MinColumnsAdaptiveGridCells(
-                                    minSize = GridDensity.Normal.minSize,
-                                    minColumns = 3,
-                                ),
+                            MinColumnsAdaptiveGridCells(
+                                minSize = GridDensity.Normal.minSize,
+                                minColumns = 3,
+                            ),
                             state = gridState,
                             modifier = Modifier.fillMaxSize(),
                             contentPadding =
-                                PaddingValues(
-                                    bottom = 24.dp + LocalFloatingBarBottomPadding.current,
-                                    start = 24.dp,
-                                    end = 24.dp,
-                                ),
+                            PaddingValues(
+                                bottom = 24.dp + LocalFloatingBarBottomPadding.current,
+                                start = 24.dp,
+                                end = 24.dp,
+                            ),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
@@ -165,19 +166,19 @@ fun SeerrPersonDetailsScreen(
                                             Text(
                                                 modifier = Modifier.padding(top = 8.dp),
                                                 text =
-                                                    buildAnnotatedString {
-                                                        withStyle(
-                                                            style = MaterialTheme.typography.titleMediumEmphasized.toSpanStyle(),
-                                                        ) {
-                                                            append(mokoString(MR.strings.also_known_as))
-                                                        }
-                                                        withStyle(
-                                                            style = MaterialTheme.typography.bodyMedium.toSpanStyle(),
-                                                        ) {
-                                                            append(" ")
-                                                            append(item.alsoKnownAs.joinToString(", "))
-                                                        }
-                                                    },
+                                                buildAnnotatedString {
+                                                    withStyle(
+                                                        style = MaterialTheme.typography.titleMediumEmphasized.toSpanStyle(),
+                                                    ) {
+                                                        append(mokoString(MR.strings.also_known_as))
+                                                    }
+                                                    withStyle(
+                                                        style = MaterialTheme.typography.bodyMedium.toSpanStyle(),
+                                                    ) {
+                                                        append(" ")
+                                                        append(item.alsoKnownAs.joinToString(", "))
+                                                    }
+                                                },
                                             )
                                         }
                                     }

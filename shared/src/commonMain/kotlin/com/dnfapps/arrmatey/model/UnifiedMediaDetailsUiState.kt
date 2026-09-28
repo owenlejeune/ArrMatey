@@ -26,6 +26,7 @@ import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import kotlin.math.roundToInt
@@ -108,15 +109,14 @@ sealed interface UnifiedMediaDetailsUiState {
 
         fun hasTracearr(isTracearrConfigured: Boolean): Boolean = isTracearrConfigured && isMovieOrTv
 
-        fun getAvailableTabs(isTracearrConfigured: Boolean): List<UnifiedMediaDetailsTab> =
-            buildList {
-                if (hasSeasonsOrFiles) add(UnifiedMediaDetailsTab.SeasonsFiles)
-                add(UnifiedMediaDetailsTab.Overview)
-                if (hasTracearr(isTracearrConfigured)) {
-                    add(UnifiedMediaDetailsTab.Analytics)
-                    add(UnifiedMediaDetailsTab.History)
-                }
+        fun getAvailableTabs(isTracearrConfigured: Boolean): List<UnifiedMediaDetailsTab> = buildList {
+            if (hasSeasonsOrFiles) add(UnifiedMediaDetailsTab.SeasonsFiles)
+            add(UnifiedMediaDetailsTab.Overview)
+            if (hasTracearr(isTracearrConfigured)) {
+                add(UnifiedMediaDetailsTab.Analytics)
+                add(UnifiedMediaDetailsTab.History)
             }
+        }
 
         val defaultTab: UnifiedMediaDetailsTab
             get() = if (hasSeasonsOrFiles) UnifiedMediaDetailsTab.SeasonsFiles else UnifiedMediaDetailsTab.Overview

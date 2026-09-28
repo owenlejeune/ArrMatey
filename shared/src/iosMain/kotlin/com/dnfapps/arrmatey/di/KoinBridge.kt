@@ -140,8 +140,7 @@ object KoinBridge : KoinComponent {
 
     fun getBazarrMediaSubtitlesViewModel(target: BazarrMediaTarget): BazarrMediaSubtitlesViewModel = getKoin().get { parametersOf(target) }
 
-    fun getCustomWebpageConfigurationViewModel(webpageId: Long?): CustomWebpageConfigurationViewModel =
-        getKoin().get { parametersOf(webpageId) }
+    fun getCustomWebpageConfigurationViewModel(webpageId: Long?): CustomWebpageConfigurationViewModel = getKoin().get { parametersOf(webpageId) }
 
     fun getCustomWebpageViewerViewModel(webpageId: Long): CustomWebpageViewerViewModel = getKoin().get { parametersOf(webpageId) }
 

@@ -59,6 +59,7 @@ import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.extensions.formatAgeMinutes
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ErrorView
@@ -165,9 +166,9 @@ fun InteractiveSearchScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             when (val state = releaseUiState) {
@@ -181,10 +182,10 @@ fun InteractiveSearchScreen(
                         modifier = Modifier.fillMaxSize().padding(horizontal = 18.dp),
                         verticalArrangement = Arrangement.spacedBy(18.dp),
                         contentPadding =
-                            PaddingValues(
-                                top = 12.dp,
-                                bottom = 12.dp + LocalFloatingBarBottomPadding.current,
-                            ),
+                        PaddingValues(
+                            top = 12.dp,
+                            bottom = 12.dp + LocalFloatingBarBottomPadding.current,
+                        ),
                     ) {
                         items(state.items) { item ->
                             val shouldAnimate =
@@ -282,27 +283,27 @@ fun <T : ArrRelease> ReleaseItem(
 ) {
     Card(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable(
-                    onClick = { onItemClick?.invoke(item) },
-                    enabled = onItemClick != null,
-                ),
+        Modifier
+            .fillMaxWidth()
+            .clickable(
+                onClick = { onItemClick?.invoke(item) },
+                enabled = onItemClick != null,
+            ),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
     ) {
         ProgressBox(
             animate = animate,
         ) {
             Column(
                 modifier =
-                    Modifier
-                        .padding(14.dp)
-                        .fillMaxWidth(),
+                Modifier
+                    .padding(14.dp)
+                    .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Row(
@@ -331,22 +332,22 @@ fun <T : ArrRelease> ReleaseItem(
                         Surface(
                             shape = MaterialTheme.shapes.small,
                             color =
-                                if (isPositive) {
-                                    MaterialTheme.colorScheme.tertiaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.errorContainer
-                                },
+                            if (isPositive) {
+                                MaterialTheme.colorScheme.tertiaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.errorContainer
+                            },
                         ) {
                             Text(
                                 text = scoreText,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color =
-                                    if (isPositive) {
-                                        MaterialTheme.colorScheme.onTertiaryContainer
-                                    } else {
-                                        MaterialTheme.colorScheme.onErrorContainer
-                                    },
+                                if (isPositive) {
+                                    MaterialTheme.colorScheme.onTertiaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onErrorContainer
+                                },
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                             )
                         }

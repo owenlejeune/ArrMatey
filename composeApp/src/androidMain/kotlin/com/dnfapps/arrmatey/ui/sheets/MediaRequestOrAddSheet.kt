@@ -52,6 +52,7 @@ import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
@@ -265,17 +266,17 @@ fun MediaRequestOrAddSheet(
             }
         },
         sheetState =
-            rememberModalBottomSheetState(
-                skipPartiallyExpanded = true,
-                confirmValueChange = { !isBusy },
-            ),
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !isBusy },
+        ),
     ) {
         if (state == null || (seerrMedia == null && arrMedia == null)) {
             Box(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
@@ -284,11 +285,11 @@ fun MediaRequestOrAddSheet(
             val displayTitle = seerrMedia?.displayTitle ?: arrMedia?.title ?: ""
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 24.dp)
-                        .animateContentSize(),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp)
+                    .animateContentSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // Static Header: Title and Selector
@@ -296,9 +297,9 @@ fun MediaRequestOrAddSheet(
                     Column {
                         Text(
                             text =
-                                mokoString(
-                                    if (mediaType == RequestType.Tv) MR.strings.type_series else MR.strings.type_movie,
-                                ).uppercase(),
+                            mokoString(
+                                if (mediaType == RequestType.Tv) MR.strings.type_series else MR.strings.type_movie,
+                            ).uppercase(),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
@@ -344,16 +345,16 @@ fun MediaRequestOrAddSheet(
                 Crossfade(
                     targetState = showMode,
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f, fill = false),
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false),
                     label = "RequestOrAddContentCrossfade",
                 ) { mode ->
                     Column(
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState()),
+                        Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         if (mode == SheetMode.Request) {
@@ -381,9 +382,9 @@ fun MediaRequestOrAddSheet(
                             if (arrMedia == null) {
                                 Box(
                                     modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .height(200.dp),
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     CircularProgressIndicator()
@@ -446,9 +447,9 @@ fun MediaRequestOrAddSheet(
                 // Static Footer: Action Buttons
                 Row(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     OutlinedButton(

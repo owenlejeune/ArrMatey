@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.utils.mokoString
@@ -35,9 +36,9 @@ fun DiskSpaceSection(diskSpaces: List<ArrDiskSpace>) {
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -59,9 +60,9 @@ fun DiskSpaceSection(diskSpaces: List<ArrDiskSpace>) {
 fun DiskSpaceItem(disk: ArrDiskSpace) {
     Column(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -99,9 +100,9 @@ fun DiskSpaceItem(disk: ArrDiskSpace) {
         LinearProgressIndicator(
             progress = { disk.usedPercentage },
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(8.dp),
+            Modifier
+                .fillMaxWidth()
+                .height(8.dp),
             color = progressColor,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
             strokeCap = StrokeCap.Round,

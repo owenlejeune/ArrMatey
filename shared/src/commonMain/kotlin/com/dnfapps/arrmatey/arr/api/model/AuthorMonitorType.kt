@@ -1,6 +1,16 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.all_books
+import com.dnfapps.arrmatey.shared.existing_books
+import com.dnfapps.arrmatey.shared.first_book
+import com.dnfapps.arrmatey.shared.future_books
+import com.dnfapps.arrmatey.shared.latest_book
+import com.dnfapps.arrmatey.shared.missing_books
+import com.dnfapps.arrmatey.shared.new_books
+import com.dnfapps.arrmatey.shared.none
+import com.dnfapps.arrmatey.shared.unknown
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
 

@@ -44,6 +44,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
@@ -95,17 +96,17 @@ fun SeerrViewRequestSheet(
             }
         },
         sheetState =
-            rememberModalBottomSheetState(
-                skipPartiallyExpanded = true,
-                confirmValueChange = { !requestInProgress },
-            ),
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !requestInProgress },
+        ),
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .verticalScroll(rememberScrollState()),
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Column {
@@ -154,12 +155,12 @@ fun SeerrViewRequestSheet(
                 },
                 onDeclineRequest = { onDeclineRequest(request.id) },
                 onViewMedia =
-                    onViewMedia?.let { viewMedia ->
-                        {
-                            viewMedia(request.media.tmdbId, request.type)
-                            onDismissRequest()
-                        }
-                    },
+                onViewMedia?.let { viewMedia ->
+                    {
+                        viewMedia(request.media.tmdbId, request.type)
+                        onDismissRequest()
+                    }
+                },
             )
         }
     }
@@ -201,29 +202,29 @@ private fun SeasonTable(
             ) {
                 Badge(
                     containerColor =
-                        if (isSelected) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerLow
-                        },
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerLow
+                    },
                 ) {
                     Text(
                         text =
-                            if (isSelected) {
-                                mokoString(MR.strings.pending)
-                            } else {
-                                mokoString(MR.strings.not_requested)
-                            },
+                        if (isSelected) {
+                            mokoString(MR.strings.pending)
+                        } else {
+                            mokoString(MR.strings.not_requested)
+                        },
                         modifier = Modifier.padding(2.dp),
                     )
                 }
                 LabelledSwitch(
                     label =
-                        if (season.seasonNumber == 0) {
-                            mokoString(MR.strings.specials)
-                        } else {
-                            mokoString(MR.strings.season_label, season.seasonNumber)
-                        },
+                    if (season.seasonNumber == 0) {
+                        mokoString(MR.strings.specials)
+                    } else {
+                        mokoString(MR.strings.season_label, season.seasonNumber)
+                    },
                     sublabel = mokoPlural(MR.plurals.episodes, season.episodeCount),
                     checked = isSelected,
                     onCheckedChange = { checked ->
@@ -281,10 +282,10 @@ private fun AdvancedSection(
             modifier = Modifier.fillMaxWidth(),
             enabled = !requestInProgress,
             colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50),
-                    contentColor = Color.White,
-                ),
+            ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF4CAF50),
+                contentColor = Color.White,
+            ),
         ) {
             if (requestInProgress) {
                 androidx.compose.material3.CircularProgressIndicator(Modifier.size(24.dp))
@@ -298,9 +299,9 @@ private fun AdvancedSection(
             modifier = Modifier.fillMaxWidth(),
             enabled = !requestInProgress,
             colors =
-                ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error,
-                ),
+            ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.error,
+            ),
         ) {
             Text(mokoString(MR.strings.decline_request))
         }
@@ -341,9 +342,9 @@ private fun RequestedBySection(request: MediaRequest) {
                     model = requestedBy.avatar,
                     contentDescription = null,
                     modifier =
-                        Modifier
-                            .size(40.dp)
-                            .clip(CircleShape),
+                    Modifier
+                        .size(40.dp)
+                        .clip(CircleShape),
                     contentScale = ContentScale.Crop,
                 )
                 Column {

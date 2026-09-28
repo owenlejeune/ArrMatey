@@ -40,9 +40,9 @@ fun LabelledCheckbox(
 
         Column(
             modifier =
-                Modifier
-                    .weight(1f)
-                    .padding(start = 12.dp),
+            Modifier
+                .weight(1f)
+                .padding(start = 12.dp),
         ) {
             Text(
                 text = label,

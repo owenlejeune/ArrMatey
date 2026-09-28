@@ -14,6 +14,5 @@ class SetRequestApprovalStatusUseCase {
         rootFolder: String? = null,
         languageProfileId: Long? = null,
         seasons: List<Int>? = null,
-    ): NetworkResult<MediaRequest> =
-        repository.setRequestStatus(requestId, approvalStatus, profileId, rootFolder, languageProfileId, seasons)
+    ): NetworkResult<MediaRequest> = repository.setRequestStatus(requestId, approvalStatus, profileId, rootFolder, languageProfileId, seasons)
 }

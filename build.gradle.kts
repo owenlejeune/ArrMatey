@@ -38,7 +38,11 @@ allprojects {
         kotlin {
             target("src/**/*.kt")
             targetExclude("**/build/**", "**/generated/**")
-            ktlint(ktlintVersion)
+            ktlint(ktlintVersion).editorConfigOverride(
+                mapOf(
+                    "ktlint_standard_no-wildcard-imports" to "disabled",
+                ),
+            )
         }
         kotlinGradle {
             target("*.gradle.kts")

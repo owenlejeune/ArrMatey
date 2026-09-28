@@ -211,15 +211,14 @@ class SeerrClientImpl(
         page: Int,
         pageSize: Int,
         filter: RequestState,
-    ): NetworkResult<RequestResponse> =
-        get(
-            "request",
-            mapOf(
-                "take" to pageSize,
-                "skip" to (page - 1) * pageSize,
-                "filter" to filter.value,
-            ),
-        )
+    ): NetworkResult<RequestResponse> = get(
+        "request",
+        mapOf(
+            "take" to pageSize,
+            "skip" to (page - 1) * pageSize,
+            "filter" to filter.value,
+        ),
+    )
 
     override suspend fun getRequestCount(): NetworkResult<RequestCount> = get("request/count")
 
@@ -260,16 +259,15 @@ class SeerrClientImpl(
         rootFolder: String?,
         languageProfileId: Long?,
         seasons: List<Int>?,
-    ): NetworkResult<MediaRequest> =
-        post(
-            "request/$requestId/${status.name.lowercase()}",
-            buildJsonObject {
-                profileId?.let { put("profileId", it) }
-                rootFolder?.let { put("rootFolder", it) }
-                languageProfileId?.let { put("languageProfileId", it) }
-                seasons?.let { put("seasons", JsonArray(it.map { s -> JsonPrimitive(s) })) }
-            },
-        )
+    ): NetworkResult<MediaRequest> = post(
+        "request/$requestId/${status.name.lowercase()}",
+        buildJsonObject {
+            profileId?.let { put("profileId", it) }
+            rootFolder?.let { put("rootFolder", it) }
+            languageProfileId?.let { put("languageProfileId", it) }
+            seasons?.let { put("seasons", JsonArray(it.map { s -> JsonPrimitive(s) })) }
+        },
+    )
 
     override suspend fun deleteRequest(requestId: Long): NetworkResult<Unit> = delete("request/$requestId")
 
@@ -283,13 +281,12 @@ class SeerrClientImpl(
     override suspend fun markMediaAsAvailable(
         mediaId: Long,
         is4k: Boolean,
-    ): NetworkResult<Unit> =
-        post(
-            "media/$mediaId/available",
-            buildJsonObject {
-                put("is4k", is4k)
-            },
-        )
+    ): NetworkResult<Unit> = post(
+        "media/$mediaId/available",
+        buildJsonObject {
+            put("is4k", is4k)
+        },
+    )
 
     override suspend fun getMovieRatings(mediaId: Long): NetworkResult<CombinedRatings> = get("movie/$mediaId/ratingscombined")
 
@@ -312,15 +309,14 @@ class SeerrClientImpl(
         page: Int,
         pageSize: Int,
         filter: IssueState,
-    ): NetworkResult<IssuesResponse> =
-        get(
-            "issue",
-            mapOf(
-                "take" to pageSize,
-                "skip" to (page - 1) * pageSize,
-                "filter" to filter.value,
-            ),
-        )
+    ): NetworkResult<IssuesResponse> = get(
+        "issue",
+        mapOf(
+            "take" to pageSize,
+            "skip" to (page - 1) * pageSize,
+            "filter" to filter.value,
+        ),
+    )
 
     override suspend fun getIssueCount(): NetworkResult<IssueCount> = get("issue/count")
 
@@ -329,13 +325,12 @@ class SeerrClientImpl(
     override suspend fun submitIssueComment(
         issueId: Long,
         comment: String,
-    ): NetworkResult<Issue> =
-        post(
-            "issue/$issueId/comment",
-            buildJsonObject {
-                put("message", comment)
-            },
-        )
+    ): NetworkResult<Issue> = post(
+        "issue/$issueId/comment",
+        buildJsonObject {
+            put("message", comment)
+        },
+    )
 
     override suspend fun getIssueDetails(issueId: Long): NetworkResult<Issue> = get("issue/$issueId")
 
@@ -348,62 +343,56 @@ class SeerrClientImpl(
     private suspend inline fun <reified T> get(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
-    ): NetworkResult<T> =
-        httpClient.safeGet<T>("$baseUrl/$endpoint") {
-            url {
-                params.forEach { (key, value) ->
-                    parameters.append(key, value.toString())
-                }
+    ): NetworkResult<T> = httpClient.safeGet<T>("$baseUrl/$endpoint") {
+        url {
+            params.forEach { (key, value) ->
+                parameters.append(key, value.toString())
             }
         }
+    }
 
     private suspend inline fun <reified T, reified R> post(
         endpoint: String,
         body: T,
-    ): NetworkResult<R> =
-        httpClient.safePost<R>("$baseUrl/$endpoint") {
-            contentType(ContentType.Application.Json)
-            setBody(body)
-        }
+    ): NetworkResult<R> = httpClient.safePost<R>("$baseUrl/$endpoint") {
+        contentType(ContentType.Application.Json)
+        setBody(body)
+    }
 
-    private suspend inline fun <reified T> post(endpoint: String): NetworkResult<T> =
-        httpClient.safePost<T>("$baseUrl/$endpoint") {
-            contentType(ContentType.Application.Json)
-        }
+    private suspend inline fun <reified T> post(endpoint: String): NetworkResult<T> = httpClient.safePost<T>("$baseUrl/$endpoint") {
+        contentType(ContentType.Application.Json)
+    }
 
     private suspend inline fun <reified T, reified R> put(
         endpoint: String,
         body: T,
-    ): NetworkResult<R> =
-        httpClient.safePut<R>("$baseUrl/$endpoint") {
-            contentType(ContentType.Application.Json)
-            setBody(body)
-        }
+    ): NetworkResult<R> = httpClient.safePut<R>("$baseUrl/$endpoint") {
+        contentType(ContentType.Application.Json)
+        setBody(body)
+    }
 
     private suspend inline fun <reified T, reified R> delete(
         endpoint: String,
         body: T,
         params: Map<String, Any> = emptyMap(),
-    ): NetworkResult<R> =
-        httpClient.safeDelete("$baseUrl/$endpoint") {
-            contentType(ContentType.Application.Json)
-            url {
-                params.forEach { (key, value) ->
-                    parameters.append(key, value.toString())
-                }
+    ): NetworkResult<R> = httpClient.safeDelete("$baseUrl/$endpoint") {
+        contentType(ContentType.Application.Json)
+        url {
+            params.forEach { (key, value) ->
+                parameters.append(key, value.toString())
             }
-            setBody(body)
         }
+        setBody(body)
+    }
 
     private suspend inline fun <reified T> delete(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
-    ): NetworkResult<T> =
-        httpClient.safeDelete("$baseUrl/$endpoint") {
-            url {
-                params.forEach { (key, value) ->
-                    parameters.append(key, value.toString())
-                }
+    ): NetworkResult<T> = httpClient.safeDelete("$baseUrl/$endpoint") {
+        url {
+            params.forEach { (key, value) ->
+                parameters.append(key, value.toString())
             }
         }
+    }
 }

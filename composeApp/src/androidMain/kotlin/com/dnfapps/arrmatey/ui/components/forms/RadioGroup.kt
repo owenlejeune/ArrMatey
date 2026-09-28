@@ -32,13 +32,13 @@ fun <T> RadioGroup(
             entries.forEach { entry ->
                 Row(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .selectable(
-                                selected = isItemSelected(entry),
-                                onClick = { onItemSelected(entry) },
-                                role = Role.RadioButton,
-                            ),
+                    Modifier
+                        .fillMaxWidth()
+                        .selectable(
+                            selected = isItemSelected(entry),
+                            onClick = { onItemSelected(entry) },
+                            role = Role.RadioButton,
+                        ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RadioButton(

@@ -60,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.androidModule
 import com.dnfapps.arrmatey.di.appModules
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrActivityByDoW
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrActivityByHoD
@@ -169,17 +170,17 @@ fun TracearrActivityContent(
                         IconButton(onClick = { isDualColumn = !isDualColumn }) {
                             Icon(
                                 imageVector =
-                                    if (isDualColumn) {
-                                        Icons.AutoMirrored.Filled.List
-                                    } else {
-                                        Icons.Default.GridView
-                                    },
+                                if (isDualColumn) {
+                                    Icons.AutoMirrored.Filled.List
+                                } else {
+                                    Icons.Default.GridView
+                                },
                                 contentDescription =
-                                    if (isDualColumn) {
-                                        "Single column"
-                                    } else {
-                                        "Dual column"
-                                    },
+                                if (isDualColumn) {
+                                    "Single column"
+                                } else {
+                                    "Dual column"
+                                },
                             )
                         }
                     }
@@ -192,9 +193,9 @@ fun TracearrActivityContent(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             when (state) {
                 is TracearrActivityState.Initial,
@@ -211,9 +212,9 @@ fun TracearrActivityContent(
                     NoInstanceView(
                         type = InstanceType.Tracearr,
                         modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .wrapContentSize(),
+                        Modifier
+                            .fillMaxSize()
+                            .wrapContentSize(),
                     )
                 }
                 is TracearrActivityState.Error -> {
@@ -248,91 +249,91 @@ fun TracearrActivityContent(
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding =
-                                    PaddingValues(
-                                        start = 16.dp,
-                                        end = 16.dp,
-                                        top = 16.dp,
-                                        bottom =
-                                            16.dp +
-                                                if (LocalFloatingBarBottomPadding.current >
-                                                    0.dp
-                                                ) {
-                                                    LocalFloatingBarBottomPadding.current
-                                                } else {
-                                                    navigationBarBottomInset()
-                                                },
-                                    ),
+                                PaddingValues(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    top = 16.dp,
+                                    bottom =
+                                    16.dp +
+                                        if (LocalFloatingBarBottomPadding.current >
+                                            0.dp
+                                        ) {
+                                            LocalFloatingBarBottomPadding.current
+                                        } else {
+                                            navigationBarBottomInset()
+                                        },
+                                ),
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
                                 item {
                                     Row(
                                         modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .height(IntrinsicSize.Max),
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(IntrinsicSize.Max),
                                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                                     ) {
                                         PlaysOverTimeCard(
                                             plays = state.response.plays,
                                             modifier =
-                                                Modifier
-                                                    .weight(1f)
-                                                    .fillMaxHeight(),
+                                            Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
                                         )
                                         ConcurrentStreamsCard(
                                             concurrent = state.response.concurrent,
                                             modifier =
-                                                Modifier
-                                                    .weight(1f)
-                                                    .fillMaxHeight(),
+                                            Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
                                         )
                                     }
                                 }
                                 item {
                                     Row(
                                         modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .height(IntrinsicSize.Max),
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(IntrinsicSize.Max),
                                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                                     ) {
                                         ActivityByDayOfWeekCard(
                                             byDay = state.response.byDayOfWeek,
                                             modifier =
-                                                Modifier
-                                                    .weight(1f)
-                                                    .fillMaxHeight(),
+                                            Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
                                         )
                                         ActivityByHourOfDayCard(
                                             byHour = state.response.byHourOfDay,
                                             modifier =
-                                                Modifier
-                                                    .weight(1f)
-                                                    .fillMaxHeight(),
+                                            Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
                                         )
                                     }
                                 }
                                 item {
                                     Row(
                                         modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .height(IntrinsicSize.Max),
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(IntrinsicSize.Max),
                                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                                     ) {
                                         PlatformsCard(
                                             platforms = state.response.platforms,
                                             modifier =
-                                                Modifier
-                                                    .weight(1f)
-                                                    .fillMaxHeight(),
+                                            Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
                                         )
                                         StreamQualityCard(
                                             quality = state.response.quality,
                                             modifier =
-                                                Modifier
-                                                    .weight(1f)
-                                                    .fillMaxHeight(),
+                                            Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
                                         )
                                     }
                                 }
@@ -341,20 +342,20 @@ fun TracearrActivityContent(
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding =
-                                    PaddingValues(
-                                        start = 16.dp,
-                                        end = 16.dp,
-                                        top = 16.dp,
-                                        bottom =
-                                            16.dp +
-                                                if (LocalFloatingBarBottomPadding.current >
-                                                    0.dp
-                                                ) {
-                                                    LocalFloatingBarBottomPadding.current
-                                                } else {
-                                                    navigationBarBottomInset()
-                                                },
-                                    ),
+                                PaddingValues(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    top = 16.dp,
+                                    bottom =
+                                    16.dp +
+                                        if (LocalFloatingBarBottomPadding.current >
+                                            0.dp
+                                        ) {
+                                            LocalFloatingBarBottomPadding.current
+                                        } else {
+                                            navigationBarBottomInset()
+                                        },
+                                ),
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
                                 item { PlaysOverTimeCard(plays = state.response.plays) }
@@ -416,10 +417,10 @@ private fun rememberMarker(): CartesianMarker {
     val label =
         rememberTextComponent(
             style =
-                MaterialTheme.typography.labelSmall.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold,
-                ),
+            MaterialTheme.typography.labelSmall.copy(
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+            ),
             padding = Insets(8.dp, 4.dp),
             background = labelBackground,
         )
@@ -545,43 +546,43 @@ private fun PlaysOverTimeCard(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 CartesianChartHost(
                     chart =
-                        rememberCartesianChart(
-                            rememberLineCartesianLayer(lineProvider = lineProvider),
-                            startAxis = VerticalAxis.rememberStart(),
-                            bottomAxis =
-                                HorizontalAxis.rememberBottom(
-                                    itemPlacer =
-                                        remember(dateLabels.size) {
-                                            HorizontalAxis.ItemPlacer.aligned(
-                                                spacing = {
-                                                    if (dateLabels.size > 20) {
-                                                        3
-                                                    } else if (dateLabels.size > 10) {
-                                                        2
-                                                    } else {
-                                                        1
-                                                    }
-                                                },
-                                            )
-                                        },
-                                    labelRotationDegrees = if (dateLabels.size > 7) 45f else 0f,
-                                    valueFormatter =
-                                        CartesianValueFormatter { _, x, _ ->
-                                            if (dateLabels.isNotEmpty()) {
-                                                val index = x.toInt().coerceIn(0, dateLabels.lastIndex)
-                                                dateLabels[index]
-                                            } else {
-                                                (x.toInt() + 1).toString()
-                                            }
-                                        },
-                                ),
-                            marker = rememberMarker(),
+                    rememberCartesianChart(
+                        rememberLineCartesianLayer(lineProvider = lineProvider),
+                        startAxis = VerticalAxis.rememberStart(),
+                        bottomAxis =
+                        HorizontalAxis.rememberBottom(
+                            itemPlacer =
+                            remember(dateLabels.size) {
+                                HorizontalAxis.ItemPlacer.aligned(
+                                    spacing = {
+                                        if (dateLabels.size > 20) {
+                                            3
+                                        } else if (dateLabels.size > 10) {
+                                            2
+                                        } else {
+                                            1
+                                        }
+                                    },
+                                )
+                            },
+                            labelRotationDegrees = if (dateLabels.size > 7) 45f else 0f,
+                            valueFormatter =
+                            CartesianValueFormatter { _, x, _ ->
+                                if (dateLabels.isNotEmpty()) {
+                                    val index = x.toInt().coerceIn(0, dateLabels.lastIndex)
+                                    dateLabels[index]
+                                } else {
+                                    (x.toInt() + 1).toString()
+                                }
+                            },
                         ),
+                        marker = rememberMarker(),
+                    ),
                     modelProducer = modelProducer,
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
                 )
 
                 if (serverNames.isNotEmpty()) {
@@ -647,52 +648,52 @@ private fun ConcurrentStreamsCard(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 CartesianChartHost(
                     chart =
-                        rememberCartesianChart(
-                            rememberLineCartesianLayer(lineProvider = lineProvider),
-                            startAxis = VerticalAxis.rememberStart(),
-                            bottomAxis =
-                                HorizontalAxis.rememberBottom(
-                                    itemPlacer =
-                                        remember(dateLabels.size) {
-                                            HorizontalAxis.ItemPlacer.aligned(
-                                                spacing = {
-                                                    if (dateLabels.size > 20) {
-                                                        3
-                                                    } else if (dateLabels.size > 10) {
-                                                        2
-                                                    } else {
-                                                        1
-                                                    }
-                                                },
-                                            )
-                                        },
-                                    labelRotationDegrees = if (dateLabels.size > 7) 45f else 0f,
-                                    valueFormatter =
-                                        CartesianValueFormatter { _, x, _ ->
-                                            if (dateLabels.isNotEmpty()) {
-                                                val index = x.toInt().coerceIn(0, dateLabels.lastIndex)
-                                                dateLabels[index]
-                                            } else {
-                                                (x.toInt() + 1).toString()
-                                            }
-                                        },
-                                ),
-                            marker = rememberMarker(),
+                    rememberCartesianChart(
+                        rememberLineCartesianLayer(lineProvider = lineProvider),
+                        startAxis = VerticalAxis.rememberStart(),
+                        bottomAxis =
+                        HorizontalAxis.rememberBottom(
+                            itemPlacer =
+                            remember(dateLabels.size) {
+                                HorizontalAxis.ItemPlacer.aligned(
+                                    spacing = {
+                                        if (dateLabels.size > 20) {
+                                            3
+                                        } else if (dateLabels.size > 10) {
+                                            2
+                                        } else {
+                                            1
+                                        }
+                                    },
+                                )
+                            },
+                            labelRotationDegrees = if (dateLabels.size > 7) 45f else 0f,
+                            valueFormatter =
+                            CartesianValueFormatter { _, x, _ ->
+                                if (dateLabels.isNotEmpty()) {
+                                    val index = x.toInt().coerceIn(0, dateLabels.lastIndex)
+                                    dateLabels[index]
+                                } else {
+                                    (x.toInt() + 1).toString()
+                                }
+                            },
                         ),
+                        marker = rememberMarker(),
+                    ),
                     modelProducer = modelProducer,
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
                 )
 
                 LegendRow(
                     items =
-                        listOf(
-                            mokoString(MR.strings.direct_play) to TracearrBlue,
-                            mokoString(MR.strings.direct_stream) to TracearrDarkBlue,
-                            mokoString(MR.strings.transcode) to ArrOrange,
-                        ),
+                    listOf(
+                        mokoString(MR.strings.direct_play) to TracearrBlue,
+                        mokoString(MR.strings.direct_stream) to TracearrDarkBlue,
+                        mokoString(MR.strings.transcode) to ArrOrange,
+                    ),
                 )
             }
         }
@@ -725,29 +726,29 @@ private fun ActivityByDayOfWeekCard(
     ) {
         CartesianChartHost(
             chart =
-                rememberCartesianChart(
-                    rememberColumnCartesianLayer(
-                        columnProvider =
-                            ColumnCartesianLayer.ColumnProvider.series(
-                                rememberLineComponent(fill = Fill(ArrBlue), 16.dp),
-                            ),
+            rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    columnProvider =
+                    ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(fill = Fill(ArrBlue), 16.dp),
                     ),
-                    startAxis = VerticalAxis.rememberStart(),
-                    bottomAxis =
-                        HorizontalAxis.rememberBottom(
-                            valueFormatter =
-                                CartesianValueFormatter { _, x, _ ->
-                                    val index = x.toInt().coerceIn(0, daysOrder.lastIndex)
-                                    daysOrder[index]
-                                },
-                        ),
-                    marker = rememberMarker(),
                 ),
+                startAxis = VerticalAxis.rememberStart(),
+                bottomAxis =
+                HorizontalAxis.rememberBottom(
+                    valueFormatter =
+                    CartesianValueFormatter { _, x, _ ->
+                        val index = x.toInt().coerceIn(0, daysOrder.lastIndex)
+                        daysOrder[index]
+                    },
+                ),
+                marker = rememberMarker(),
+            ),
             modelProducer = modelProducer,
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
+            Modifier
+                .fillMaxWidth()
+                .height(200.dp),
         )
     }
 }
@@ -777,36 +778,36 @@ private fun ActivityByHourOfDayCard(
     ) {
         CartesianChartHost(
             chart =
-                rememberCartesianChart(
-                    rememberColumnCartesianLayer(
-                        columnProvider =
-                            ColumnCartesianLayer.ColumnProvider.series(
-                                rememberLineComponent(fill = Fill(ArrBlue), 16.dp),
-                            ),
+            rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    columnProvider =
+                    ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(fill = Fill(ArrBlue), 16.dp),
                     ),
-                    startAxis = VerticalAxis.rememberStart(),
-                    bottomAxis =
-                        HorizontalAxis.rememberBottom(
-                            itemPlacer = remember { HorizontalAxis.ItemPlacer.aligned(spacing = { 2 }) },
-                            labelRotationDegrees = 45f,
-                            valueFormatter =
-                                CartesianValueFormatter { _, x, _ ->
-                                    val hr = (x.toInt() % 24 + 24) % 24
-                                    when (hr) {
-                                        0 -> "12am"
-                                        12 -> "12pm"
-                                        in 1..11 -> "${hr}am"
-                                        else -> "${hr - 12}pm"
-                                    }
-                                },
-                        ),
-                    marker = rememberMarker(),
                 ),
+                startAxis = VerticalAxis.rememberStart(),
+                bottomAxis =
+                HorizontalAxis.rememberBottom(
+                    itemPlacer = remember { HorizontalAxis.ItemPlacer.aligned(spacing = { 2 }) },
+                    labelRotationDegrees = 45f,
+                    valueFormatter =
+                    CartesianValueFormatter { _, x, _ ->
+                        val hr = (x.toInt() % 24 + 24) % 24
+                        when (hr) {
+                            0 -> "12am"
+                            12 -> "12pm"
+                            in 1..11 -> "${hr}am"
+                            else -> "${hr - 12}pm"
+                        }
+                    },
+                ),
+                marker = rememberMarker(),
+            ),
             modelProducer = modelProducer,
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
+            Modifier
+                .fillMaxWidth()
+                .height(200.dp),
         )
     }
 }
@@ -879,9 +880,9 @@ private fun PlatformsCard(
             ) {
                 Box(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(240.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .height(240.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     PieChartHost(
@@ -958,9 +959,9 @@ private fun StreamQualityCard(
             ) {
                 Box(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(240.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .height(240.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     PieChartHost(
@@ -988,15 +989,15 @@ private fun ChartCardContainer(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
     ) {
         Column(
             modifier =
-                Modifier
-                    .padding(16.dp)
-                    .fillMaxSize(),
+            Modifier
+                .padding(16.dp)
+                .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
@@ -1013,9 +1014,9 @@ private fun ChartCardContainer(
 private fun EmptyChartPlaceholder() {
     Box(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(160.dp),
+        Modifier
+            .fillMaxWidth()
+            .height(160.dp),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -1055,10 +1056,10 @@ private fun LegendRow(
             ) {
                 Box(
                     modifier =
-                        Modifier
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(color),
+                    Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(color),
                 )
                 Text(
                     text = label,
@@ -1118,17 +1119,17 @@ fun TracearrActivityScreenPreview() {
             TracearrActivityByHoD(
                 hour = hr,
                 count =
-                    when (hr) {
-                        1 -> 33
-                        2 -> 15
-                        12 -> 13
-                        13 -> 15
-                        14 -> 14
-                        20 -> 18
-                        21 -> 25
-                        22 -> 21
-                        else -> 3
-                    },
+                when (hr) {
+                    1 -> 33
+                    2 -> 15
+                    12 -> 13
+                    13 -> 15
+                    14 -> 14
+                    20 -> 18
+                    21 -> 25
+                    22 -> 21
+                    else -> 3
+                },
             )
         }
 
@@ -1163,23 +1164,23 @@ fun TracearrActivityScreenPreview() {
     ArrMateyTheme {
         TracearrActivityContent(
             state =
-                TracearrActivityState.Success(
-                    response =
-                        TracearrActivityResponse(
-                            period = TracearrPeriod.Month,
-                            range =
-                                TracearrActivityRange(
-                                    start = "2026-08-10 00:00:00",
-                                    end = "2026-09-09 00:00:00",
-                                ),
-                            plays = mockPlays,
-                            concurrent = mockConcurrent,
-                            byDayOfWeek = mockByDay,
-                            byHourOfDay = mockByHour,
-                            platforms = mockPlatforms,
-                            quality = mockQuality,
-                        ),
+            TracearrActivityState.Success(
+                response =
+                TracearrActivityResponse(
+                    period = TracearrPeriod.Month,
+                    range =
+                    TracearrActivityRange(
+                        start = "2026-08-10 00:00:00",
+                        end = "2026-09-09 00:00:00",
+                    ),
+                    plays = mockPlays,
+                    concurrent = mockConcurrent,
+                    byDayOfWeek = mockByDay,
+                    byHourOfDay = mockByHour,
+                    platforms = mockPlatforms,
+                    quality = mockQuality,
                 ),
+            ),
             isRefreshing = false,
             selectedPeriod = TracearrPeriod.Month,
             isLargeScreen = false,

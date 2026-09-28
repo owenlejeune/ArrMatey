@@ -68,11 +68,10 @@ class DownloadClientManager(
 
     fun observeSelectedDownloadClient(): Flow<DownloadClient?> = downloadClientRepository.observeSelectedDownloadClient()
 
-    fun getSelectedDownloadClientApi(): Flow<DownloadClientApi?> =
-        observeSelectedDownloadClient()
-            .map { selectedClient ->
-                selectedClient?.let { _downloadClientApis.value[it.id] }
-            }
+    fun getSelectedDownloadClientApi(): Flow<DownloadClientApi?> = observeSelectedDownloadClient()
+        .map { selectedClient ->
+            selectedClient?.let { _downloadClientApis.value[it.id] }
+        }
 
     fun observeSelectedApiClient(): Flow<DownloadClientApi?> = getSelectedDownloadClientApi()
 

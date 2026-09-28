@@ -33,6 +33,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ExtraFileCard
 import com.dnfapps.arrmatey.ui.components.FileCard
@@ -82,9 +83,9 @@ fun MovieFilesScreen(
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refreshHistory() },
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -117,9 +118,9 @@ fun MovieFilesScreen(
                         Text(
                             text = mokoString(MR.strings.no_files),
                             modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                         )

@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.datastore.TabPreferences
 import com.dnfapps.arrmatey.entensions.androidIcon
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingNavigationBar
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingNavigationBarItem
@@ -176,29 +177,29 @@ fun NavigationSetupPage(
                             val isSelected = useFloatingNavigationBar == isFloating
                             Surface(
                                 modifier =
-                                    Modifier
-                                        .weight(1f)
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .clickable {
-                                            if (useFloatingNavigationBar != isFloating) {
-                                                onToggleFloatingNavigationBar()
-                                            }
-                                        }.border(
-                                            width = if (isSelected) 2.dp else 1.dp,
-                                            color =
-                                                if (isSelected) {
-                                                    MaterialTheme.colorScheme.primary
-                                                } else {
-                                                    MaterialTheme.colorScheme.outlineVariant
-                                                },
-                                            shape = MaterialTheme.shapes.medium,
-                                        ),
+                                Modifier
+                                    .weight(1f)
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .clickable {
+                                        if (useFloatingNavigationBar != isFloating) {
+                                            onToggleFloatingNavigationBar()
+                                        }
+                                    }.border(
+                                        width = if (isSelected) 2.dp else 1.dp,
+                                        color =
+                                        if (isSelected) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.outlineVariant
+                                        },
+                                        shape = MaterialTheme.shapes.medium,
+                                    ),
                                 color =
-                                    if (isSelected) {
-                                        MaterialTheme.colorScheme.primaryContainer
-                                    } else {
-                                        MaterialTheme.colorScheme.surface
-                                    },
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
                             ) {
                                 Box(
                                     modifier = Modifier.padding(vertical = 10.dp),
@@ -224,9 +225,9 @@ fun NavigationSetupPage(
             ) {
                 Column(
                     modifier =
-                        Modifier
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
-                            .animateContentSize(),
+                    Modifier
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .animateContentSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     // Header with Selected Count & Reorder Button
@@ -318,12 +319,12 @@ fun NavigationSetupPage(
                                         val position = visibleTabs.indexOf(tab) + 1
                                         Box(
                                             modifier =
-                                                Modifier
-                                                    .size(18.dp)
-                                                    .background(
-                                                        MaterialTheme.colorScheme.primary,
-                                                        CircleShape,
-                                                    ),
+                                            Modifier
+                                                .size(18.dp)
+                                                .background(
+                                                    MaterialTheme.colorScheme.primary,
+                                                    CircleShape,
+                                                ),
                                             contentAlignment = Alignment.Center,
                                         ) {
                                             Text(
@@ -418,10 +419,10 @@ fun NavigationSetupPage(
         ) {
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 32.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -451,9 +452,9 @@ fun NavigationSetupPage(
                         ) {
                             Row(
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
@@ -464,9 +465,9 @@ fun NavigationSetupPage(
                                 ) {
                                     Box(
                                         modifier =
-                                            Modifier
-                                                .size(24.dp)
-                                                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                                        Modifier
+                                            .size(24.dp)
+                                            .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Text(
@@ -557,9 +558,9 @@ private fun PreferenceToggleCard(
     ) {
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {

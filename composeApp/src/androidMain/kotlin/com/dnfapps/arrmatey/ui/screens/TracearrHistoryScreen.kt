@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
 import com.dnfapps.arrmatey.tracearr.state.TracearrHistoryState
@@ -89,9 +90,9 @@ fun TracearrHistoryScreen(
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refresh() },
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             when (val currentState = state) {
                 is TracearrHistoryState.Initial,
@@ -145,20 +146,20 @@ fun TracearrHistoryScreen(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding =
-                            PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 16.dp,
-                                bottom =
-                                    16.dp +
-                                        if (LocalFloatingBarBottomPadding.current >
-                                            0.dp
-                                        ) {
-                                            LocalFloatingBarBottomPadding.current
-                                        } else {
-                                            navigationBarBottomInset()
-                                        },
-                            ),
+                        PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom =
+                            16.dp +
+                                if (LocalFloatingBarBottomPadding.current >
+                                    0.dp
+                                ) {
+                                    LocalFloatingBarBottomPadding.current
+                                } else {
+                                    navigationBarBottomInset()
+                                },
+                        ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         if (currentState.activeStreams.isNotEmpty()) {
@@ -192,9 +193,9 @@ fun TracearrHistoryScreen(
                             item(key = "empty_history") {
                                 Box(
                                     modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 24.dp),
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 24.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
@@ -227,9 +228,9 @@ fun TracearrHistoryScreen(
                             item(key = "loading_more") {
                                 Box(
                                     modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     LoadingIndicator()

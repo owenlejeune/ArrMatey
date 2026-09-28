@@ -22,48 +22,47 @@ class GetSeerrMediaDetailsUseCase {
         tmdbId: Long,
         type: RequestType,
         repository: SeerrInstanceRepository,
-    ): Flow<SeerrDetailsState> =
-        channelFlow {
-            send(SeerrDetailsState.Loading)
+    ): Flow<SeerrDetailsState> = channelFlow {
+        send(SeerrDetailsState.Loading)
 
-            repository
-                .observeMediaDetails(tmdbId, type)
-                .collect { detailsResult ->
-                    when (detailsResult) {
-                        is NetworkResult.Loading -> send(SeerrDetailsState.Loading)
-                        is NetworkResult.Error -> {
-                            send(
-                                SeerrDetailsState.Error(
-                                    detailsResult.errorType.toHttpError(),
-                                    detailsResult.message,
-                                ),
-                            )
-                        }
-                        is NetworkResult.Success<*> -> {
-                            val mediaDetails = (detailsResult as NetworkResult.Success<RequestMediaDetails>).data
+        repository
+            .observeMediaDetails(tmdbId, type)
+            .collect { detailsResult ->
+                when (detailsResult) {
+                    is NetworkResult.Loading -> send(SeerrDetailsState.Loading)
+                    is NetworkResult.Error -> {
+                        send(
+                            SeerrDetailsState.Error(
+                                detailsResult.errorType.toHttpError(),
+                                detailsResult.message,
+                            ),
+                        )
+                    }
+                    is NetworkResult.Success<*> -> {
+                        val mediaDetails = (detailsResult as NetworkResult.Success<RequestMediaDetails>).data
 
-                            if (type == RequestType.Tv && mediaDetails is TvDetails) {
-                                val seasonCount = mediaDetails.numberOfSeasons
-                                val seasonSemaphore = Semaphore(MAX_CONCURRENT_SEASON_REQUESTS)
-                                val seasons =
-                                    (1..seasonCount)
-                                        .map { seasonNumber ->
-                                            async {
-                                                seasonSemaphore.withPermit {
-                                                    repository.getSeasonDetails(tmdbId, seasonNumber)
-                                                }
+                        if (type == RequestType.Tv && mediaDetails is TvDetails) {
+                            val seasonCount = mediaDetails.numberOfSeasons
+                            val seasonSemaphore = Semaphore(MAX_CONCURRENT_SEASON_REQUESTS)
+                            val seasons =
+                                (1..seasonCount)
+                                    .map { seasonNumber ->
+                                        async {
+                                            seasonSemaphore.withPermit {
+                                                repository.getSeasonDetails(tmdbId, seasonNumber)
                                             }
-                                        }.awaitAll()
-                                        .filterIsInstance<NetworkResult.Success<Season>>()
-                                        .map { it.data }
+                                        }
+                                    }.awaitAll()
+                                    .filterIsInstance<NetworkResult.Success<Season>>()
+                                    .map { it.data }
 
-                                val enrichedDetails = mediaDetails.copy(seasons = seasons)
-                                send(SeerrDetailsState.Success(enrichedDetails))
-                            } else {
-                                send(SeerrDetailsState.Success(mediaDetails))
-                            }
+                            val enrichedDetails = mediaDetails.copy(seasons = seasons)
+                            send(SeerrDetailsState.Success(enrichedDetails))
+                        } else {
+                            send(SeerrDetailsState.Success(mediaDetails))
                         }
                     }
                 }
-        }
+            }
+    }
 }

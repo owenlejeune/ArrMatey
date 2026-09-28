@@ -23,6 +23,7 @@ import com.dnfapps.arrmatey.navigation.toMovieFiles
 import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.navigation.toSeriesRelease
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.ArrSearchScreen
 import com.dnfapps.arrmatey.ui.screens.AudiobookFilesScreen
@@ -121,11 +122,11 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             releaseParams = releaseParams,
             instanceId = params.instanceId,
             defaultFilter =
-                if (params.episodeId != null) {
-                    ReleaseFilterBy.SingleEpisode
-                } else {
-                    ReleaseFilterBy.SeasonPack
-                },
+            if (params.episodeId != null) {
+                ReleaseFilterBy.SingleEpisode
+            } else {
+                ReleaseFilterBy.SeasonPack
+            },
             onBack = { navigation.popBackStack() },
         )
     }

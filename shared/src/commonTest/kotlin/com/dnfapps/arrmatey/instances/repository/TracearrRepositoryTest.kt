@@ -52,17 +52,16 @@ class TracearrRepositoryTest {
     }
 
     @Test
-    fun testGetPublicStreamsFetchesAndCachesMediaDetailsDeduplicated() =
-        runTest {
-            val mutex = Mutex()
-            var mediaCallCount = 0
-            val requestedMediaRefs = mutableListOf<String>()
+    fun testGetPublicStreamsFetchesAndCachesMediaDetailsDeduplicated() = runTest {
+        val mutex = Mutex()
+        var mediaCallCount = 0
+        val requestedMediaRefs = mutableListOf<String>()
 
-            val httpClient =
-                createHttpClient { url ->
-                    when {
-                        url.contains("/v2/public/streams") ->
-                            """
+        val httpClient =
+            createHttpClient { url ->
+                when {
+                    url.contains("/v2/public/streams") ->
+                        """
                             {
                               "data": [
                                 {
@@ -85,51 +84,50 @@ class TracearrRepositoryTest {
                                 }
                               ]
                             }
-                            """.trimIndent()
-                        url.contains("/v2/public/media/") -> {
-                            val ref = url.substringAfter("/v2/public/media/")
-                            mutex.withLock {
-                                mediaCallCount++
-                                requestedMediaRefs.add(ref)
-                            }
-                            """
+                        """.trimIndent()
+                    url.contains("/v2/public/media/") -> {
+                        val ref = url.substringAfter("/v2/public/media/")
+                        mutex.withLock {
+                            mediaCallCount++
+                            requestedMediaRefs.add(ref)
+                        }
+                        """
                             {
                               "id": "$ref",
                               "title": "Title for $ref"
                             }
-                            """.trimIndent()
-                        }
-                        else -> "{}"
+                        """.trimIndent()
                     }
+                    else -> "{}"
                 }
+            }
 
-            val repository = TracearrRepository(fakeInstance, httpClient)
+        val repository = TracearrRepository(fakeInstance, httpClient)
 
-            val result1 = repository.getPublicStreams()
-            assertTrue(result1 is NetworkResult.Success)
+        val result1 = repository.getPublicStreams()
+        assertTrue(result1 is NetworkResult.Success)
 
-            val streams1 = result1.data.data
-            assertEquals(3, streams1.size)
-            assertEquals("Title for movie-1", streams1[0].mediaDetails?.title)
-            assertEquals("Title for movie-1", streams1[1].mediaDetails?.title)
-            assertEquals("Title for show-100", streams1[2].mediaDetails?.title)
+        val streams1 = result1.data.data
+        assertEquals(3, streams1.size)
+        assertEquals("Title for movie-1", streams1[0].mediaDetails?.title)
+        assertEquals("Title for movie-1", streams1[1].mediaDetails?.title)
+        assertEquals("Title for show-100", streams1[2].mediaDetails?.title)
 
-            assertEquals(2, mediaCallCount)
-            assertEquals(listOf("movie-1", "show-100"), requestedMediaRefs.sorted())
+        assertEquals(2, mediaCallCount)
+        assertEquals(listOf("movie-1", "show-100"), requestedMediaRefs.sorted())
 
-            val result2 = repository.getPublicStreams()
-            assertTrue(result2 is NetworkResult.Success)
-            assertEquals(2, mediaCallCount)
-            assertEquals(3, repository.activeStreams.value.size)
-        }
+        val result2 = repository.getPublicStreams()
+        assertTrue(result2 is NetworkResult.Success)
+        assertEquals(2, mediaCallCount)
+        assertEquals(3, repository.activeStreams.value.size)
+    }
 
     @Test
-    fun testGetTodayStatsUpdatesTodayStatsStateFlow() =
-        runTest {
-            val httpClient =
-                createHttpClient { url ->
-                    if (url.contains("/public/stats/today")) {
-                        """
+    fun testGetTodayStatsUpdatesTodayStatsStateFlow() = runTest {
+        val httpClient =
+            createHttpClient { url ->
+                if (url.contains("/public/stats/today")) {
+                    """
                         {
                           "activeStreams": 2,
                           "todayPlays": 15,
@@ -138,18 +136,18 @@ class TracearrRepositoryTest {
                           "alertsLast24h": 0,
                           "activeUsersToday": 3
                         }
-                        """.trimIndent()
-                    } else {
-                        "{}"
-                    }
+                    """.trimIndent()
+                } else {
+                    "{}"
                 }
+            }
 
-            val repository = TracearrRepository(fakeInstance, httpClient)
-            assertEquals(null, repository.todayStats.value)
+        val repository = TracearrRepository(fakeInstance, httpClient)
+        assertEquals(null, repository.todayStats.value)
 
-            val result = repository.getTodayStats()
-            assertTrue(result is NetworkResult.Success)
-            assertEquals(2, repository.todayStats.value?.activeStreams)
-            assertEquals(15, repository.todayStats.value?.todayPlays)
-        }
+        val result = repository.getTodayStats()
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(2, repository.todayStats.value?.activeStreams)
+        assertEquals(15, repository.todayStats.value?.todayPlays)
+    }
 }

@@ -7,8 +7,7 @@ import kotlinx.coroutines.flow.Flow
 class GetTracearrInstanceRepositoryUseCase(
     private val instanceManager: InstanceManager,
 ) {
-    operator fun invoke(instanceId: Long): TracearrRepository? =
-        instanceManager.getAllTracearrRepositories().find { it.instance.id == instanceId }
+    operator fun invoke(instanceId: Long): TracearrRepository? = instanceManager.getAllTracearrRepositories().find { it.instance.id == instanceId }
 
     fun observeSelected(): Flow<TracearrRepository?> = instanceManager.getSelectedTracearrRepository()
 }

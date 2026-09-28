@@ -23,10 +23,10 @@ fun ClearLogo(item: ArrMedia) {
                 model = rememberRemoteImageData(logo),
                 contentDescription = item.title,
                 modifier =
-                    Modifier
-                        .align(Alignment.CenterStart)
-                        .height(120.dp)
-                        .padding(horizontal = 6.dp),
+                Modifier
+                    .align(Alignment.CenterStart)
+                    .height(120.dp)
+                    .padding(horizontal = 6.dp),
                 contentScale = ContentScale.Fit,
             )
         }

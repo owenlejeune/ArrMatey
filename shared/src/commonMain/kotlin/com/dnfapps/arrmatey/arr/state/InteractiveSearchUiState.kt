@@ -20,9 +20,8 @@ data class InteractiveSearchUiState(
     val customFilterId: Long? = null,
 ) {
     companion object {
-        fun empty(filterBy: ReleaseFilterBy) =
-            InteractiveSearchUiState(
-                filterBy = filterBy,
-            )
+        fun empty(filterBy: ReleaseFilterBy) = InteractiveSearchUiState(
+            filterBy = filterBy,
+        )
     }
 }

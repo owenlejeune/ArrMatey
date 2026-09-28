@@ -31,37 +31,36 @@ class ReadarrRepositoryTest {
     private val fakeLogger = LoggerFactory.get("test")
 
     @Test
-    fun testGetAuthorSeries() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(
-                        content = """[{"id": 1, "title": "Foundation", "authorId": 10}]""",
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
+    fun testGetAuthorSeries() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content = """[{"id": 1, "title": "Foundation", "authorId": 10}]""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                        },
                     )
                 }
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json(
-                            Json {
-                                ignoreUnknownKeys = true
-                            },
-                        )
-                    }
-                }
-            val repository = ReadarrRepository(fakeInstance, httpClient, fakeLogger)
+            }
+        val repository = ReadarrRepository(fakeInstance, httpClient, fakeLogger)
 
-            repository.getAuthorSeries(authorId = 10)
+        repository.getAuthorSeries(authorId = 10)
 
-            assertNotNull(repository.authorSeries.value[10])
-            assertEquals(1, repository.authorSeries.value[10]?.size)
-            assertEquals(
-                "Foundation",
-                repository.authorSeries.value[10]
-                    ?.first()
-                    ?.title,
-            )
-        }
+        assertNotNull(repository.authorSeries.value[10])
+        assertEquals(1, repository.authorSeries.value[10]?.size)
+        assertEquals(
+            "Foundation",
+            repository.authorSeries.value[10]
+                ?.first()
+                ?.title,
+        )
+    }
 }

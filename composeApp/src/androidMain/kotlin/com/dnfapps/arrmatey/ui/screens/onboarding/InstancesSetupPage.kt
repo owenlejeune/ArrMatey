@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.associatedColor
 import com.dnfapps.arrmatey.utils.mokoString
@@ -52,10 +53,10 @@ fun InstancesSetupPage(
 ) {
     Column(
         modifier =
-            modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .padding(top = 16.dp),
+        modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp)
+            .padding(top = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
@@ -72,9 +73,9 @@ fun InstancesSetupPage(
 
         Column(
             modifier =
-                Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
+            Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (instances.isEmpty() && downloadClients.isEmpty()) {
@@ -114,17 +115,17 @@ fun InstancesSetupPage(
                         ) {
                             Row(
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(IntrinsicSize.Min),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(IntrinsicSize.Min),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Box(
                                     modifier =
-                                        Modifier
-                                            .width(6.dp)
-                                            .fillMaxHeight()
-                                            .background(instance.type.associatedColor),
+                                    Modifier
+                                        .width(6.dp)
+                                        .fillMaxHeight()
+                                        .background(instance.type.associatedColor),
                                 )
                                 Row(
                                     modifier = Modifier.padding(16.dp).weight(1f),
@@ -215,17 +216,17 @@ fun InstancesSetupPage(
                         ) {
                             Row(
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(IntrinsicSize.Min),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(IntrinsicSize.Min),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Box(
                                     modifier =
-                                        Modifier
-                                            .width(6.dp)
-                                            .fillMaxHeight()
-                                            .background(client.type.associatedColor),
+                                    Modifier
+                                        .width(6.dp)
+                                        .fillMaxHeight()
+                                        .background(client.type.associatedColor),
                                 )
                                 Row(
                                     modifier = Modifier.padding(16.dp).weight(1f),

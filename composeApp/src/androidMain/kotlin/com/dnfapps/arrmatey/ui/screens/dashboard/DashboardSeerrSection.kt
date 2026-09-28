@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.utils.mokoString
@@ -47,11 +48,11 @@ fun SeerrSection(
 
     val containerColor by animateColorAsState(
         targetValue =
-            if (isEditing || seerrInstances.isEmpty()) {
-                MaterialTheme.colorScheme.surfaceContainerHigh
-            } else {
-                Color.Transparent
-            },
+        if (isEditing || seerrInstances.isEmpty()) {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        } else {
+            Color.Transparent
+        },
         label = "SeerrCardBackgroundAnimation",
     )
 
@@ -64,17 +65,17 @@ fun SeerrSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = containerColor,
-            ),
+        CardDefaults.cardColors(
+            containerColor = containerColor,
+        ),
         border =
-            if (isEditing ||
-                seerrInstances.isEmpty()
-            ) {
-                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            } else {
-                null
-            },
+        if (isEditing ||
+            seerrInstances.isEmpty()
+        ) {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        } else {
+            null
+        },
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
@@ -126,17 +127,17 @@ fun SeerrSection(
                         label = mokoString(MR.strings.dashboard_pending_issues),
                         count = totalIssues,
                         iconColor =
-                            if (totalIssues > 0) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.secondary
-                            },
+                        if (totalIssues > 0) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.secondary
+                        },
                         containerColor =
-                            if (totalIssues > 0) {
-                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainerHigh
-                            },
+                        if (totalIssues > 0) {
+                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        },
                         onClick = if (!isEditing) onIssueClick else null,
                     )
                 }

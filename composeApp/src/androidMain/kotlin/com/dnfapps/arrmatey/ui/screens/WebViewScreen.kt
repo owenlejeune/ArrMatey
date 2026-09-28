@@ -52,6 +52,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.utils.mokoString
@@ -192,9 +193,9 @@ fun WebViewScreen(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
         ) {
             AnimatedVisibility(
                 visible = showBanner && bannerMessage != null,
@@ -203,11 +204,11 @@ fun WebViewScreen(
             ) {
                 Row(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surfaceContainer)
-                            .clickable(enabled = onBannerClick != null) { onBannerClick?.invoke() }
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .clickable(enabled = onBannerClick != null) { onBannerClick?.invoke() }
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
@@ -283,9 +284,9 @@ fun WebViewScreen(
                     LinearProgressIndicator(
                         progress = { progress },
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.TopCenter),
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter),
                     )
                 }
             }

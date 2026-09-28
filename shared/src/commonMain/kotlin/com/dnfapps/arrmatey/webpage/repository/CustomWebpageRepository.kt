@@ -14,29 +14,27 @@ class CustomWebpageRepository(
 
     fun observeWebpageById(id: Long): Flow<CustomWebpage?> = dao.observeWebpageById(id)
 
-    suspend fun addWebpage(webpage: CustomWebpage): InsertResult =
-        try {
-            val id = dao.insert(webpage)
-            if (id > 0L) {
-                InsertResult.Success(id)
-            } else {
-                InsertResult.Error("Failed to save webpage")
-            }
-        } catch (e: Exception) {
-            InsertResult.Error(e.message ?: "An error occurred")
+    suspend fun addWebpage(webpage: CustomWebpage): InsertResult = try {
+        val id = dao.insert(webpage)
+        if (id > 0L) {
+            InsertResult.Success(id)
+        } else {
+            InsertResult.Error("Failed to save webpage")
         }
+    } catch (e: Exception) {
+        InsertResult.Error(e.message ?: "An error occurred")
+    }
 
-    suspend fun updateWebpage(webpage: CustomWebpage): InsertResult =
-        try {
-            val rows = dao.update(webpage)
-            if (rows > 0) {
-                InsertResult.Success(webpage.id)
-            } else {
-                InsertResult.Error("Failed up update webpage")
-            }
-        } catch (e: Exception) {
-            InsertResult.Error(e.message ?: "An error occurred")
+    suspend fun updateWebpage(webpage: CustomWebpage): InsertResult = try {
+        val rows = dao.update(webpage)
+        if (rows > 0) {
+            InsertResult.Success(webpage.id)
+        } else {
+            InsertResult.Error("Failed up update webpage")
         }
+    } catch (e: Exception) {
+        InsertResult.Error(e.message ?: "An error occurred")
+    }
 
     suspend fun deleteWebpage(webpage: CustomWebpage) {
         dao.delete(webpage)

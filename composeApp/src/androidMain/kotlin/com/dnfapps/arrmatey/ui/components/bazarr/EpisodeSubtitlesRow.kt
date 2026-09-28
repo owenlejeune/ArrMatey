@@ -62,11 +62,11 @@ fun EpisodeSubtitlesRow(
                 }
             Box(
                 modifier =
-                    Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = MaterialTheme.shapes.extraSmall,
-                        ).padding(horizontal = 4.dp, vertical = 1.dp),
+                Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        shape = MaterialTheme.shapes.extraSmall,
+                    ).padding(horizontal = 4.dp, vertical = 1.dp),
             ) {
                 Text(
                     text = label,
@@ -81,12 +81,12 @@ fun EpisodeSubtitlesRow(
             val label = missing.chipLabel()
             Box(
                 modifier =
-                    Modifier
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
-                            shape = MaterialTheme.shapes.extraSmall,
-                        ).padding(horizontal = 4.dp, vertical = 1.dp),
+                Modifier
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
+                        shape = MaterialTheme.shapes.extraSmall,
+                    ).padding(horizontal = 4.dp, vertical = 1.dp),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

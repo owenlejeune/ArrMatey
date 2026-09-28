@@ -37,6 +37,7 @@ import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
@@ -86,9 +87,9 @@ fun AudiobookFilesScreen(
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refreshHistory() },
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -163,20 +164,20 @@ fun AudiobookFileCard(file: AudiobookFile) {
     ContainerCard(modifier = Modifier.fillMaxWidth()) {
         Text(
             text =
-                file.path
-                    ?.split("/")
-                    ?.lastOrNull()
-                    ?.breakable()
-                    ?: mokoString(MR.strings.unknown),
+            file.path
+                ?.split("/")
+                ?.lastOrNull()
+                ?.breakable()
+                ?: mokoString(MR.strings.unknown),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
             text =
-                listOfNotNull(
-                    file.format,
-                    file.size?.bytesAsFileSizeString(),
-                ).joinToString(BULLET),
+            listOfNotNull(
+                file.format,
+                file.size?.bytesAsFileSizeString(),
+            ).joinToString(BULLET),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -28,13 +28,12 @@ class SonarrClient(
     httpClient: HttpClient,
 ) : BaseArrClient(httpClient),
     ArrClient {
-    override suspend fun getLibrary(): NetworkResult<List<ArrSeries>> =
-        get<List<ArrSeries>>("series")
-            .map { shows ->
-                shows.map { series ->
-                    series.withLocalImages(instance.url).copy(instanceId = instance.id)
-                }
+    override suspend fun getLibrary(): NetworkResult<List<ArrSeries>> = get<List<ArrSeries>>("series")
+        .map { shows ->
+            shows.map { series ->
+                series.withLocalImages(instance.url).copy(instanceId = instance.id)
             }
+        }
 
     override suspend fun getDetail(id: Long): NetworkResult<ArrSeries> = get("series/$id")
 
@@ -70,15 +69,14 @@ class SonarrClient(
         id: Long,
         deleteFiles: Boolean,
         addImportExclusion: Boolean,
-    ): NetworkResult<Unit> =
-        delete(
-            endpoint = "series/$id",
-            params =
-                mapOf(
-                    "deleteFiles" to deleteFiles,
-                    "addImportListExclusion" to addImportExclusion,
-                ),
-        )
+    ): NetworkResult<Unit> = delete(
+        endpoint = "series/$id",
+        params =
+        mapOf(
+            "deleteFiles" to deleteFiles,
+            "addImportListExclusion" to addImportExclusion,
+        ),
+    )
 
     override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrSeries>> = get("series/lookup", mapOf("term" to params.query))
 
@@ -103,104 +101,99 @@ class SonarrClient(
     override suspend fun setMonitorStatus(
         id: Long,
         monitorStatus: Boolean,
-    ): NetworkResult<List<MonitoredResponse>> =
-        put(
-            "series/editor",
-            mapOf(
-                "monitored" to monitorStatus,
-                "seriesIds" to listOf(id),
-            ),
-        )
+    ): NetworkResult<List<MonitoredResponse>> = put(
+        "series/editor",
+        mapOf(
+            "monitored" to monitorStatus,
+            "seriesIds" to listOf(id),
+        ),
+    )
 
     override suspend fun getItemHistory(
         id: Long,
         page: Int,
         pageSize: Int,
         altId: Long?,
-    ): NetworkResult<List<SonarrHistoryItem>> =
-        get<SonarrHistoryResponse>(
-            "history",
-            mapOf<String, Any>(
-                "page" to page,
-                "pageSize" to pageSize,
-                "episodeId" to id,
-                "includeSeries" to true,
-                "includeEpisode" to true,
-            ),
-        ).map { response ->
-            response.records.map {
-                it.copy(
-                    instanceId = instance.id,
-                    instanceName = instance.label,
-                    instanceType = instance.type,
+    ): NetworkResult<List<SonarrHistoryItem>> = get<SonarrHistoryResponse>(
+        "history",
+        mapOf<String, Any>(
+            "page" to page,
+            "pageSize" to pageSize,
+            "episodeId" to id,
+            "includeSeries" to true,
+            "includeEpisode" to true,
+        ),
+    ).map { response ->
+        response.records.map {
+            it.copy(
+                instanceId = instance.id,
+                instanceName = instance.label,
+                instanceType = instance.type,
+                series = it.series?.withLocalImages(instance.url),
+                episode =
+                it.episode?.copy(
+                    images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
                     series = it.series?.withLocalImages(instance.url),
-                    episode =
-                        it.episode?.copy(
-                            images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
-                            series = it.series?.withLocalImages(instance.url),
-                        ),
-                )
-            }
+                ),
+            )
         }
+    }
 
     override suspend fun getHistory(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<List<HistoryItem>> =
-        get<SonarrHistoryResponse>(
-            "history",
-            mapOf<String, Any>(
-                "page" to page,
-                "pageSize" to pageSize,
-                "includeSeries" to true,
-                "includeEpisode" to true,
-            ),
-        ).map { response ->
-            response.records.map {
-                it.copy(
-                    instanceId = instance.id,
-                    instanceName = instance.label,
-                    instanceType = instance.type,
+    ): NetworkResult<List<HistoryItem>> = get<SonarrHistoryResponse>(
+        "history",
+        mapOf<String, Any>(
+            "page" to page,
+            "pageSize" to pageSize,
+            "includeSeries" to true,
+            "includeEpisode" to true,
+        ),
+    ).map { response ->
+        response.records.map {
+            it.copy(
+                instanceId = instance.id,
+                instanceName = instance.label,
+                instanceType = instance.type,
+                series = it.series?.withLocalImages(instance.url),
+                episode =
+                it.episode?.copy(
+                    images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
                     series = it.series?.withLocalImages(instance.url),
-                    episode =
-                        it.episode?.copy(
-                            images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
-                            series = it.series?.withLocalImages(instance.url),
-                        ),
-                )
-            }
+                ),
+            )
         }
+    }
 
     override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> = post("command", CommandPayload.Series(id))
 
     override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate,
-    ): NetworkResult<List<Episode>> =
-        get<List<Episode>>(
-            "calendar",
-            mapOf(
-                "start" to start.toString(),
-                "end" to end.toString(),
-                "unmonitored" to true,
-                "includeSeries" to true,
-                "includeEpisodeFile" to true,
-                "includeEpisodeImages" to true,
-            ),
-        ).map { it.map { ep -> ep.copy(instanceId = instance.id) } }
+    ): NetworkResult<List<Episode>> = get<List<Episode>>(
+        "calendar",
+        mapOf(
+            "start" to start.toString(),
+            "end" to end.toString(),
+            "unmonitored" to true,
+            "includeSeries" to true,
+            "includeEpisodeFile" to true,
+            "includeEpisodeImages" to true,
+        ),
+    ).map { it.map { ep -> ep.copy(instanceId = instance.id) } }
 
     override suspend fun updateMonitoring(
         ids: List<Long>,
         monitor: Any,
-    ): NetworkResult<Unit> =
-        post(
-            endpoint = "seasonPass",
-            body =
-                SeriesMonitoringBody(
-                    series = ids.map { IdWrapper(it) },
-                    monitoringOptions = SeriesMonitorOption(monitor as SeriesMonitorType),
-                ),
-        )
+    ): NetworkResult<Unit> = post(
+        endpoint = "seasonPass",
+        body =
+        SeriesMonitoringBody(
+            series = ids.map { IdWrapper(it) },
+            monitoringOptions = SeriesMonitorOption(monitor as SeriesMonitorType),
+        ),
+    )
 
     suspend fun updateEpisode(item: Episode): NetworkResult<Episode> = put("episode/${item.id}", item)
 
@@ -209,22 +202,20 @@ class SonarrClient(
         seasonNumber: Int? = null,
         includeEpisodeFile: Boolean = true,
         includeImages: Boolean = true,
-    ): NetworkResult<List<Episode>> =
-        get(
-            "episode",
-            buildMap {
-                put("seriesId", seriesId)
-                seasonNumber?.let { put("seasonNumber", it) }
-                if (includeEpisodeFile) put("includeEpisodeFile", true)
-                if (includeImages) put("includeImages", true)
-            },
-        )
+    ): NetworkResult<List<Episode>> = get(
+        "episode",
+        buildMap {
+            put("seriesId", seriesId)
+            seasonNumber?.let { put("seasonNumber", it) }
+            if (includeEpisodeFile) put("includeEpisodeFile", true)
+            if (includeImages) put("includeImages", true)
+        },
+    )
 
-    suspend fun deleteEpisodes(fileIds: List<Long>): NetworkResult<Unit> =
-        delete(
-            endpoint = "episodefile/bulk",
-            body = DeleteEpisodeBody(fileIds),
-        )
+    suspend fun deleteEpisodes(fileIds: List<Long>): NetworkResult<Unit> = delete(
+        endpoint = "episodefile/bulk",
+        body = DeleteEpisodeBody(fileIds),
+    )
 
     suspend fun deleteEpisode(id: Long): NetworkResult<Unit> = delete("episodefile/$id")
 }

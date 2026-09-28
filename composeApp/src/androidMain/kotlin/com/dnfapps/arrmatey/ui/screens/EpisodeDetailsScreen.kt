@@ -49,6 +49,7 @@ import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.DetailHeaderBanner
@@ -169,10 +170,10 @@ fun EpisodeDetailsScreen(
                     IconButton(
                         onClick = { confirmDelete = true },
                         colors =
-                            IconButtonDefaults.headerBarColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                            ),
+                        IconButtonDefaults.headerBarColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        ),
                         enabled = currentEpisode.episodeFile != null,
                     ) {
                         Icon(
@@ -186,9 +187,9 @@ fun EpisodeDetailsScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues.copy(top = 0.dp, bottom = 0.dp))
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues.copy(top = 0.dp, bottom = 0.dp))
+                .fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier.verticalScroll(scrollState),
@@ -246,9 +247,9 @@ fun EpisodeDetailsScreen(
                                 )
                             PrimaryScrollableTabRow(
                                 selectedTabIndex =
-                                    availableTabs
-                                        .indexOfFirst { it.first == selectedTab }
-                                        .coerceAtLeast(0),
+                                availableTabs
+                                    .indexOfFirst { it.first == selectedTab }
+                                    .coerceAtLeast(0),
                                 modifier = Modifier.fillMaxWidth(),
                                 edgePadding = 0.dp,
                             ) {
@@ -307,19 +308,19 @@ fun EpisodeDetailsScreen(
                                         fontWeight = FontWeight.Medium,
                                         textAlign = TextAlign.Center,
                                         modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 24.dp),
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 24.dp),
                                     )
                                 }
 
                                 series.id?.let { seriesId ->
                                     BazarrSubtitlesSection(
                                         target =
-                                            BazarrMediaTarget.Episode(
-                                                seriesId,
-                                                currentEpisode.id,
-                                            ),
+                                        BazarrMediaTarget.Episode(
+                                            seriesId,
+                                            currentEpisode.id,
+                                        ),
                                         modifier = Modifier.padding(horizontal = 24.dp),
                                     )
                                 }
@@ -346,9 +347,9 @@ fun EpisodeDetailsScreen(
                                                 fontWeight = FontWeight.Medium,
                                                 textAlign = TextAlign.Center,
                                                 modifier =
-                                                    Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(horizontal = 24.dp),
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 24.dp),
                                             )
                                         } else {
                                             historyResult.items.forEach { historyItem ->

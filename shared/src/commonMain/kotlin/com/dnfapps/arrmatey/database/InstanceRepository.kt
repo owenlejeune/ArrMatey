@@ -43,56 +43,54 @@ class InstanceRepository(
         return instanceDao.insert(newInstance)
     }
 
-    suspend fun createInstance(instance: Instance): InsertResult =
-        try {
-            val urlConflict = instanceDao.findByUrl(instance.url) != null
-            val labelConflict = instanceDao.findByLabel(instance.label) != null
+    suspend fun createInstance(instance: Instance): InsertResult = try {
+        val urlConflict = instanceDao.findByUrl(instance.url) != null
+        val labelConflict = instanceDao.findByLabel(instance.label) != null
 
-            val conflictFields =
-                buildList {
-                    if (urlConflict) add(ConflictField.InstanceUrl)
-                    if (labelConflict) add(ConflictField.InstanceLabel)
-                }
-
-            if (conflictFields.isNotEmpty()) {
-                InsertResult.Conflict(fields = conflictFields)
-            } else {
-                val id = newInstance(instance)
-                if (id > 0L) {
-                    InsertResult.Success(id)
-                } else {
-                    InsertResult.Error("Failed to save")
-                }
+        val conflictFields =
+            buildList {
+                if (urlConflict) add(ConflictField.InstanceUrl)
+                if (labelConflict) add(ConflictField.InstanceLabel)
             }
-        } catch (e: Exception) {
-            InsertResult.Error(e.message ?: "An error occurred")
-        }
 
-    suspend fun updateInstance(instance: Instance): InsertResult =
-        try {
-            val urlConflict = instanceDao.findOtherByUrl(instance.url, instance.id) != null
-            val labelConflict = instanceDao.findOtherByLabel(instance.label, instance.id) != null
-
-            val conflictField =
-                buildList {
-                    if (urlConflict) add(ConflictField.InstanceUrl)
-                    if (labelConflict) add(ConflictField.InstanceLabel)
-                }
-
-            if (conflictField.isNotEmpty()) {
-                InsertResult.Conflict(fields = conflictField)
+        if (conflictFields.isNotEmpty()) {
+            InsertResult.Conflict(fields = conflictFields)
+        } else {
+            val id = newInstance(instance)
+            if (id > 0L) {
+                InsertResult.Success(id)
             } else {
-                val rows = instanceDao.update(instance)
-                if (rows > 0) {
-                    InsertResult.Success(instance.id)
-                } else {
-                    InsertResult.Error("Failed to update")
-                }
+                InsertResult.Error("Failed to save")
             }
-        } catch (e: Exception) {
-            println("Error during creation: ${e.message}")
-            InsertResult.Error(e.message ?: "An error occurred")
         }
+    } catch (e: Exception) {
+        InsertResult.Error(e.message ?: "An error occurred")
+    }
+
+    suspend fun updateInstance(instance: Instance): InsertResult = try {
+        val urlConflict = instanceDao.findOtherByUrl(instance.url, instance.id) != null
+        val labelConflict = instanceDao.findOtherByLabel(instance.label, instance.id) != null
+
+        val conflictField =
+            buildList {
+                if (urlConflict) add(ConflictField.InstanceUrl)
+                if (labelConflict) add(ConflictField.InstanceLabel)
+            }
+
+        if (conflictField.isNotEmpty()) {
+            InsertResult.Conflict(fields = conflictField)
+        } else {
+            val rows = instanceDao.update(instance)
+            if (rows > 0) {
+                InsertResult.Success(instance.id)
+            } else {
+                InsertResult.Error("Failed to update")
+            }
+        }
+    } catch (e: Exception) {
+        println("Error during creation: ${e.message}")
+        InsertResult.Error(e.message ?: "An error occurred")
+    }
 
     suspend fun deleteInstance(instance: Instance) {
         instanceDao.deleteAndUpdateSelected(instance)

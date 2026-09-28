@@ -72,12 +72,12 @@ fun HomeNavigationRail(
     }
     NavigationRail(
         modifier =
-            modifier.combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = {},
-                onLongClick = handleLongPress,
-            ),
+        modifier.combinedClickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            onClick = {},
+            onLongClick = handleLongPress,
+        ),
         header = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -148,59 +148,59 @@ fun HomeNavigationRailItem(
 
     val indicatorColor by animateColorAsState(
         targetValue =
-            if (selected) {
-                MaterialTheme.colorScheme.secondaryContainer
-            } else {
-                Color.Transparent
-            },
+        if (selected) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            Color.Transparent
+        },
         animationSpec = animationSpec,
         label = "RailNavIndicatorColor",
     )
 
     val iconColor by animateColorAsState(
         targetValue =
-            if (selected) {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
+        if (selected) {
+            MaterialTheme.colorScheme.onSecondaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
         animationSpec = animationSpec,
         label = "RailNavIconColor",
     )
 
     val textColor by animateColorAsState(
         targetValue =
-            if (selected) {
-                MaterialTheme.colorScheme.onSurface
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
+        if (selected) {
+            MaterialTheme.colorScheme.onSurface
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
         animationSpec = animationSpec,
         label = "RailNavTextColor",
     )
 
     Column(
         modifier =
-            modifier
-                .semantics {
-                    this.selected = selected
-                    this.role = Role.Tab
-                }.clip(CircleShape)
-                .combinedClickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = ripple(bounded = true),
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                ).padding(vertical = 4.dp, horizontal = 8.dp),
+        modifier
+            .semantics {
+                this.selected = selected
+                this.role = Role.Tab
+            }.clip(CircleShape)
+            .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(bounded = true),
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ).padding(vertical = 4.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         Box(
             modifier =
-                Modifier
-                    .size(width = 56.dp, height = 32.dp)
-                    .clip(CircleShape)
-                    .background(indicatorColor),
+            Modifier
+                .size(width = 56.dp, height = 32.dp)
+                .clip(CircleShape)
+                .background(indicatorColor),
             contentAlignment = Alignment.Center,
         ) {
             CompositionLocalProvider(LocalContentColor provides iconColor) {
@@ -213,9 +213,9 @@ fun HomeNavigationRailItem(
         CompositionLocalProvider(LocalContentColor provides textColor) {
             ProvideTextStyle(
                 value =
-                    MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                    ),
+                MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                ),
             ) {
                 label()
             }

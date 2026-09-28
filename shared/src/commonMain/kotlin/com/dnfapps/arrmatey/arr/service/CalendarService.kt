@@ -196,15 +196,14 @@ class CalendarService(
     private fun isItemOfInstanceType(
         item: CalendarItem,
         type: InstanceType,
-    ): Boolean =
-        when (type) {
-            InstanceType.Radarr -> item is ArrMovie
-            InstanceType.Sonarr -> item is Episode || item is EpisodeGroup
-            InstanceType.Lidarr -> item is ArrAlbum
-            InstanceType.Bookshelf -> item is Book
-            InstanceType.Listenarr -> item is Audiobook
-            else -> false
-        }
+    ): Boolean = when (type) {
+        InstanceType.Radarr -> item is ArrMovie
+        InstanceType.Sonarr -> item is Episode || item is EpisodeGroup
+        InstanceType.Lidarr -> item is ArrAlbum
+        InstanceType.Bookshelf -> item is Book
+        InstanceType.Listenarr -> item is Audiobook
+        else -> false
+    }
 
     private fun upsertItem(
         map: MutableMap<LocalDate, List<CalendarItem>>,

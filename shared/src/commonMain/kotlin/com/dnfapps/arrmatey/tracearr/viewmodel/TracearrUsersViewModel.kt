@@ -186,19 +186,18 @@ class TracearrUsersViewModel(
     private suspend fun fetchStatsForUsers(
         repo: TracearrRepository,
         users: List<TracearrUserDetail>,
-    ): Map<String, TracearrUserStats> =
-        coroutineScope {
-            users
-                .map { user ->
-                    async {
-                        var stats: TracearrUserStats? = null
-                        getUserStatsUseCase(repo, ref = user.id).onSuccess {
-                            stats = it
-                        }
-                        stats?.let { user.id to it }
+    ): Map<String, TracearrUserStats> = coroutineScope {
+        users
+            .map { user ->
+                async {
+                    var stats: TracearrUserStats? = null
+                    getUserStatsUseCase(repo, ref = user.id).onSuccess {
+                        stats = it
                     }
-                }.awaitAll()
-                .filterNotNull()
-                .toMap()
-        }
+                    stats?.let { user.id to it }
+                }
+            }.awaitAll()
+            .filterNotNull()
+            .toMap()
+    }
 }

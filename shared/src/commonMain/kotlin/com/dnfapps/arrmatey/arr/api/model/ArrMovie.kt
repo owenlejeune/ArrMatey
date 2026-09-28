@@ -2,7 +2,11 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
-import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.*
+import com.dnfapps.arrmatey.shared.MR.strings
+import com.dnfapps.arrmatey.shared.digital_release
+import com.dnfapps.arrmatey.shared.in_cinemas
+import com.dnfapps.arrmatey.shared.physical_release
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
@@ -149,9 +153,9 @@ data class ArrMovie(
         get() {
             val now = Clock.System.now()
             return listOfNotNull(
-                inCinemas?.let { MR.strings.in_cinemas to it },
-                digitalRelease?.let { MR.strings.digital_release to it },
-                physicalRelease?.let { MR.strings.physical_release to it },
+                inCinemas?.let { strings.in_cinemas to it },
+                digitalRelease?.let { strings.digital_release to it },
+                physicalRelease?.let { strings.physical_release to it },
             ).filter { it.second > now }
                 .minByOrNull { it.second }
         }

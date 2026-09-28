@@ -11,12 +11,11 @@ class GetAudiobookMetadataUseCase {
     operator fun invoke(
         asin: String,
         repository: ArrInstanceRepository,
-    ): Flow<AudiobookMetadataResponse?> =
-        flow {
-            val region = repository.listenarrConfiguration.value.defaultSearchRegion
-            repository
-                .getMetadata(asin, region)
-                .onSuccess { emit(it) }
-                .onError { _, _, _ -> emit(null) }
-        }
+    ): Flow<AudiobookMetadataResponse?> = flow {
+        val region = repository.listenarrConfiguration.value.defaultSearchRegion
+        repository
+            .getMetadata(asin, region)
+            .onSuccess { emit(it) }
+            .onError { _, _, _ -> emit(null) }
+    }
 }

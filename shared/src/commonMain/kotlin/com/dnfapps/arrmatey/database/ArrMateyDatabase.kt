@@ -36,9 +36,8 @@ expect object ArrMateyDatabaseConstructor : RoomDatabaseConstructor<ArrMateyData
     override fun initialize(): ArrMateyDatabase
 }
 
-fun getRoomDatabase(builder: RoomDatabase.Builder<ArrMateyDatabase>): ArrMateyDatabase =
-    builder
-        .setDriver(BundledSQLiteDriver())
-        .setQueryCoroutineContext(Dispatchers.IO)
-        .addMigrations(*migrations)
-        .build()
+fun getRoomDatabase(builder: RoomDatabase.Builder<ArrMateyDatabase>): ArrMateyDatabase = builder
+    .setDriver(BundledSQLiteDriver())
+    .setQueryCoroutineContext(Dispatchers.IO)
+    .addMigrations(*migrations)
+    .build()

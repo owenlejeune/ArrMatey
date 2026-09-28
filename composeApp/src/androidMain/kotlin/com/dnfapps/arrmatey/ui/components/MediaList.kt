@@ -69,6 +69,7 @@ import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.rememberHtml
 import com.dnfapps.arrmatey.entensions.unlessEmpty
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -107,12 +108,12 @@ fun <T : ArrMedia> MediaList(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         userScrollEnabled = userScrollEnabled,
         contentPadding =
-            PaddingValues(
-                start = 12.dp,
-                top = 12.dp,
-                end = 12.dp,
-                bottom = 12.dp + bottomPadding,
-            ),
+        PaddingValues(
+            start = 12.dp,
+            top = 12.dp,
+            end = 12.dp,
+            bottom = 12.dp + bottomPadding,
+        ),
     ) {
         items(
             items = items,
@@ -167,12 +168,12 @@ fun SearchResultList(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(18.dp),
         contentPadding =
-            PaddingValues(
-                top = 12.dp,
-                bottom = bottomPadding + 16.dp,
-                start = 18.dp,
-                end = 18.dp,
-            ),
+        PaddingValues(
+            top = 12.dp,
+            bottom = bottomPadding + 16.dp,
+            start = 18.dp,
+            end = 18.dp,
+        ),
     ) {
         items(items, key = { it.id }) { item ->
             SearchResultItem(
@@ -261,34 +262,34 @@ fun <T : ArrMedia> MediaItem(
 
     Card(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .combinedClickable(
-                    onClick = {
-                        if (isInSelectionMode) {
-                            multiSelectState.toggle(item.guid)
-                        } else {
-                            onItemClick(item)
-                        }
-                    },
-                    onLongClick = {
-                        if (isSelectionModeAvailable) {
-                            multiSelectState.toggle(item.guid)
-                        }
-                    },
-                ),
+        modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = {
+                    if (isInSelectionMode) {
+                        multiSelectState.toggle(item.guid)
+                    } else {
+                        onItemClick(item)
+                    }
+                },
+                onLongClick = {
+                    if (isSelectionModeAvailable) {
+                        multiSelectState.toggle(item.guid)
+                    }
+                },
+            ),
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = posterElevation.elevation),
         border =
-            if (isSelected) {
-                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-            } else {
-                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            },
+        if (isSelected) {
+            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+        } else {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        },
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
@@ -296,10 +297,10 @@ fun <T : ArrMedia> MediaItem(
             if (edgeColor != null) {
                 Box(
                     modifier =
-                        Modifier
-                            .width(6.dp)
-                            .fillMaxHeight()
-                            .background(edgeColor),
+                    Modifier
+                        .width(6.dp)
+                        .fillMaxHeight()
+                        .background(edgeColor),
                 )
             }
 
@@ -333,15 +334,15 @@ fun <T : ArrMedia> MediaItem(
                                     shape = CircleShape,
                                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
                                     border =
-                                        BorderStroke(
-                                            1.dp,
-                                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                        ),
+                                    BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                    ),
                                     shadowElevation = 2.dp,
                                     modifier =
-                                        Modifier
-                                            .align(Alignment.TopStart)
-                                            .padding(4.dp),
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(4.dp),
                                 ) {
                                     Box(
                                         modifier = Modifier.padding(3.dp),
@@ -349,21 +350,21 @@ fun <T : ArrMedia> MediaItem(
                                     ) {
                                         Icon(
                                             imageVector =
-                                                if (item.monitored) {
-                                                    Icons.Default.Bookmark
-                                                } else {
-                                                    Icons.Default.BookmarkBorder
-                                                },
+                                            if (item.monitored) {
+                                                Icons.Default.Bookmark
+                                            } else {
+                                                Icons.Default.BookmarkBorder
+                                            },
                                             contentDescription =
-                                                mokoString(
-                                                    if (item.monitored) MR.strings.monitored else MR.strings.unmonitored,
-                                                ),
+                                            mokoString(
+                                                if (item.monitored) MR.strings.monitored else MR.strings.unmonitored,
+                                            ),
                                             tint =
-                                                if (item.monitored) {
-                                                    MaterialTheme.colorScheme.primary
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                                },
+                                            if (item.monitored) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            },
                                             modifier = Modifier.size(12.dp),
                                         )
                                     }
@@ -430,15 +431,15 @@ fun SeerrMediaItem(
 
     Card(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .combinedClickable(onClick = { onItemClick(result) }),
+        modifier
+            .fillMaxWidth()
+            .combinedClickable(onClick = { onItemClick(result) }),
         shape = MaterialTheme.shapes.medium,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
@@ -446,10 +447,10 @@ fun SeerrMediaItem(
             if (edgeColor != null) {
                 Box(
                     modifier =
-                        Modifier
-                            .width(6.dp)
-                            .fillMaxHeight()
-                            .background(edgeColor),
+                    Modifier
+                        .width(6.dp)
+                        .fillMaxHeight()
+                        .background(edgeColor),
                 )
             }
 
@@ -525,10 +526,10 @@ fun SeerrPersonItem(
     val item = result.result
     Card(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .combinedClickable(onClick = { onItemClick(result) }),
+        Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .combinedClickable(onClick = { onItemClick(result) }),
         shape = MaterialTheme.shapes.large,
     ) {
         Row(
@@ -537,10 +538,10 @@ fun SeerrPersonItem(
             if (edgeColor != null) {
                 Box(
                     modifier =
-                        Modifier
-                            .width(6.dp)
-                            .fillMaxHeight()
-                            .background(edgeColor),
+                    Modifier
+                        .width(6.dp)
+                        .fillMaxHeight()
+                        .background(edgeColor),
                 )
             }
 
@@ -548,19 +549,19 @@ fun SeerrPersonItem(
                 horizontalArrangement = Arrangement.spacedBy(18.dp),
                 verticalAlignment = Alignment.Top,
                 modifier =
-                    Modifier
-                        .weight(1f)
-                        .padding(12.dp)
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
+                Modifier
+                    .weight(1f)
+                    .padding(12.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
             ) {
                 PersonProfileImage(item.fullPosterPath)
 
                 Column(
                     modifier =
-                        Modifier
-                            .weight(1f)
-                            .wrapContentHeight(),
+                    Modifier
+                        .weight(1f)
+                        .wrapContentHeight(),
                     verticalArrangement = Arrangement.Top,
                 ) {
                     Text(
@@ -655,10 +656,10 @@ private fun SeriesDetails(
             progress = { item.statusProgress },
             color = if (isActive) ArrPurple else item.statusColor,
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(CircleShape),
+            Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(CircleShape),
             trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
         )
     }
@@ -713,11 +714,11 @@ private fun MovieDetails(
             progress = { item.statusProgress },
             color = if (isActive) ArrPurple else item.statusColor,
             modifier =
-                Modifier
-                    .padding(top = 8.dp)
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(CircleShape),
+            Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(CircleShape),
             trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
         )
     }
@@ -799,10 +800,10 @@ private fun AuthorDetails(
             progress = { item.statusProgress },
             color = if (isActive) ArrPurple else item.statusColor,
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(CircleShape),
+            Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(CircleShape),
             trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
         )
     }
@@ -914,9 +915,9 @@ fun BannerView(
 
         Box(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(TranslucentBlack),
+            Modifier
+                .fillMaxSize()
+                .background(TranslucentBlack),
         )
     }
 }

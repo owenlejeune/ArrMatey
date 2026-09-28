@@ -47,24 +47,23 @@ actual class AesTransportEncryptor : TransportEncryptor {
     actual override fun decrypt(
         encryptedData: String,
         password: String,
-    ): String =
-        try {
-            val combined = Base64.decode(encryptedData, Base64.NO_WRAP)
-            val salt = combined.sliceArray(0 until saltLength)
-            val iv = combined.sliceArray(saltLength until saltLength + ivLength)
-            val cipherText = combined.sliceArray(saltLength + ivLength until combined.size)
+    ): String = try {
+        val combined = Base64.decode(encryptedData, Base64.NO_WRAP)
+        val salt = combined.sliceArray(0 until saltLength)
+        val iv = combined.sliceArray(saltLength until saltLength + ivLength)
+        val cipherText = combined.sliceArray(saltLength + ivLength until combined.size)
 
-            val keySpec = PBEKeySpec(password.toCharArray(), salt, iterations, keyLength)
-            val secretKeyFactory = SecretKeyFactory.getInstance(pbkdf2Algorithm)
-            val keyBytes = secretKeyFactory.generateSecret(keySpec).encoded
-            val secretKey = SecretKeySpec(keyBytes, "AES")
+        val keySpec = PBEKeySpec(password.toCharArray(), salt, iterations, keyLength)
+        val secretKeyFactory = SecretKeyFactory.getInstance(pbkdf2Algorithm)
+        val keyBytes = secretKeyFactory.generateSecret(keySpec).encoded
+        val secretKey = SecretKeySpec(keyBytes, "AES")
 
-            val ivSpec = IvParameterSpec(iv)
-            val cipher = Cipher.getInstance(algorithm)
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec)
+        val ivSpec = IvParameterSpec(iv)
+        val cipher = Cipher.getInstance(algorithm)
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec)
 
-            String(cipher.doFinal(cipherText), Charsets.UTF_8)
-        } catch (e: Exception) {
-            ""
-        }
+        String(cipher.doFinal(cipherText), Charsets.UTF_8)
+    } catch (e: Exception) {
+        ""
+    }
 }

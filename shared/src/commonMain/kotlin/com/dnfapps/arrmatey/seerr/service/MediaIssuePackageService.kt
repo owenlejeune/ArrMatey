@@ -25,13 +25,12 @@ class MediaIssuePackageService(
         return MediaIssuePackage(issue, details)
     }
 
-    suspend fun enrichIssues(issues: List<Issue>): List<MediaIssuePackage> =
-        coroutineScope {
-            issues
-                .map { issue ->
-                    async { enrichIssue(issue) }
-                }.awaitAll()
-        }
+    suspend fun enrichIssues(issues: List<Issue>): List<MediaIssuePackage> = coroutineScope {
+        issues
+            .map { issue ->
+                async { enrichIssue(issue) }
+            }.awaitAll()
+    }
 
     private suspend fun fetchMovieDetails(tmdbId: Long): RequestMediaDetails? {
         var details: RequestMediaDetails? = null

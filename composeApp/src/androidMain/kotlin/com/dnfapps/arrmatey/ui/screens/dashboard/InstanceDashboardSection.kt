@@ -39,6 +39,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrHealthType
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.utils.mokoString
@@ -54,9 +55,9 @@ fun InstanceDashboardSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Column(
@@ -83,9 +84,9 @@ fun InstanceDashboardSection(
                 Text(
                     text = mokoString(MR.strings.no_type_instances_message, "Arr"),
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 2.dp, bottom = 8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 2.dp, bottom = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -157,9 +158,9 @@ private fun InstanceDashboardCard(
                 )
                 Text(
                     text =
-                        "${state.totalItems} Items • " +
-                            "${state.sizeOnDisk.bytesAsFileSizeString()} • " +
-                            "${(completion * 100).toInt()}% Downloaded",
+                    "${state.totalItems} Items • " +
+                        "${state.sizeOnDisk.bytesAsFileSizeString()} • " +
+                        "${(completion * 100).toInt()}% Downloaded",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -284,13 +285,13 @@ private fun InstanceDashboardCard(
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color =
-                                        if (disk.usedPercentage >
-                                            0.90f
-                                        ) {
-                                            MaterialTheme.colorScheme.error
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurface
-                                        },
+                                    if (disk.usedPercentage >
+                                        0.90f
+                                    ) {
+                                        MaterialTheme.colorScheme.error
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    },
                                 )
                             }
                         }
@@ -298,9 +299,9 @@ private fun InstanceDashboardCard(
                         LinearProgressIndicator(
                             progress = { disk.usedPercentage },
                             modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(5.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .height(5.dp),
                             color = diskProgressColor,
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,
                             strokeCap = StrokeCap.Round,

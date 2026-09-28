@@ -53,10 +53,9 @@ data class Book(
 
     fun toJson(): String = ArrMedia.json.encodeToString(this)
 
-    fun getCover() =
-        images.firstOrNull {
-            it.coverType == CoverType.Cover
-        }
+    fun getCover() = images.firstOrNull {
+        it.coverType == CoverType.Cover
+    }
 
     val isDownloaded: Boolean
         get() = statistics?.percentOfBooks?.equals(100f) ?: false

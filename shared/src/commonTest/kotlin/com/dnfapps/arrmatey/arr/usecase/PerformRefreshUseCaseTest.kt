@@ -32,26 +32,23 @@ class PerformRefreshUseCaseTest {
     }
 
     @Test
-    fun testUnsupportedTypeThrows() =
-        runTest {
-            assertFailsWith<UnsupportedOperationException> {
-                useCase(mediaId = 1, type = InstanceType.Seerr, repository = repository())
-            }
+    fun testUnsupportedTypeThrows() = runTest {
+        assertFailsWith<UnsupportedOperationException> {
+            useCase(mediaId = 1, type = InstanceType.Seerr, repository = repository())
         }
+    }
 
     @Test
-    fun testBulkRefreshUnsupportedTypeThrows() =
-        runTest {
-            assertFailsWith<UnsupportedOperationException> {
-                useCase.bulkRefresh(ids = listOf(1, 2), type = InstanceType.Bazarr, repository = repository())
-            }
+    fun testBulkRefreshUnsupportedTypeThrows() = runTest {
+        assertFailsWith<UnsupportedOperationException> {
+            useCase.bulkRefresh(ids = listOf(1, 2), type = InstanceType.Bazarr, repository = repository())
         }
+    }
 
     @Test
-    fun testProwlarrRefreshThrows() =
-        runTest {
-            assertFailsWith<UnsupportedOperationException> {
-                useCase(mediaId = 1, type = InstanceType.Prowlarr, repository = repository())
-            }
+    fun testProwlarrRefreshThrows() = runTest {
+        assertFailsWith<UnsupportedOperationException> {
+            useCase(mediaId = 1, type = InstanceType.Prowlarr, repository = repository())
         }
+    }
 }

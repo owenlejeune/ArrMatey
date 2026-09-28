@@ -77,23 +77,21 @@ class NavigationManager(
      */
     fun arr(type: InstanceType): Navigator<NavKey> = navigatorFor(tabFor(type))
 
-    fun tabFor(type: InstanceType): TabItem.Standard =
-        when (type) {
-            InstanceType.Sonarr -> TabItem.Standard.SHOWS
-            InstanceType.Radarr -> TabItem.Standard.MOVIES
-            InstanceType.Lidarr -> TabItem.Standard.MUSIC
-            InstanceType.Bookshelf -> TabItem.Standard.BOOKS
-            InstanceType.Listenarr -> TabItem.Standard.AUDIOBOOKS
-            else -> throw IllegalStateException("Invalid arr type $type")
-        }
+    fun tabFor(type: InstanceType): TabItem.Standard = when (type) {
+        InstanceType.Sonarr -> TabItem.Standard.SHOWS
+        InstanceType.Radarr -> TabItem.Standard.MOVIES
+        InstanceType.Lidarr -> TabItem.Standard.MUSIC
+        InstanceType.Bookshelf -> TabItem.Standard.BOOKS
+        InstanceType.Listenarr -> TabItem.Standard.AUDIOBOOKS
+        else -> throw IllegalStateException("Invalid arr type $type")
+    }
 
     /**
      * Generic accessor for feature navigators.
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : NavKey> navigatorFor(tab: TabItem): Navigator<T> =
-        tabNavigators[tab] as? Navigator<T>
-            ?: throw IllegalArgumentException("No navigator registered for tab: $tab")
+    fun <T : NavKey> navigatorFor(tab: TabItem): Navigator<T> = tabNavigators[tab] as? Navigator<T>
+        ?: throw IllegalArgumentException("No navigator registered for tab: $tab")
 
     fun getNavigator(tab: TabItem?): Navigator<*>? = tab?.let { tabNavigators[it] }
 

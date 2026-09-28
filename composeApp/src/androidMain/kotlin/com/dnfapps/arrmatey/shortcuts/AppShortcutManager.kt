@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.datastore.AndroidPreferencesStore
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.notifications.NotificationConstants
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.MokoStrings
 import kotlinx.coroutines.CoroutineScope

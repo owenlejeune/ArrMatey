@@ -36,6 +36,7 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.SubtitleSearchState
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.viewmodel.koinViewModel
@@ -59,9 +60,9 @@ fun BazarrSubtitleSearchSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
         ) {
             Text(
                 text = mokoString(MR.strings.bazarr_search_subtitles),
@@ -151,9 +152,8 @@ private fun SearchResultRow(
     }
 }
 
-private fun ProviderSubtitle.languageLabel(): String =
-    buildString {
-        append(language.uppercase())
-        if (isForced) append(" · Forced")
-        if (isHearingImpaired) append(" · HI")
-    }
+private fun ProviderSubtitle.languageLabel(): String = buildString {
+    append(language.uppercase())
+    if (isForced) append(" · Forced")
+    if (isHearingImpaired) append(" · HI")
+}

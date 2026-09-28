@@ -35,133 +35,128 @@ class DelugeClient(
         return ensureAuthenticated()
     }
 
-    override suspend fun getDownloads(): NetworkResult<List<DownloadItem>> =
-        when (val authResult = ensureAuthenticated()) {
-            is NetworkResult.Success -> {
-                when (
-                    val torrentsResult =
-                        callDeluge<Map<String, DelugeTorrentData>>(
-                            method = "core.get_torrents_status",
-                            params =
-                                listOf(
-                                    buildJsonObject {},
-                                    buildJsonArray {
-                                        add(JsonPrimitive("name"))
-                                        add(JsonPrimitive("total_size"))
-                                        add(JsonPrimitive("progress"))
-                                        add(JsonPrimitive("download_payload_rate"))
-                                        add(JsonPrimitive("upload_payload_rate"))
-                                        add(JsonPrimitive("eta"))
-                                        add(JsonPrimitive("state"))
-                                        add(JsonPrimitive("label"))
-                                        add(JsonPrimitive("time_added"))
-                                        add(JsonPrimitive("hash"))
-                                    },
-                                ),
-                        )
-                ) {
-                    is NetworkResult.Success -> {
-                        when (val rpcResult = torrentsResult.data.resultOrError()) {
-                            is NetworkResult.Success -> {
-                                NetworkResult.Success(rpcResult.data.values.map { it.toDownloadItem() })
-                            }
-                            is NetworkResult.Error -> rpcResult
-                            is NetworkResult.Loading -> rpcResult
+    override suspend fun getDownloads(): NetworkResult<List<DownloadItem>> = when (val authResult = ensureAuthenticated()) {
+        is NetworkResult.Success -> {
+            when (
+                val torrentsResult =
+                    callDeluge<Map<String, DelugeTorrentData>>(
+                        method = "core.get_torrents_status",
+                        params =
+                        listOf(
+                            buildJsonObject {},
+                            buildJsonArray {
+                                add(JsonPrimitive("name"))
+                                add(JsonPrimitive("total_size"))
+                                add(JsonPrimitive("progress"))
+                                add(JsonPrimitive("download_payload_rate"))
+                                add(JsonPrimitive("upload_payload_rate"))
+                                add(JsonPrimitive("eta"))
+                                add(JsonPrimitive("state"))
+                                add(JsonPrimitive("label"))
+                                add(JsonPrimitive("time_added"))
+                                add(JsonPrimitive("hash"))
+                            },
+                        ),
+                    )
+            ) {
+                is NetworkResult.Success -> {
+                    when (val rpcResult = torrentsResult.data.resultOrError()) {
+                        is NetworkResult.Success -> {
+                            NetworkResult.Success(rpcResult.data.values.map { it.toDownloadItem() })
                         }
+                        is NetworkResult.Error -> rpcResult
+                        is NetworkResult.Loading -> rpcResult
                     }
-                    is NetworkResult.Error -> torrentsResult
-                    is NetworkResult.Loading -> torrentsResult
                 }
+                is NetworkResult.Error -> torrentsResult
+                is NetworkResult.Loading -> torrentsResult
             }
-            is NetworkResult.Error -> authResult
-            is NetworkResult.Loading -> NetworkResult.Loading
         }
+        is NetworkResult.Error -> authResult
+        is NetworkResult.Loading -> NetworkResult.Loading
+    }
 
-    override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> =
-        when (val authResult = ensureAuthenticated()) {
-            is NetworkResult.Success -> {
-                executeTorrentAction(
-                    method = "core.pause_torrent",
-                    ids = ids,
-                )
-            }
-            is NetworkResult.Error -> authResult
-            is NetworkResult.Loading -> NetworkResult.Loading
+    override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> = when (val authResult = ensureAuthenticated()) {
+        is NetworkResult.Success -> {
+            executeTorrentAction(
+                method = "core.pause_torrent",
+                ids = ids,
+            )
         }
+        is NetworkResult.Error -> authResult
+        is NetworkResult.Loading -> NetworkResult.Loading
+    }
 
-    override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> =
-        when (val authResult = ensureAuthenticated()) {
-            is NetworkResult.Success -> {
-                executeTorrentAction(
-                    method = "core.resume_torrent",
-                    ids = ids,
-                )
-            }
-            is NetworkResult.Error -> authResult
-            is NetworkResult.Loading -> NetworkResult.Loading
+    override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> = when (val authResult = ensureAuthenticated()) {
+        is NetworkResult.Success -> {
+            executeTorrentAction(
+                method = "core.resume_torrent",
+                ids = ids,
+            )
         }
+        is NetworkResult.Error -> authResult
+        is NetworkResult.Loading -> NetworkResult.Loading
+    }
 
     override suspend fun deleteDownload(
         ids: List<String>,
         deleteFiles: Boolean,
-    ): NetworkResult<Unit> =
-        when (val authResult = ensureAuthenticated()) {
-            is NetworkResult.Success -> {
-                var lastError: NetworkResult.Error? = null
-                for (id in ids) {
-                    val result =
-                        callDeluge<JsonElement>(
-                            method = "core.remove_torrent",
-                            params = listOf(JsonPrimitive(id), JsonPrimitive(deleteFiles)),
-                        )
-                    if (result is NetworkResult.Error) {
-                        lastError = result
-                    }
+    ): NetworkResult<Unit> = when (val authResult = ensureAuthenticated()) {
+        is NetworkResult.Success -> {
+            var lastError: NetworkResult.Error? = null
+            for (id in ids) {
+                val result =
+                    callDeluge<JsonElement>(
+                        method = "core.remove_torrent",
+                        params = listOf(JsonPrimitive(id), JsonPrimitive(deleteFiles)),
+                    )
+                if (result is NetworkResult.Error) {
+                    lastError = result
                 }
-                lastError ?: NetworkResult.Success(Unit)
             }
-            is NetworkResult.Error -> authResult
-            is NetworkResult.Loading -> NetworkResult.Loading
+            lastError ?: NetworkResult.Success(Unit)
         }
+        is NetworkResult.Error -> authResult
+        is NetworkResult.Loading -> NetworkResult.Loading
+    }
 
-    override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> =
-        when (val authResult = ensureAuthenticated()) {
-            is NetworkResult.Success -> {
-                when (
-                    val result =
-                        callDeluge<DelugeSessionStatus>(
-                            method = "core.get_session_status",
-                            params =
-                                listOf(
-                                    buildJsonArray {
-                                        add(JsonPrimitive("download_rate"))
-                                        add(JsonPrimitive("upload_rate"))
-                                    },
+    override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> = when (val authResult = ensureAuthenticated()) {
+        is NetworkResult.Success -> {
+            when (
+                val result =
+                    callDeluge<DelugeSessionStatus>(
+                        method = "core.get_session_status",
+                        params =
+                        listOf(
+                            buildJsonArray {
+                                add(JsonPrimitive("download_rate"))
+                                add(JsonPrimitive("upload_rate"))
+                            },
+                        ),
+                    )
+            ) {
+                is NetworkResult.Success -> {
+                    when (val rpcResult = result.data.resultOrError()) {
+                        is NetworkResult.Success -> {
+                            NetworkResult.Success(
+                                DownloadTransferInfo(
+                                    client = downloadClient,
+                                    downloadSpeed = rpcResult.data.downloadRate,
+                                    uploadSpeed = rpcResult.data.uploadRate,
                                 ),
-                        )
-                ) {
-                    is NetworkResult.Success -> {
-                        when (val rpcResult = result.data.resultOrError()) {
-                            is NetworkResult.Success -> {
-                                NetworkResult.Success(
-                                    DownloadTransferInfo(
-                                        client = downloadClient,
-                                        downloadSpeed = rpcResult.data.downloadRate,
-                                        uploadSpeed = rpcResult.data.uploadRate,
-                                    ),
-                                )
-                            }
-                            is NetworkResult.Error -> rpcResult
-                            is NetworkResult.Loading -> rpcResult
+                            )
                         }
+                        is NetworkResult.Error -> rpcResult
+                        is NetworkResult.Loading -> rpcResult
                     }
-                    is NetworkResult.Error -> result
-                    is NetworkResult.Loading -> result
                 }
+                is NetworkResult.Error -> result
+                is NetworkResult.Loading -> result
             }
-            is NetworkResult.Error -> authResult
-            is NetworkResult.Loading -> NetworkResult.Loading
         }
+        is NetworkResult.Error -> authResult
+        is NetworkResult.Loading -> NetworkResult.Loading
+    }
 
     private suspend fun ensureAuthenticated(): NetworkResult<Unit> {
         if (authenticated) return NetworkResult.Success(Unit)
@@ -214,25 +209,24 @@ class DelugeClient(
     private suspend fun executeTorrentAction(
         method: String,
         ids: List<String>,
-    ): NetworkResult<Unit> =
-        when (
-            val result =
-                callDeluge<JsonElement>(
-                    method = method,
-                    params =
-                        listOf(
-                            buildJsonArray {
-                                ids.forEach { id ->
-                                    add(JsonPrimitive(id))
-                                }
-                            },
-                        ),
-                )
-        ) {
-            is NetworkResult.Success -> result.data.toUnitResult()
-            is NetworkResult.Error -> result
-            is NetworkResult.Loading -> result
-        }
+    ): NetworkResult<Unit> = when (
+        val result =
+            callDeluge<JsonElement>(
+                method = method,
+                params =
+                listOf(
+                    buildJsonArray {
+                        ids.forEach { id ->
+                            add(JsonPrimitive(id))
+                        }
+                    },
+                ),
+            )
+    ) {
+        is NetworkResult.Success -> result.data.toUnitResult()
+        is NetworkResult.Error -> result
+        is NetworkResult.Loading -> result
+    }
 
     private suspend inline fun <reified T> callDeluge(
         method: String,
@@ -308,24 +302,23 @@ class DelugeClient(
         return NetworkResult.Success(rpcResult)
     }
 
-    private fun DelugeJsonRpcResponse<JsonElement>.toUnitResult(): NetworkResult<Unit> =
-        if (error != null && error != JsonNull) {
-            val errorMessage =
-                try {
-                    when {
-                        error is JsonPrimitive && error.isString ->
-                            error.jsonPrimitive.content
-                        else ->
-                            error.toString()
-                    }
-                } catch (e: Exception) {
-                    error.toString()
+    private fun DelugeJsonRpcResponse<JsonElement>.toUnitResult(): NetworkResult<Unit> = if (error != null && error != JsonNull) {
+        val errorMessage =
+            try {
+                when {
+                    error is JsonPrimitive && error.isString ->
+                        error.jsonPrimitive.content
+                    else ->
+                        error.toString()
                 }
+            } catch (e: Exception) {
+                error.toString()
+            }
 
-            NetworkResult.Error(message = "Deluge RPC error: $errorMessage")
-        } else {
-            NetworkResult.Success(Unit)
-        }
+        NetworkResult.Error(message = "Deluge RPC error: $errorMessage")
+    } else {
+        NetworkResult.Success(Unit)
+    }
 
     private fun DelugeTorrentData.toDownloadItem(): DownloadItem {
         val coercedProgress = (progress / 100.0).coerceIn(0.0, 1.0)

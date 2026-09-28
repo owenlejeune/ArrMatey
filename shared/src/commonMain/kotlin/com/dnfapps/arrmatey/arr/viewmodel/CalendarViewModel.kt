@@ -214,10 +214,9 @@ class CalendarViewModel(
     private fun filterEpisode(
         episode: Episode,
         filter: CalendarFilterState,
-    ): Boolean =
-        (!filter.showMonitoredOnly || episode.monitored) &&
-            (!filter.showPremiersOnly || (episode.seasonNumber == 1 && episode.episodeNumber == 1)) &&
-            (!filter.showFinalesOnly || episode.finaleType != null)
+    ): Boolean = (!filter.showMonitoredOnly || episode.monitored) &&
+        (!filter.showPremiersOnly || (episode.seasonNumber == 1 && episode.episodeNumber == 1)) &&
+        (!filter.showFinalesOnly || episode.finaleType != null)
 
     private fun filterAlbum(
         album: ArrAlbum,

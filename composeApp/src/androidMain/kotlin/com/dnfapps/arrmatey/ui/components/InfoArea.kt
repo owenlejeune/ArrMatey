@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.InfoItem
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.StringResource
@@ -83,15 +84,15 @@ fun InfoAreaCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top,
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .then(
-                                if (item.onClick != null) {
-                                    Modifier.clickable { item.onClick.invoke() }
-                                } else {
-                                    Modifier
-                                },
-                            ).padding(vertical = 4.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (item.onClick != null) {
+                                Modifier.clickable { item.onClick.invoke() }
+                            } else {
+                                Modifier
+                            },
+                        ).padding(vertical = 4.dp),
                 ) {
                     Text(text = key, style = MaterialTheme.typography.bodyMedium)
                     Text(

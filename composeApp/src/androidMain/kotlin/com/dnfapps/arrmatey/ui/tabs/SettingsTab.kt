@@ -54,110 +54,110 @@ fun SettingsTabNavHost(
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
         entryProvider =
-            entryProvider {
-                entry<SettingsScreen.Landing> {
-                    SettingsScreen(
-                        onNavigateToServices = { navigation.toServices() },
-                        onNavigateToUserInterface = { navigation.toUserInterface() },
-                        onNavigateToIntegrations = { navigation.toIntegrations() },
-                        onNavigateToBackupRestore = { navigation.toBackupRestore() },
-                        onNavigateToDev = { navigation.toDev() },
-                    )
-                }
-                entry<SettingsScreen.Services> {
-                    ServicesSettingsScreen(
-                        onNavigateToInstance = { id, type -> navigation.onInstanceTap(id, type) },
-                        onNavigateToAddInstance = { navigation.toAddInstance() },
-                        onNavigateToEditDownloadClient = { id -> navigation.toEditDownloadClient(id) },
-                        onNavigateToAddDownloadClient = { navigation.toAddDownloadClient() },
-                        onNavigateToEditCustomWebpage = { id -> navigation.toEditCustomWebpage(id) },
-                        onNavigateToAddCustomWebpage = { navigation.toAddCustomWebpage() },
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.UserInterface> {
-                    UiSettingsScreen(
-                        windowSizeClass = windowSizeClass,
-                        onNavigateToTabPreferences = { navigation.toTabPreferences() },
-                        onNavigateToShortcutsPreferences = { navigation.toShortcutsPreferences() },
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.Integrations> {
-                    IntegrationsSettingsScreen(
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.BackupRestore> {
-                    BackupRestoreSettingsScreen(
-                        onBack = { navigation.popBackStack() },
-                        onNavigateToOnboarding = { navigation.toOnboarding() },
-                    )
-                }
-                entry<SettingsScreen.AddInstance> {
-                    AddInstanceScreen(
-                        initialType = it.type,
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.EditInstance> {
-                    EditInstanceScreen(
-                        id = it.id,
-                        onBack = { navigation.popBackStack() },
-                        onDelete = { navigation.popToRoot() },
-                    )
-                }
-                entry<SettingsScreen.Dev> {
-                    DevSettingsScreen(
-                        onNavigateToOnboarding = { navigation.toOnboarding() },
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.Onboarding> {
-                    OnboardingScreen(
-                        onComplete = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.TabPreferences> {
-                    TabCustomizationScreen(
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.ShortcutPreferences> {
-                    ShortcutsCustomizationScreen(
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.ArrDashboard> {
-                    ArrInstanceDashboard(
-                        id = it.id,
-                        windowSizeClass = windowSizeClass,
-                        onBack = { navigation.popBackStack() },
-                        onNavigateToEditInstance = { instanceId -> navigation.toEditInstance(instanceId) },
-                    )
-                }
-                entry<SettingsScreen.AddDownloadClient> {
-                    AddEditDownloadClientScreen(
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.EditDownloadClient> {
-                    AddEditDownloadClientScreen(
-                        clientId = it.id,
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.AddCustomWebpage> {
-                    AddEditCustomWebpageScreen(
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-                entry<SettingsScreen.EditCustomWebpage> {
-                    AddEditCustomWebpageScreen(
-                        webpageId = it.id,
-                        onBack = { navigation.popBackStack() },
-                    )
-                }
-            },
+        entryProvider {
+            entry<SettingsScreen.Landing> {
+                SettingsScreen(
+                    onNavigateToServices = { navigation.toServices() },
+                    onNavigateToUserInterface = { navigation.toUserInterface() },
+                    onNavigateToIntegrations = { navigation.toIntegrations() },
+                    onNavigateToBackupRestore = { navigation.toBackupRestore() },
+                    onNavigateToDev = { navigation.toDev() },
+                )
+            }
+            entry<SettingsScreen.Services> {
+                ServicesSettingsScreen(
+                    onNavigateToInstance = { id, type -> navigation.onInstanceTap(id, type) },
+                    onNavigateToAddInstance = { navigation.toAddInstance() },
+                    onNavigateToEditDownloadClient = { id -> navigation.toEditDownloadClient(id) },
+                    onNavigateToAddDownloadClient = { navigation.toAddDownloadClient() },
+                    onNavigateToEditCustomWebpage = { id -> navigation.toEditCustomWebpage(id) },
+                    onNavigateToAddCustomWebpage = { navigation.toAddCustomWebpage() },
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.UserInterface> {
+                UiSettingsScreen(
+                    windowSizeClass = windowSizeClass,
+                    onNavigateToTabPreferences = { navigation.toTabPreferences() },
+                    onNavigateToShortcutsPreferences = { navigation.toShortcutsPreferences() },
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.Integrations> {
+                IntegrationsSettingsScreen(
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.BackupRestore> {
+                BackupRestoreSettingsScreen(
+                    onBack = { navigation.popBackStack() },
+                    onNavigateToOnboarding = { navigation.toOnboarding() },
+                )
+            }
+            entry<SettingsScreen.AddInstance> {
+                AddInstanceScreen(
+                    initialType = it.type,
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.EditInstance> {
+                EditInstanceScreen(
+                    id = it.id,
+                    onBack = { navigation.popBackStack() },
+                    onDelete = { navigation.popToRoot() },
+                )
+            }
+            entry<SettingsScreen.Dev> {
+                DevSettingsScreen(
+                    onNavigateToOnboarding = { navigation.toOnboarding() },
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.Onboarding> {
+                OnboardingScreen(
+                    onComplete = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.TabPreferences> {
+                TabCustomizationScreen(
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.ShortcutPreferences> {
+                ShortcutsCustomizationScreen(
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.ArrDashboard> {
+                ArrInstanceDashboard(
+                    id = it.id,
+                    windowSizeClass = windowSizeClass,
+                    onBack = { navigation.popBackStack() },
+                    onNavigateToEditInstance = { instanceId -> navigation.toEditInstance(instanceId) },
+                )
+            }
+            entry<SettingsScreen.AddDownloadClient> {
+                AddEditDownloadClientScreen(
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.EditDownloadClient> {
+                AddEditDownloadClientScreen(
+                    clientId = it.id,
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.AddCustomWebpage> {
+                AddEditCustomWebpageScreen(
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.EditCustomWebpage> {
+                AddEditCustomWebpageScreen(
+                    webpageId = it.id,
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+        },
     )
 }

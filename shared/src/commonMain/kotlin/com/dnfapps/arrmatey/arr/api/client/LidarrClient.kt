@@ -64,30 +64,27 @@ class LidarrClient(
         id: Long,
         deleteFiles: Boolean,
         addImportExclusion: Boolean,
-    ): NetworkResult<Unit> =
-        delete(
-            endpoint = "artist/$id",
-            params =
-                mapOf(
-                    "deleteFiles" to deleteFiles,
-                    "addImportExclusion" to addImportExclusion,
-                ),
-        )
+    ): NetworkResult<Unit> = delete(
+        endpoint = "artist/$id",
+        params =
+        mapOf(
+            "deleteFiles" to deleteFiles,
+            "addImportExclusion" to addImportExclusion,
+        ),
+    )
 
     override suspend fun setMonitorStatus(
         id: Long,
         monitorStatus: Boolean,
-    ): NetworkResult<List<MonitoredResponse>> =
-        put(
-            "artist/editor",
-            mapOf(
-                "monitored" to monitorStatus,
-                "artistIds" to listOf(id),
-            ),
-        )
+    ): NetworkResult<List<MonitoredResponse>> = put(
+        "artist/editor",
+        mapOf(
+            "monitored" to monitorStatus,
+            "artistIds" to listOf(id),
+        ),
+    )
 
-    override suspend fun lookup(params: LookupParams): NetworkResult<List<Arrtist>> =
-        get<List<Arrtist>>("artist/lookup", mapOf("term" to params.query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<Arrtist>> = get<List<Arrtist>>("artist/lookup", mapOf("term" to params.query))
 
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Arrtist> = post<ArrMedia, Arrtist>("artist", item)
 
@@ -111,70 +108,65 @@ class LidarrClient(
         page: Int,
         pageSize: Int,
         altId: Long?,
-    ): NetworkResult<List<HistoryItem>> =
-        get<LidarrHistoryResponse>(
-            "history",
-            mapOf<String, Any>(
-                "page" to page,
-                "pageSize" to pageSize,
-                "albumId" to id,
-            ),
-        ).map { response ->
-            response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
-        }
+    ): NetworkResult<List<HistoryItem>> = get<LidarrHistoryResponse>(
+        "history",
+        mapOf<String, Any>(
+            "page" to page,
+            "pageSize" to pageSize,
+            "albumId" to id,
+        ),
+    ).map { response ->
+        response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+    }
 
     override suspend fun getHistory(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<List<HistoryItem>> =
-        get<LidarrHistoryResponse>(
-            "history",
-            mapOf<String, Any>(
-                "page" to page,
-                "pageSize" to pageSize,
-            ),
-        ).map { response ->
-            response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
-        }
+    ): NetworkResult<List<HistoryItem>> = get<LidarrHistoryResponse>(
+        "history",
+        mapOf<String, Any>(
+            "page" to page,
+            "pageSize" to pageSize,
+        ),
+    ).map { response ->
+        response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+    }
 
     override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate,
-    ): NetworkResult<List<ArrAlbum>> =
-        get<List<ArrAlbum>>(
-            "calendar",
-            mapOf(
-                "start" to start.toString(),
-                "end" to end.toString(),
-                "unmonitored" to true,
-                "includeArtist" to true,
-            ),
-        ).map { it.map { ab -> ab.copy(instanceId = instance.id) } }
+    ): NetworkResult<List<ArrAlbum>> = get<List<ArrAlbum>>(
+        "calendar",
+        mapOf(
+            "start" to start.toString(),
+            "end" to end.toString(),
+            "unmonitored" to true,
+            "includeArtist" to true,
+        ),
+    ).map { it.map { ab -> ab.copy(instanceId = instance.id) } }
 
     override suspend fun updateMonitoring(
         ids: List<Long>,
         monitor: Any,
-    ): NetworkResult<Unit> =
-        post(
-            endpoint = "albumStudio",
-            body =
-                ArtistMonitoringBody(
-                    artist = ids.map { IdWrapper(it) },
-                    monitoringOptions = ArtistMonitoringOption(monitor as ArtistMonitorType),
-                ),
-        )
+    ): NetworkResult<Unit> = post(
+        endpoint = "albumStudio",
+        body =
+        ArtistMonitoringBody(
+            artist = ids.map { IdWrapper(it) },
+            monitoringOptions = ArtistMonitoringOption(monitor as ArtistMonitorType),
+        ),
+    )
 
     suspend fun getAlbums(
         artistId: Long,
         includeAllArtistAlbums: Boolean = true,
-    ): NetworkResult<List<ArrAlbum>> =
-        get(
-            "album",
-            mapOf(
-                "artistId" to artistId,
-                "includeAllArtistAlbums" to includeAllArtistAlbums,
-            ),
-        )
+    ): NetworkResult<List<ArrAlbum>> = get(
+        "album",
+        mapOf(
+            "artistId" to artistId,
+            "includeAllArtistAlbums" to includeAllArtistAlbums,
+        ),
+    )
 
     suspend fun getAlbum(foreignAlbumId: String): NetworkResult<ArrAlbum> = get("album", mapOf("foreignAlbumId" to foreignAlbumId))
 
@@ -185,38 +177,34 @@ class LidarrClient(
     suspend fun getTracks(
         albumId: Long? = null,
         artistId: Long? = null,
-    ): NetworkResult<List<LidarrTrack>> =
-        get(
-            "track",
-            buildMap {
-                albumId?.let { put("albumId", it) }
-                artistId?.let { put("artistId", it) }
-            },
-        )
+    ): NetworkResult<List<LidarrTrack>> = get(
+        "track",
+        buildMap {
+            albumId?.let { put("albumId", it) }
+            artistId?.let { put("artistId", it) }
+        },
+    )
 
     suspend fun getTrackFiles(
         albumId: Long? = null,
         artistId: Long? = null,
-    ): NetworkResult<List<LidarrTrackFile>> =
-        get(
-            "trackfile",
-            buildMap {
-                albumId?.let { put("albumId", it) }
-                artistId?.let { put("artistId", it) }
-            },
-        )
+    ): NetworkResult<List<LidarrTrackFile>> = get(
+        "trackfile",
+        buildMap {
+            albumId?.let { put("albumId", it) }
+            artistId?.let { put("artistId", it) }
+        },
+    )
 
-    suspend fun deleteTracks(trackIds: List<Long>): NetworkResult<Unit> =
-        delete(
-            endpoint = "trackfile/bulk",
-            body = DeleteTrackBody(trackIds),
-        )
+    suspend fun deleteTracks(trackIds: List<Long>): NetworkResult<Unit> = delete(
+        endpoint = "trackfile/bulk",
+        body = DeleteTrackBody(trackIds),
+    )
 
     suspend fun updateAlbum(album: ArrAlbum): NetworkResult<ArrAlbum> = put("album/${album.id}", album)
 
-    suspend fun toggleMonitored(album: ArrAlbum): NetworkResult<ArrAlbum> =
-        put<AlbumMonitorBody, List<ArrAlbum>>(
-            endpoint = "album/monitor",
-            body = AlbumMonitorBody(listOf(album.id), !album.monitored),
-        ).map { it.first() }
+    suspend fun toggleMonitored(album: ArrAlbum): NetworkResult<ArrAlbum> = put<AlbumMonitorBody, List<ArrAlbum>>(
+        endpoint = "album/monitor",
+        body = AlbumMonitorBody(listOf(album.id), !album.monitored),
+    ).map { it.first() }
 }

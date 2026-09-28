@@ -51,6 +51,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
 import com.dnfapps.arrmatey.model.SmartAddSeerrAction
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
@@ -91,172 +92,172 @@ fun IntegrationsSettingsScreen(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = navigationBarBottomInset() + 16.dp),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = navigationBarBottomInset() + 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             SettingsGroup(
                 title = mokoString(MR.strings.seerr),
                 items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Approval),
-                            title = mokoString(MR.strings.smart_add_seerr_action_title),
-                            subtitle = mokoString(smartAddAction.resource),
-                            onClick = { showSmartAddActionDropdown = true },
-                            trailingContent = {
-                                Box {
-                                    DropdownMenu(
-                                        expanded = showSmartAddActionDropdown,
-                                        onDismissRequest = {
-                                            showSmartAddActionDropdown = false
-                                        },
-                                    ) {
-                                        SmartAddSeerrAction.entries.forEach { action ->
-                                            DropdownMenuItem(
-                                                text = { Text(mokoString(action.resource)) },
-                                                onClick = {
-                                                    viewModel.setSmartAddSeerrAction(action)
-                                                    showSmartAddActionDropdown = false
-                                                },
-                                            )
-                                        }
+                listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Approval),
+                        title = mokoString(MR.strings.smart_add_seerr_action_title),
+                        subtitle = mokoString(smartAddAction.resource),
+                        onClick = { showSmartAddActionDropdown = true },
+                        trailingContent = {
+                            Box {
+                                DropdownMenu(
+                                    expanded = showSmartAddActionDropdown,
+                                    onDismissRequest = {
+                                        showSmartAddActionDropdown = false
+                                    },
+                                ) {
+                                    SmartAddSeerrAction.entries.forEach { action ->
+                                        DropdownMenuItem(
+                                            text = { Text(mokoString(action.resource)) },
+                                            onClick = {
+                                                viewModel.setSmartAddSeerrAction(action)
+                                                showSmartAddActionDropdown = false
+                                            },
+                                        )
                                     }
                                 }
-                            },
-                        ),
+                            }
+                        },
                     ),
+                ),
                 footer = mokoString(MR.strings.smart_add_seerr_action_description),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.unified_media),
                 items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Layers),
-                            title = mokoString(MR.strings.combine_seerr_arr_media_title),
-                            enabled = hasSeerrAndArr,
-                            onClick = { viewModel.toggleCombineSeerrArrMedia() },
-                            trailingContent = {
-                                Switch(
-                                    checked = combineSeerrArrMedia,
-                                    onCheckedChange = { viewModel.toggleCombineSeerrArrMedia() },
-                                    enabled = hasSeerrAndArr,
-                                )
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Subtitles),
-                            title = mokoString(MR.strings.bazarr_details_integration_title),
-                            enabled = hasBazarr,
-                            onClick = { viewModel.toggleBazarrDetailsIntegration() },
-                            trailingContent = {
-                                Switch(
-                                    checked = bazarrDetailsIntegration,
-                                    onCheckedChange = { viewModel.toggleBazarrDetailsIntegration() },
-                                    enabled = hasBazarr,
-                                )
-                            },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.AutoGraph),
-                            title = mokoString(MR.strings.tracearr_details_integration_title),
-                            enabled = hasTracearr,
-                            onClick = { viewModel.toggleTracearrDetailsIntegration() },
-                            trailingContent = {
-                                Switch(
-                                    checked = tracearrDetailsIntegration,
-                                    onCheckedChange = { viewModel.toggleTracearrDetailsIntegration() },
-                                    enabled = hasTracearr,
-                                )
-                            },
-                        ),
+                listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Layers),
+                        title = mokoString(MR.strings.combine_seerr_arr_media_title),
+                        enabled = hasSeerrAndArr,
+                        onClick = { viewModel.toggleCombineSeerrArrMedia() },
+                        trailingContent = {
+                            Switch(
+                                checked = combineSeerrArrMedia,
+                                onCheckedChange = { viewModel.toggleCombineSeerrArrMedia() },
+                                enabled = hasSeerrAndArr,
+                            )
+                        },
                     ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Subtitles),
+                        title = mokoString(MR.strings.bazarr_details_integration_title),
+                        enabled = hasBazarr,
+                        onClick = { viewModel.toggleBazarrDetailsIntegration() },
+                        trailingContent = {
+                            Switch(
+                                checked = bazarrDetailsIntegration,
+                                onCheckedChange = { viewModel.toggleBazarrDetailsIntegration() },
+                                enabled = hasBazarr,
+                            )
+                        },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.AutoGraph),
+                        title = mokoString(MR.strings.tracearr_details_integration_title),
+                        enabled = hasTracearr,
+                        onClick = { viewModel.toggleTracearrDetailsIntegration() },
+                        trailingContent = {
+                            Switch(
+                                checked = tracearrDetailsIntegration,
+                                onCheckedChange = { viewModel.toggleTracearrDetailsIntegration() },
+                                enabled = hasTracearr,
+                            )
+                        },
+                    ),
+                ),
                 footer = mokoString(MR.strings.unified_media_description),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.deep_links_title),
                 items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Link),
-                            title = mokoString(MR.strings.tmdb_links),
-                            onClick = {
-                                val intent =
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                        Intent(
-                                            Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
-                                            "package:${context.packageName}".toUri(),
-                                        )
-                                    } else {
-                                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                            data = Uri.fromParts("package", context.packageName, null)
-                                        }
-                                    }
-                                context.startActivity(intent)
-                            },
-                            trailingContent = {
+                listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Link),
+                        title = mokoString(MR.strings.tmdb_links),
+                        onClick = {
+                            val intent =
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    val isVerified =
-                                        remember(context) {
-                                            val manager = context.getSystemService(DomainVerificationManager::class.java)
-                                            val userState = manager.getDomainVerificationUserState(context.packageName)
-                                            userState?.hostToStateMap?.entries?.any { (host, state) ->
-                                                host.contains("themoviedb.org") &&
-                                                    (
-                                                        state == DomainVerificationUserState.DOMAIN_STATE_VERIFIED ||
-                                                            state == DomainVerificationUserState.DOMAIN_STATE_SELECTED
+                                    Intent(
+                                        Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
+                                        "package:${context.packageName}".toUri(),
+                                    )
+                                } else {
+                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = Uri.fromParts("package", context.packageName, null)
+                                    }
+                                }
+                            context.startActivity(intent)
+                        },
+                        trailingContent = {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                val isVerified =
+                                    remember(context) {
+                                        val manager = context.getSystemService(DomainVerificationManager::class.java)
+                                        val userState = manager.getDomainVerificationUserState(context.packageName)
+                                        userState?.hostToStateMap?.entries?.any { (host, state) ->
+                                            host.contains("themoviedb.org") &&
+                                                (
+                                                    state == DomainVerificationUserState.DOMAIN_STATE_VERIFIED ||
+                                                        state == DomainVerificationUserState.DOMAIN_STATE_SELECTED
                                                     )
-                                            } == true
-                                        }
+                                        } == true
+                                    }
 
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    ) {
-                                        Text(
-                                            text =
-                                                if (isVerified) {
-                                                    mokoString(
-                                                        MR.strings.links_verified,
-                                                    )
-                                                } else {
-                                                    mokoString(MR.strings.links_not_verified)
-                                                },
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = if (isVerified) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                                        )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Text(
+                                        text =
                                         if (isVerified) {
-                                            Icon(
-                                                imageVector = Icons.Default.CheckCircle,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp),
-                                                tint = MaterialTheme.colorScheme.primary,
+                                            mokoString(
+                                                MR.strings.links_verified,
                                             )
                                         } else {
-                                            Icon(
-                                                imageVector = Icons.Default.ChevronRight,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(24.dp),
-                                            )
-                                        }
-                                    }
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.ChevronRight,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
+                                            mokoString(MR.strings.links_not_verified)
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (isVerified) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                                     )
+                                    if (isVerified) {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp),
+                                            tint = MaterialTheme.colorScheme.primary,
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.ChevronRight,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp),
+                                        )
+                                    }
                                 }
-                            },
-                        ),
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        },
                     ),
+                ),
                 footer = mokoString(MR.strings.tmdb_links_description),
             )
         }

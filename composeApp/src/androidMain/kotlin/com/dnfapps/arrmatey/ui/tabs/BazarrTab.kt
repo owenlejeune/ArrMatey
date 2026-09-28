@@ -35,22 +35,22 @@ fun BazarrTab(
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
         entryProvider =
-            entryProvider {
-                entry<BazarrScreen.Library> {
-                    BazarrScreen(
-                        wideRailIsVisible = wideRailIsVisible,
-                        onNavigateToDetails = { id, type -> navigation.openDetails(id, type) },
-                    )
-                }
-                entry<BazarrScreen.Details> { details ->
-                    BazarrDetailsScreen(
-                        id = details.id,
-                        type = details.type,
-                        onBack = { navigation.popBackStack() },
-                        isExpanded = isExpanded,
-                        wideRailIsVisible = wideRailIsVisible,
-                    )
-                }
-            },
+        entryProvider {
+            entry<BazarrScreen.Library> {
+                BazarrScreen(
+                    wideRailIsVisible = wideRailIsVisible,
+                    onNavigateToDetails = { id, type -> navigation.openDetails(id, type) },
+                )
+            }
+            entry<BazarrScreen.Details> { details ->
+                BazarrDetailsScreen(
+                    id = details.id,
+                    type = details.type,
+                    onBack = { navigation.popBackStack() },
+                    isExpanded = isExpanded,
+                    wideRailIsVisible = wideRailIsVisible,
+                )
+            }
+        },
     )
 }

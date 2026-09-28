@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.AudiobookFileCard
 import com.dnfapps.arrmatey.utils.mokoString
@@ -57,9 +58,9 @@ fun AudiobookFileView(
             automaticSearchEnabled = audiobook.monitored,
             automaticSearchInProgress = searchIds.contains(audiobook.id),
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp),
         )
 
         audiobook.files.forEach { file ->
@@ -70,9 +71,9 @@ fun AudiobookFileView(
             Text(
                 text = mokoString(MR.strings.no_files),
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )

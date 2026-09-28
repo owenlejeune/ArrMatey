@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.model
 
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.MokoStrings
 import kotlinx.datetime.TimeZone

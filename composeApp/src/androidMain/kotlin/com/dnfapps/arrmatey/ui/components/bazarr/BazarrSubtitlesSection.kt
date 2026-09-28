@@ -43,6 +43,7 @@ import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.utils.mokoPlural
@@ -213,16 +214,16 @@ private fun EmbeddedSubtitlesCard(embedded: List<BazarrSubtitle>) {
             embedded.forEach { subtitle ->
                 SubtitleLanguageChip(
                     label =
-                        buildString {
-                            append(
-                                subtitle.code2
-                                    .orEmpty()
-                                    .uppercase()
-                                    .ifBlank { subtitle.name },
-                            )
-                            if (subtitle.forced) append(" · Forced")
-                            if (subtitle.hi) append(" · HI")
-                        },
+                    buildString {
+                        append(
+                            subtitle.code2
+                                .orEmpty()
+                                .uppercase()
+                                .ifBlank { subtitle.name },
+                        )
+                        if (subtitle.forced) append(" · Forced")
+                        if (subtitle.hi) append(" · HI")
+                    },
                 )
             }
         }
@@ -243,27 +244,27 @@ private fun PresentSubtitleRow(
         ) {
             Text(
                 text =
-                    buildString {
-                        append(subtitle.name)
-                        subtitle.path?.let { path ->
-                            append(" • ${path.breakable()}")
-                        }
-                    },
+                buildString {
+                    append(subtitle.name)
+                    subtitle.path?.let { path ->
+                        append(" • ${path.breakable()}")
+                    }
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f),
             )
             SubtitleLanguageChip(
                 label =
-                    buildString {
-                        append(
-                            subtitle.code2
-                                .orEmpty()
-                                .uppercase()
-                                .ifBlank { subtitle.name },
-                        )
-                        if (subtitle.forced) append(" · Forced")
-                        if (subtitle.hi) append(" · HI")
-                    },
+                buildString {
+                    append(
+                        subtitle.code2
+                            .orEmpty()
+                            .uppercase()
+                            .ifBlank { subtitle.name },
+                    )
+                    if (subtitle.forced) append(" · Forced")
+                    if (subtitle.hi) append(" · HI")
+                },
             )
             Row {
                 if (subtitle.isExternal) {

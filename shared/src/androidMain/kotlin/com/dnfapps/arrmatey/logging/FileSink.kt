@@ -128,16 +128,15 @@ actual class FileSink actual constructor(
         }
     }
 
-    fun getAllLogFiles(): List<File> =
-        buildList {
-            if (file.exists()) add(file)
-            for (i in 1..maxBackupFiles) {
-                val backupFile = File(LogFileManager.getLogFilePath("$filename.$i"))
-                if (backupFile.exists()) {
-                    add(backupFile)
-                }
+    fun getAllLogFiles(): List<File> = buildList {
+        if (file.exists()) add(file)
+        for (i in 1..maxBackupFiles) {
+            val backupFile = File(LogFileManager.getLogFilePath("$filename.$i"))
+            if (backupFile.exists()) {
+                add(backupFile)
             }
         }
+    }
 
     fun getTotalLogSize(): Long = getAllLogFiles().sumOf { it.length() }
 
@@ -154,12 +153,11 @@ actual object LogFileManager {
         appContext = context.applicationContext
     }
 
-    actual fun getLogDirectory(): String =
-        if (::appContext.isInitialized) {
-            File(appContext.filesDir, "logs").apply { mkdirs() }.absolutePath
-        } else {
-            File(System.getProperty("java.io.tmpdir") ?: ".", "logs").apply { mkdirs() }.absolutePath
-        }
+    actual fun getLogDirectory(): String = if (::appContext.isInitialized) {
+        File(appContext.filesDir, "logs").apply { mkdirs() }.absolutePath
+    } else {
+        File(System.getProperty("java.io.tmpdir") ?: ".", "logs").apply { mkdirs() }.absolutePath
+    }
 
     actual fun getLogFilePath(filename: String): String = File(getLogDirectory(), filename).absolutePath
 

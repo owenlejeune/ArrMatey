@@ -46,6 +46,7 @@ import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.toBookDetails
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toEpisodeDetails
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.calendar.CalendarListView
 import com.dnfapps.arrmatey.ui.calendar.CalendarMonthView
@@ -76,75 +77,75 @@ fun CalendarTab(
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
         entryProvider =
-            entryProvider {
-                entry<CalendarScreen.Home> {
-                    CalendarHomeScreen(
-                        viewModel = viewModel,
-                        wideRailIsVisible = wideRailIsVisible,
-                        isExpanded = isExpanded,
-                        onItemClick = { item, instanceId ->
-                            when (item) {
-                                is ArrMovie ->
-                                    navigation.toDetails(
-                                        id = item.id,
-                                        tmdbId = item.tmdbId,
-                                        type = item.associatedType,
-                                        instanceId = instanceId,
-                                    )
-
-                                is EpisodeGroup ->
-                                    navigation.toDetails(
-                                        id = item.first.seriesId,
-                                        type = item.associatedType,
-                                        instanceId = instanceId,
-                                    )
-
-                                is Episode -> {
-                                    item.series?.let { series ->
-                                        navigation.toDetails(
-                                            id = series.id,
-                                            tmdbId = series.tmdbId,
-                                            type = item.associatedType,
-                                            instanceId = instanceId,
-                                        )
-                                        navigation.toEpisodeDetails(series, item)
-                                    }
-                                }
-
-                                is ArrAlbum ->
-                                    navigation.toDetails(
-                                        id = item.id,
-                                        type = item.associatedType,
-                                        instanceId = instanceId,
-                                    )
-
-                                is Book -> {
-                                    item.author?.let { author ->
-                                        navigation.toDetails(
-                                            id = author.id,
-                                            type = item.associatedType,
-                                            instanceId = instanceId,
-                                        )
-                                        navigation.toBookDetails(author, item)
-                                    }
-                                }
-
-                                is Audiobook ->
-                                    navigation.toDetails(
-                                        id = item.id,
-                                        type = item.associatedType,
-                                        instanceId = instanceId,
-                                    )
-                            }
-                        },
-                    )
-                }
-                mediaNavEntries(
-                    navigation = navigation,
-                    isExpanded = isExpanded,
+        entryProvider {
+            entry<CalendarScreen.Home> {
+                CalendarHomeScreen(
+                    viewModel = viewModel,
                     wideRailIsVisible = wideRailIsVisible,
+                    isExpanded = isExpanded,
+                    onItemClick = { item, instanceId ->
+                        when (item) {
+                            is ArrMovie ->
+                                navigation.toDetails(
+                                    id = item.id,
+                                    tmdbId = item.tmdbId,
+                                    type = item.associatedType,
+                                    instanceId = instanceId,
+                                )
+
+                            is EpisodeGroup ->
+                                navigation.toDetails(
+                                    id = item.first.seriesId,
+                                    type = item.associatedType,
+                                    instanceId = instanceId,
+                                )
+
+                            is Episode -> {
+                                item.series?.let { series ->
+                                    navigation.toDetails(
+                                        id = series.id,
+                                        tmdbId = series.tmdbId,
+                                        type = item.associatedType,
+                                        instanceId = instanceId,
+                                    )
+                                    navigation.toEpisodeDetails(series, item)
+                                }
+                            }
+
+                            is ArrAlbum ->
+                                navigation.toDetails(
+                                    id = item.id,
+                                    type = item.associatedType,
+                                    instanceId = instanceId,
+                                )
+
+                            is Book -> {
+                                item.author?.let { author ->
+                                    navigation.toDetails(
+                                        id = author.id,
+                                        type = item.associatedType,
+                                        instanceId = instanceId,
+                                    )
+                                    navigation.toBookDetails(author, item)
+                                }
+                            }
+
+                            is Audiobook ->
+                                navigation.toDetails(
+                                    id = item.id,
+                                    type = item.associatedType,
+                                    instanceId = instanceId,
+                                )
+                        }
+                    },
                 )
-            },
+            }
+            mediaNavEntries(
+                navigation = navigation,
+                isExpanded = isExpanded,
+                wideRailIsVisible = wideRailIsVisible,
+            )
+        },
     )
 }
 
@@ -176,10 +177,10 @@ private fun CalendarHomeScreen(
                         }) {
                             Icon(
                                 imageVector =
-                                    when (calendarState.filterState.viewMode) {
-                                        CalendarViewMode.List -> Icons.Default.CalendarMonth
-                                        CalendarViewMode.Month -> Icons.Default.CalendarViewDay
-                                    },
+                                when (calendarState.filterState.viewMode) {
+                                    CalendarViewMode.List -> Icons.Default.CalendarMonth
+                                    CalendarViewMode.Month -> Icons.Default.CalendarViewDay
+                                },
                                 contentDescription = null,
                             )
                         }
@@ -200,9 +201,9 @@ private fun CalendarHomeScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
             contentAlignment = Alignment.Center,
         ) {
             if (!calendarState.hasLoaded && calendarState.isLoading && calendarState.items.isEmpty()) {

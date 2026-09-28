@@ -53,6 +53,7 @@ import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
@@ -123,9 +124,9 @@ fun PosterItem(
             if (isInSelectionMode) {
                 Box(
                     modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(8.dp),
+                    Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
                     contentAlignment = Alignment.TopEnd,
                 ) {
                     CircularCheckbox(checked = isSelected)
@@ -195,9 +196,9 @@ fun PosterItem(
             name = item.title ?: item.name ?: mokoString(MR.strings.unknown),
             credit = item.knownForDepartment ?: "",
             modifier =
-                modifier.clickable(enabled = onItemClick != null) {
-                    onItemClick?.invoke(item)
-                },
+            modifier.clickable(enabled = onItemClick != null) {
+                onItemClick?.invoke(item)
+            },
         )
     } else {
         var imageLoadError by remember { mutableStateOf(false) }
@@ -385,9 +386,9 @@ private fun BoxScope.MediaTypeOverlay(type: RequestType) {
         text = text,
         requestType = type,
         modifier =
-            Modifier
-                .align(Alignment.TopStart)
-                .padding(8.dp),
+        Modifier
+            .align(Alignment.TopStart)
+            .padding(8.dp),
     )
 }
 
@@ -447,32 +448,32 @@ fun BasePosterItem(
         shape = RoundedCornerShape(radius.radius),
         elevation = CardDefaults.cardElevation(elevation.elevation),
         modifier =
-            modifier.then(
-                if (onClick != null || onLongClick != null) {
-                    Modifier.combinedClickable(
-                        enabled = enabled,
-                        onClick = { onClick?.invoke() },
-                        onLongClick = onLongClick,
-                    )
-                } else {
-                    Modifier
-                },
-            ),
+        modifier.then(
+            if (onClick != null || onLongClick != null) {
+                Modifier.combinedClickable(
+                    enabled = enabled,
+                    onClick = { onClick?.invoke() },
+                    onLongClick = onLongClick,
+                )
+            } else {
+                Modifier
+            },
+        ),
         border = if (isSelected) BorderStroke(4.dp, ArrLightPurple) else null,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
     ) {
         val isFixedSize = posterHeight != null
         Column(modifier = if (isFixedSize) Modifier.width(IntrinsicSize.Min) else Modifier) {
             Box(
                 modifier =
-                    Modifier
-                        .then(if (isFixedSize) Modifier.height(posterHeight) else Modifier)
-                        .aspectRatio(aspectRatio.ratio, isFixedSize)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                Modifier
+                    .then(if (isFixedSize) Modifier.height(posterHeight) else Modifier)
+                    .aspectRatio(aspectRatio.ratio, isFixedSize)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
             ) {
                 when (model) {
                     is Painter ->
@@ -481,9 +482,9 @@ fun BasePosterItem(
                             contentScale = ContentScale.Crop,
                             contentDescription = null,
                             modifier =
-                                Modifier
-                                    .align(Alignment.Center)
-                                    .fillMaxSize(),
+                            Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize(),
                         )
 
                     else ->
@@ -492,9 +493,9 @@ fun BasePosterItem(
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier =
-                                Modifier
-                                    .align(Alignment.Center)
-                                    .fillMaxSize(),
+                            Modifier
+                                .align(Alignment.Center)
+                                .fillMaxSize(),
                         )
                 }
 
@@ -504,9 +505,9 @@ fun BasePosterItem(
             if (footerVisible) {
                 Column(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                 ) {
                     footerContent()
                 }

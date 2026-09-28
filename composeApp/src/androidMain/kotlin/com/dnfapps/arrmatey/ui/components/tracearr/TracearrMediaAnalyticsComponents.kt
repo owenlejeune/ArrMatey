@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.model.TracearrMediaUiState
 import com.dnfapps.arrmatey.model.TracearrStatsWindowType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryItem
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaWatcher
@@ -66,9 +67,9 @@ fun TracearrSummaryChipRow(
 
     Row(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .horizontalScroll(scrollState),
+        modifier
+            .fillMaxWidth()
+            .horizontalScroll(scrollState),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -84,11 +85,11 @@ fun TracearrSummaryChipRow(
                 )
             },
             colors =
-                SuggestionChipDefaults.suggestionChipColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    iconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
+            SuggestionChipDefaults.suggestionChipColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                iconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ),
         )
 
         SuggestionChip(
@@ -199,9 +200,9 @@ fun TracearrAnalyticsSection(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors =
-                    CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    ),
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                ),
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -279,9 +280,9 @@ private fun AnalyticsMetricCard(
     Card(
         modifier = modifier,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -317,15 +318,15 @@ private fun WatcherCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
     ) {
         Row(
             modifier =
-                Modifier
-                    .padding(12.dp)
-                    .fillMaxWidth(),
+            Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -333,10 +334,10 @@ private fun WatcherCard(
             val avatarUrl = user?.identityName ?: user?.username
             Box(
                 modifier =
-                    Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
+                Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -406,15 +407,15 @@ fun TracearrHistorySection(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors =
-                    CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    ),
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                ),
             ) {
                 Box(
                     modifier =
-                        Modifier
-                            .padding(24.dp)
-                            .fillMaxWidth(),
+                    Modifier
+                        .padding(24.dp)
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -442,9 +443,9 @@ fun TracearrHistorySection(
             if (uiState.nextHistoryCursor != null) {
                 Box(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (uiState.isLoadingHistoryMore) {

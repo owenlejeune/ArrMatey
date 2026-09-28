@@ -90,6 +90,7 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
@@ -515,10 +516,10 @@ fun CombinedDashboard(
             ProvideFloatingBarAction(
                 visible = useFloatingNavigationBar && showFab,
                 action =
-                    FloatingBarAction(
-                        icon = { Icon(Icons.Default.Add, null) },
-                        onClick = { showAddCardSheet = true },
-                    ),
+                FloatingBarAction(
+                    icon = { Icon(Icons.Default.Add, null) },
+                    onClick = { showAddCardSheet = true },
+                ),
             )
 
             if (!useFloatingNavigationBar && showFab) {
@@ -533,9 +534,9 @@ fun CombinedDashboard(
     ) { contentPadding ->
         Box(
             modifier =
-                Modifier
-                    .padding(top = contentPadding.calculateTopPadding())
-                    .fillMaxSize(),
+            Modifier
+                .padding(top = contentPadding.calculateTopPadding())
+                .fillMaxSize(),
         ) {
             if (showDashboardSearch && searchBarState.isExpanded()) {
                 DiscoverSearchOverlay(
@@ -574,9 +575,9 @@ fun CombinedDashboard(
                             if (cards.isEmpty()) {
                                 Column(
                                     modifier =
-                                        Modifier
-                                            .fillMaxSize()
-                                            .padding(16.dp),
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp),
                                     verticalArrangement = Arrangement.Center,
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
@@ -603,18 +604,18 @@ fun CombinedDashboard(
                                     verticalItemSpacing = 16.dp,
                                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                                     contentPadding =
-                                        PaddingValues(
-                                            all = 16.dp,
-                                            bottom =
-                                                16.dp +
-                                                    if (LocalFloatingBarBottomPadding.current >
-                                                        0.dp
-                                                    ) {
-                                                        LocalFloatingBarBottomPadding.current
-                                                    } else {
-                                                        navigationBarBottomInset()
-                                                    },
-                                        ),
+                                    PaddingValues(
+                                        all = 16.dp,
+                                        bottom =
+                                        16.dp +
+                                            if (LocalFloatingBarBottomPadding.current >
+                                                0.dp
+                                            ) {
+                                                LocalFloatingBarBottomPadding.current
+                                            } else {
+                                                navigationBarBottomInset()
+                                            },
+                                    ),
                                     modifier = Modifier.fillMaxSize(),
                                 ) {
                                     itemsIndexed(cards, key = { _, it -> it }) { index, dashboardCard ->
@@ -674,21 +675,21 @@ fun CombinedDashboard(
 
                                             Surface(
                                                 modifier =
-                                                    Modifier
-                                                        .padding(innerPadding)
-                                                        .clip(MaterialTheme.shapes.large)
-                                                        .combinedClickable(
-                                                            enabled = !isEditing,
-                                                            onClick = { cardOnClick?.invoke() },
-                                                            onLongClick = {
-                                                                if (!isEditing) {
-                                                                    viewModel.toggleEditing()
-                                                                    hapticFeedback.performHapticFeedback(
-                                                                        HapticFeedbackType.GestureThresholdActivate,
-                                                                    )
-                                                                }
-                                                            },
-                                                        ),
+                                                Modifier
+                                                    .padding(innerPadding)
+                                                    .clip(MaterialTheme.shapes.large)
+                                                    .combinedClickable(
+                                                        enabled = !isEditing,
+                                                        onClick = { cardOnClick?.invoke() },
+                                                        onLongClick = {
+                                                            if (!isEditing) {
+                                                                viewModel.toggleEditing()
+                                                                hapticFeedback.performHapticFeedback(
+                                                                    HapticFeedbackType.GestureThresholdActivate,
+                                                                )
+                                                            }
+                                                        },
+                                                    ),
                                             ) {
                                                 DashboardCardContent(
                                                     cardType = dashboardCard,
@@ -723,9 +724,9 @@ fun CombinedDashboard(
                                             if (isEditing) {
                                                 Row(
                                                     modifier =
-                                                        Modifier
-                                                            .align(Alignment.TopEnd)
-                                                            .padding(top = 16.dp, end = 16.dp),
+                                                    Modifier
+                                                        .align(Alignment.TopEnd)
+                                                        .padding(top = 16.dp, end = 16.dp),
                                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                                                     verticalAlignment = Alignment.CenterVertically,
                                                 ) {
@@ -744,9 +745,9 @@ fun CombinedDashboard(
                                                         enabled = index > 0,
                                                         modifier = Modifier.size(32.dp),
                                                         colors =
-                                                            IconButtonDefaults.filledTonalIconButtonColors(
-                                                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                                                            ),
+                                                        IconButtonDefaults.filledTonalIconButtonColors(
+                                                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                                        ),
                                                     ) {
                                                         Icon(
                                                             imageVector = Icons.Default.ArrowUpward,
@@ -770,9 +771,9 @@ fun CombinedDashboard(
                                                         enabled = index < cards.lastIndex,
                                                         modifier = Modifier.size(32.dp),
                                                         colors =
-                                                            IconButtonDefaults.filledTonalIconButtonColors(
-                                                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                                                            ),
+                                                        IconButtonDefaults.filledTonalIconButtonColors(
+                                                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                                        ),
                                                     ) {
                                                         Icon(
                                                             imageVector = Icons.Default.ArrowDownward,
@@ -787,10 +788,10 @@ fun CombinedDashboard(
                                                         },
                                                         modifier = Modifier.size(32.dp),
                                                         colors =
-                                                            IconButtonDefaults.iconButtonColors(
-                                                                containerColor = MaterialTheme.colorScheme.error,
-                                                                contentColor = MaterialTheme.colorScheme.onError,
-                                                            ),
+                                                        IconButtonDefaults.iconButtonColors(
+                                                            containerColor = MaterialTheme.colorScheme.error,
+                                                            contentColor = MaterialTheme.colorScheme.onError,
+                                                        ),
                                                     ) {
                                                         Icon(
                                                             Icons.Default.Close,
@@ -815,8 +816,8 @@ fun CombinedDashboard(
                     ) {
                         Column(
                             modifier =
-                                Modifier
-                                    .fillMaxWidth(),
+                            Modifier
+                                .fillMaxWidth(),
                         ) {
                             Text(
                                 text = mokoString(MR.strings.add_dashboard_cards),
@@ -833,11 +834,11 @@ fun CombinedDashboard(
                                 items(availableCards) { card ->
                                     Box(
                                         modifier =
-                                            Modifier
-                                                .clip(MaterialTheme.shapes.large)
-                                                .clickable {
-                                                    viewModel.addCard(card)
-                                                },
+                                        Modifier
+                                            .clip(MaterialTheme.shapes.large)
+                                            .clickable {
+                                                viewModel.addCard(card)
+                                            },
                                     ) {
                                         Column(
                                             modifier = Modifier.padding(horizontal = 12.dp),

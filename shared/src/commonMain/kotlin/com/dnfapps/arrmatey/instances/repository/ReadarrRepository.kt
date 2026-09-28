@@ -53,23 +53,21 @@ class ReadarrRepository(
         )
     }
 
-    override suspend fun getAuthorSeries(authorId: Long): NetworkResult<List<BookSeries>> =
-        bookshelfClient
-            .getAuthorSeries(authorId)
-            .onSuccess { result ->
-                val currentMap = _authorSeries.value.toMutableMap()
-                currentMap[authorId] = result
-                _authorSeries.value = currentMap
-            }
+    override suspend fun getAuthorSeries(authorId: Long): NetworkResult<List<BookSeries>> = bookshelfClient
+        .getAuthorSeries(authorId)
+        .onSuccess { result ->
+            val currentMap = _authorSeries.value.toMutableMap()
+            currentMap[authorId] = result
+            _authorSeries.value = currentMap
+        }
 
-    override suspend fun getAuthorBookFiles(authorId: Long): NetworkResult<List<BookFile>> =
-        bookshelfClient
-            .getAuthorBookFiles(authorId)
-            .onSuccess { result ->
-                val currentMap = _authorBookFiles.value.toMutableMap()
-                currentMap[authorId] = result
-                _authorBookFiles.value = currentMap
-            }
+    override suspend fun getAuthorBookFiles(authorId: Long): NetworkResult<List<BookFile>> = bookshelfClient
+        .getAuthorBookFiles(authorId)
+        .onSuccess { result ->
+            val currentMap = _authorBookFiles.value.toMutableMap()
+            currentMap[authorId] = result
+            _authorBookFiles.value = currentMap
+        }
 
     override suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> = bookshelfClient.deleteBookFiles(bookFilesIds)
 

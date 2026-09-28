@@ -28,20 +28,19 @@ class DeleteMediaUseCaseTest {
     private val fakeLogger = LoggerFactory.get("test")
 
     @Test
-    fun testDeleteMediaSuccess() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond("", HttpStatusCode.OK)
-                }
-            val httpClient = HttpClient(mockEngine)
-            val repository = ArrInstanceRepository(fakeInstance, httpClient, fakeLogger)
-            val useCase = DeleteMediaUseCase()
-
-            useCase(123, true, false, repository).test {
-                assertTrue(awaitItem() is OperationStatus.InProgress)
-                assertTrue(awaitItem() is OperationStatus.Success)
-                awaitComplete()
+    fun testDeleteMediaSuccess() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond("", HttpStatusCode.OK)
             }
+        val httpClient = HttpClient(mockEngine)
+        val repository = ArrInstanceRepository(fakeInstance, httpClient, fakeLogger)
+        val useCase = DeleteMediaUseCase()
+
+        useCase(123, true, false, repository).test {
+            assertTrue(awaitItem() is OperationStatus.InProgress)
+            assertTrue(awaitItem() is OperationStatus.Success)
+            awaitComplete()
         }
+    }
 }

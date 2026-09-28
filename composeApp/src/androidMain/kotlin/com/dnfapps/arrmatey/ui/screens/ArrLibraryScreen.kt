@@ -101,6 +101,7 @@ import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ErrorView
@@ -217,10 +218,10 @@ fun ArrLibraryScreen(
     com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction(
         visible = useFloatingNavigationBar && showFab,
         action =
-            com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction(
-                icon = { Icon(Icons.Default.Add, null) },
-                onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) },
-            ),
+        com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction(
+            icon = { Icon(Icons.Default.Add, null) },
+            onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) },
+        ),
     )
 
     Scaffold(
@@ -247,7 +248,7 @@ fun ArrLibraryScreen(
                     (
                         fadeIn(animationSpec = tween(200, delayMillis = 50)) +
                             slideInVertically(animationSpec = tween(200, delayMillis = 50)) { -it / 2 }
-                    ).togetherWith(
+                        ).togetherWith(
                         fadeOut(animationSpec = tween(150)) +
                             slideOutVertically(animationSpec = tween(150)) { -it / 2 },
                     )
@@ -272,10 +273,10 @@ fun ArrLibraryScreen(
                         textFieldState = textFieldState,
                         textFieldEnabled = instancesState.selectedInstance != null,
                         searchPlaceholder =
-                            mokoString(
-                                MR.strings.search_placeholder,
-                                instancesState.selectedInstance?.label ?: "",
-                            ),
+                        mokoString(
+                            MR.strings.search_placeholder,
+                            instancesState.selectedInstance?.label ?: "",
+                        ),
                         trailingIcon = {
                             InstanceOptionsMenu(
                                 onViewWebGui = {
@@ -333,9 +334,9 @@ fun ArrLibraryScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             if (instancesState.instances.isEmpty()) {
@@ -433,16 +434,16 @@ fun ArrLibraryScreen(
             FlexibleBottomSheet(
                 onDismissRequest = { arrMediaViewModel.exitSelectionMode() },
                 sheetState =
-                    rememberFlexibleBottomSheetState(
-                        isModal = false,
-                        initialValue = FlexibleSheetValue.IntermediatelyExpanded,
-                        flexibleSheetSize =
-                            FlexibleSheetSize(
-                                fullyExpanded = FlexibleSheetSize.WrapContent,
-                                intermediatelyExpanded = 0.15f,
-                                slightlyExpanded = 0.15f,
-                            ),
+                rememberFlexibleBottomSheetState(
+                    isModal = false,
+                    initialValue = FlexibleSheetValue.IntermediatelyExpanded,
+                    flexibleSheetSize =
+                    FlexibleSheetSize(
+                        fullyExpanded = FlexibleSheetSize.WrapContent,
+                        intermediatelyExpanded = 0.15f,
+                        slightlyExpanded = 0.15f,
                     ),
+                ),
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
                 SelectionBottomBar(
@@ -595,10 +596,10 @@ internal fun SelectionBottomBar(
 ) {
     FlowRow(
         modifier =
-            Modifier
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 24.dp)
-                .fillMaxWidth(),
+        Modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 24.dp)
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
@@ -667,14 +668,14 @@ private fun SelectionActionItem(
     Button(
         onClick = onClick,
         colors =
-            if (isError) {
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError,
-                )
-            } else {
-                ButtonDefaults.buttonColors()
-            },
+        if (isError) {
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = MaterialTheme.colorScheme.onError,
+            )
+        } else {
+            ButtonDefaults.buttonColors()
+        },
         enabled = enabled,
     ) {
         Icon(
@@ -705,9 +706,9 @@ internal fun ConfirmDeleteAlert(
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             modifier =
-                Modifier
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp),
+            Modifier
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
         ) {
             LabelledSwitch(
                 label = mokoString(MR.strings.add_exclusion),
@@ -724,10 +725,10 @@ internal fun ConfirmDeleteAlert(
             Button(
                 onClick = { onDelete(deleteFiles, addExclusion) },
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    ),
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                ),
                 enabled = !deleteInProgress,
             ) {
                 if (deleteInProgress) {
@@ -827,9 +828,9 @@ internal fun MonitorOptionsSheet(
     ModalBottomSheet(onDismissRequest = onDismissRequest) {
         Column(
             modifier =
-                Modifier
-                    .padding(bottom = 24.dp)
-                    .fillMaxWidth(),
+            Modifier
+                .padding(bottom = 24.dp)
+                .fillMaxWidth(),
         ) {
             Text(
                 text = mokoString(MR.strings.monitor),
@@ -874,10 +875,10 @@ private fun BookshelfMonitorOptionsSheet(
     ModalBottomSheet(onDismissRequest = onDismissRequest) {
         Column(
             modifier =
-                Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 24.dp)
-                    .fillMaxWidth(),
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp)
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
@@ -979,9 +980,9 @@ internal fun EmptySearchResultsView(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier =
-            Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxSize(),
+        Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxSize(),
     ) {
         Text(
             text = mokoString(MR.strings.no_query_results, query),
@@ -990,25 +991,25 @@ internal fun EmptySearchResultsView(
         )
         Text(
             text =
-                buildAnnotatedString {
-                    append(mokoString(MR.strings.no_query_results_label))
-                    append(" ")
-                    withLink(
-                        link =
-                            LinkAnnotation.Clickable(tag = "new_entry") {
-                                onShouldSearch()
-                            },
+            buildAnnotatedString {
+                append(mokoString(MR.strings.no_query_results_label))
+                append(" ")
+                withLink(
+                    link =
+                    LinkAnnotation.Clickable(tag = "new_entry") {
+                        onShouldSearch()
+                    },
+                ) {
+                    withStyle(
+                        SpanStyle(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                        ),
                     ) {
-                        withStyle(
-                            SpanStyle(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                            ),
-                        ) {
-                            append(mokoString(MR.strings.no_query_results_link, mediaType))
-                        }
+                        append(mokoString(MR.strings.no_query_results_link, mediaType))
                     }
-                },
+                }
+            },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

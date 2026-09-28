@@ -12,15 +12,14 @@ class GetSimilarUseCase {
         mediaType: RequestType,
         mediaId: Long,
         scope: CoroutineScope,
-    ): PagingController<DiscoverResult> =
-        PagingController(
-            scope = scope,
-            keySelector = { "${it.mediaType.name}_${it.id}" },
-        ) {
-            when (mediaType) {
-                RequestType.Movie -> repository.getMovieSimilarPaging(mediaId)
-                RequestType.Tv -> repository.getTvSimilarPaging(mediaId)
-                RequestType.Person -> throw IllegalArgumentException("Similar not supported for Person")
-            }
+    ): PagingController<DiscoverResult> = PagingController(
+        scope = scope,
+        keySelector = { "${it.mediaType.name}_${it.id}" },
+    ) {
+        when (mediaType) {
+            RequestType.Movie -> repository.getMovieSimilarPaging(mediaId)
+            RequestType.Tv -> repository.getTvSimilarPaging(mediaId)
+            RequestType.Person -> throw IllegalArgumentException("Similar not supported for Person")
         }
+    }
 }

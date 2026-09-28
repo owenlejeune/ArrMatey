@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CalendarState
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.utils.mokoString
@@ -91,12 +92,12 @@ fun CalendarListView(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding =
-                PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 8.dp,
-                    bottom = 8.dp + LocalFloatingBarBottomPadding.current,
-                ),
+            PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 8.dp,
+                bottom = 8.dp + LocalFloatingBarBottomPadding.current,
+            ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(
@@ -116,9 +117,9 @@ fun CalendarListView(
                 item {
                     Box(
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(32.dp))
@@ -132,19 +133,19 @@ fun CalendarListView(
         com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction(
             visible = useFloatingNavigationBar && !isTodayVisible,
             action =
-                com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Today,
-                            contentDescription = mokoString(MR.strings.today),
-                        )
-                    },
-                    onClick = {
-                        scope.launch {
-                            listState.animateScrollToItem(todayIndex)
-                        }
-                    },
-                ),
+            com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Today,
+                        contentDescription = mokoString(MR.strings.today),
+                    )
+                },
+                onClick = {
+                    scope.launch {
+                        listState.animateScrollToItem(todayIndex)
+                    }
+                },
+            ),
         )
 
         if (!useFloatingNavigationBar) {

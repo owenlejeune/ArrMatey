@@ -62,11 +62,11 @@ fun AMOutlinedTextField(
                 text = labelText,
                 style = MaterialTheme.typography.bodyMedium,
                 color =
-                    when {
-                        !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        isError -> MaterialTheme.colorScheme.error
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
-                    },
+                when {
+                    !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    isError -> MaterialTheme.colorScheme.error
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 maxLines = 1,
             )
         }
@@ -75,23 +75,23 @@ fun AMOutlinedTextField(
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             placeholder =
-                placeholder?.let {
-                    {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1,
-                        )
-                    }
-                },
+            placeholder?.let {
+                {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                    )
+                }
+            },
             singleLine = singleLine,
             isError = isError,
             supportingText =
-                if (isError && errorMessage != null) {
-                    { Text(text = errorMessage, style = MaterialTheme.typography.bodySmall) }
-                } else {
-                    null
-                },
+            if (isError && errorMessage != null) {
+                { Text(text = errorMessage, style = MaterialTheme.typography.bodySmall) }
+            } else {
+                null
+            },
             enabled = enabled,
             keyboardOptions = keyboardOptions,
             shape = MaterialTheme.shapes.large,

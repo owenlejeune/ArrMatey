@@ -32,12 +32,11 @@ class ImportDataUseCase(
         return json.decodeFromString(sanitizedJson)
     }
 
-    private fun sanitizeLegacyBackupJson(jsonString: String): String =
-        jsonString
-            .replace("\"Booksehlf\"", "\"Bookshelf\"")
-            .replace("\"Booksehelf\"", "\"Bookshelf\"")
-            .replace("\"booksehlf\"", "\"bookshelf\"")
-            .replace("\"booksehelf\"", "\"bookshelf\"")
+    private fun sanitizeLegacyBackupJson(jsonString: String): String = jsonString
+        .replace("\"Booksehlf\"", "\"Bookshelf\"")
+        .replace("\"Booksehelf\"", "\"Bookshelf\"")
+        .replace("\"booksehlf\"", "\"bookshelf\"")
+        .replace("\"booksehelf\"", "\"bookshelf\"")
 
     suspend fun importSelected(
         backup: BackupExport,

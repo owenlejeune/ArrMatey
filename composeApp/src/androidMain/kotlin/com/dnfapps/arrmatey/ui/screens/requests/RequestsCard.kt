@@ -22,6 +22,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BannerView
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
@@ -53,10 +54,10 @@ fun RequestCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = Color.White,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = Color.White,
+        ),
         onClick = onClick,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -115,10 +116,10 @@ private fun RequestCardHeader(
             model = rememberRemoteImageData(posterUrl),
             contentDescription = null,
             modifier =
-                Modifier
-                    .height(110.dp)
-                    .aspectRatio(AspectRatio.Poster.ratio, true)
-                    .clip(MaterialTheme.shapes.medium),
+            Modifier
+                .height(110.dp)
+                .aspectRatio(AspectRatio.Poster.ratio, true)
+                .clip(MaterialTheme.shapes.medium),
             contentScale = ContentScale.Fit,
         )
 

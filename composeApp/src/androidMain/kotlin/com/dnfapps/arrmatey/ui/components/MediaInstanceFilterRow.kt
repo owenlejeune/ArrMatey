@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
@@ -52,9 +53,9 @@ fun MediaInstanceFilterRow(
 
     LazyRow(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .animateContentSize(),
+        modifier
+            .fillMaxWidth()
+            .animateContentSize(),
         contentPadding = contentPadding,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -71,17 +72,17 @@ fun MediaInstanceFilterRow(
                         count = totalCount,
                         isSelected = isAllSelected,
                         countContainerColor =
-                            if (isAllSelected) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainerHighest
-                            },
+                        if (isAllSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHighest
+                        },
                         countContentColor =
-                            if (isAllSelected) {
-                                MaterialTheme.colorScheme.onPrimary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
+                        if (isAllSelected) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                     )
                 },
                 leadingIcon = {
@@ -102,11 +103,11 @@ fun MediaInstanceFilterRow(
                 },
                 shape = CircleShape,
                 colors =
-                    FilterChipDefaults.elevatedFilterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
+                FilterChipDefaults.elevatedFilterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
             )
         }
 
@@ -118,11 +119,11 @@ fun MediaInstanceFilterRow(
 
             val containerColor by animateColorAsState(
                 targetValue =
-                    if (isSelected) {
-                        typeAccentColor.copy(alpha = 0.24f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
-                    },
+                if (isSelected) {
+                    typeAccentColor.copy(alpha = 0.24f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                },
                 label = "chip_bg_${type.name}",
             )
 
@@ -141,17 +142,17 @@ fun MediaInstanceFilterRow(
                         count = count,
                         isSelected = isSelected,
                         countContainerColor =
-                            if (isSelected) {
-                                typeAccentColor.copy(alpha = 0.38f)
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainerHighest
-                            },
+                        if (isSelected) {
+                            typeAccentColor.copy(alpha = 0.38f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHighest
+                        },
                         countContentColor =
-                            if (isSelected) {
-                                MaterialTheme.colorScheme.onSurface
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                     )
                 },
                 leadingIcon = {
@@ -173,12 +174,12 @@ fun MediaInstanceFilterRow(
                 },
                 shape = CircleShape,
                 colors =
-                    FilterChipDefaults.elevatedFilterChipColors(
-                        containerColor = containerColor,
-                        selectedContainerColor = containerColor,
-                        selectedLabelColor = MaterialTheme.colorScheme.onSurface,
-                        selectedLeadingIconColor = MaterialTheme.colorScheme.onSurface,
-                    ),
+                FilterChipDefaults.elevatedFilterChipColors(
+                    containerColor = containerColor,
+                    selectedContainerColor = containerColor,
+                    selectedLabelColor = MaterialTheme.colorScheme.onSurface,
+                    selectedLeadingIconColor = MaterialTheme.colorScheme.onSurface,
+                ),
             )
         }
     }
@@ -207,19 +208,19 @@ private fun FilterChipLabel(
         if (count > 0) {
             Box(
                 modifier =
-                    Modifier
-                        .clip(CircleShape)
-                        .background(countContainerColor)
-                        .padding(horizontal = 6.dp, vertical = 1.dp),
+                Modifier
+                    .clip(CircleShape)
+                    .background(countContainerColor)
+                    .padding(horizontal = 6.dp, vertical = 1.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = count.toString(),
                     style =
-                        MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                        ),
+                    MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
                     color = countContentColor,
                 )
             }

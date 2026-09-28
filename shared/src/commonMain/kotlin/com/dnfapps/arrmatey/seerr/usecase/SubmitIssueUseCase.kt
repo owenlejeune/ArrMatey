@@ -12,23 +12,22 @@ import kotlinx.coroutines.flow.flow
 class SubmitIssueUseCase(
     private val instanceManager: InstanceManager,
 ) {
-    operator fun invoke(issue: IssueBody): Flow<OperationStatus> =
-        flow {
-            val repository =
-                instanceManager
-                    .getSelectedSeerrRepository()
-                    .firstOrNull()
-            if (repository == null) {
-                emit(OperationStatus.Error(message = "No selected seerr instance found"))
-                return@flow
-            }
-
-            emit(OperationStatus.InProgress)
-            repository
-                .submitIssue(issue)
-                .onSuccess { emit(OperationStatus.Success("Issue submitted successfully")) }
-                .onError { code, message, cause ->
-                    emit(OperationStatus.Error(code, message, cause))
-                }
+    operator fun invoke(issue: IssueBody): Flow<OperationStatus> = flow {
+        val repository =
+            instanceManager
+                .getSelectedSeerrRepository()
+                .firstOrNull()
+        if (repository == null) {
+            emit(OperationStatus.Error(message = "No selected seerr instance found"))
+            return@flow
         }
+
+        emit(OperationStatus.InProgress)
+        repository
+            .submitIssue(issue)
+            .onSuccess { emit(OperationStatus.Success("Issue submitted successfully")) }
+            .onError { code, message, cause ->
+                emit(OperationStatus.Error(code, message, cause))
+            }
+    }
 }

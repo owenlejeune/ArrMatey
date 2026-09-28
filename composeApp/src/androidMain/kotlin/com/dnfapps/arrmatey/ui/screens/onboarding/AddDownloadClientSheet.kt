@@ -49,6 +49,7 @@ import com.dnfapps.arrmatey.downloadclient.database.DownloadClientConflictField
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientMutationState
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewModel
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
@@ -104,16 +105,16 @@ fun AddDownloadClientSheet(
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(bottom = 16.dp),
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(bottom = 16.dp),
         ) {
             Row(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
@@ -159,10 +160,10 @@ fun AddDownloadClientSheet(
 
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 AnimatedVisibility(
@@ -170,9 +171,9 @@ fun AddDownloadClientSheet(
                 ) {
                     Card(
                         colors =
-                            CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                            ),
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                        ),
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Row(
@@ -220,11 +221,11 @@ fun AddDownloadClientSheet(
                     label = mokoString(MR.strings.client_label),
                     isError = hasLabelConflict,
                     errorMessage =
-                        hasLabelConflict thenGet
-                            mokoString(
-                                MR.strings.field_conflict,
-                                mokoString(MR.strings.client_label),
-                            ),
+                    hasLabelConflict thenGet
+                        mokoString(
+                            MR.strings.field_conflict,
+                            mokoString(MR.strings.client_label),
+                        ),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                 )
@@ -241,20 +242,20 @@ fun AddDownloadClientSheet(
                     singleLine = true,
                     isError = uiState.endpointError || hasUrlConflict,
                     errorMessage =
-                        when {
-                            uiState.endpointError -> mokoString(MR.strings.invalid_host)
-                            hasUrlConflict -> mokoString(MR.strings.field_conflict, mokoString(MR.strings.client_url))
-                            else -> null
-                        },
+                    when {
+                        uiState.endpointError -> mokoString(MR.strings.invalid_host)
+                        hasUrlConflict -> mokoString(MR.strings.field_conflict, mokoString(MR.strings.client_url))
+                        else -> null
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 )
 
                 Card(
                     shape = MaterialTheme.shapes.large,
                     colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        ),
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(
@@ -293,11 +294,11 @@ fun AddDownloadClientSheet(
                             onValueChange = { viewModel.updatePassword(it) },
                             label = mokoString(MR.strings.client_password),
                             visualTransformation =
-                                if (showPassword) {
-                                    VisualTransformation.None
-                                } else {
-                                    PasswordVisualTransformation()
-                                },
+                            if (showPassword) {
+                                VisualTransformation.None
+                            } else {
+                                PasswordVisualTransformation()
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             trailingIcon = {

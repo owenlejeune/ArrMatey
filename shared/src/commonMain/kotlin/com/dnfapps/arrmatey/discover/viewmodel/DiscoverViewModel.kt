@@ -368,14 +368,13 @@ class DiscoverViewModel(
         upcomingTvPagingController?.loadNextPage()
     }
 
-    fun getStateForCategory(category: DiscoverCategory): StateFlow<PagedData<DiscoverResult>> =
-        when (category) {
-            DiscoverCategory.TRENDING -> trendingState
-            DiscoverCategory.POPULAR_MOVIES -> moviesState
-            DiscoverCategory.POPULAR_SERIES -> tvState
-            DiscoverCategory.UPCOMING_MOVIES -> upcomingMoviesState
-            DiscoverCategory.UPCOMING_SERIES -> upcomingTvState
-        }
+    fun getStateForCategory(category: DiscoverCategory): StateFlow<PagedData<DiscoverResult>> = when (category) {
+        DiscoverCategory.TRENDING -> trendingState
+        DiscoverCategory.POPULAR_MOVIES -> moviesState
+        DiscoverCategory.POPULAR_SERIES -> tvState
+        DiscoverCategory.UPCOMING_MOVIES -> upcomingMoviesState
+        DiscoverCategory.UPCOMING_SERIES -> upcomingTvState
+    }
 
     fun loadNextPageForCategory(category: DiscoverCategory) {
         when (category) {

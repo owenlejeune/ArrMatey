@@ -126,15 +126,15 @@ fun TorrentActionsCard(
                         contentDescription = null,
                         tint = Color.White,
                         modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .drawBehind {
-                                    drawRoundRect(
-                                        color = color,
-                                        cornerRadius = CornerRadius(10.dp.toPx()),
-                                    )
-                                }.wrapContentSize(alignment)
-                                .padding(12.dp),
+                        Modifier
+                            .fillMaxSize()
+                            .drawBehind {
+                                drawRoundRect(
+                                    color = color,
+                                    cornerRadius = CornerRadius(10.dp.toPx()),
+                                )
+                            }.wrapContentSize(alignment)
+                            .padding(12.dp),
                     )
                 }
 
@@ -199,22 +199,22 @@ fun DownloadQueueItem(
 
     ContainerCard(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .combinedClickable(
-                    onLongClick = onLongClick,
-                    onClick = onClick,
-                ),
+        Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onLongClick = onLongClick,
+                onClick = onClick,
+            ),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerHigh
-                    },
-            ),
+        CardDefaults.cardColors(
+            containerColor =
+            if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHigh
+            },
+        ),
     ) {
         Box(
             modifier = Modifier.fillMaxWidth(),
@@ -225,11 +225,11 @@ fun DownloadQueueItem(
                 ) {
                     Box(
                         modifier =
-                            Modifier
-                                .width(6.dp)
-                                .fillMaxHeight()
-                                .background(item.client.type.associatedColor)
-                                .align(Alignment.CenterStart),
+                        Modifier
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .background(item.client.type.associatedColor)
+                            .align(Alignment.CenterStart),
                     )
                 }
             }
@@ -238,9 +238,9 @@ fun DownloadQueueItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(start = if (showClientInfo) 6.dp else 0.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = if (showClientInfo) 6.dp else 0.dp),
             ) {
                 if (isInSelectionMode) {
                     Checkbox(
@@ -384,10 +384,10 @@ fun DownloadQueueItem(
                                     label = { Text(category, style = MaterialTheme.typography.labelSmall) },
                                     border = null,
                                     colors =
-                                        AssistChipDefaults.assistChipColors(
-                                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                            labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        ),
+                                    AssistChipDefaults.assistChipColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    ),
                                 )
                             }
                             item.tags.forEach { tag ->
@@ -397,10 +397,10 @@ fun DownloadQueueItem(
                                     border = null,
                                     shape = CircleShape,
                                     colors =
-                                        AssistChipDefaults.assistChipColors(
-                                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                            labelColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                                        ),
+                                    AssistChipDefaults.assistChipColors(
+                                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                        labelColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                    ),
                                 )
                             }
                         }

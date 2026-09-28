@@ -49,8 +49,8 @@ class UnifiedMediaDetailsDataObserver(
             SeerrInstanceRepository?,
             BazarrInstanceRepository?,
             Map<Long, ArrMedia?>,
-        >,
-    > =
+            >,
+        > =
         combine(
             instanceHandler.activeArrRepoFlow,
             instanceHandler.allArrReposFlow,

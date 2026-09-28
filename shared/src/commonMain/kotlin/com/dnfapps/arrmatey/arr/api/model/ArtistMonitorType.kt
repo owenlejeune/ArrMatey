@@ -1,6 +1,16 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.all_albums
+import com.dnfapps.arrmatey.shared.existing_albums
+import com.dnfapps.arrmatey.shared.first_album
+import com.dnfapps.arrmatey.shared.future_albums
+import com.dnfapps.arrmatey.shared.latest_album
+import com.dnfapps.arrmatey.shared.missing_albums
+import com.dnfapps.arrmatey.shared.new_albums
+import com.dnfapps.arrmatey.shared.none
+import com.dnfapps.arrmatey.shared.unknown
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
 

@@ -13,26 +13,25 @@ class GrabProwlarrReleaseUseCase(
         instanceId: Long,
         guid: String,
         indexerId: Long,
-    ): Flow<OperationStatus> =
-        flow {
-            emit(OperationStatus.InProgress)
+    ): Flow<OperationStatus> = flow {
+        emit(OperationStatus.InProgress)
 
-            val repository = instanceManager.getProwlarrRepository(instanceId)
-            if (repository == null) {
-                emit(OperationStatus.Error(message = "Instance not found"))
-                return@flow
-            }
-
-            when (val result = repository.grabRelease(guid, indexerId)) {
-                is NetworkResult.Success<*> -> emit(OperationStatus.Success())
-                is NetworkResult.Error ->
-                    emit(
-                        OperationStatus.Error(
-                            code = result.code,
-                            message = result.message ?: "Failed to grab release",
-                        ),
-                    )
-                is NetworkResult.Loading -> { /* no-op */ }
-            }
+        val repository = instanceManager.getProwlarrRepository(instanceId)
+        if (repository == null) {
+            emit(OperationStatus.Error(message = "Instance not found"))
+            return@flow
         }
+
+        when (val result = repository.grabRelease(guid, indexerId)) {
+            is NetworkResult.Success<*> -> emit(OperationStatus.Success())
+            is NetworkResult.Error ->
+                emit(
+                    OperationStatus.Error(
+                        code = result.code,
+                        message = result.message ?: "Failed to grab release",
+                    ),
+                )
+            is NetworkResult.Loading -> { /* no-op */ }
+        }
+    }
 }

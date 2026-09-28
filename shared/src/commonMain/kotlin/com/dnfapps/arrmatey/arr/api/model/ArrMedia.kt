@@ -77,26 +77,24 @@ sealed interface ArrMedia {
 
     fun getPoster(): ArrImage? = images.firstOrNull { it.coverType == CoverType.Poster }
 
-    fun getBanner(): ArrImage? =
-        images.firstOrNull { it.coverType == CoverType.FanArt }
-            ?: images.firstOrNull { it.coverType == CoverType.Banner }
-            ?: images.firstOrNull { it.coverType == CoverType.Poster }
-            ?: images.firstOrNull { it.coverType == CoverType.Cover }
+    fun getBanner(): ArrImage? = images.firstOrNull { it.coverType == CoverType.FanArt }
+        ?: images.firstOrNull { it.coverType == CoverType.Banner }
+        ?: images.firstOrNull { it.coverType == CoverType.Poster }
+        ?: images.firstOrNull { it.coverType == CoverType.Cover }
 
     fun getClearLogo(): ArrImage? = images.firstOrNull { it.coverType == CoverType.ClearLogo }
 
     fun setMonitored(monitored: Boolean): ArrMedia
 
-    fun formatTags(availableTags: List<Tag>): String? =
-        when {
-            availableTags.isEmpty() || tags.isEmpty() -> null
-            else -> {
-                tags
-                    .mapNotNull { t -> availableTags.firstOrNull { it.id == t }?.label }
-                    .joinToString(", ")
-                    .takeUnless { it.isEmpty() }
-            }
+    fun formatTags(availableTags: List<Tag>): String? = when {
+        availableTags.isEmpty() || tags.isEmpty() -> null
+        else -> {
+            tags
+                .mapNotNull { t -> availableTags.firstOrNull { it.id == t }?.label }
+                .joinToString(", ")
+                .takeUnless { it.isEmpty() }
         }
+    }
 
     fun withNewRoot(
         rootFolderPath: String,

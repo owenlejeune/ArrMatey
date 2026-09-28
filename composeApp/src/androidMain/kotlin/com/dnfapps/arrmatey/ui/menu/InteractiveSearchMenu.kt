@@ -47,6 +47,7 @@ import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.compose.utils.ReleaseSortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -128,12 +129,12 @@ fun InteractiveSearchMenu(
             ) {
                 Column(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                            .padding(bottom = 32.dp)
-                            .navigationBarsPadding()
-                            .verticalScroll(rememberScrollState()),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 32.dp)
+                        .navigationBarsPadding()
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     // Header
@@ -202,11 +203,11 @@ fun InteractiveSearchMenu(
                                 leadingIcon = {
                                     Icon(
                                         imageVector =
-                                            if (selectedSortOrder == SortOrder.Asc) {
-                                                Icons.Default.ArrowUpward
-                                            } else {
-                                                Icons.Default.ArrowDownward
-                                            },
+                                        if (selectedSortOrder == SortOrder.Asc) {
+                                            Icons.Default.ArrowUpward
+                                        } else {
+                                            Icons.Default.ArrowDownward
+                                        },
                                         contentDescription = null,
                                         modifier = Modifier.size(16.dp),
                                     )
@@ -226,11 +227,11 @@ fun InteractiveSearchMenu(
                                     onClick = { onSortByChanged(sort) },
                                     label = { Text(mokoString(sort.resource)) },
                                     leadingIcon =
-                                        if (isSelected) {
-                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                        } else {
-                                            null
-                                        },
+                                    if (isSelected) {
+                                        { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                    } else {
+                                        null
+                                    },
                                     shape = MaterialTheme.shapes.small,
                                 )
                             }
@@ -262,11 +263,11 @@ fun InteractiveSearchMenu(
                                         },
                                         label = { Text(mokoString(filter.resource)) },
                                         leadingIcon =
-                                            if (isSelected) {
-                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                            } else {
-                                                null
-                                            },
+                                        if (isSelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
                                         shape = MaterialTheme.shapes.small,
                                     )
                                 }
@@ -296,11 +297,11 @@ fun InteractiveSearchMenu(
                                         },
                                         label = { Text(filter.label) },
                                         leadingIcon =
-                                            if (isSelected) {
-                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                            } else {
-                                                null
-                                            },
+                                        if (isSelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
                                         shape = MaterialTheme.shapes.small,
                                     )
                                 }
@@ -328,11 +329,11 @@ fun InteractiveSearchMenu(
                                         onClick = { onQualityChange(null) },
                                         label = { Text(mokoString(MR.strings.any)) },
                                         leadingIcon =
-                                            if (isAnySelected) {
-                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                            } else {
-                                                null
-                                            },
+                                        if (isAnySelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
                                         shape = MaterialTheme.shapes.small,
                                     )
                                     qualities.forEach { info ->
@@ -342,11 +343,11 @@ fun InteractiveSearchMenu(
                                             onClick = { onQualityChange(if (isSelected) null else info) },
                                             label = { Text(info.qualityLabel) },
                                             leadingIcon =
-                                                if (isSelected) {
-                                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                                } else {
-                                                    null
-                                                },
+                                            if (isSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
                                             shape = MaterialTheme.shapes.small,
                                         )
                                     }
@@ -375,11 +376,11 @@ fun InteractiveSearchMenu(
                                         onClick = { onLanguageChange(null) },
                                         label = { Text(mokoString(MR.strings.any)) },
                                         leadingIcon =
-                                            if (isAnySelected) {
-                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                            } else {
-                                                null
-                                            },
+                                        if (isAnySelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
                                         shape = MaterialTheme.shapes.small,
                                     )
                                     languages.forEach { lang ->
@@ -389,11 +390,11 @@ fun InteractiveSearchMenu(
                                             onClick = { onLanguageChange(if (isSelected) null else lang) },
                                             label = { Text(lang.name ?: "") },
                                             leadingIcon =
-                                                if (isSelected) {
-                                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                                } else {
-                                                    null
-                                                },
+                                            if (isSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
                                             shape = MaterialTheme.shapes.small,
                                         )
                                     }
@@ -422,11 +423,11 @@ fun InteractiveSearchMenu(
                                         onClick = { onCustomFormatChange(null) },
                                         label = { Text(mokoString(MR.strings.any)) },
                                         leadingIcon =
-                                            if (isAnySelected) {
-                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                            } else {
-                                                null
-                                            },
+                                        if (isAnySelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
                                         shape = MaterialTheme.shapes.small,
                                     )
                                     customFormats.forEach { cf ->
@@ -436,11 +437,11 @@ fun InteractiveSearchMenu(
                                             onClick = { onCustomFormatChange(if (isSelected) null else cf) },
                                             label = { Text(cf.name) },
                                             leadingIcon =
-                                                if (isSelected) {
-                                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                                } else {
-                                                    null
-                                                },
+                                            if (isSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
                                             shape = MaterialTheme.shapes.small,
                                         )
                                     }
@@ -469,11 +470,11 @@ fun InteractiveSearchMenu(
                                         onClick = { onProtocolChange(null) },
                                         label = { Text(mokoString(MR.strings.any)) },
                                         leadingIcon =
-                                            if (isAnySelected) {
-                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                            } else {
-                                                null
-                                            },
+                                        if (isAnySelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
                                         shape = MaterialTheme.shapes.small,
                                     )
                                     protocols.forEach { proto ->
@@ -483,11 +484,11 @@ fun InteractiveSearchMenu(
                                             onClick = { onProtocolChange(if (isSelected) null else proto) },
                                             label = { Text(proto.name) },
                                             leadingIcon =
-                                                if (isSelected) {
-                                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                                } else {
-                                                    null
-                                                },
+                                            if (isSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
                                             shape = MaterialTheme.shapes.small,
                                         )
                                     }
@@ -516,11 +517,11 @@ fun InteractiveSearchMenu(
                                         onClick = { onIndexerChange(null) },
                                         label = { Text(mokoString(MR.strings.any)) },
                                         leadingIcon =
-                                            if (isAnySelected) {
-                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                            } else {
-                                                null
-                                            },
+                                        if (isAnySelected) {
+                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                        } else {
+                                            null
+                                        },
                                         shape = MaterialTheme.shapes.small,
                                     )
                                     indexers.forEach { indexer ->
@@ -530,11 +531,11 @@ fun InteractiveSearchMenu(
                                             onClick = { onIndexerChange(if (isSelected) null else indexer) },
                                             label = { Text(indexer) },
                                             leadingIcon =
-                                                if (isSelected) {
-                                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                                } else {
-                                                    null
-                                                },
+                                            if (isSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
                                             shape = MaterialTheme.shapes.small,
                                         )
                                     }

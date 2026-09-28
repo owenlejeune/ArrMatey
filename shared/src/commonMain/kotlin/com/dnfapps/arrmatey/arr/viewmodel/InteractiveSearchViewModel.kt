@@ -193,12 +193,11 @@ class InteractiveSearchViewModel(
     private fun seriesFiltering(
         items: List<SeriesRelease>,
         filter: InteractiveSearchUiState,
-    ): List<SeriesRelease> =
-        when (filter.filterBy) {
-            ReleaseFilterBy.Any -> items
-            ReleaseFilterBy.SeasonPack -> items.filter { it.fullSeason }
-            ReleaseFilterBy.SingleEpisode -> items.filter { !it.fullSeason }
-        }
+    ): List<SeriesRelease> = when (filter.filterBy) {
+        ReleaseFilterBy.Any -> items
+        ReleaseFilterBy.SeasonPack -> items.filter { it.fullSeason }
+        ReleaseFilterBy.SingleEpisode -> items.filter { !it.fullSeason }
+    }
 
     private fun observeDownloadStatus() {
         viewModelScope.launch {

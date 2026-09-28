@@ -1,6 +1,12 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.docker
+import com.dnfapps.arrmatey.shared.linux
+import com.dnfapps.arrmatey.shared.macos
+import com.dnfapps.arrmatey.shared.unknown
+import com.dnfapps.arrmatey.shared.windows
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Serializable
 

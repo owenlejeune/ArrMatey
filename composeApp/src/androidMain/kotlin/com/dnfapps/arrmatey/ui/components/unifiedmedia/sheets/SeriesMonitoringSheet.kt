@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -31,9 +32,9 @@ fun SeriesMonitoringSheet(
     ) {
         Column(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
         ) {
             Text(
                 text = mokoString(MR.strings.series_monitoring),
@@ -55,10 +56,10 @@ fun SeriesMonitoringSheet(
                 ListItem(
                     headlineContent = { Text(mokoString(option.resource)) },
                     modifier =
-                        Modifier.clickable {
-                            onOptionSelected(option)
-                            onDismissRequest()
-                        },
+                    Modifier.clickable {
+                        onOptionSelected(option)
+                        onDismissRequest()
+                    },
                 )
             }
         }

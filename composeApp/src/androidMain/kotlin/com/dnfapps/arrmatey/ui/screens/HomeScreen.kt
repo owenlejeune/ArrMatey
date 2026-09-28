@@ -85,9 +85,9 @@ fun HomeScreen(
     val pagerState =
         rememberPagerState(
             initialPage =
-                remember(visibleTabs, currentSelectedTab) {
-                    visibleTabs.indexOf(currentSelectedTab).coerceAtLeast(0)
-                },
+            remember(visibleTabs, currentSelectedTab) {
+                visibleTabs.indexOf(currentSelectedTab).coerceAtLeast(0)
+            },
         ) { visibleTabs.size }
 
     LaunchedEffect(visibleTabs, overlayTab) {
@@ -158,8 +158,8 @@ fun HomeScreen(
 
         ModalNavigationDrawer(
             gesturesEnabled =
-                overlayTab !is TabItem.CustomWebpage &&
-                    !drawerState.isAnimationRunning,
+            overlayTab !is TabItem.CustomWebpage &&
+                !drawerState.isAnimationRunning,
             drawerState = drawerState,
             drawerContent = {
                 ModalDrawerSheet(drawerState = drawerState) {
@@ -223,9 +223,9 @@ fun HomeScreen(
                             onSelectTab = { navigationManager.setSelectedTab(it) },
                             onLongPressTab = { showReorderSheet = true },
                             modifier =
-                                Modifier.align(Alignment.BottomCenter).onGloballyPositioned {
-                                    floatingBarHeight = it.size.height
-                                },
+                            Modifier.align(Alignment.BottomCenter).onGloballyPositioned {
+                                floatingBarHeight = it.size.height
+                            },
                         )
                     }
                 }

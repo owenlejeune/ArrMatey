@@ -57,6 +57,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.entensions.openLink
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.utils.mokoString
@@ -253,9 +254,9 @@ fun CustomWebpageViewerScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
         ) {
             webpage?.let { webpage ->
                 AndroidView(
@@ -340,9 +341,9 @@ fun CustomWebpageViewerScreen(
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.TopCenter),
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter),
                 )
             }
         }

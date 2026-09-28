@@ -68,27 +68,25 @@ class BookshelfClient(
         id: Long,
         deleteFiles: Boolean,
         addImportExclusion: Boolean,
-    ): NetworkResult<Unit> =
-        delete(
-            endpoint = "author/$id",
-            params =
-                mapOf(
-                    "deleteFiles" to deleteFiles,
-                    "addImportExclusion" to addImportExclusion,
-                ),
-        )
+    ): NetworkResult<Unit> = delete(
+        endpoint = "author/$id",
+        params =
+        mapOf(
+            "deleteFiles" to deleteFiles,
+            "addImportExclusion" to addImportExclusion,
+        ),
+    )
 
     override suspend fun setMonitorStatus(
         id: Long,
         monitorStatus: Boolean,
-    ): NetworkResult<List<MonitoredResponse>> =
-        put(
-            "author/editor",
-            mapOf(
-                "monitored" to monitorStatus,
-                "authorIds" to listOf(id),
-            ),
-        )
+    ): NetworkResult<List<MonitoredResponse>> = put(
+        "author/editor",
+        mapOf(
+            "monitored" to monitorStatus,
+            "authorIds" to listOf(id),
+        ),
+    )
 
     override suspend fun lookup(params: LookupParams): NetworkResult<List<Author>> = get("author/lookup", mapOf("term" to params.query))
 
@@ -109,30 +107,28 @@ class BookshelfClient(
         page: Int,
         pageSize: Int,
         altId: Long?,
-    ): NetworkResult<List<BookshelfHistoryItem>> =
-        get<List<BookshelfHistoryItem>>(
-            "history/author",
-            buildMap {
-                put("authorId", id)
-                altId?.let { put("bookId", it) }
-            },
-        ).map { list ->
-            list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
-        }
+    ): NetworkResult<List<BookshelfHistoryItem>> = get<List<BookshelfHistoryItem>>(
+        "history/author",
+        buildMap {
+            put("authorId", id)
+            altId?.let { put("bookId", it) }
+        },
+    ).map { list ->
+        list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+    }
 
     override suspend fun getHistory(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<List<HistoryItem>> =
-        get<BookshelfHistoryResponse>(
-            "history",
-            mapOf<String, Any>(
-                "page" to page,
-                "pageSize" to pageSize,
-            ),
-        ).map { response ->
-            response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
-        }
+    ): NetworkResult<List<HistoryItem>> = get<BookshelfHistoryResponse>(
+        "history",
+        mapOf<String, Any>(
+            "page" to page,
+            "pageSize" to pageSize,
+        ),
+    ).map { response ->
+        response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+    }
 
     suspend fun getAuthorSeries(id: Long): NetworkResult<List<BookSeries>> = get("series", mapOf("authorId" to id))
 
@@ -147,53 +143,49 @@ class BookshelfClient(
     suspend fun setBookMonitorStatus(
         bookIds: List<Long>,
         monitored: Boolean,
-    ): NetworkResult<List<MonitoredResponse>> =
-        put<BookMonitorBody, List<MonitoredResponse>>("book/monitor", BookMonitorBody(bookIds, monitored))
+    ): NetworkResult<List<MonitoredResponse>> = put<BookMonitorBody, List<MonitoredResponse>>("book/monitor", BookMonitorBody(bookIds, monitored))
 
     suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> = get("edition", mapOf("bookId" to bookId))
 
-    suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
-        delete("bookFiles/bulk", body = BookFileBulkDeleteBody(bookFilesIds))
+    suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> = delete("bookFiles/bulk", body = BookFileBulkDeleteBody(bookFilesIds))
 
     override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate,
-    ): NetworkResult<List<Book>> =
-        get<List<Book>>(
-            "calendar",
-            mapOf(
-                "start" to start.toString(),
-                "end" to end.toString(),
-                "unmonitored" to true,
-                "includeAuthor" to true,
-                "includeBookFile" to true,
-            ),
-        ).map { it.map { bk -> bk.copy(instanceId = instance.id) } }
+    ): NetworkResult<List<Book>> = get<List<Book>>(
+        "calendar",
+        mapOf(
+            "start" to start.toString(),
+            "end" to end.toString(),
+            "unmonitored" to true,
+            "includeAuthor" to true,
+            "includeBookFile" to true,
+        ),
+    ).map { it.map { bk -> bk.copy(instanceId = instance.id) } }
 
     override suspend fun updateMonitoring(
         ids: List<Long>,
         monitor: Any,
-    ): NetworkResult<Unit> =
-        when (monitor) {
-            is AuthorMonitorType -> {
-                post(
-                    endpoint = "bookshelf",
-                    body =
-                        AuthorMonitoringBody(
-                            authors = ids.map { IdWrapper(it) },
-                            monitoringOptions = AuthorMonitoringOption(monitor),
-                        ),
-                )
-            }
-            is AuthorMonitorOptions -> {
-                val body =
-                    AuthorBulkEditBody(
-                        authorIds = ids,
-                        monitored = monitor.monitored,
-                        monitorNewItems = monitor.monitorNewItems,
-                    )
-                put("author/editor", body)
-            }
-            else -> NetworkResult.Error(message = "Invalid monitor options")
+    ): NetworkResult<Unit> = when (monitor) {
+        is AuthorMonitorType -> {
+            post(
+                endpoint = "bookshelf",
+                body =
+                AuthorMonitoringBody(
+                    authors = ids.map { IdWrapper(it) },
+                    monitoringOptions = AuthorMonitoringOption(monitor),
+                ),
+            )
         }
+        is AuthorMonitorOptions -> {
+            val body =
+                AuthorBulkEditBody(
+                    authorIds = ids,
+                    monitored = monitor.monitored,
+                    monitorNewItems = monitor.monitorNewItems,
+                )
+            put("author/editor", body)
+        }
+        else -> NetworkResult.Error(message = "Invalid monitor options")
+    }
 }

@@ -44,24 +44,23 @@ class MediaExtensionsTest {
         tvdbId: Long,
         tmdbId: Long?,
         id: Long? = null,
-    ): ArrSeries =
-        ArrSeries(
-            id = id,
-            title = title,
-            originalLanguage = Language(1, "English"),
-            year = 2020,
-            qualityProfileId = 1,
-            monitored = true,
-            runtime = 45,
-            status = MediaStatus.Ended,
-            ended = true,
-            seasonFolder = false,
-            monitorNewItems = MonitorNewItems.All,
-            useSceneNumbering = false,
-            tvdbId = tvdbId,
-            tmdbId = tmdbId,
-            seriesType = SeriesType.Standard,
-        )
+    ): ArrSeries = ArrSeries(
+        id = id,
+        title = title,
+        originalLanguage = Language(1, "English"),
+        year = 2020,
+        qualityProfileId = 1,
+        monitored = true,
+        runtime = 45,
+        status = MediaStatus.Ended,
+        ended = true,
+        seasonFolder = false,
+        monitorNewItems = MonitorNewItems.All,
+        useSceneNumbering = false,
+        tvdbId = tvdbId,
+        tmdbId = tmdbId,
+        seriesType = SeriesType.Standard,
+    )
 
     @Test
     fun testFormatAirTime_24h() {

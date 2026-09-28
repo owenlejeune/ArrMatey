@@ -45,17 +45,16 @@ class UnifiedMediaDetailsIssueHandlerTest {
     }
 
     @Test
-    fun testSubmitIssueSuccess() =
-        runTest(UnconfinedTestDispatcher()) {
-            every { submitIssueUseCase(any()) } returns flowOf(OperationStatus.Success())
+    fun testSubmitIssueSuccess() = runTest(UnconfinedTestDispatcher()) {
+        every { submitIssueUseCase(any()) } returns flowOf(OperationStatus.Success())
 
-            handler.setIssueMessage("Broken video")
-            handler.submitIssue(
-                scope = TestScope(UnconfinedTestDispatcher()),
-                seerrMediaIdProvider = { 999L },
-            )
+        handler.setIssueMessage("Broken video")
+        handler.submitIssue(
+            scope = TestScope(UnconfinedTestDispatcher()),
+            seerrMediaIdProvider = { 999L },
+        )
 
-            assertTrue(handler.rawReportIssueState.value.saveSuccess)
-            assertFalse(handler.rawReportIssueState.value.saveInProgress)
-        }
+        assertTrue(handler.rawReportIssueState.value.saveSuccess)
+        assertFalse(handler.rawReportIssueState.value.saveInProgress)
+    }
 }

@@ -13,15 +13,14 @@ class DeleteMediaUseCase {
         deleteFiles: Boolean,
         addImportExclusion: Boolean,
         repository: ArrInstanceRepository,
-    ): Flow<OperationStatus> =
-        flow {
-            emit(OperationStatus.InProgress)
-            repository
-                .delete(mediaId, deleteFiles, addImportExclusion)
-                .onSuccess {
-                    emit(OperationStatus.Success("Deleted successfully"))
-                }.onError { code, message, cause ->
-                    emit(OperationStatus.Error(code, message, cause))
-                }
-        }
+    ): Flow<OperationStatus> = flow {
+        emit(OperationStatus.InProgress)
+        repository
+            .delete(mediaId, deleteFiles, addImportExclusion)
+            .onSuccess {
+                emit(OperationStatus.Success("Deleted successfully"))
+            }.onError { code, message, cause ->
+                emit(OperationStatus.Error(code, message, cause))
+            }
+    }
 }

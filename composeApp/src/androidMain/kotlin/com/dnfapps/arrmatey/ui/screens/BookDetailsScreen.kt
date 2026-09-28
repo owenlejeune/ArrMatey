@@ -48,6 +48,7 @@ import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DetailHeaderBanner
@@ -154,10 +155,10 @@ fun BookDetailsScreen(
                     IconButton(
                         onClick = { confirmDelete = true },
                         colors =
-                            IconButtonDefaults.headerBarColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                            ),
+                        IconButtonDefaults.headerBarColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        ),
                         enabled = bookFiles.isNotEmpty(),
                     ) {
                         Icon(
@@ -171,9 +172,9 @@ fun BookDetailsScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues.copy(top = 0.dp, bottom = 0.dp))
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues.copy(top = 0.dp, bottom = 0.dp))
+                .fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier.verticalScroll(scrollState),
@@ -305,10 +306,10 @@ fun BookFileCard(file: BookFile) {
         )
         Text(
             text =
-                listOfNotNull(
-                    file.quality?.qualityLabel,
-                    file.size?.bytesAsFileSizeString(),
-                ).joinToString(BULLET),
+            listOfNotNull(
+                file.quality?.qualityLabel,
+                file.size?.bytesAsFileSizeString(),
+            ).joinToString(BULLET),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

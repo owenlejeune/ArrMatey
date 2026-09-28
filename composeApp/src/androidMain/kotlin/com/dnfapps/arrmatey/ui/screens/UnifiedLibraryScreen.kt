@@ -64,6 +64,7 @@ import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ErrorView
@@ -186,9 +187,9 @@ fun UnifiedLibraryScreen(
         ) { paddingValues ->
             Box(
                 modifier =
-                    Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize(),
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
                 NoInstanceView(InstanceType.Sonarr)
@@ -216,10 +217,10 @@ fun UnifiedLibraryScreen(
         ProvideFloatingBarAction(
             visible = useFloatingNavigationBar && showFab,
             action =
-                FloatingBarAction(
-                    icon = { Icon(Icons.Default.Add, null) },
-                    onClick = { handleAddSearch("") },
-                ),
+            FloatingBarAction(
+                icon = { Icon(Icons.Default.Add, null) },
+                onClick = { handleAddSearch("") },
+            ),
         )
 
         Scaffold(
@@ -246,7 +247,7 @@ fun UnifiedLibraryScreen(
                         (
                             fadeIn(animationSpec = tween(200, delayMillis = 50)) +
                                 slideInVertically(animationSpec = tween(200, delayMillis = 50)) { -it / 2 }
-                        ).togetherWith(
+                            ).togetherWith(
                             fadeOut(animationSpec = tween(150)) +
                                 slideOutVertically(animationSpec = tween(150)) { -it / 2 },
                         )
@@ -271,10 +272,10 @@ fun UnifiedLibraryScreen(
                             textFieldState = textFieldState,
                             textFieldEnabled = true,
                             searchPlaceholder =
-                                mokoString(
-                                    MR.strings.search_placeholder,
-                                    currentInstance.label,
-                                ),
+                            mokoString(
+                                MR.strings.search_placeholder,
+                                currentInstance.label,
+                            ),
                             trailingIcon = {
                                 InstanceOptionsMenu(
                                     onViewWebGui = {
@@ -324,9 +325,9 @@ fun UnifiedLibraryScreen(
         ) { paddingValues ->
             Column(
                 modifier =
-                    Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize(),
+                Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
             ) {
                 AnimatedVisibility(
                     visible = arrInstances.size > 1 && !isInSelectionMode,
@@ -382,9 +383,9 @@ fun UnifiedLibraryScreen(
 
                 Box(
                     modifier =
-                        Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
                     when (val state = uiState) {
@@ -471,16 +472,16 @@ fun UnifiedLibraryScreen(
                 FlexibleBottomSheet(
                     onDismissRequest = { unifiedLibraryViewModel.exitSelectionMode() },
                     sheetState =
-                        rememberFlexibleBottomSheetState(
-                            isModal = false,
-                            initialValue = FlexibleSheetValue.IntermediatelyExpanded,
-                            flexibleSheetSize =
-                                FlexibleSheetSize(
-                                    fullyExpanded = FlexibleSheetSize.WrapContent,
-                                    intermediatelyExpanded = 0.15f,
-                                    slightlyExpanded = 0.15f,
-                                ),
+                    rememberFlexibleBottomSheetState(
+                        isModal = false,
+                        initialValue = FlexibleSheetValue.IntermediatelyExpanded,
+                        flexibleSheetSize =
+                        FlexibleSheetSize(
+                            fullyExpanded = FlexibleSheetSize.WrapContent,
+                            intermediatelyExpanded = 0.15f,
+                            slightlyExpanded = 0.15f,
                         ),
+                    ),
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 ) {
                     SelectionBottomBar(

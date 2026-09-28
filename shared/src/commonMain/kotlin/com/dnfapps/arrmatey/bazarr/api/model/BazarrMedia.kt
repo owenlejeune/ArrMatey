@@ -35,19 +35,18 @@ sealed interface BazarrMedia : HasArrImages<BazarrMedia> {
                 fanart?.let { ArrImage(CoverType.FanArt, it, it) },
             )
 
-    override fun withLocalImages(instanceUrl: String): BazarrMedia =
-        when (this) {
-            is BazarrMovie ->
-                copy(
-                    poster = if (poster?.startsWith("/") == true) "$instanceUrl$poster" else poster,
-                    fanart = if (fanart?.startsWith("/") == true) "$instanceUrl$fanart" else fanart,
-                )
-            is BazarrSeries ->
-                copy(
-                    poster = if (poster?.startsWith("/") == true) "$instanceUrl$poster" else poster,
-                    fanart = if (fanart?.startsWith("/") == true) "$instanceUrl$fanart" else fanart,
-                )
-        }
+    override fun withLocalImages(instanceUrl: String): BazarrMedia = when (this) {
+        is BazarrMovie ->
+            copy(
+                poster = if (poster?.startsWith("/") == true) "$instanceUrl$poster" else poster,
+                fanart = if (fanart?.startsWith("/") == true) "$instanceUrl$fanart" else fanart,
+            )
+        is BazarrSeries ->
+            copy(
+                poster = if (poster?.startsWith("/") == true) "$instanceUrl$poster" else poster,
+                fanart = if (fanart?.startsWith("/") == true) "$instanceUrl$fanart" else fanart,
+            )
+    }
 }
 
 enum class BazarrMediaType {

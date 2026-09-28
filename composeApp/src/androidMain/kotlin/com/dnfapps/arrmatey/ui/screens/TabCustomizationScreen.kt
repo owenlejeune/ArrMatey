@@ -40,6 +40,7 @@ import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.datastore.TabPreferences
 import com.dnfapps.arrmatey.entensions.androidIcon
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
@@ -246,11 +247,11 @@ fun TabCustomizationContent(
                                     imageVector = Icons.Default.Remove,
                                     contentDescription = "Move to Drawer",
                                     tint =
-                                        if (visibleTabs.size > 1) {
-                                            MaterialTheme.colorScheme.error
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                        },
+                                    if (visibleTabs.size > 1) {
+                                        MaterialTheme.colorScheme.error
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    },
                                 )
                             }
                         }
@@ -313,11 +314,11 @@ fun TabCustomizationContent(
                                     imageVector = Icons.Default.Add,
                                     contentDescription = "Promote to Nav Bar",
                                     tint =
-                                        if (visibleTabs.size < MAX_TABS) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                        },
+                                    if (visibleTabs.size < MAX_TABS) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    },
                                 )
                             }
 

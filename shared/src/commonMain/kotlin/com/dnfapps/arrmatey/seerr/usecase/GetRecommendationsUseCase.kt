@@ -12,15 +12,14 @@ class GetRecommendationsUseCase {
         mediaType: RequestType,
         mediaId: Long,
         scope: CoroutineScope,
-    ): PagingController<DiscoverResult> =
-        PagingController(
-            scope = scope,
-            keySelector = { "${it.mediaType.name}_${it.id}" },
-        ) {
-            when (mediaType) {
-                RequestType.Movie -> repository.getMovieRecommendationsPaging(mediaId)
-                RequestType.Tv -> repository.getTvRecommendationsPaging(mediaId)
-                RequestType.Person -> throw IllegalArgumentException("Recommendations not supported for Person")
-            }
+    ): PagingController<DiscoverResult> = PagingController(
+        scope = scope,
+        keySelector = { "${it.mediaType.name}_${it.id}" },
+    ) {
+        when (mediaType) {
+            RequestType.Movie -> repository.getMovieRecommendationsPaging(mediaId)
+            RequestType.Tv -> repository.getTvRecommendationsPaging(mediaId)
+            RequestType.Person -> throw IllegalArgumentException("Recommendations not supported for Person")
         }
+    }
 }

@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.model.SeasonWrapper
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.mokoPlural
@@ -111,11 +112,11 @@ fun SeasonsArea(
                             ) {
                                 Text(
                                     text =
-                                        if (season.seasonNumber == 0) {
-                                            mokoString(MR.strings.specials)
-                                        } else {
-                                            mokoString(MR.strings.season_label, season.seasonNumber)
-                                        },
+                                    if (season.seasonNumber == 0) {
+                                        mokoString(MR.strings.specials)
+                                    } else {
+                                        mokoString(MR.strings.season_label, season.seasonNumber)
+                                    },
                                     style = MaterialTheme.typography.titleMediumEmphasized,
                                 )
                                 val activeCount = season.activeEpisodeCount
@@ -175,15 +176,15 @@ fun SeasonsArea(
                                 Icon(
                                     imageVector = if (isMonitored) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                                     contentDescription =
-                                        if (isMonitored) {
-                                            mokoString(MR.strings.monitored)
-                                        } else {
-                                            mokoString(MR.strings.unmonitored)
-                                        },
+                                    if (isMonitored) {
+                                        mokoString(MR.strings.monitored)
+                                    } else {
+                                        mokoString(MR.strings.unmonitored)
+                                    },
                                     modifier =
-                                        Modifier.clickable {
-                                            onToggleSeasonMonitor(season.seasonNumber)
-                                        },
+                                    Modifier.clickable {
+                                        onToggleSeasonMonitor(season.seasonNumber)
+                                    },
                                 )
                             }
                         }

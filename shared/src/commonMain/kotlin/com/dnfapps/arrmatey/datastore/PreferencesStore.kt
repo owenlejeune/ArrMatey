@@ -307,20 +307,19 @@ class DefaultPreferencesStore(
             } ?: PreferenceDefaults.DOWNLOAD_CLIENT_SORT_ORDER
         }
 
-    override fun observeCalendarFilterState(): Flow<CalendarFilterState> =
+    override fun observeCalendarFilterState(): Flow<CalendarFilterState> = combine(
         combine(
-            combine(
-                calendarViewMode,
-                calendarContentFilter,
-                calendarShowMonitorOnly,
-            ) { viewMode, contentFilter, monitorOnly ->
-                Triple(viewMode, contentFilter, monitorOnly)
-            },
-            calendarShowPremiersOnly,
-            calendarShowFinalesOnly,
-        ) { (viewMode, contentFilter, monitorOnly), premiersOnly, finalesOnly ->
-            CalendarFilterState(viewMode, contentFilter, monitorOnly, premiersOnly, finalesOnly)
-        }
+            calendarViewMode,
+            calendarContentFilter,
+            calendarShowMonitorOnly,
+        ) { viewMode, contentFilter, monitorOnly ->
+            Triple(viewMode, contentFilter, monitorOnly)
+        },
+        calendarShowPremiersOnly,
+        calendarShowFinalesOnly,
+    ) { (viewMode, contentFilter, monitorOnly), premiersOnly, finalesOnly ->
+        CalendarFilterState(viewMode, contentFilter, monitorOnly, premiersOnly, finalesOnly)
+    }
 
     override suspend fun saveCalendarFilterState(state: CalendarFilterState) {
         dataStore.edit { preferences ->
@@ -628,13 +627,12 @@ class DefaultPreferencesStore(
         }
     }
 
-    override fun observeDownloadClientUiState(): Flow<DownloadQueueSortState> =
-        combine(
-            downloadClientSortBy,
-            downloadClientSortOrder,
-        ) { sortBy, sortOrder ->
-            DownloadQueueSortState(sortBy, sortOrder)
-        }
+    override fun observeDownloadClientUiState(): Flow<DownloadQueueSortState> = combine(
+        downloadClientSortBy,
+        downloadClientSortOrder,
+    ) { sortBy, sortOrder ->
+        DownloadQueueSortState(sortBy, sortOrder)
+    }
 
     override suspend fun saveDownloadClientUiState(state: DownloadQueueSortState) {
         dataStore.edit {

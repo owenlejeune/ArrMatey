@@ -37,25 +37,23 @@ class InstanceRepositoryTest {
 
             override fun observeAllInstances(): Flow<List<Instance>> = instances
 
-            override fun observeInstancesByType(type: InstanceType): Flow<List<Instance>> =
-                MutableStateFlow(
-                    instances.value.filter {
-                        it.type ==
-                            type
-                    },
-                )
+            override fun observeInstancesByType(type: InstanceType): Flow<List<Instance>> = MutableStateFlow(
+                instances.value.filter {
+                    it.type ==
+                        type
+                },
+            )
 
             override suspend fun getAllInstances(): List<Instance> = instances.value
 
             override suspend fun getInstanceById(id: Long): Instance? = instances.value.find { it.id == id }
 
-            override fun observeSelectedInstance(type: InstanceType): Flow<Instance?> =
-                MutableStateFlow(
-                    instances.value.find {
-                        it.type == type &&
-                            it.selected
-                    },
-                )
+            override fun observeSelectedInstance(type: InstanceType): Flow<Instance?> = MutableStateFlow(
+                instances.value.find {
+                    it.type == type &&
+                        it.selected
+                },
+            )
 
             override suspend fun getInstancesOfType(type: InstanceType): List<Instance> = instances.value.filter { it.type == type }
 
@@ -74,22 +72,20 @@ class InstanceRepositoryTest {
             override suspend fun findOtherByUrl(
                 url: String,
                 currentId: Long,
-            ): Long? =
-                instances.value
-                    .find {
-                        it.url == url &&
-                            it.id != currentId
-                    }?.id
+            ): Long? = instances.value
+                .find {
+                    it.url == url &&
+                        it.id != currentId
+                }?.id
 
             override suspend fun findOtherByLabel(
                 label: String,
                 currentId: Long,
-            ): Long? =
-                instances.value
-                    .find {
-                        it.label == label &&
-                            it.id != currentId
-                    }?.id
+            ): Long? = instances.value
+                .find {
+                    it.label == label &&
+                        it.id != currentId
+                }?.id
 
             override suspend fun ensureFirstSelectedIfNone(type: InstanceType) {
                 if (instances.value.none { it.type == type && it.selected }) {
@@ -104,33 +100,31 @@ class InstanceRepositoryTest {
     private val repository = InstanceRepository(fakeDao)
 
     @Test
-    fun testCreateInstanceSuccess() =
-        runTest {
-            val instance =
-                Instance(
-                    type = InstanceType.Sonarr,
-                    label = "Test",
-                    url = "http://test.com",
-                    apiKey = EncryptedString("key"),
-                )
-            val result = repository.createInstance(instance)
-            assertTrue(result is InsertResult.Success)
-            assertEquals(1, result.id)
-        }
+    fun testCreateInstanceSuccess() = runTest {
+        val instance =
+            Instance(
+                type = InstanceType.Sonarr,
+                label = "Test",
+                url = "http://test.com",
+                apiKey = EncryptedString("key"),
+            )
+        val result = repository.createInstance(instance)
+        assertTrue(result is InsertResult.Success)
+        assertEquals(1, result.id)
+    }
 
     @Test
-    fun testCreateInstanceConflict() =
-        runTest {
-            val instance =
-                Instance(
-                    type = InstanceType.Sonarr,
-                    label = "Test",
-                    url = "http://test.com",
-                    apiKey = EncryptedString("key"),
-                )
-            repository.createInstance(instance)
+    fun testCreateInstanceConflict() = runTest {
+        val instance =
+            Instance(
+                type = InstanceType.Sonarr,
+                label = "Test",
+                url = "http://test.com",
+                apiKey = EncryptedString("key"),
+            )
+        repository.createInstance(instance)
 
-            val result = repository.createInstance(instance)
-            assertTrue(result is InsertResult.Conflict)
-        }
+        val result = repository.createInstance(instance)
+        assertTrue(result is InsertResult.Conflict)
+    }
 }

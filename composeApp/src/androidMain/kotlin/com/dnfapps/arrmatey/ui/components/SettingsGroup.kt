@@ -36,9 +36,9 @@ fun SettingsGroup(
 ) {
     Column(
         modifier =
-            Modifier
-                .padding(vertical = 8.dp)
-                .fillMaxWidth(),
+        Modifier
+            .padding(vertical = 8.dp)
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         title?.let { title ->
@@ -105,9 +105,9 @@ fun SettingsRow(
         Column {
             Row(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(

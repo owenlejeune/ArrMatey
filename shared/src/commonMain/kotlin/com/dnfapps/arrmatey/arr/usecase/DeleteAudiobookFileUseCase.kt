@@ -12,16 +12,15 @@ class DeleteAudiobookFileUseCase {
         audiobookId: Long,
         fileIds: List<Long>,
         repository: ArrInstanceRepository,
-    ): Flow<OperationStatus> =
-        flow {
-            emit(OperationStatus.InProgress)
-            repository
-                .deleteAudiobookFiles(audiobookId, fileIds)
-                .onSuccess {
-                    repository.getMediaDetails(audiobookId)
-                    emit(OperationStatus.Success("Audiobook file deleted successfully"))
-                }.onError { code, message, cause ->
-                    emit(OperationStatus.Error(code, message, cause))
-                }
-        }
+    ): Flow<OperationStatus> = flow {
+        emit(OperationStatus.InProgress)
+        repository
+            .deleteAudiobookFiles(audiobookId, fileIds)
+            .onSuccess {
+                repository.getMediaDetails(audiobookId)
+                emit(OperationStatus.Success("Audiobook file deleted successfully"))
+            }.onError { code, message, cause ->
+                emit(OperationStatus.Error(code, message, cause))
+            }
+    }
 }

@@ -55,6 +55,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.components.PosterItem
@@ -83,9 +84,9 @@ fun DashboardDiscoverQuickPickSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Column(
@@ -117,9 +118,9 @@ fun DashboardDiscoverQuickPickSection(
                 Text(
                     text = mokoString(MR.strings.no_type_instances_message, InstanceType.Seerr.name),
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -128,9 +129,9 @@ fun DashboardDiscoverQuickPickSection(
                 Text(
                     text = mokoString(MR.strings.no_media_found),
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -154,9 +155,9 @@ fun DashboardDiscoverQuickPickSection(
                     ) {
                         Row(
                             modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(160.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .height(160.dp),
                             horizontalArrangement = Arrangement.spacedBy(14.dp),
                             verticalAlignment = Alignment.Top,
                         ) {
@@ -248,19 +249,19 @@ fun DashboardDiscoverQuickPickSection(
                                 },
                                 enabled = enabled && state.quickPickMedia.isNotEmpty(),
                                 colors =
-                                    IconButtonDefaults.filledTonalIconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                                    ),
+                                IconButtonDefaults.filledTonalIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                ),
                                 modifier = Modifier.size(40.dp),
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Casino,
                                     contentDescription = mokoString(MR.strings.shuffle),
                                     modifier =
-                                        Modifier
-                                            .size(20.dp)
-                                            .rotate(animatedRotation),
+                                    Modifier
+                                        .size(20.dp)
+                                        .rotate(animatedRotation),
                                 )
                             }
 

@@ -30,42 +30,40 @@ class ProwlarrInstanceRepositoryTest {
         )
 
     @Test
-    fun testRefreshStatus() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(
-                        content = """{"version": "1.2.0"}""",
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
+    fun testRefreshStatus() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content = """{"version": "1.2.0"}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                        },
                     )
                 }
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json(
-                            Json {
-                                ignoreUnknownKeys = true
-                            },
-                        )
-                    }
-                }
-            val repository = ProwlarrInstanceRepository(fakeInstance, httpClient)
+            }
+        val repository = ProwlarrInstanceRepository(fakeInstance, httpClient)
 
-            repository.refreshStatus()
+        repository.refreshStatus()
 
-            assertNotNull(repository.softwareStatus.value)
-            assertEquals("1.2.0", repository.softwareStatus.value?.version)
-        }
+        assertNotNull(repository.softwareStatus.value)
+        assertEquals("1.2.0", repository.softwareStatus.value?.version)
+    }
 
     @Test
-    fun testGetIndexers() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(
-                        content =
-                            """
+    fun testGetIndexers() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content =
+                    """
                             [
                               {
                                 "id": 1,
@@ -77,28 +75,28 @@ class ProwlarrInstanceRepositoryTest {
                                 "priority": 1
                               }
                             ]
-                            """.trimIndent(),
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                        },
                     )
                 }
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json(
-                            Json {
-                                ignoreUnknownKeys = true
-                            },
-                        )
-                    }
-                }
-            val repository = ProwlarrInstanceRepository(fakeInstance, httpClient)
+            }
+        val repository = ProwlarrInstanceRepository(fakeInstance, httpClient)
 
-            val result = repository.getIndexers()
+        val result = repository.getIndexers()
 
-            assertTrue(result is NetworkResult.Success)
-            assertEquals(1, result.data.size)
-            assertEquals("Indexer 1", result.data[0].name)
-            assertEquals(1, repository.indexers.value.size)
-        }
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(1, result.data.size)
+        assertEquals("Indexer 1", result.data[0].name)
+        assertEquals(1, repository.indexers.value.size)
+    }
 }

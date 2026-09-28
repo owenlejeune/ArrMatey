@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.features
 
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 
 object ReleaseNotes {

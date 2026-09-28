@@ -11,14 +11,13 @@ class GetEpisodeHistoryUseCase {
     operator fun invoke(
         episodeId: Long,
         repository: ArrInstanceRepository,
-    ): Flow<HistoryState> =
-        flow {
-            emit(HistoryState.Loading)
-            repository
-                .getItemHistory(episodeId)
-                .onSuccess { emit(HistoryState.Success(it)) }
-                .onError { _, message, _ ->
-                    emit(HistoryState.Error(message))
-                }
-        }
+    ): Flow<HistoryState> = flow {
+        emit(HistoryState.Loading)
+        repository
+            .getItemHistory(episodeId)
+            .onSuccess { emit(HistoryState.Success(it)) }
+            .onError { _, message, _ ->
+                emit(HistoryState.Error(message))
+            }
+    }
 }

@@ -28,14 +28,13 @@ class SonarrRepository(
     override suspend fun getEpisodes(
         seriesId: Long,
         seasonNumber: Int?,
-    ): NetworkResult<List<Episode>> =
-        sonarrClient
-            .getEpisodes(seriesId, seasonNumber)
-            .onSuccess { epList ->
-                val currentMap = _episodes.value.toMutableMap()
-                currentMap[seriesId] = epList
-                _episodes.value = currentMap
-            }
+    ): NetworkResult<List<Episode>> = sonarrClient
+        .getEpisodes(seriesId, seasonNumber)
+        .onSuccess { epList ->
+            val currentMap = _episodes.value.toMutableMap()
+            currentMap[seriesId] = epList
+            _episodes.value = currentMap
+        }
 
     override suspend fun toggleSeasonMonitor(
         id: Long,
@@ -158,10 +157,9 @@ class SonarrRepository(
     override suspend fun deleteEpisodeFile(
         seriesId: Long,
         fileId: Long,
-    ): NetworkResult<Unit> =
-        sonarrClient
-            .deleteEpisode(fileId)
-            .onSuccess {
-                getEpisodes(seriesId)
-            }
+    ): NetworkResult<Unit> = sonarrClient
+        .deleteEpisode(fileId)
+        .onSuccess {
+            getEpisodes(seriesId)
+        }
 }

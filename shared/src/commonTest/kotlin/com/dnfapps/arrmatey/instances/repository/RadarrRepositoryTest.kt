@@ -31,13 +31,12 @@ class RadarrRepositoryTest {
     private val fakeLogger = LoggerFactory.get("test")
 
     @Test
-    fun testGetMovieExtraFiles() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(
-                        content =
-                            """
+    fun testGetMovieExtraFiles() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content =
+                    """
                             [{
                                 "id": 100,
                                 "movieId": 5,
@@ -47,26 +46,26 @@ class RadarrRepositoryTest {
                                 "languageTags": [],
                                 "type": "subtitle"
                             }]
-                            """.trimIndent(),
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                        },
                     )
                 }
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json(
-                            Json {
-                                ignoreUnknownKeys = true
-                            },
-                        )
-                    }
-                }
-            val repository = RadarrRepository(fakeInstance, httpClient, fakeLogger)
+            }
+        val repository = RadarrRepository(fakeInstance, httpClient, fakeLogger)
 
-            repository.getMovieExtraFiles(movieId = 5)
+        repository.getMovieExtraFiles(movieId = 5)
 
-            assertNotNull(repository.movieExtraFiles.value[5])
-            assertEquals(1, repository.movieExtraFiles.value[5]?.size)
-        }
+        assertNotNull(repository.movieExtraFiles.value[5])
+        assertEquals(1, repository.movieExtraFiles.value[5]?.size)
+    }
 }

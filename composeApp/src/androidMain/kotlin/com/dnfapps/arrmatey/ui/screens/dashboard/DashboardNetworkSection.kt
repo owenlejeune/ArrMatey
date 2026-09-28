@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
@@ -42,9 +43,9 @@ fun DashboardNetworkSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Column(
@@ -75,10 +76,10 @@ fun DashboardNetworkSection(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier =
-                                Modifier
-                                    .clip(MaterialTheme.shapes.small)
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                            Modifier
+                                .clip(MaterialTheme.shapes.small)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
                         )
                     }
                 }
@@ -118,25 +119,25 @@ fun DashboardNetworkSection(
                             if (status.isLocalSwitchingEnabled) {
                                 Box(
                                     modifier =
-                                        Modifier
-                                            .clip(MaterialTheme.shapes.small)
-                                            .background(
-                                                if (status.isLocal) {
-                                                    ArrBlue.copy(alpha = 0.1f)
-                                                } else {
-                                                    MaterialTheme.colorScheme.secondaryContainer.copy(
-                                                        alpha = 0.5f,
-                                                    )
-                                                },
-                                            ).padding(horizontal = 8.dp, vertical = 4.dp),
+                                    Modifier
+                                        .clip(MaterialTheme.shapes.small)
+                                        .background(
+                                            if (status.isLocal) {
+                                                ArrBlue.copy(alpha = 0.1f)
+                                            } else {
+                                                MaterialTheme.colorScheme.secondaryContainer.copy(
+                                                    alpha = 0.5f,
+                                                )
+                                            },
+                                        ).padding(horizontal = 8.dp, vertical = 4.dp),
                                 ) {
                                     Text(
                                         text =
-                                            if (status.isLocal) {
-                                                mokoString(MR.strings.local_network)
-                                            } else {
-                                                mokoString(MR.strings.remote_vpn)
-                                            },
+                                        if (status.isLocal) {
+                                            mokoString(MR.strings.local_network)
+                                        } else {
+                                            mokoString(MR.strings.remote_vpn)
+                                        },
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = if (status.isLocal) ArrBlue else MaterialTheme.colorScheme.primary,
@@ -146,25 +147,25 @@ fun DashboardNetworkSection(
 
                             Box(
                                 modifier =
-                                    Modifier
-                                        .clip(MaterialTheme.shapes.small)
-                                        .background(
-                                            if (status.isOnline) {
-                                                ArrGreen.copy(alpha = 0.1f)
-                                            } else {
-                                                MaterialTheme.colorScheme.errorContainer.copy(
-                                                    alpha = 0.5f,
-                                                )
-                                            },
-                                        ).padding(horizontal = 8.dp, vertical = 4.dp),
+                                Modifier
+                                    .clip(MaterialTheme.shapes.small)
+                                    .background(
+                                        if (status.isOnline) {
+                                            ArrGreen.copy(alpha = 0.1f)
+                                        } else {
+                                            MaterialTheme.colorScheme.errorContainer.copy(
+                                                alpha = 0.5f,
+                                            )
+                                        },
+                                    ).padding(horizontal = 8.dp, vertical = 4.dp),
                             ) {
                                 Text(
                                     text =
-                                        if (status.isOnline) {
-                                            mokoString(MR.strings.online)
-                                        } else {
-                                            mokoString(MR.strings.offline)
-                                        },
+                                    if (status.isOnline) {
+                                        mokoString(MR.strings.online)
+                                    } else {
+                                        mokoString(MR.strings.offline)
+                                    },
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = if (status.isOnline) ArrGreen else MaterialTheme.colorScheme.error,

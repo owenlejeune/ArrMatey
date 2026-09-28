@@ -3,7 +3,11 @@ package com.dnfapps.arrmatey.arr.api.model
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.isBeforeToday
 import com.dnfapps.arrmatey.extensions.padStart
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.midseason_finale
+import com.dnfapps.arrmatey.shared.season_finale
+import com.dnfapps.arrmatey.shared.series_finale
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.formatLocalDateTime
 import dev.icerock.moko.resources.StringResource
@@ -99,15 +103,13 @@ data class Episode(
     val episodeLabel: String
         get() = "s${seasonNumber.padStart(2, '0')}e${episodeNumber.padStart(2, '0')}"
 
-    fun getPoster(): ArrImage? =
-        images.firstOrNull { it.coverType == CoverType.Poster }
-            ?: images.firstOrNull { it.coverType == CoverType.Screenshot }
+    fun getPoster(): ArrImage? = images.firstOrNull { it.coverType == CoverType.Poster }
+        ?: images.firstOrNull { it.coverType == CoverType.Screenshot }
 
-    fun getBanner(): ArrImage? =
-        images.firstOrNull { it.coverType == CoverType.FanArt }
-            ?: images.firstOrNull { it.coverType == CoverType.Banner }
-            ?: images.firstOrNull { it.coverType == CoverType.Poster }
-            ?: images.firstOrNull { it.coverType == CoverType.Screenshot }
+    fun getBanner(): ArrImage? = images.firstOrNull { it.coverType == CoverType.FanArt }
+        ?: images.firstOrNull { it.coverType == CoverType.Banner }
+        ?: images.firstOrNull { it.coverType == CoverType.Poster }
+        ?: images.firstOrNull { it.coverType == CoverType.Screenshot }
 
     val statusLabel: String
         get() =

@@ -47,9 +47,9 @@ fun LabelledSwitch(
     ) {
         Column(
             modifier =
-                Modifier
-                    .weight(1f)
-                    .padding(end = 12.dp),
+            Modifier
+                .weight(1f)
+                .padding(end = 12.dp),
         ) {
             Text(
                 text = label,
@@ -65,13 +65,13 @@ fun LabelledSwitch(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     color =
-                        if (enabled) {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                alpha = 0.38f,
-                            )
-                        },
+                    if (enabled) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = 0.38f,
+                        )
+                    },
                 )
             }
         }
@@ -124,25 +124,25 @@ fun LargeLabelledSwitch(
     Card(
         shape = MaterialTheme.shapes.large,
         modifier =
-            modifier
-                .fillMaxWidth()
-                .selectable(
-                    selected = checked,
-                    enabled = enabled,
-                    onClick = { onCheckedChange(!checked) },
-                    role = Role.Switch,
-                ),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = containerColor,
-                contentColor = contentColor,
+        modifier
+            .fillMaxWidth()
+            .selectable(
+                selected = checked,
+                enabled = enabled,
+                onClick = { onCheckedChange(!checked) },
+                role = Role.Switch,
             ),
+        colors =
+        CardDefaults.cardColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+        ),
         border =
-            if (!checked && enabled) {
-                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            } else {
-                null
-            },
+        if (!checked && enabled) {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        } else {
+            null
+        },
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
@@ -152,9 +152,9 @@ fun LargeLabelledSwitch(
         ) {
             Column(
                 modifier =
-                    Modifier
-                        .weight(1f)
-                        .padding(end = 12.dp),
+                Modifier
+                    .weight(1f)
+                    .padding(end = 12.dp),
             ) {
                 Text(
                     text = label,

@@ -44,6 +44,7 @@ import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
 import com.dnfapps.arrmatey.entensions.showErrorImmediately
 import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.downloads.DeleteDownloadDialog
@@ -183,9 +184,9 @@ fun DownloadsTab(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             if (downloadClientState.downloadClients.isEmpty()) {
@@ -247,12 +248,12 @@ fun DownloadsTab(
                                 verticalArrangement = Arrangement.spacedBy(12.dp),
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding =
-                                    PaddingValues(
-                                        start = 16.dp,
-                                        end = 16.dp,
-                                        top = 16.dp,
-                                        bottom = 16.dp + LocalFloatingBarBottomPadding.current,
-                                    ),
+                                PaddingValues(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    top = 16.dp,
+                                    bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+                                ),
                                 state = listState,
                             ) {
                                 items(
@@ -290,16 +291,16 @@ fun DownloadsTab(
             FlexibleBottomSheet(
                 onDismissRequest = { viewModel.exitSelectionMode() },
                 sheetState =
-                    rememberFlexibleBottomSheetState(
-                        isModal = false,
-                        initialValue = FlexibleSheetValue.IntermediatelyExpanded,
-                        flexibleSheetSize =
-                            FlexibleSheetSize(
-                                fullyExpanded = FlexibleSheetSize.WrapContent,
-                                intermediatelyExpanded = 0.15f,
-                                slightlyExpanded = 0.15f,
-                            ),
+                rememberFlexibleBottomSheetState(
+                    isModal = false,
+                    initialValue = FlexibleSheetValue.IntermediatelyExpanded,
+                    flexibleSheetSize =
+                    FlexibleSheetSize(
+                        fullyExpanded = FlexibleSheetSize.WrapContent,
+                        intermediatelyExpanded = 0.15f,
+                        slightlyExpanded = 0.15f,
                     ),
+                ),
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
                 DownloadSelectionBottomBar(

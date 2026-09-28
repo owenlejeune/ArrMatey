@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.backup.state.ExportUiState
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.ContainerCard
@@ -75,11 +76,11 @@ fun ExportDialog(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp)
-                    .verticalScroll(rememberScrollState()),
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
+                .verticalScroll(rememberScrollState()),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -335,14 +336,14 @@ fun ExportDialog(
 
                 Button(
                     enabled =
-                        exportState.password.isNotBlank() &&
-                            (
-                                exportState.selectedInstanceIds.isNotEmpty() ||
-                                    exportState.selectedDownloadClientIds.isNotEmpty() ||
-                                    exportState.selectedCustomWebpageIds.isNotEmpty() ||
-                                    exportState.includeTabPreferences ||
-                                    exportState.includeUiPreferences ||
-                                    exportState.includeIntegrationsPreferences
+                    exportState.password.isNotBlank() &&
+                        (
+                            exportState.selectedInstanceIds.isNotEmpty() ||
+                                exportState.selectedDownloadClientIds.isNotEmpty() ||
+                                exportState.selectedCustomWebpageIds.isNotEmpty() ||
+                                exportState.includeTabPreferences ||
+                                exportState.includeUiPreferences ||
+                                exportState.includeIntegrationsPreferences
                             ),
                     onClick = onConfirm,
                     modifier = Modifier.weight(1f),

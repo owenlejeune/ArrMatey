@@ -57,6 +57,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
 import com.dnfapps.arrmatey.ui.components.StatusOverlay
@@ -93,9 +94,9 @@ fun DashboardDiscoverSpotlightSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
         Column {
@@ -104,9 +105,9 @@ fun DashboardDiscoverSpotlightSection(
             ) {
                 Row(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
@@ -127,10 +128,10 @@ fun DashboardDiscoverSpotlightSection(
                 Text(
                     text = mokoString(MR.strings.no_type_instances_message, InstanceType.Seerr.name),
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 8.dp, bottom = 36.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 8.dp, bottom = 36.dp),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -143,10 +144,10 @@ fun DashboardDiscoverSpotlightSection(
                 ) {
                     Box(
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(16f / 9f)
-                                .clip(MaterialTheme.shapes.large),
+                        Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f)
+                            .clip(MaterialTheme.shapes.large),
                     ) {
                         HorizontalPager(
                             state = pagerState,
@@ -162,11 +163,11 @@ fun DashboardDiscoverSpotlightSection(
 
                             Box(
                                 modifier =
-                                    Modifier
-                                        .fillMaxSize()
-                                        .clickable(enabled = enabled) {
-                                            onMediaClick(spotlightItem.id, spotlightItem.mediaType)
-                                        },
+                                Modifier
+                                    .fillMaxSize()
+                                    .clickable(enabled = enabled) {
+                                        onMediaClick(spotlightItem.id, spotlightItem.mediaType)
+                                    },
                             ) {
                                 if (imageModel != null) {
                                     AsyncImage(
@@ -193,18 +194,18 @@ fun DashboardDiscoverSpotlightSection(
 
                         Box(
                             modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(
-                                        Brush.verticalGradient(
-                                            colors =
-                                                listOf(
-                                                    Color.Transparent,
-                                                    Color.Black.copy(alpha = 0.4f),
-                                                    Color.Black.copy(alpha = 0.85f),
-                                                ),
+                            Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors =
+                                        listOf(
+                                            Color.Transparent,
+                                            Color.Black.copy(alpha = 0.4f),
+                                            Color.Black.copy(alpha = 0.85f),
                                         ),
                                     ),
+                                ),
                         )
 
                         AnimatedContent(
@@ -224,9 +225,9 @@ fun DashboardDiscoverSpotlightSection(
                             ) {
                                 Row(
                                     modifier =
-                                        Modifier
-                                            .align(Alignment.TopStart)
-                                            .padding(12.dp),
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(12.dp),
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
@@ -250,9 +251,9 @@ fun DashboardDiscoverSpotlightSection(
 
                                 Column(
                                     modifier =
-                                        Modifier
-                                            .align(Alignment.BottomStart)
-                                            .padding(12.dp),
+                                    Modifier
+                                        .align(Alignment.BottomStart)
+                                        .padding(12.dp),
                                     verticalArrangement = Arrangement.spacedBy(4.dp),
                                 ) {
                                     Row(
@@ -261,15 +262,15 @@ fun DashboardDiscoverSpotlightSection(
                                     ) {
                                         MediaRequestTypeChip(
                                             text =
-                                                mokoString(
-                                                    if (item.mediaType ==
-                                                        RequestType.Tv
-                                                    ) {
-                                                        MR.strings.series
-                                                    } else {
-                                                        MR.strings.movie
-                                                    },
-                                                ),
+                                            mokoString(
+                                                if (item.mediaType ==
+                                                    RequestType.Tv
+                                                ) {
+                                                    MR.strings.series
+                                                } else {
+                                                    MR.strings.movie
+                                                },
+                                            ),
                                             requestType = item.mediaType,
                                         )
 

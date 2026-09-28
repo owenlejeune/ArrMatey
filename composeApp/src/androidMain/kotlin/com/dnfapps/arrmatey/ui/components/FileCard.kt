@@ -25,6 +25,7 @@ import com.dnfapps.arrmatey.arr.api.model.MediaFile
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.BULLET
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -59,15 +60,15 @@ fun FileCard(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onError,
                     modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .drawBehind {
-                                drawRoundRect(
-                                    color = deleteSwipeBackground,
-                                    cornerRadius = CornerRadius(16.dp.toPx()),
-                                )
-                            }.wrapContentSize(Alignment.CenterEnd)
-                            .padding(12.dp),
+                    Modifier
+                        .fillMaxSize()
+                        .drawBehind {
+                            drawRoundRect(
+                                color = deleteSwipeBackground,
+                                cornerRadius = CornerRadius(16.dp.toPx()),
+                            )
+                        }.wrapContentSize(Alignment.CenterEnd)
+                        .padding(12.dp),
                 )
             }
         },
@@ -84,11 +85,11 @@ fun FileCard(
             )
             Text(
                 text =
-                    listOfNotNull(
-                        file.quality?.qualityLabel,
-                        file.languages.first().name,
-                        file.size.bytesAsFileSizeString(),
-                    ).joinToString(BULLET),
+                listOfNotNull(
+                    file.quality?.qualityLabel,
+                    file.languages.first().name,
+                    file.size.bytesAsFileSizeString(),
+                ).joinToString(BULLET),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

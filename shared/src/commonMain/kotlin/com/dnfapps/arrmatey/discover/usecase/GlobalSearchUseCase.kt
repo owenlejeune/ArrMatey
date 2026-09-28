@@ -24,129 +24,128 @@ import kotlinx.coroutines.sync.withLock
 class GlobalSearchUseCase(
     private val instanceManager: InstanceManager,
 ) {
-    operator fun invoke(query: String): Flow<List<SearchResult>> =
-        channelFlow {
-            if (query.isBlank()) {
-                send(emptyList())
-                return@channelFlow
-            }
+    operator fun invoke(query: String): Flow<List<SearchResult>> = channelFlow {
+        if (query.isBlank()) {
+            send(emptyList())
+            return@channelFlow
+        }
 
-            val arrRepos = instanceManager.getAllArrRepositories().sortedBy { it.instance.id }
-            val seerrRepos = instanceManager.getAllSeerrRepositories().sortedBy { it.instance.id }
+        val arrRepos = instanceManager.getAllArrRepositories().sortedBy { it.instance.id }
+        val seerrRepos = instanceManager.getAllSeerrRepositories().sortedBy { it.instance.id }
 
-            if (arrRepos.isEmpty() && seerrRepos.isEmpty()) {
-                send(emptyList())
-                return@channelFlow
-            }
+        if (arrRepos.isEmpty() && seerrRepos.isEmpty()) {
+            send(emptyList())
+            return@channelFlow
+        }
 
-            val hasSonarr = arrRepos.any { it.instance.type == InstanceType.Sonarr }
-            val hasRadarr = arrRepos.any { it.instance.type == InstanceType.Radarr }
-            val includeSeerrMedia = !(hasSonarr && hasRadarr)
+        val hasSonarr = arrRepos.any { it.instance.type == InstanceType.Sonarr }
+        val hasRadarr = arrRepos.any { it.instance.type == InstanceType.Radarr }
+        val includeSeerrMedia = !(hasSonarr && hasRadarr)
 
-            val libraryByTmdbId = mutableMapOf<Long, MutableList<SearchResult.ArrMediaResult>>()
-            val libraryByTvdbId = mutableMapOf<Long, MutableList<SearchResult.ArrMediaResult>>()
-            val libraryByCleanTitle = mutableMapOf<String, MutableList<SearchResult.ArrMediaResult>>()
+        val libraryByTmdbId = mutableMapOf<Long, MutableList<SearchResult.ArrMediaResult>>()
+        val libraryByTvdbId = mutableMapOf<Long, MutableList<SearchResult.ArrMediaResult>>()
+        val libraryByCleanTitle = mutableMapOf<String, MutableList<SearchResult.ArrMediaResult>>()
 
-            arrRepos.forEach { repo ->
-                val items =
-                    repo.library.value
-                        ?.asSuccess()
-                        ?.data ?: emptyList()
-                items.forEach { media ->
-                    val res = SearchResult.ArrMediaResult(media, instanceId = repo.instance.id, originalRank = 0)
-                    when (media) {
-                        is ArrMovie -> {
-                            if (media.tmdbId != 0L) libraryByTmdbId.getOrPut(media.tmdbId) { mutableListOf() }.add(res)
-                            media.cleanTitle?.takeIf { it.isNotBlank() }?.let {
-                                libraryByCleanTitle.getOrPut(it) { mutableListOf() }.add(res)
-                            }
+        arrRepos.forEach { repo ->
+            val items =
+                repo.library.value
+                    ?.asSuccess()
+                    ?.data ?: emptyList()
+            items.forEach { media ->
+                val res = SearchResult.ArrMediaResult(media, instanceId = repo.instance.id, originalRank = 0)
+                when (media) {
+                    is ArrMovie -> {
+                        if (media.tmdbId != 0L) libraryByTmdbId.getOrPut(media.tmdbId) { mutableListOf() }.add(res)
+                        media.cleanTitle?.takeIf { it.isNotBlank() }?.let {
+                            libraryByCleanTitle.getOrPut(it) { mutableListOf() }.add(res)
                         }
-                        is ArrSeries -> {
-                            if (media.tvdbId != 0L) libraryByTvdbId.getOrPut(media.tvdbId) { mutableListOf() }.add(res)
-                            if (media.tmdbId != null &&
-                                media.tmdbId != 0L
-                            ) {
-                                libraryByTmdbId.getOrPut(media.tmdbId) { mutableListOf() }.add(res)
-                            }
-                            media.cleanTitle?.takeIf { it.isNotBlank() }?.let {
-                                libraryByCleanTitle.getOrPut(it) { mutableListOf() }.add(res)
-                            }
-                        }
-                        else -> {}
                     }
+                    is ArrSeries -> {
+                        if (media.tvdbId != 0L) libraryByTvdbId.getOrPut(media.tvdbId) { mutableListOf() }.add(res)
+                        if (media.tmdbId != null &&
+                            media.tmdbId != 0L
+                        ) {
+                            libraryByTmdbId.getOrPut(media.tmdbId) { mutableListOf() }.add(res)
+                        }
+                        media.cleanTitle?.takeIf { it.isNotBlank() }?.let {
+                            libraryByCleanTitle.getOrPut(it) { mutableListOf() }.add(res)
+                        }
+                    }
+                    else -> {}
                 }
             }
-
-            val mutex = Mutex()
-            val accumulatedResults = mutableListOf<SearchResult>()
-            val searchJobs = mutableListOf<Job>()
-
-            arrRepos.forEach { repo ->
-                val job =
-                    launch {
-                        val result = repo.directLookup(query)
-                        val data = if (result is NetworkResult.Success) result.data else emptyList()
-                        val mapped =
-                            data.mapIndexed { index, media ->
-                                SearchResult.ArrMediaResult(media, instanceId = repo.instance.id, originalRank = index)
-                            }
-                        if (mapped.isNotEmpty()) {
-                            val woven =
-                                mutex.withLock {
-                                    accumulatedResults.addAll(mapped)
-                                    processAndWeave(
-                                        query = query,
-                                        allResults = accumulatedResults,
-                                        libraryByTmdbId = libraryByTmdbId,
-                                        libraryByTvdbId = libraryByTvdbId,
-                                        libraryByCleanTitle = libraryByCleanTitle,
-                                    )
-                                }
-                            send(woven)
-                        }
-                    }
-                searchJobs.add(job)
-            }
-
-            seerrRepos.forEach { repo ->
-                val job =
-                    launch {
-                        val result = repo.client.search(query, page = 1)
-                        val data = if (result is NetworkResult.Success) result.data.results else emptyList()
-                        val mapped =
-                            data.mapIndexedNotNull { index, res ->
-                                if (res.mediaType == RequestType.Person) {
-                                    SearchResult.SeerrPersonResult(res, originalRank = index)
-                                } else if (includeSeerrMedia) {
-                                    SearchResult.SeerrMediaResult(res, originalRank = index)
-                                } else {
-                                    null
-                                }
-                            }
-                        if (mapped.isNotEmpty()) {
-                            val woven =
-                                mutex.withLock {
-                                    accumulatedResults.addAll(mapped)
-                                    processAndWeave(
-                                        query = query,
-                                        allResults = accumulatedResults,
-                                        libraryByTmdbId = libraryByTmdbId,
-                                        libraryByTvdbId = libraryByTvdbId,
-                                        libraryByCleanTitle = libraryByCleanTitle,
-                                    )
-                                }
-                            send(woven)
-                        }
-                    }
-                searchJobs.add(job)
-            }
-
-            searchJobs.joinAll()
-
-            if (accumulatedResults.isEmpty()) {
-                send(emptyList())
-            }
         }
+
+        val mutex = Mutex()
+        val accumulatedResults = mutableListOf<SearchResult>()
+        val searchJobs = mutableListOf<Job>()
+
+        arrRepos.forEach { repo ->
+            val job =
+                launch {
+                    val result = repo.directLookup(query)
+                    val data = if (result is NetworkResult.Success) result.data else emptyList()
+                    val mapped =
+                        data.mapIndexed { index, media ->
+                            SearchResult.ArrMediaResult(media, instanceId = repo.instance.id, originalRank = index)
+                        }
+                    if (mapped.isNotEmpty()) {
+                        val woven =
+                            mutex.withLock {
+                                accumulatedResults.addAll(mapped)
+                                processAndWeave(
+                                    query = query,
+                                    allResults = accumulatedResults,
+                                    libraryByTmdbId = libraryByTmdbId,
+                                    libraryByTvdbId = libraryByTvdbId,
+                                    libraryByCleanTitle = libraryByCleanTitle,
+                                )
+                            }
+                        send(woven)
+                    }
+                }
+            searchJobs.add(job)
+        }
+
+        seerrRepos.forEach { repo ->
+            val job =
+                launch {
+                    val result = repo.client.search(query, page = 1)
+                    val data = if (result is NetworkResult.Success) result.data.results else emptyList()
+                    val mapped =
+                        data.mapIndexedNotNull { index, res ->
+                            if (res.mediaType == RequestType.Person) {
+                                SearchResult.SeerrPersonResult(res, originalRank = index)
+                            } else if (includeSeerrMedia) {
+                                SearchResult.SeerrMediaResult(res, originalRank = index)
+                            } else {
+                                null
+                            }
+                        }
+                    if (mapped.isNotEmpty()) {
+                        val woven =
+                            mutex.withLock {
+                                accumulatedResults.addAll(mapped)
+                                processAndWeave(
+                                    query = query,
+                                    allResults = accumulatedResults,
+                                    libraryByTmdbId = libraryByTmdbId,
+                                    libraryByTvdbId = libraryByTvdbId,
+                                    libraryByCleanTitle = libraryByCleanTitle,
+                                )
+                            }
+                        send(woven)
+                    }
+                }
+            searchJobs.add(job)
+        }
+
+        searchJobs.joinAll()
+
+        if (accumulatedResults.isEmpty()) {
+            send(emptyList())
+        }
+    }
 
     private fun processAndWeave(
         query: String,
@@ -283,8 +282,7 @@ class GlobalSearchUseCase(
         return SearchResultWeaver.weave(query, combined)
     }
 
-    private fun selectBestItem(items: List<SearchResult>): SearchResult =
-        items.firstOrNull { it is SearchResult.ArrMediaResult && it.media.id != null && it.media.id != 0L }
-            ?: items.firstOrNull { it is SearchResult.ArrMediaResult }
-            ?: items.first()
+    private fun selectBestItem(items: List<SearchResult>): SearchResult = items.firstOrNull { it is SearchResult.ArrMediaResult && it.media.id != null && it.media.id != 0L }
+        ?: items.firstOrNull { it is SearchResult.ArrMediaResult }
+        ?: items.first()
 }

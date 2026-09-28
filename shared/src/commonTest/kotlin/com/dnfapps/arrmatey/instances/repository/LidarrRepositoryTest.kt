@@ -31,13 +31,12 @@ class LidarrRepositoryTest {
     private val fakeLogger = LoggerFactory.get("test")
 
     @Test
-    fun testGetArtistAlbums() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(
-                        content =
-                            """
+    fun testGetArtistAlbums() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content =
+                    """
                             [{
                                 "id": 50,
                                 "artistId": 2,
@@ -49,32 +48,32 @@ class LidarrRepositoryTest {
                                 "title": "Greatest Hits",
                                 "monitored": true
                             }]
-                            """.trimIndent(),
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                        },
                     )
                 }
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json(
-                            Json {
-                                ignoreUnknownKeys = true
-                            },
-                        )
-                    }
-                }
-            val repository = LidarrRepository(fakeInstance, httpClient, fakeLogger)
+            }
+        val repository = LidarrRepository(fakeInstance, httpClient, fakeLogger)
 
-            repository.getArtistAlbums(artistId = 2)
+        repository.getArtistAlbums(artistId = 2)
 
-            assertNotNull(repository.artistAlbums.value[2])
-            assertEquals(1, repository.artistAlbums.value[2]?.size)
-            assertEquals(
-                "Greatest Hits",
-                repository.artistAlbums.value[2]
-                    ?.first()
-                    ?.title,
-            )
-        }
+        assertNotNull(repository.artistAlbums.value[2])
+        assertEquals(1, repository.artistAlbums.value[2]?.size)
+        assertEquals(
+            "Greatest Hits",
+            repository.artistAlbums.value[2]
+                ?.first()
+                ?.title,
+        )
+    }
 }

@@ -78,16 +78,14 @@ fun PaddingValues(
     end: Dp? = null,
     top: Dp? = null,
     bottom: Dp? = null,
-): PaddingValues =
-    PaddingValues(
-        start = start ?: all,
-        end = end ?: all,
-        top = top ?: all,
-        bottom = bottom ?: all,
-    )
+): PaddingValues = PaddingValues(
+    start = start ?: all,
+    end = end ?: all,
+    top = top ?: all,
+    bottom = bottom ?: all,
+)
 
 @Composable
-fun String.rememberHtml(): String =
-    remember(this) {
-        Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY).toString()
-    }
+fun String.rememberHtml(): String = remember(this) {
+    Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY).toString()
+}

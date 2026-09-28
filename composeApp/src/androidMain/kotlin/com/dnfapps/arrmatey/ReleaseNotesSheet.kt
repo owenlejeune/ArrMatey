@@ -29,10 +29,10 @@ fun ReleaseNotesSheet(onDismiss: () -> Unit) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier =
-                Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp),
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
         ) {
             ReleaseNotes.updates.forEach { update ->
                 val releaseNotes by update.androidContentFile.readTextAsState()

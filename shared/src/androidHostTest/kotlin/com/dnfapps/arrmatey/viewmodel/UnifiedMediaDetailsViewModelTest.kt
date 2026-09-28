@@ -34,21 +34,21 @@ class UnifiedMediaDetailsViewModelTest {
                 getUnifiedMediaDetailsUseCase = mockk(relaxed = true),
                 smartAddMediaUseCase = mockk(),
                 getArrInstanceRepositoryUseCase =
-                    mockk(relaxed = true) {
-                        every { observeSelected(any()) } returns flowOf(null)
-                    },
+                mockk(relaxed = true) {
+                    every { observeSelected(any()) } returns flowOf(null)
+                },
                 getSeerrInstanceRepositoryUseCase =
-                    mockk(relaxed = true) {
-                        every { observeSelected() } returns flowOf(null)
-                    },
+                mockk(relaxed = true) {
+                    every { observeSelected() } returns flowOf(null)
+                },
                 getBazarrInstanceRepositoryUseCase =
-                    mockk(relaxed = true) {
-                        every { observeSelected() } returns flowOf(null)
-                    },
+                mockk(relaxed = true) {
+                    every { observeSelected() } returns flowOf(null)
+                },
                 getTracearrInstanceRepositoryUseCase =
-                    mockk(relaxed = true) {
-                        every { observeSelected() } returns flowOf(null)
-                    },
+                mockk(relaxed = true) {
+                    every { observeSelected() } returns flowOf(null)
+                },
                 toggleMonitorUseCase = mockk(),
                 updateMediaUseCase = mockk(),
                 deleteMediaUseCase = mockk(),
@@ -76,11 +76,11 @@ class UnifiedMediaDetailsViewModelTest {
                 getSimilarUseCase = mockk(relaxed = true),
                 logger = mockk(relaxed = true),
                 preferencesStore =
-                    mockk {
-                        every { combineSeerrArrMedia } returns flowOf(true)
-                        every { bazarrDetailsIntegration } returns flowOf(true)
-                        every { tracearrDetailsIntegration } returns flowOf(true)
-                    },
+                mockk {
+                    every { combineSeerrArrMedia } returns flowOf(true)
+                    every { bazarrDetailsIntegration } returns flowOf(true)
+                    every { tracearrDetailsIntegration } returns flowOf(true)
+                },
             )
 
         assertEquals(InstanceType.Radarr, viewModel.resolvedInstanceType)

@@ -1,6 +1,15 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.announced
+import com.dnfapps.arrmatey.shared.continuing
+import com.dnfapps.arrmatey.shared.deleted
+import com.dnfapps.arrmatey.shared.ended
+import com.dnfapps.arrmatey.shared.in_cinemas
+import com.dnfapps.arrmatey.shared.released
+import com.dnfapps.arrmatey.shared.tba
+import com.dnfapps.arrmatey.shared.upcoming
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
 

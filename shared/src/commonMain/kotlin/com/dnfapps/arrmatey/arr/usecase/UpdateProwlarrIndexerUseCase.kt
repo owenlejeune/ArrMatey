@@ -13,25 +13,24 @@ class UpdateProwlarrIndexerUseCase(
     operator fun invoke(
         instanceId: Long,
         indexer: ProwlarrIndexer,
-    ): Flow<OperationStatus> =
-        flow {
-            emit(OperationStatus.InProgress)
+    ): Flow<OperationStatus> = flow {
+        emit(OperationStatus.InProgress)
 
-            val repository = instanceManager.getProwlarrRepository(instanceId)
-            if (repository == null) {
-                emit(OperationStatus.Error(message = "Instance not found"))
-                return@flow
-            }
-
-            when (val result = repository.updateIndexer(indexer)) {
-                is NetworkResult.Success<*> -> emit(OperationStatus.Success())
-                is NetworkResult.Error ->
-                    emit(
-                        OperationStatus.Error(
-                            message = result.message ?: "Failed to update indexer",
-                        ),
-                    )
-                is NetworkResult.Loading -> emit(OperationStatus.InProgress)
-            }
+        val repository = instanceManager.getProwlarrRepository(instanceId)
+        if (repository == null) {
+            emit(OperationStatus.Error(message = "Instance not found"))
+            return@flow
         }
+
+        when (val result = repository.updateIndexer(indexer)) {
+            is NetworkResult.Success<*> -> emit(OperationStatus.Success())
+            is NetworkResult.Error ->
+                emit(
+                    OperationStatus.Error(
+                        message = result.message ?: "Failed to update indexer",
+                    ),
+                )
+            is NetworkResult.Loading -> emit(OperationStatus.InProgress)
+        }
+    }
 }

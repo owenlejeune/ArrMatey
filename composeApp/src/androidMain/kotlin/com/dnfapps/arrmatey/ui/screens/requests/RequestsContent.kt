@@ -30,6 +30,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.utils.mokoString
@@ -110,9 +111,9 @@ fun RequestsContent(
                     onRetry = onRetry,
                     onDismiss = onClearError,
                     modifier =
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(16.dp),
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
                 )
             }
         }

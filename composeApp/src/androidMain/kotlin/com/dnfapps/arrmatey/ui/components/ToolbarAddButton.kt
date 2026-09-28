@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -137,10 +138,10 @@ fun ToolbarAddButton(
                     SplitButtonDefaults.LeadingButton(
                         onClick = onRequestClicked,
                         colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                                contentColor = MaterialTheme.colorScheme.onBackground,
-                            ),
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                            contentColor = MaterialTheme.colorScheme.onBackground,
+                        ),
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -157,10 +158,10 @@ fun ToolbarAddButton(
                         SplitButtonDefaults.TrailingButton(
                             onClick = { showRequestMenu = true },
                             colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                                    contentColor = MaterialTheme.colorScheme.onBackground,
-                                ),
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                                contentColor = MaterialTheme.colorScheme.onBackground,
+                            ),
                         ) {
                             Icon(Icons.Default.ArrowDropDown, null)
                         }

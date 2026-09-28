@@ -48,21 +48,21 @@ fun HistoryItemView(
                 ) {
                     Box(
                         modifier =
-                            Modifier
-                                .width(6.dp)
-                                .fillMaxHeight()
-                                .background(color)
-                                .align(Alignment.CenterStart),
+                        Modifier
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .background(color)
+                            .align(Alignment.CenterStart),
                     )
                 }
             }
 
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(start = if (item.instanceType != null) 6.dp else 0.dp)
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = if (item.instanceType != null) 6.dp else 0.dp)
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Row(

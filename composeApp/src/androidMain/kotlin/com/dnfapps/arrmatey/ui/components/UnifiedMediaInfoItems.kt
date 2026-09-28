@@ -19,6 +19,7 @@ import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -30,53 +31,51 @@ fun buildArrInfoItems(
     qualityProfiles: List<QualityProfile>,
     tags: List<Tag>,
     onEditPath: () -> Unit,
-): List<InfoItem> =
-    buildList {
-        val arrMedia = state.arrMedia
-        if (arrMedia != null && state.hasArrId) {
-            val arrItems =
-                when (arrMedia) {
-                    is ArrSeries -> seriesInfo(arrMedia, qualityProfiles, tags, onEditPath)
-                    is ArrMovie -> movieInfo(arrMedia, qualityProfiles, tags, onEditPath)
-                    is Arrtist -> artistInfo(arrMedia, qualityProfiles, tags, onEditPath)
-                    is Author -> authorInfo(arrMedia, qualityProfiles, tags, onEditPath)
-                    is Audiobook -> audiobookInfo(arrMedia, onEditPath)
-                    else -> emptyList()
-                }
-            addAll(arrItems)
-        }
+): List<InfoItem> = buildList {
+    val arrMedia = state.arrMedia
+    if (arrMedia != null && state.hasArrId) {
+        val arrItems =
+            when (arrMedia) {
+                is ArrSeries -> seriesInfo(arrMedia, qualityProfiles, tags, onEditPath)
+                is ArrMovie -> movieInfo(arrMedia, qualityProfiles, tags, onEditPath)
+                is Arrtist -> artistInfo(arrMedia, qualityProfiles, tags, onEditPath)
+                is Author -> authorInfo(arrMedia, qualityProfiles, tags, onEditPath)
+                is Audiobook -> audiobookInfo(arrMedia, onEditPath)
+                else -> emptyList()
+            }
+        addAll(arrItems)
     }
+}
 
 @Composable
-fun buildSeerrInfoItems(state: UnifiedMediaDetailsUiState.Success): List<InfoItem> =
-    buildList {
-        val seerrMedia = state.seerrMedia
-        if (seerrMedia != null && seerrMedia !is PersonDetails) {
-            val statusLabel = mokoString(MR.strings.status)
-            add(InfoItem(statusLabel, seerrMedia.status))
+fun buildSeerrInfoItems(state: UnifiedMediaDetailsUiState.Success): List<InfoItem> = buildList {
+    val seerrMedia = state.seerrMedia
+    if (seerrMedia != null && seerrMedia !is PersonDetails) {
+        val statusLabel = mokoString(MR.strings.status)
+        add(InfoItem(statusLabel, seerrMedia.status))
 
-            (seerrMedia as? MovieDetails)?.let { movie ->
-                movie.releaseDate?.format("MMM dd, yyyy")?.let { releaseDate ->
-                    add(InfoItem(mokoString(MR.strings.release_date), releaseDate))
-                }
-                if (movie.revenue > 0L) {
-                    add(InfoItem(mokoString(MR.strings.revenue), movie.revenue.formatWithCommas()))
-                }
-                if (movie.budget > 0L) {
-                    add(InfoItem(mokoString(MR.strings.budget), movie.budget.formatWithCommas()))
-                }
+        (seerrMedia as? MovieDetails)?.let { movie ->
+            movie.releaseDate?.format("MMM dd, yyyy")?.let { releaseDate ->
+                add(InfoItem(mokoString(MR.strings.release_date), releaseDate))
             }
-
-            val countriesText = seerrMedia.productionCountries.joinToString("\n") { it.name }
-            if (countriesText.isNotEmpty()) {
-                add(InfoItem(mokoString(MR.strings.production_countries), countriesText))
+            if (movie.revenue > 0L) {
+                add(InfoItem(mokoString(MR.strings.revenue), movie.revenue.formatWithCommas()))
             }
-            val studiosText = seerrMedia.productionCompanies.joinToString("\n") { it.name }
-            if (studiosText.isNotEmpty()) {
-                add(InfoItem(mokoString(MR.strings.studios), studiosText))
+            if (movie.budget > 0L) {
+                add(InfoItem(mokoString(MR.strings.budget), movie.budget.formatWithCommas()))
             }
         }
+
+        val countriesText = seerrMedia.productionCountries.joinToString("\n") { it.name }
+        if (countriesText.isNotEmpty()) {
+            add(InfoItem(mokoString(MR.strings.production_countries), countriesText))
+        }
+        val studiosText = seerrMedia.productionCompanies.joinToString("\n") { it.name }
+        if (studiosText.isNotEmpty()) {
+            add(InfoItem(mokoString(MR.strings.studios), studiosText))
+        }
     }
+}
 
 @Composable
 fun seriesInfo(

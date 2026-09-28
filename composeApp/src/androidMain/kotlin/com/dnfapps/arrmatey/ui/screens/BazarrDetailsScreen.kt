@@ -73,6 +73,7 @@ import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.toInfoList
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BasePosterItem
 import com.dnfapps.arrmatey.ui.components.ContainerCard
@@ -192,9 +193,9 @@ fun BazarrDetailsScreen(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState),
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState),
         ) {
             BazarrDetailsHeader(
                 poster = uiState.details?.poster,
@@ -206,10 +207,10 @@ fun BazarrDetailsScreen(
 
             Column(
                 modifier =
-                    Modifier
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 24.dp)
-                        .padding(top = 12.dp),
+                Modifier
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp)
+                    .padding(top = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 Text(
@@ -314,11 +315,11 @@ private fun BazarrDetailsHeader(
 
         Row(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = topPadding)
-                    .padding(horizontal = 12.dp)
-                    .align(Alignment.BottomCenter),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = topPadding)
+                .padding(horizontal = 12.dp)
+                .align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             verticalAlignment = Alignment.Bottom,
         ) {
@@ -368,9 +369,9 @@ private fun MissingSubtitleItem(
     ) {
         Row(
             modifier =
-                Modifier
-                    .padding(12.dp)
-                    .fillMaxWidth(),
+            Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -410,9 +411,9 @@ private fun SubtitleItem(
     ) {
         Row(
             modifier =
-                Modifier
-                    .padding(12.dp)
-                    .fillMaxWidth(),
+            Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -440,23 +441,23 @@ private fun SubtitleItem(
                 }
                 Box(
                     modifier =
-                        Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = MaterialTheme.shapes.extraSmall,
-                            ).padding(horizontal = 8.dp, vertical = 4.dp),
+                    Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = MaterialTheme.shapes.extraSmall,
+                        ).padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     Text(
                         text =
-                            buildString {
-                                append(
-                                    subtitle.code2
-                                        .orEmpty()
-                                        .uppercase()
-                                        .ifBlank { subtitle.name },
-                                )
-                                if (subtitle.hi) append(":HI")
-                            },
+                        buildString {
+                            append(
+                                subtitle.code2
+                                    .orEmpty()
+                                    .uppercase()
+                                    .ifBlank { subtitle.name },
+                            )
+                            if (subtitle.hi) append(":HI")
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         fontWeight = FontWeight.Bold,
@@ -501,11 +502,11 @@ private fun BazarrEpisodesSection(
                     ) {
                         Text(
                             text =
-                                if (seasonNumber == 0) {
-                                    mokoString(MR.strings.specials)
-                                } else {
-                                    mokoString(MR.strings.season_label, seasonNumber)
-                                },
+                            if (seasonNumber == 0) {
+                                mokoString(MR.strings.specials)
+                            } else {
+                                mokoString(MR.strings.season_label, seasonNumber)
+                            },
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                         )
@@ -551,10 +552,10 @@ private fun BazarrEpisodeItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 4.dp)
-                .clickable(onClick = onClick),
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 4.dp)
+            .clickable(onClick = onClick),
     ) {
         Column(
             modifier = Modifier.weight(1f),
@@ -607,15 +608,15 @@ private fun BazarrEpisodeItem(
                     .forEach { sub ->
                         LanguageTag(
                             text =
-                                buildString {
-                                    append(
-                                        sub.code2
-                                            .orEmpty()
-                                            .uppercase()
-                                            .ifBlank { sub.name },
-                                    )
-                                    if (sub.hi) append(":HI")
-                                },
+                            buildString {
+                                append(
+                                    sub.code2
+                                        .orEmpty()
+                                        .uppercase()
+                                        .ifBlank { sub.name },
+                                )
+                                if (sub.hi) append(":HI")
+                            },
                             containerColor = MaterialTheme.colorScheme.surfaceVariant,
                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -633,9 +634,9 @@ private fun LanguageTag(
 ) {
     Box(
         modifier =
-            Modifier
-                .background(containerColor, MaterialTheme.shapes.extraSmall)
-                .padding(horizontal = 6.dp, vertical = 2.dp),
+        Modifier
+            .background(containerColor, MaterialTheme.shapes.extraSmall)
+            .padding(horizontal = 6.dp, vertical = 2.dp),
     ) {
         Text(
             text = text,

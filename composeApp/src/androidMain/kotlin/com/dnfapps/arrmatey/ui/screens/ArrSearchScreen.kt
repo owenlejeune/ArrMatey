@@ -40,6 +40,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
@@ -121,18 +122,18 @@ fun ArrSearchScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             when (val state = lookupState) {
                 is ArrLibrary.Initial -> {}
                 is ArrLibrary.Loading -> {
                     LoadingIndicator(
                         modifier =
-                            Modifier
-                                .size(96.dp)
-                                .align(Alignment.Center),
+                        Modifier
+                            .size(96.dp)
+                            .align(Alignment.Center),
                     )
                 }
 
@@ -140,17 +141,17 @@ fun ArrSearchScreen(
                     if (state.items.isEmpty()) {
                         Column(
                             modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(24.dp),
+                            Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
                         ) {
                             Box(
                                 modifier =
-                                    Modifier
-                                        .size(72.dp)
-                                        .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
+                                Modifier
+                                    .size(72.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Icon(
@@ -182,17 +183,17 @@ fun ArrSearchScreen(
                 is ArrLibrary.Error -> {
                     Column(
                         modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .padding(24.dp),
+                        Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Box(
                             modifier =
-                                Modifier
-                                    .size(72.dp)
-                                    .background(MaterialTheme.colorScheme.errorContainer, CircleShape),
+                            Modifier
+                                .size(72.dp)
+                                .background(MaterialTheme.colorScheme.errorContainer, CircleShape),
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(

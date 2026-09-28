@@ -61,6 +61,7 @@ import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsTab
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
@@ -414,17 +415,17 @@ fun UnifiedMediaDetailsScreen(
                             onEdit = { showEditSheet = true },
                             onDelete = { confirmDelete = true },
                             onDeleteFile =
-                                if (canDeleteFile) {
-                                    {
-                                        if (resolvedType == InstanceType.Radarr) {
-                                            confirmDeleteMovie = true
-                                        } else {
-                                            confirmDeleteAudiobookFile = true
-                                        }
+                            if (canDeleteFile) {
+                                {
+                                    if (resolvedType == InstanceType.Radarr) {
+                                        confirmDeleteMovie = true
+                                    } else {
+                                        confirmDeleteAudiobookFile = true
                                     }
-                                } else {
-                                    null
-                                },
+                                }
+                            } else {
+                                null
+                            },
                             onMarkAsAvailable = { viewModel.markSeerrMediaAsAvailable() },
                             onRemoveFromService = { confirmRemoveFromService = true },
                             onClearData = { confirmClearData = true },
@@ -446,9 +447,9 @@ fun UnifiedMediaDetailsScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues.copy(bottom = 0.dp, top = 0.dp))
+                .fillMaxSize(),
         ) {
             when {
                 successState != null -> {
@@ -684,9 +685,9 @@ fun UnifiedMediaDetailsScreen(
                 else -> {
                     LoadingIndicator(
                         modifier =
-                            Modifier
-                                .size(96.dp)
-                                .align(Alignment.Center),
+                        Modifier
+                            .size(96.dp)
+                            .align(Alignment.Center),
                     )
                 }
             }

@@ -33,157 +33,151 @@ class QBittorrentClientTest {
         apiKey = EncryptedString(apiKey),
     )
 
-    private fun httpClient(mockEngine: MockEngine) =
-        HttpClient(mockEngine) {
-            expectSuccess = true
-            install(ContentNegotiation) {
-                json(Json { ignoreUnknownKeys = true })
+    private fun httpClient(mockEngine: MockEngine) = HttpClient(mockEngine) {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+    }
+
+    @Test
+    fun testConnectionWithApiKeySkipsLogin() = runTest {
+        val paths = mutableListOf<String>()
+        val mockEngine =
+            MockEngine { request ->
+                paths.add(request.url.encodedPath)
+                respond(
+                    content = "4.6.0",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "text/plain"),
+                )
             }
-        }
+
+        val result = QBittorrentClient(client(apiKey = "key"), httpClient(mockEngine)).testConnection()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(listOf("/api/v2/app/version"), paths)
+    }
 
     @Test
-    fun testConnectionWithApiKeySkipsLogin() =
-        runTest {
-            val paths = mutableListOf<String>()
-            val mockEngine =
-                MockEngine { request ->
-                    paths.add(request.url.encodedPath)
-                    respond(
-                        content = "4.6.0",
-                        status = HttpStatusCode.OK,
-                        headers = headersOf(HttpHeaders.ContentType, "text/plain"),
-                    )
+    fun testConnectionWithNoCredentialsSkipsLogin() = runTest {
+        val paths = mutableListOf<String>()
+        val mockEngine =
+            MockEngine { request ->
+                paths.add(request.url.encodedPath)
+                respond(
+                    content = "4.6.0",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "text/plain"),
+                )
+            }
+
+        val result = QBittorrentClient(client(), httpClient(mockEngine)).testConnection()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(listOf("/api/v2/app/version"), paths)
+    }
+
+    @Test
+    fun testConnectionWithCredentialsLogsInFirst() = runTest {
+        val paths = mutableListOf<String>()
+        val mockEngine =
+            MockEngine { request ->
+                paths.add(request.url.encodedPath)
+                respond(
+                    content = "4.6.0",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "text/plain"),
+                )
+            }
+
+        val result =
+            QBittorrentClient(
+                client(username = "u", password = "p"),
+                httpClient(mockEngine),
+            ).testConnection()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(listOf("/api/v2/auth/login", "/api/v2/app/version"), paths)
+    }
+
+    @Test
+    fun testGetDownloadsRetriesLoginOn401() = runTest {
+        // Verifies the authenticated flag resets on 401 so an expired cookie recovers.
+        val paths = mutableListOf<String>()
+        var infoCalls = 0
+        val mockEngine =
+            MockEngine { request ->
+                val path = request.url.encodedPath
+                paths.add(path)
+                when (path) {
+                    "/api/v2/auth/login" ->
+                        respond(
+                            content = "Ok.",
+                            status = HttpStatusCode.OK,
+                            headers = headersOf(HttpHeaders.ContentType, "text/plain"),
+                        )
+                    "/api/v2/torrents/info" -> {
+                        infoCalls += 1
+                        if (infoCalls == 1) {
+                            respond(content = "Forbidden", status = HttpStatusCode.Unauthorized)
+                        } else {
+                            respond(
+                                content = "[]",
+                                status = HttpStatusCode.OK,
+                                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                            )
+                        }
+                    }
+                    else -> respond(content = "", status = HttpStatusCode.NotFound)
                 }
+            }
 
-            val result = QBittorrentClient(client(apiKey = "key"), httpClient(mockEngine)).testConnection()
+        val qb = QBittorrentClient(client(username = "u", password = "p"), httpClient(mockEngine))
+        val result = qb.getDownloads()
 
-            assertTrue(result is NetworkResult.Success)
-            assertEquals(listOf("/api/v2/app/version"), paths)
-        }
-
-    @Test
-    fun testConnectionWithNoCredentialsSkipsLogin() =
-        runTest {
-            val paths = mutableListOf<String>()
-            val mockEngine =
-                MockEngine { request ->
-                    paths.add(request.url.encodedPath)
-                    respond(
-                        content = "4.6.0",
-                        status = HttpStatusCode.OK,
-                        headers = headersOf(HttpHeaders.ContentType, "text/plain"),
-                    )
-                }
-
-            val result = QBittorrentClient(client(), httpClient(mockEngine)).testConnection()
-
-            assertTrue(result is NetworkResult.Success)
-            assertEquals(listOf("/api/v2/app/version"), paths)
-        }
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(emptyList(), result.data)
+        assertEquals(
+            listOf(
+                "/api/v2/auth/login",
+                "/api/v2/torrents/info",
+                "/api/v2/auth/login",
+                "/api/v2/torrents/info",
+            ),
+            paths,
+        )
+    }
 
     @Test
-    fun testConnectionWithCredentialsLogsInFirst() =
-        runTest {
-            val paths = mutableListOf<String>()
-            val mockEngine =
-                MockEngine { request ->
-                    paths.add(request.url.encodedPath)
-                    respond(
-                        content = "4.6.0",
-                        status = HttpStatusCode.OK,
-                        headers = headersOf(HttpHeaders.ContentType, "text/plain"),
-                    )
-                }
-
-            val result =
-                QBittorrentClient(
-                    client(username = "u", password = "p"),
-                    httpClient(mockEngine),
-                ).testConnection()
-
-            assertTrue(result is NetworkResult.Success)
-            assertEquals(listOf("/api/v2/auth/login", "/api/v2/app/version"), paths)
-        }
-
-    @Test
-    fun testGetDownloadsRetriesLoginOn401() =
-        runTest {
-            // Verifies the authenticated flag resets on 401 so an expired cookie recovers.
-            val paths = mutableListOf<String>()
-            var infoCalls = 0
-            val mockEngine =
-                MockEngine { request ->
-                    val path = request.url.encodedPath
-                    paths.add(path)
-                    when (path) {
-                        "/api/v2/auth/login" ->
+    fun testGetDownloadsReturnsErrorWhenReLoginFails() = runTest {
+        var loginCalls = 0
+        val mockEngine =
+            MockEngine { request ->
+                when (request.url.encodedPath) {
+                    "/api/v2/auth/login" -> {
+                        loginCalls += 1
+                        if (loginCalls == 1) {
                             respond(
                                 content = "Ok.",
                                 status = HttpStatusCode.OK,
                                 headers = headersOf(HttpHeaders.ContentType, "text/plain"),
                             )
-                        "/api/v2/torrents/info" -> {
-                            infoCalls += 1
-                            if (infoCalls == 1) {
-                                respond(content = "Forbidden", status = HttpStatusCode.Unauthorized)
-                            } else {
-                                respond(
-                                    content = "[]",
-                                    status = HttpStatusCode.OK,
-                                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                                )
-                            }
+                        } else {
+                            respond(content = "Fails.", status = HttpStatusCode.Forbidden)
                         }
-                        else -> respond(content = "", status = HttpStatusCode.NotFound)
                     }
+                    "/api/v2/torrents/info" ->
+                        respond(content = "Unauthorized", status = HttpStatusCode.Unauthorized)
+                    else -> respond(content = "", status = HttpStatusCode.NotFound)
                 }
+            }
 
-            val qb = QBittorrentClient(client(username = "u", password = "p"), httpClient(mockEngine))
-            val result = qb.getDownloads()
+        val result =
+            QBittorrentClient(client(username = "u", password = "p"), httpClient(mockEngine))
+                .getDownloads()
 
-            assertTrue(result is NetworkResult.Success)
-            assertEquals(emptyList(), result.data)
-            assertEquals(
-                listOf(
-                    "/api/v2/auth/login",
-                    "/api/v2/torrents/info",
-                    "/api/v2/auth/login",
-                    "/api/v2/torrents/info",
-                ),
-                paths,
-            )
-        }
-
-    @Test
-    fun testGetDownloadsReturnsErrorWhenReLoginFails() =
-        runTest {
-            var loginCalls = 0
-            val mockEngine =
-                MockEngine { request ->
-                    when (request.url.encodedPath) {
-                        "/api/v2/auth/login" -> {
-                            loginCalls += 1
-                            if (loginCalls == 1) {
-                                respond(
-                                    content = "Ok.",
-                                    status = HttpStatusCode.OK,
-                                    headers = headersOf(HttpHeaders.ContentType, "text/plain"),
-                                )
-                            } else {
-                                respond(content = "Fails.", status = HttpStatusCode.Forbidden)
-                            }
-                        }
-                        "/api/v2/torrents/info" ->
-                            respond(content = "Unauthorized", status = HttpStatusCode.Unauthorized)
-                        else -> respond(content = "", status = HttpStatusCode.NotFound)
-                    }
-                }
-
-            val result =
-                QBittorrentClient(client(username = "u", password = "p"), httpClient(mockEngine))
-                    .getDownloads()
-
-            assertTrue(result is NetworkResult.Error)
-            assertEquals(HttpStatusCode.Forbidden.value, result.code)
-        }
+        assertTrue(result is NetworkResult.Error)
+        assertEquals(HttpStatusCode.Forbidden.value, result.code)
+    }
 }

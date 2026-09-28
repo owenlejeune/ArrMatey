@@ -131,11 +131,11 @@ private fun OverlayTopAppBar(
         actions = actions,
         modifier = modifier,
         colors =
-            TopAppBarDefaults.topAppBarColors(
-                containerColor =
-                    MaterialTheme.colorScheme.surface.copy(
-                        alpha = headerBackgroundAlpha,
-                    ),
+        TopAppBarDefaults.topAppBarColors(
+            containerColor =
+            MaterialTheme.colorScheme.surface.copy(
+                alpha = headerBackgroundAlpha,
             ),
+        ),
     )
 }

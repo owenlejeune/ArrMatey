@@ -33,13 +33,13 @@ fun UserInfoRow(
     ) {
         Text(
             text =
-                buildAnnotatedString {
-                    append(label)
-                    append(" ")
-                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(displayName)
-                    }
-                },
+            buildAnnotatedString {
+                append(label)
+                append(" ")
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(displayName)
+                }
+            },
             style = MaterialTheme.typography.bodyMedium,
             color = textColor,
         )

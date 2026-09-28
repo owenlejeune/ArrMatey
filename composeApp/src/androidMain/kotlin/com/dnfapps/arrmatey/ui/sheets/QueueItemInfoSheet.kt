@@ -41,6 +41,7 @@ import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.isDebug
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -60,10 +61,10 @@ fun QueueItemInfoSheet(
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier =
-                Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp),
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
         ) {
             Text(
                 text = item.titleLabel,
@@ -133,11 +134,11 @@ fun QueueItemInfoSheet(
                 chipItems.forEach { chipItem ->
                     Box(
                         modifier =
-                            Modifier.border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                                shape = MaterialTheme.shapes.small,
-                            ),
+                        Modifier.border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            shape = MaterialTheme.shapes.small,
+                        ),
                     ) {
                         Text(
                             chipItem,
@@ -151,19 +152,19 @@ fun QueueItemInfoSheet(
             item.errorMessage?.let { errorMessage ->
                 Card(
                     colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        ),
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 ) {
                     Text(
                         errorMessage,
                         modifier =
-                            Modifier.padding(
-                                horizontal = 16.dp,
-                                vertical = 8.dp,
-                            ),
+                        Modifier.padding(
+                            horizontal = 16.dp,
+                            vertical = 8.dp,
+                        ),
                     )
                 }
             } ?: item.statusMessages.forEach { status ->

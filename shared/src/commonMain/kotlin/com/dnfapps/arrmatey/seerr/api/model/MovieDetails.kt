@@ -40,10 +40,9 @@ data class MovieDetails(
     val video: Boolean = false,
     val collection: Collection? = null,
 ) : RequestMediaDetails {
-    override fun getCertification(localeCode: String): String? =
-        releases
-            ?.results
-            ?.firstOrNull {
-                it.iso_3166_1 == localeCode
-            }?.rating
+    override fun getCertification(localeCode: String): String? = releases
+        ?.results
+        ?.firstOrNull {
+            it.iso_3166_1 == localeCode
+        }?.rating
 }

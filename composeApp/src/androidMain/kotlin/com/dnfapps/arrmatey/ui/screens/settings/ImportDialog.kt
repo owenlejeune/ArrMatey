@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.backup.state.ImportUiState
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.ContainerCard
@@ -75,11 +76,11 @@ fun ImportDialog(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp)
-                    .verticalScroll(rememberScrollState()),
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
+                .verticalScroll(rememberScrollState()),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -106,11 +107,11 @@ fun ImportDialog(
                     )
                     Text(
                         text =
-                            if (importState.decryptedBackup == null) {
-                                mokoString(MR.strings.import_password_prompt)
-                            } else {
-                                mokoString(MR.strings.select_items_to_import)
-                            },
+                        if (importState.decryptedBackup == null) {
+                            mokoString(MR.strings.import_password_prompt)
+                        } else {
+                            mokoString(MR.strings.select_items_to_import)
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -380,14 +381,14 @@ fun ImportDialog(
                             (
                                 importState.decryptedBackup?.globalPreferences?.hasIntegrationsPreferences == true &&
                                     importState.importIntegrationsPreferences
-                            )
+                                )
 
                     Button(
                         enabled =
-                            importState.selectedInstanceIndices.isNotEmpty() ||
-                                importState.selectedDownloadClientIndices.isNotEmpty() ||
-                                importState.selectedCustomWebpageIndices.isNotEmpty() ||
-                                hasGlobalPrefToImport,
+                        importState.selectedInstanceIndices.isNotEmpty() ||
+                            importState.selectedDownloadClientIndices.isNotEmpty() ||
+                            importState.selectedCustomWebpageIndices.isNotEmpty() ||
+                            hasGlobalPrefToImport,
                         onClick = onConfirmImport,
                         modifier = Modifier.weight(1f),
                     ) {

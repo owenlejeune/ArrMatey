@@ -72,6 +72,7 @@ import com.dnfapps.arrmatey.instances.state.AddInstanceUiState
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.permissions.rememberLocationPermissionHandler
 import com.dnfapps.arrmatey.permissions.rememberNotificationPermissionHandler
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.LabelledCheckbox
@@ -163,11 +164,11 @@ fun ArrConfigurationScreen(
             singleLine = true,
             isError = endpointError || hasUrlConflict,
             errorMessage =
-                when {
-                    endpointError -> mokoString(MR.strings.invalid_host)
-                    hasUrlConflict -> mokoString(MR.strings.instance_url_exists)
-                    else -> null
-                },
+            when {
+                endpointError -> mokoString(MR.strings.invalid_host)
+                hasUrlConflict -> mokoString(MR.strings.instance_url_exists)
+                else -> null
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
         )
 
@@ -195,12 +196,12 @@ fun ArrConfigurationScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier =
-                    Modifier.clickable(
-                        enabled = enabled,
-                    ) {
-                        val fullUrl = "${uiState.apiEndpoint}/$getApiKey"
-                        context.openLink(fullUrl)
-                    },
+                Modifier.clickable(
+                    enabled = enabled,
+                ) {
+                    val fullUrl = "${uiState.apiEndpoint}/$getApiKey"
+                    context.openLink(fullUrl)
+                },
             ) {
                 Text(
                     text = mokoString(MR.strings.api_key_in_browser),
@@ -257,9 +258,9 @@ fun ArrConfigurationScreen(
         TestConnectionSection(
             isTesting = isTesting,
             testButtonEnabled =
-                !isTesting &&
-                    apiEndpoint.isNotBlank() &&
-                    (uiState.noApiKeyRequired || apiKey.isNotBlank()),
+            !isTesting &&
+                apiEndpoint.isNotBlank() &&
+                (uiState.noApiKeyRequired || apiKey.isNotBlank()),
             testResult = testResult,
             onTestConnection = onTestConnection,
         )
@@ -384,17 +385,17 @@ private fun HeaderItem(
                 ) {
                     Text(
                         text =
-                            when (header.restrictionType) {
-                                HeaderRestrictionType.Always -> "Always"
-                                HeaderRestrictionType.RemoteOnly -> "Remote Only"
-                                HeaderRestrictionType.SpecificSsids -> {
-                                    if (header.restrictedSsids.isEmpty()) {
-                                        "Select SSIDs"
-                                    } else {
-                                        header.restrictedSsids.joinToString(", ")
-                                    }
+                        when (header.restrictionType) {
+                            HeaderRestrictionType.Always -> "Always"
+                            HeaderRestrictionType.RemoteOnly -> "Remote Only"
+                            HeaderRestrictionType.SpecificSsids -> {
+                                if (header.restrictedSsids.isEmpty()) {
+                                    "Select SSIDs"
+                                } else {
+                                    header.restrictedSsids.joinToString(", ")
                                 }
-                            },
+                            }
+                        },
                     )
                     Spacer(Modifier.weight(1f))
                     Icon(
@@ -413,11 +414,11 @@ private fun HeaderItem(
                             text = {
                                 Text(
                                     text =
-                                        when (type) {
-                                            HeaderRestrictionType.Always -> "Always"
-                                            HeaderRestrictionType.RemoteOnly -> "Remote Only"
-                                            HeaderRestrictionType.SpecificSsids -> "Specific SSIDs"
-                                        },
+                                    when (type) {
+                                        HeaderRestrictionType.Always -> "Always"
+                                        HeaderRestrictionType.RemoteOnly -> "Remote Only"
+                                        HeaderRestrictionType.SpecificSsids -> "Specific SSIDs"
+                                    },
                                 )
                             },
                             onClick = {
@@ -453,17 +454,17 @@ private fun HeaderItem(
                             },
                             label = { Text(ssid) },
                             leadingIcon =
-                                if (selected) {
-                                    {
-                                        Icon(
-                                            imageVector = Icons.Filled.Done,
-                                            contentDescription = "Done icon",
-                                            modifier = Modifier.size(FilterChipDefaults.IconSize),
-                                        )
-                                    }
-                                } else {
-                                    null
-                                },
+                            if (selected) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Filled.Done,
+                                        contentDescription = "Done icon",
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                    )
+                                }
+                            } else {
+                                null
+                            },
                         )
                     }
                 }
@@ -482,9 +483,9 @@ fun TestConnectionSection(
     Card(
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         modifier = Modifier.fillMaxWidth(),
     ) {
@@ -492,9 +493,9 @@ fun TestConnectionSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
         ) {
             Button(
                 onClick = onTestConnection,
@@ -513,11 +514,11 @@ fun TestConnectionSection(
                 Surface(
                     shape = CircleShape,
                     color =
-                        if (result) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.errorContainer
-                        },
+                    if (result) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.errorContainer
+                    },
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -594,9 +595,9 @@ fun CustomHeaderSection(
     Card(
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        ),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
@@ -652,9 +653,9 @@ fun LocalNetworkArea(
     Card(
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         modifier = Modifier.fillMaxWidth(),
     ) {
@@ -710,11 +711,11 @@ fun LocalNetworkArea(
                         singleLine = true,
                         isError = uiState.localNetworkUrlError,
                         errorMessage =
-                            if (uiState.localNetworkUrlError) {
-                                mokoString(MR.strings.invalid_url)
-                            } else {
-                                null
-                            },
+                        if (uiState.localNetworkUrlError) {
+                            mokoString(MR.strings.invalid_url)
+                        } else {
+                            null
+                        },
                     )
 
                     AMOutlinedTextField(
@@ -762,16 +763,16 @@ fun LocalNetworkArea(
                         Button(
                             onClick = onTestLocalConnection,
                             enabled =
-                                !uiState.localTesting &&
-                                    uiState.localNetworkUrl.isNotBlank() &&
-                                    (uiState.noApiKeyRequired || uiState.apiKey.isNotBlank()),
+                            !uiState.localTesting &&
+                                uiState.localNetworkUrl.isNotBlank() &&
+                                (uiState.noApiKeyRequired || uiState.apiKey.isNotBlank()),
                         ) {
                             if (uiState.localTesting) {
                                 CircularProgressIndicator(
                                     modifier =
-                                        Modifier
-                                            .padding(end = 8.dp)
-                                            .size(16.dp),
+                                    Modifier
+                                        .padding(end = 8.dp)
+                                        .size(16.dp),
                                     strokeWidth = 2.dp,
                                 )
                             }
@@ -782,11 +783,11 @@ fun LocalNetworkArea(
                             Surface(
                                 shape = CircleShape,
                                 color =
-                                    if (result) {
-                                        MaterialTheme.colorScheme.primaryContainer
-                                    } else {
-                                        MaterialTheme.colorScheme.errorContainer
-                                    },
+                                if (result) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.errorContainer
+                                },
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -835,9 +836,9 @@ fun Section(content: @Composable ColumnScope.() -> Unit) {
     Card(
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         modifier = Modifier.fillMaxWidth(),
     ) {

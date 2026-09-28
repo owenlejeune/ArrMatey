@@ -19,6 +19,7 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DiscoverSection
 import com.dnfapps.arrmatey.ui.components.InfoArea
@@ -90,61 +91,61 @@ fun OverviewTabContent(
         if (arrInfoItems.isNotEmpty() || seerrInfoItems.isNotEmpty() || state.keywords.isNotEmpty()) {
             InfoArea(
                 cards =
-                    listOf(
-                        InfoCardData(
-                            items = arrInfoItems,
-                            footer =
-                                if (showBothCards && selectedArrInstance != null) {
-                                    { InfoCardInstanceFooter(selectedArrInstance) }
-                                } else {
-                                    null
-                                },
-                        ),
-                        InfoCardData(
-                            items = seerrInfoItems,
-                            content =
-                                if (state.keywords.isNotEmpty()) {
-                                    {
-                                        Column(
-                                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                                        ) {
-                                            Text(
-                                                text = mokoString(MR.strings.tags),
-                                                style = MaterialTheme.typography.bodyMedium,
-                                            )
-                                            FlowRow(
-                                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                listOf(
+                    InfoCardData(
+                        items = arrInfoItems,
+                        footer =
+                        if (showBothCards && selectedArrInstance != null) {
+                            { InfoCardInstanceFooter(selectedArrInstance) }
+                        } else {
+                            null
+                        },
+                    ),
+                    InfoCardData(
+                        items = seerrInfoItems,
+                        content =
+                        if (state.keywords.isNotEmpty()) {
+                            {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Text(
+                                        text = mokoString(MR.strings.tags),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                    )
+                                    FlowRow(
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                                    ) {
+                                        state.keywords.forEach { keyword ->
+                                            Surface(
+                                                shape = MaterialTheme.shapes.small,
+                                                color = MaterialTheme.colorScheme.secondaryContainer,
                                             ) {
-                                                state.keywords.forEach { keyword ->
-                                                    Surface(
-                                                        shape = MaterialTheme.shapes.small,
-                                                        color = MaterialTheme.colorScheme.secondaryContainer,
-                                                    ) {
-                                                        Text(
-                                                            text = keyword.name,
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                            fontWeight = FontWeight.SemiBold,
-                                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                                        )
-                                                    }
-                                                }
+                                                Text(
+                                                    text = keyword.name,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                                )
                                             }
                                         }
                                     }
-                                } else {
-                                    null
-                                },
-                            footer =
-                                if (showBothCards && selectedSeerrInstance != null) {
-                                    { InfoCardInstanceFooter(selectedSeerrInstance) }
-                                } else {
-                                    null
-                                },
-                        ),
+                                }
+                            }
+                        } else {
+                            null
+                        },
+                        footer =
+                        if (showBothCards && selectedSeerrInstance != null) {
+                            { InfoCardInstanceFooter(selectedSeerrInstance) }
+                        } else {
+                            null
+                        },
                     ),
+                ),
                 modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
                 useDualColumn = isExpanded && !isDualPanel,
             )

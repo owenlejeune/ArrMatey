@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -67,12 +68,12 @@ fun IndexersSortMenu(
             ) {
                 Column(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                            .padding(bottom = 32.dp)
-                            .navigationBarsPadding()
-                            .verticalScroll(rememberScrollState()),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 32.dp)
+                        .navigationBarsPadding()
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     // Header with sort direction toggle
@@ -106,11 +107,11 @@ fun IndexersSortMenu(
                             leadingIcon = {
                                 Icon(
                                     imageVector =
-                                        if (sortOrder == SortOrder.Asc) {
-                                            Icons.Default.ArrowUpward
-                                        } else {
-                                            Icons.Default.ArrowDownward
-                                        },
+                                    if (sortOrder == SortOrder.Asc) {
+                                        Icons.Default.ArrowUpward
+                                    } else {
+                                        Icons.Default.ArrowDownward
+                                    },
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp),
                                 )
@@ -138,11 +139,11 @@ fun IndexersSortMenu(
                                     onClick = { onSortByChanged(sort) },
                                     label = { Text(mokoString(sort.resource)) },
                                     leadingIcon =
-                                        if (isSelected) {
-                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                        } else {
-                                            null
-                                        },
+                                    if (isSelected) {
+                                        { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                    } else {
+                                        null
+                                    },
                                     shape = MaterialTheme.shapes.small,
                                 )
                             }

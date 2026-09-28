@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.LargeLabelledSwitch
@@ -71,10 +72,10 @@ fun ArrViewCustomizationSheet(
             type.mockCover?.let { mockCover ->
                 Box(
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                            .padding(bottom = 12.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 12.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     val model = painterResource(mockCover)
@@ -116,11 +117,11 @@ fun ArrViewCustomizationSheet(
 
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 24.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -131,10 +132,10 @@ fun ArrViewCustomizationSheet(
                         SegmentedButton(
                             modifier = Modifier.weight(1f),
                             shape =
-                                SegmentedButtonDefaults.itemShape(
-                                    index = index,
-                                    count = ViewType.entries.size,
-                                ),
+                            SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = ViewType.entries.size,
+                            ),
                             onClick = { onViewTypeChanged(viewType) },
                             selected = viewType == preferences.viewType,
                             label = {
@@ -230,10 +231,10 @@ fun ListTypeOptions(
                     SegmentedButton(
                         modifier = Modifier.weight(1f),
                         shape =
-                            SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = Blur.entries.size,
-                            ),
+                        SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = Blur.entries.size,
+                        ),
                         onClick = { onBannerBlurChanged(blur) },
                         selected = blur == preferences.bannerBlur,
                         label = {
@@ -295,10 +296,10 @@ fun GridTypeOptions(
                     SegmentedButton(
                         modifier = Modifier.weight(1f),
                         shape =
-                            SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = GridDensity.entries.size,
-                            ),
+                        SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = GridDensity.entries.size,
+                        ),
                         onClick = { onGridDensityChanged(density) },
                         selected = density == preferences.gridDensity,
                         label = {
@@ -328,10 +329,10 @@ fun GridTypeOptions(
                     SegmentedButton(
                         modifier = Modifier.weight(1f),
                         shape =
-                            SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = GridSpacing.entries.size,
-                            ),
+                        SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = GridSpacing.entries.size,
+                        ),
                         onClick = { onGridSpacingChanged(spacing) },
                         selected = spacing == preferences.gridSpacing,
                         label = {
@@ -378,10 +379,10 @@ fun PosterOptions(
                     SegmentedButton(
                         modifier = Modifier.weight(1f),
                         shape =
-                            SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = PosterElevation.entries.size,
-                            ),
+                        SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = PosterElevation.entries.size,
+                        ),
                         onClick = { onPosterElevationChanged(elevation) },
                         selected = elevation == preferences.posterElevation,
                         label = {
@@ -411,10 +412,10 @@ fun PosterOptions(
                     SegmentedButton(
                         modifier = Modifier.weight(1f),
                         shape =
-                            SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = PosterRadius.entries.size,
-                            ),
+                        SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = PosterRadius.entries.size,
+                        ),
                         onClick = { onPosterRadiusChanged(radius) },
                         selected = radius == preferences.posterRadius,
                         label = {

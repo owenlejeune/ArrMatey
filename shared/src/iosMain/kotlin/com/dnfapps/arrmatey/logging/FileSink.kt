@@ -167,18 +167,17 @@ actual class FileSink actual constructor(
         }
     }
 
-    fun getAllLogFiles(): List<String> =
-        buildList {
-            if (fileManager.fileExistsAtPath(filePath)) {
-                add(filePath)
-            }
-            for (i in 1..maxBackupFiles) {
-                val backupPath = LogFileManager.getLogFilePath("$filename.$i")
-                if (fileManager.fileExistsAtPath(backupPath)) {
-                    add(backupPath)
-                }
+    fun getAllLogFiles(): List<String> = buildList {
+        if (fileManager.fileExistsAtPath(filePath)) {
+            add(filePath)
+        }
+        for (i in 1..maxBackupFiles) {
+            val backupPath = LogFileManager.getLogFilePath("$filename.$i")
+            if (fileManager.fileExistsAtPath(backupPath)) {
+                add(backupPath)
             }
         }
+    }
 
     fun getTotalLogSize(): Long {
         var totalSize = 0L

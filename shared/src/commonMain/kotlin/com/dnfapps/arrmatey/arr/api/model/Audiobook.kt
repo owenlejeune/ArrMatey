@@ -227,36 +227,34 @@ data class Audiobook(
         get() = "$title $${authors.joinToString(" ")}"
 }
 
-fun Audiobook.toEditBody(): JsonElement =
-    buildJsonObject {
-        put("monitored", monitored)
-        put("title", title)
-        put("subtitle", subtitle)
-        put("authors", authors.toJsonArray())
-        put("narrators", narrators.toJsonArray())
-        put("description", overview)
-        put("publisher", publisher)
-        put("language", language)
-        put("publishedDate", publishedDate?.toString() ?: "")
-        put("publishYear", publishYear)
-        put("edition", edition ?: "")
-        put("series", series)
-        put("seriesNumber", seriesNumber)
-        put("seriesMemberships", JsonArray(seriesMemberships.map { Json.encodeToJsonElement(SeriesMembership.serializer(), it) }))
-        put("genres", genres.toJsonArray())
-        put("imageUrl", imageUrl)
-        put("tags", JsonArray(tags.map { JsonPrimitive(it) }))
-        put("abridged", abridged)
-        put("explicit", explicit)
-        put("runtime", runtime)
-        put("basePath", basePath)
-        put("qualityProfileId", if (qualityProfileId > 0) qualityProfileId else -1)
-    }
+fun Audiobook.toEditBody(): JsonElement = buildJsonObject {
+    put("monitored", monitored)
+    put("title", title)
+    put("subtitle", subtitle)
+    put("authors", authors.toJsonArray())
+    put("narrators", narrators.toJsonArray())
+    put("description", overview)
+    put("publisher", publisher)
+    put("language", language)
+    put("publishedDate", publishedDate?.toString() ?: "")
+    put("publishYear", publishYear)
+    put("edition", edition ?: "")
+    put("series", series)
+    put("seriesNumber", seriesNumber)
+    put("seriesMemberships", JsonArray(seriesMemberships.map { Json.encodeToJsonElement(SeriesMembership.serializer(), it) }))
+    put("genres", genres.toJsonArray())
+    put("imageUrl", imageUrl)
+    put("tags", JsonArray(tags.map { JsonPrimitive(it) }))
+    put("abridged", abridged)
+    put("explicit", explicit)
+    put("runtime", runtime)
+    put("basePath", basePath)
+    put("qualityProfileId", if (qualityProfileId > 0) qualityProfileId else -1)
+}
 
-fun Audiobook.toSearchAudiobook(): SearchAudiobook =
-    SearchAudiobook(
-        asin = asin ?: "",
-        title = title ?: "",
-        summary = overview,
-        authors = authors.map { SearchAuthor(name = it) },
-    )
+fun Audiobook.toSearchAudiobook(): SearchAudiobook = SearchAudiobook(
+    asin = asin ?: "",
+    title = title ?: "",
+    summary = overview,
+    authors = authors.map { SearchAuthor(name = it) },
+)

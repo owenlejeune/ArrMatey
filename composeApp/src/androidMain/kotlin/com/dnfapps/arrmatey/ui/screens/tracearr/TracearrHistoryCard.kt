@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.extensions.pxToDp
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryItem
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
@@ -78,29 +79,29 @@ fun TracearrHistoryCard(
     Card(
         onClick = { onClick?.invoke() },
         modifier =
-            modifier.fillMaxWidth().onGloballyPositioned {
-                cardHeight = it.size.height
-            },
+        modifier.fillMaxWidth().onGloballyPositioned {
+            cardHeight = it.size.height
+        },
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(
                 modifier =
-                    Modifier
-                        .width(6.dp)
-                        .height(cardHeight.pxToDp())
-                        .background(edgeColor),
+                Modifier
+                    .width(6.dp)
+                    .height(cardHeight.pxToDp())
+                    .background(edgeColor),
             )
 
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Row(
@@ -109,11 +110,11 @@ fun TracearrHistoryCard(
                 ) {
                     Box(
                         modifier =
-                            Modifier
-                                .width(60.dp)
-                                .aspectRatio(AspectRatio.Poster.ratio)
-                                .clip(MaterialTheme.shapes.small)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        Modifier
+                            .width(60.dp)
+                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .clip(MaterialTheme.shapes.small)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                         contentAlignment = Alignment.Center,
                     ) {
                         val imageUrl = item.posterUrl ?: item.thumbPath
@@ -149,9 +150,9 @@ fun TracearrHistoryCard(
                                         model = rememberRemoteImageData(avatarUrl, trim = false),
                                         contentDescription = null,
                                         modifier =
-                                            Modifier
-                                                .size(18.dp)
-                                                .clip(CircleShape),
+                                        Modifier
+                                            .size(18.dp)
+                                            .clip(CircleShape),
                                         contentScale = ContentScale.Crop,
                                     )
                                 } else {
@@ -233,10 +234,10 @@ fun TracearrHistoryCard(
                             LinearProgressIndicator(
                                 progress = { progressFraction },
                                 modifier =
-                                    Modifier
-                                        .weight(1f)
-                                        .height(4.dp)
-                                        .clip(RoundedCornerShape(2.dp)),
+                                Modifier
+                                    .weight(1f)
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(2.dp)),
                                 color = TracearrBlue,
                                 trackColor = MaterialTheme.colorScheme.surface,
                             )

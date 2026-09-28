@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrHealthType
 import com.dnfapps.arrmatey.entensions.openLink
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -56,13 +57,13 @@ fun ArrHealthCard(health: ArrHealth) {
     ContainerCard(
         colors = colors,
         modifier =
-            Modifier
-                .clickable(
-                    enabled = health.wikiUrl != null,
-                    onClick = {
-                        health.wikiUrl?.let { context.openLink(it) }
-                    },
-                ),
+        Modifier
+            .clickable(
+                enabled = health.wikiUrl != null,
+                onClick = {
+                    health.wikiUrl?.let { context.openLink(it) }
+                },
+            ),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),

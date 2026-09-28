@@ -9,9 +9,8 @@ class PerformBazarrAutomaticSearchUseCase {
         id: Long,
         type: BazarrMediaType,
         repository: BazarrInstanceRepository,
-    ): NetworkResult<Unit> =
-        when (type) {
-            BazarrMediaType.Series -> repository.autoSearchSeriesSubtitles(id)
-            BazarrMediaType.Movie -> repository.autoSearchMovieSubtitles(id)
-        }
+    ): NetworkResult<Unit> = when (type) {
+        BazarrMediaType.Series -> repository.autoSearchSeriesSubtitles(id)
+        BazarrMediaType.Movie -> repository.autoSearchMovieSubtitles(id)
+    }
 }

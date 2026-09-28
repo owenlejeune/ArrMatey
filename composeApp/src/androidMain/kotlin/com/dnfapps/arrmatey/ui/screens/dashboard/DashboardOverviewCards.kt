@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrHealthType
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.icons.Hard_drive
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
@@ -49,11 +50,11 @@ fun DashboardOverviewCards(
 
     val containerColor by animateColorAsState(
         targetValue =
-            if (isEditing || instances.isEmpty()) {
-                MaterialTheme.colorScheme.surfaceContainerHigh
-            } else {
-                Color.Transparent
-            },
+        if (isEditing || instances.isEmpty()) {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        } else {
+            Color.Transparent
+        },
         label = "ArrOverviewCardBackgroundAnimation",
     )
 
@@ -66,17 +67,17 @@ fun DashboardOverviewCards(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = containerColor,
-            ),
+        CardDefaults.cardColors(
+            containerColor = containerColor,
+        ),
         border =
-            if (isEditing ||
-                instances.isEmpty()
-            ) {
-                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            } else {
-                null
-            },
+        if (isEditing ||
+            instances.isEmpty()
+        ) {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        } else {
+            null
+        },
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
@@ -138,11 +139,11 @@ fun DashboardOverviewCards(
                         value = if (totalIssues == 0) mokoString(MR.strings.no_issues) else "$totalIssues Issues",
                         iconColor = healthColor,
                         containerColor =
-                            if (hasErrors) {
-                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainerHigh
-                            },
+                        if (hasErrors) {
+                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        },
                         onClick = if (!isEditing) onHealthClick else null,
                     )
                 }

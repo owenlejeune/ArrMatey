@@ -38,46 +38,46 @@ fun ProgressBox(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec =
-            infiniteRepeatable(
-                animation =
-                    keyframes {
-                        durationMillis = 1200
-                        0f at 0 using LinearEasing
-                        1f at 1000 using FastOutSlowInEasing
-                        1f at 1200
-                    },
-                repeatMode = RepeatMode.Restart,
-            ),
+        infiniteRepeatable(
+            animation =
+            keyframes {
+                durationMillis = 1200
+                0f at 0 using LinearEasing
+                1f at 1000 using FastOutSlowInEasing
+                1f at 1200
+            },
+            repeatMode = RepeatMode.Restart,
+        ),
         label = "gradientProgress",
     )
 
     Box(
         modifier =
-            modifier
-                .drawBehind {
-                    if (animate) {
-                        val gradientWidth = size.width * gradientProgress
-                        drawRect(
-                            brush =
-                                Brush.horizontalGradient(
-                                    colors = gradientColors,
-                                    startX = 0f,
-                                    endX = gradientWidth,
-                                ),
-                            size = Size(gradientWidth, size.height),
-                        )
+        modifier
+            .drawBehind {
+                if (animate) {
+                    val gradientWidth = size.width * gradientProgress
+                    drawRect(
+                        brush =
+                        Brush.horizontalGradient(
+                            colors = gradientColors,
+                            startX = 0f,
+                            endX = gradientWidth,
+                        ),
+                        size = Size(gradientWidth, size.height),
+                    )
 
-                        if (gradientWidth < size.width) {
-                            drawRect(
-                                color = backgroundColor,
-                                topLeft = Offset(gradientWidth, 0f),
-                                size = Size(size.width - gradientWidth, size.height),
-                            )
-                        } else {
-                            drawRect(color = backgroundColor)
-                        }
+                    if (gradientWidth < size.width) {
+                        drawRect(
+                            color = backgroundColor,
+                            topLeft = Offset(gradientWidth, 0f),
+                            size = Size(size.width - gradientWidth, size.height),
+                        )
+                    } else {
+                        drawRect(color = backgroundColor)
                     }
-                },
+                }
+            },
         content = content,
     )
 }

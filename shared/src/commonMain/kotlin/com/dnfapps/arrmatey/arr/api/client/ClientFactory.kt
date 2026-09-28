@@ -108,69 +108,68 @@ open class HttpClientFactory(
 ) {
     open fun create(instance: Instance): HttpClient = createInstanceClient(instance, json, logger)
 
-    fun createDownloadClient(downloadClient: DownloadClient): HttpClient =
-        HttpClient {
-            expectSuccess = true
-            install(ContentNegotiation) {
-                json(json)
-            }
+    fun createDownloadClient(downloadClient: DownloadClient): HttpClient = HttpClient {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            json(json)
+        }
 
-            install(HttpTimeout) {
-                requestTimeoutMillis = 30_000
-                socketTimeoutMillis = 30_000
-            }
+        install(HttpTimeout) {
+            requestTimeoutMillis = 30_000
+            socketTimeoutMillis = 30_000
+        }
 
-            install(HttpRequestRetry) {
-                // Never retry 4xx: repeated failed auth triggers qBittorrent's IP ban.
-                retryOnServerErrors(maxRetries = 3)
-                retryOnExceptionIf(maxRetries = 3) { _, cause ->
-                    cause !is ClientRequestException
+        install(HttpRequestRetry) {
+            // Never retry 4xx: repeated failed auth triggers qBittorrent's IP ban.
+            retryOnServerErrors(maxRetries = 3)
+            retryOnExceptionIf(maxRetries = 3) { _, cause ->
+                cause !is ClientRequestException
+            }
+            exponentialDelay()
+        }
+
+        install(HttpCookies) {
+            storage = AcceptAllCookiesStorage()
+        }
+
+        install(Logging) {
+            this.logger = logger
+            level = LogLevel.ALL
+        }
+
+        defaultRequest {
+            url(downloadClient.getEffectiveBaseUrl().trimEnd('/') + "/")
+            if (!url.user.isNullOrBlank() && !url.password.isNullOrBlank()) {
+                basicAuth(url.user!!, url.password!!)
+                url.user = null
+                url.password = null
+            }
+            if (!downloadClient.noApiKeyRequired && downloadClient.apiKey.value.isNotEmpty()) {
+                when (downloadClient.type) {
+                    // qBittorrent >= 5.2 only accepts API keys via Authorization: Bearer.
+                    DownloadClientType.QBittorrent ->
+                        header(HttpHeaders.Authorization, "Bearer ${downloadClient.apiKey.value}")
+                    else ->
+                        header(HEADER_X_API_KEY, downloadClient.apiKey.value)
                 }
-                exponentialDelay()
             }
-
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-            }
-
-            install(Logging) {
-                this.logger = logger
-                level = LogLevel.ALL
-            }
-
-            defaultRequest {
-                url(downloadClient.getEffectiveBaseUrl().trimEnd('/') + "/")
-                if (!url.user.isNullOrBlank() && !url.password.isNullOrBlank()) {
-                    basicAuth(url.user!!, url.password!!)
-                    url.user = null
-                    url.password = null
-                }
-                if (!downloadClient.noApiKeyRequired && downloadClient.apiKey.value.isNotEmpty()) {
-                    when (downloadClient.type) {
-                        // qBittorrent >= 5.2 only accepts API keys via Authorization: Bearer.
-                        DownloadClientType.QBittorrent ->
-                            header(HttpHeaders.Authorization, "Bearer ${downloadClient.apiKey.value}")
-                        else ->
-                            header(HEADER_X_API_KEY, downloadClient.apiKey.value)
-                    }
-                }
-                downloadClient.headers.forEach { header ->
-                    val shouldSend =
-                        when (header.restrictionType) {
-                            HeaderRestrictionType.Always -> true
-                            HeaderRestrictionType.RemoteOnly -> !downloadClient.isUsingLocalNetwork()
-                            HeaderRestrictionType.SpecificSsids -> {
-                                val currentSsid = getNetworkUtils().getCurrentWifiSsid()
-                                currentSsid != null && header.restrictedSsids.contains(currentSsid)
-                            }
+            downloadClient.headers.forEach { header ->
+                val shouldSend =
+                    when (header.restrictionType) {
+                        HeaderRestrictionType.Always -> true
+                        HeaderRestrictionType.RemoteOnly -> !downloadClient.isUsingLocalNetwork()
+                        HeaderRestrictionType.SpecificSsids -> {
+                            val currentSsid = getNetworkUtils().getCurrentWifiSsid()
+                            currentSsid != null && header.restrictedSsids.contains(currentSsid)
                         }
-
-                    if (shouldSend) {
-                        header(header.key, header.value)
                     }
+
+                if (shouldSend) {
+                    header(header.key, header.value)
                 }
             }
         }
+    }
 
     fun createGeneric(): HttpClient = createInstanceClient(null, json, logger)
 }

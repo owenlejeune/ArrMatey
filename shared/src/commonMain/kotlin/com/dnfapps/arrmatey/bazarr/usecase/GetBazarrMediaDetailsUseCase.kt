@@ -17,20 +17,19 @@ class GetBazarrMediaDetailsUseCase(
     operator fun invoke(
         id: Long,
         type: BazarrMediaType,
-    ): Flow<BazarrMedia?> =
-        getBazarrRespositoryUseCase
-            .observeSelected()
-            .filterNotNull()
-            .flatMapLatest { repo ->
-                when (type) {
-                    BazarrMediaType.Movie ->
-                        repo.movies.map { result ->
-                            (result as? NetworkResult.Success)?.data?.find { it.serviceId == id }
-                        }
-                    BazarrMediaType.Series ->
-                        repo.series.map { result ->
-                            (result as? NetworkResult.Success)?.data?.find { it.serviceId == id }
-                        }
-                }
+    ): Flow<BazarrMedia?> = getBazarrRespositoryUseCase
+        .observeSelected()
+        .filterNotNull()
+        .flatMapLatest { repo ->
+            when (type) {
+                BazarrMediaType.Movie ->
+                    repo.movies.map { result ->
+                        (result as? NetworkResult.Success)?.data?.find { it.serviceId == id }
+                    }
+                BazarrMediaType.Series ->
+                    repo.series.map { result ->
+                        (result as? NetworkResult.Success)?.data?.find { it.serviceId == id }
+                    }
             }
+        }
 }

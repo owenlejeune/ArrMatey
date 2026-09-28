@@ -9,44 +9,44 @@ class CreditsGroupingTest {
         val credits =
             Credits(
                 crew =
-                    listOf(
-                        CrewMember(
-                            id = 2381985,
-                            creditId = "c1",
-                            gender = 2,
-                            name = "Curry Barker",
-                            job = "Writer",
-                            department = "Writing",
-                            profilePath = "/A16CxGKlkQYryoxGpxzKj4Wxk83.jpg",
-                        ),
-                        CrewMember(
-                            id = 2381985,
-                            creditId = "c2",
-                            gender = 2,
-                            name = "Curry Barker",
-                            job = "Director",
-                            department = "Directing",
-                            profilePath = "/A16CxGKlkQYryoxGpxzKj4Wxk83.jpg",
-                        ),
-                        CrewMember(
-                            id = 239663,
-                            creditId = "c3",
-                            gender = 2,
-                            name = "James Harris",
-                            job = "Producer",
-                            department = "Production",
-                            profilePath = "/saC2CiD6PUazSJEeKJODHoI5VWE.jpg",
-                        ),
-                        CrewMember(
-                            id = 2381985,
-                            creditId = "c4",
-                            gender = 2,
-                            name = "Curry Barker",
-                            job = "Editor",
-                            department = "Editing",
-                            profilePath = "/A16CxGKlkQYryoxGpxzKj4Wxk83.jpg",
-                        ),
+                listOf(
+                    CrewMember(
+                        id = 2381985,
+                        creditId = "c1",
+                        gender = 2,
+                        name = "Curry Barker",
+                        job = "Writer",
+                        department = "Writing",
+                        profilePath = "/A16CxGKlkQYryoxGpxzKj4Wxk83.jpg",
                     ),
+                    CrewMember(
+                        id = 2381985,
+                        creditId = "c2",
+                        gender = 2,
+                        name = "Curry Barker",
+                        job = "Director",
+                        department = "Directing",
+                        profilePath = "/A16CxGKlkQYryoxGpxzKj4Wxk83.jpg",
+                    ),
+                    CrewMember(
+                        id = 239663,
+                        creditId = "c3",
+                        gender = 2,
+                        name = "James Harris",
+                        job = "Producer",
+                        department = "Production",
+                        profilePath = "/saC2CiD6PUazSJEeKJODHoI5VWE.jpg",
+                    ),
+                    CrewMember(
+                        id = 2381985,
+                        creditId = "c4",
+                        gender = 2,
+                        name = "Curry Barker",
+                        job = "Editor",
+                        department = "Editing",
+                        profilePath = "/A16CxGKlkQYryoxGpxzKj4Wxk83.jpg",
+                    ),
+                ),
             )
 
         val grouped = credits.groupedCrew
@@ -67,35 +67,35 @@ class CreditsGroupingTest {
         val credits =
             Credits(
                 cast =
-                    listOf(
-                        CastMember(
-                            id = 1,
-                            character = "Character A",
-                            creditId = "ca1",
-                            gender = 2,
-                            name = "Actor One",
-                            order = 0,
-                            profilePath = "/profile1.jpg",
-                        ),
-                        CastMember(
-                            id = 2,
-                            character = "Character B",
-                            creditId = "ca2",
-                            gender = 1,
-                            name = "Actor Two",
-                            order = 1,
-                            profilePath = "/profile2.jpg",
-                        ),
-                        CastMember(
-                            id = 1,
-                            character = "Character C",
-                            creditId = "ca3",
-                            gender = 2,
-                            name = "Actor One",
-                            order = 2,
-                            profilePath = null,
-                        ),
+                listOf(
+                    CastMember(
+                        id = 1,
+                        character = "Character A",
+                        creditId = "ca1",
+                        gender = 2,
+                        name = "Actor One",
+                        order = 0,
+                        profilePath = "/profile1.jpg",
                     ),
+                    CastMember(
+                        id = 2,
+                        character = "Character B",
+                        creditId = "ca2",
+                        gender = 1,
+                        name = "Actor Two",
+                        order = 1,
+                        profilePath = "/profile2.jpg",
+                    ),
+                    CastMember(
+                        id = 1,
+                        character = "Character C",
+                        creditId = "ca3",
+                        gender = 2,
+                        name = "Actor One",
+                        order = 2,
+                        profilePath = null,
+                    ),
+                ),
             )
 
         val grouped = credits.groupedCast
@@ -114,32 +114,32 @@ class CreditsGroupingTest {
         val credits =
             Credits(
                 crew =
-                    listOf(
-                        CrewMember(
-                            id = 10,
-                            creditId = "c1",
-                            gender = 1,
-                            name = "Jane Doe",
-                            job = "Producer",
-                            department = "Production",
-                        ),
-                        CrewMember(
-                            id = 10,
-                            creditId = "c2",
-                            gender = 1,
-                            name = "Jane Doe",
-                            job = "Producer",
-                            department = "Production",
-                        ),
-                        CrewMember(
-                            id = 10,
-                            creditId = "c3",
-                            gender = 1,
-                            name = "Jane Doe",
-                            job = "Executive Producer",
-                            department = "Production",
-                        ),
+                listOf(
+                    CrewMember(
+                        id = 10,
+                        creditId = "c1",
+                        gender = 1,
+                        name = "Jane Doe",
+                        job = "Producer",
+                        department = "Production",
                     ),
+                    CrewMember(
+                        id = 10,
+                        creditId = "c2",
+                        gender = 1,
+                        name = "Jane Doe",
+                        job = "Producer",
+                        department = "Production",
+                    ),
+                    CrewMember(
+                        id = 10,
+                        creditId = "c3",
+                        gender = 1,
+                        name = "Jane Doe",
+                        job = "Executive Producer",
+                        department = "Production",
+                    ),
+                ),
             )
 
         val grouped = credits.groupedCrew

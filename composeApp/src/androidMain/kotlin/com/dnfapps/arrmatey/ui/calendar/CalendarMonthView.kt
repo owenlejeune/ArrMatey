@@ -42,6 +42,7 @@ import com.dnfapps.arrmatey.arr.state.CalendarState
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.extensions.localToday
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
@@ -133,12 +134,12 @@ fun CalendarMonthView(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding =
-                        PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = 16.dp + LocalFloatingBarBottomPadding.current,
-                        ),
+                    PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 16.dp,
+                        bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+                    ),
                 ) {
                     item {
                         CalendarDaySection(
@@ -156,18 +157,18 @@ fun CalendarMonthView(
         ProvideFloatingBarAction(
             visible = useFloatingNavigationBar && !isTodaySelected,
             action =
-                FloatingBarAction(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Today,
-                            contentDescription = mokoString(MR.strings.today),
-                        )
-                    },
-                    onClick = {
-                        currentMonth = today
-                        selectedDate = today
-                    },
-                ),
+            FloatingBarAction(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Today,
+                        contentDescription = mokoString(MR.strings.today),
+                    )
+                },
+                onClick = {
+                    currentMonth = today
+                    selectedDate = today
+                },
+            ),
         )
 
         if (!useFloatingNavigationBar) {
@@ -206,9 +207,9 @@ private fun MonthHeader(
 ) {
     Row(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+        Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.androidModule
 import com.dnfapps.arrmatey.di.appModules
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUser
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrViolation
@@ -119,9 +120,9 @@ fun TracearrViolationsContent(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             when (state) {
                 is TracearrViolationsState.Initial,
@@ -184,9 +185,9 @@ fun TracearrViolationsContent(
                     if (state.filteredViolations.isEmpty()) {
                         Column(
                             modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(32.dp),
+                            Modifier
+                                .fillMaxSize()
+                                .padding(32.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
                         ) {
@@ -198,11 +199,11 @@ fun TracearrViolationsContent(
                             )
                             Text(
                                 text =
-                                    if (state.searchQuery.isBlank()) {
-                                        mokoString(MR.strings.no_violations_found)
-                                    } else {
-                                        mokoString(MR.strings.no_results_found)
-                                    },
+                                if (state.searchQuery.isBlank()) {
+                                    mokoString(MR.strings.no_violations_found)
+                                } else {
+                                    mokoString(MR.strings.no_results_found)
+                                },
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 16.dp),
@@ -213,20 +214,20 @@ fun TracearrViolationsContent(
                             state = listState,
                             modifier = Modifier.fillMaxSize(),
                             contentPadding =
-                                PaddingValues(
-                                    start = 16.dp,
-                                    end = 16.dp,
-                                    top = 16.dp,
-                                    bottom =
-                                        16.dp +
-                                            if (LocalFloatingBarBottomPadding.current >
-                                                0.dp
-                                            ) {
-                                                LocalFloatingBarBottomPadding.current
-                                            } else {
-                                                navigationBarBottomInset()
-                                            },
-                                ),
+                            PaddingValues(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = 16.dp,
+                                bottom =
+                                16.dp +
+                                    if (LocalFloatingBarBottomPadding.current >
+                                        0.dp
+                                    ) {
+                                        LocalFloatingBarBottomPadding.current
+                                    } else {
+                                        navigationBarBottomInset()
+                                    },
+                            ),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             items(
@@ -240,9 +241,9 @@ fun TracearrViolationsContent(
                                 item {
                                     Box(
                                         modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         LoadingIndicator()
@@ -271,16 +272,16 @@ fun TracearrViolationsScreenPreview() {
                 acknowledged = false,
                 createdAt = "2026-09-09T10:00:00.000Z",
                 rule =
-                    TracearrViolationRule(
-                        id = "rule-1",
-                        type = "stream_limit",
-                        name = "Max 2 concurrent streams exceeded",
-                    ),
+                TracearrViolationRule(
+                    id = "rule-1",
+                    type = "stream_limit",
+                    name = "Max 2 concurrent streams exceeded",
+                ),
                 user =
-                    TracearrUser(
-                        id = "user-1",
-                        username = "john_doe",
-                    ),
+                TracearrUser(
+                    id = "user-1",
+                    username = "john_doe",
+                ),
             ),
             TracearrViolation(
                 id = "2",
@@ -290,16 +291,16 @@ fun TracearrViolationsScreenPreview() {
                 acknowledged = true,
                 createdAt = "2026-09-08T18:30:00.000Z",
                 rule =
-                    TracearrViolationRule(
-                        id = "rule-2",
-                        type = "location_mismatch",
-                        name = "New login from unknown location",
-                    ),
+                TracearrViolationRule(
+                    id = "rule-2",
+                    type = "location_mismatch",
+                    name = "New login from unknown location",
+                ),
                 user =
-                    TracearrUser(
-                        id = "user-2",
-                        username = "jane_smith",
-                    ),
+                TracearrUser(
+                    id = "user-2",
+                    username = "jane_smith",
+                ),
             ),
             TracearrViolation(
                 id = "3",
@@ -309,16 +310,16 @@ fun TracearrViolationsScreenPreview() {
                 acknowledged = false,
                 createdAt = "2026-09-07T14:15:00.000Z",
                 rule =
-                    TracearrViolationRule(
-                        id = "rule-3",
-                        type = "bandwidth_limit",
-                        name = "Bandwidth limit threshold reached",
-                    ),
+                TracearrViolationRule(
+                    id = "rule-3",
+                    type = "bandwidth_limit",
+                    name = "Bandwidth limit threshold reached",
+                ),
                 user =
-                    TracearrUser(
-                        id = "user-3",
-                        username = "alex_v",
-                    ),
+                TracearrUser(
+                    id = "user-3",
+                    username = "alex_v",
+                ),
             ),
         )
 
@@ -333,11 +334,11 @@ fun TracearrViolationsScreenPreview() {
     ArrMateyTheme {
         TracearrViolationsContent(
             state =
-                TracearrViolationsState.Success(
-                    violations = mockViolations,
-                    filteredViolations = mockViolations,
-                    total = mockViolations.size,
-                ),
+            TracearrViolationsState.Success(
+                violations = mockViolations,
+                filteredViolations = mockViolations,
+                total = mockViolations.size,
+            ),
             isRefreshing = false,
             textFieldState = rememberTextFieldState(),
             onRefresh = {},

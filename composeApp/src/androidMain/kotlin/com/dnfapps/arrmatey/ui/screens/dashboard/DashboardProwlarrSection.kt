@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.utils.mokoString
@@ -45,11 +46,11 @@ fun DashboardProwlarrSection(
 
     val containerColor by animateColorAsState(
         targetValue =
-            if (isEditing || prowlarrStats.isEmpty()) {
-                MaterialTheme.colorScheme.surfaceContainerHigh
-            } else {
-                Color.Transparent
-            },
+        if (isEditing || prowlarrStats.isEmpty()) {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        } else {
+            Color.Transparent
+        },
         label = "ProwlarrCardBackgroundAnimation",
     )
 
@@ -62,17 +63,17 @@ fun DashboardProwlarrSection(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = containerColor,
-            ),
+        CardDefaults.cardColors(
+            containerColor = containerColor,
+        ),
         border =
-            if (isEditing ||
-                prowlarrStats.isEmpty()
-            ) {
-                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            } else {
-                null
-            },
+        if (isEditing ||
+            prowlarrStats.isEmpty()
+        ) {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        } else {
+            null
+        },
     ) {
         Column(
             modifier = Modifier.padding(internalPadding),
@@ -123,17 +124,17 @@ fun DashboardProwlarrSection(
                         label = mokoString(MR.strings.failing_indexers),
                         count = totalFailingIndexers,
                         iconColor =
-                            if (totalFailingIndexers > 0) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.secondary
-                            },
+                        if (totalFailingIndexers > 0) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.secondary
+                        },
                         containerColor =
-                            if (totalFailingIndexers > 0) {
-                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainerHigh
-                            },
+                        if (totalFailingIndexers > 0) {
+                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        },
                     )
                 }
             }

@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.seerr.state
 import com.dnfapps.arrmatey.seerr.api.model.MediaInfo
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.Video
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Contextual

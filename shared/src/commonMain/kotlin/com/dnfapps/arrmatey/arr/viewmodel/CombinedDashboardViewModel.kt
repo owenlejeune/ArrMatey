@@ -121,8 +121,8 @@ class CombinedDashboardViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue =
-                    com.dnfapps.arrmatey.datastore
-                        .DiscoverSectionPreferences(),
+                com.dnfapps.arrmatey.datastore
+                    .DiscoverSectionPreferences(),
             )
 
     private val arrInstancesFlow =
@@ -361,9 +361,9 @@ class CombinedDashboardViewModel(
                             transferInfo = transfer,
                             isOnline = true,
                             activeDownloadsCount =
-                                clientItems.count {
-                                    (it.downloadSpeed > 0) || (it.uploadSpeed > 0) || (it.progress < 1.0)
-                                },
+                            clientItems.count {
+                                (it.downloadSpeed > 0) || (it.uploadSpeed > 0) || (it.progress < 1.0)
+                            },
                         )
                     }.toMutableList()
 
@@ -376,9 +376,9 @@ class CombinedDashboardViewModel(
                                 client = client,
                                 isOnline = false,
                                 activeDownloadsCount =
-                                    clientItems.count {
-                                        (it.downloadSpeed > 0) || (it.uploadSpeed > 0) || (it.progress < 1.0)
-                                    },
+                                clientItems.count {
+                                    (it.downloadSpeed > 0) || (it.uploadSpeed > 0) || (it.progress < 1.0)
+                                },
                             ),
                         )
                     }
@@ -540,14 +540,14 @@ class CombinedDashboardViewModel(
                     upcomingTv = upcomingTv,
                     quickPickItem = quickPick,
                     networkStatus =
-                        resolveNetworkStatus(
-                            instances,
-                            seerrInstances,
-                            prowlarrStats,
-                            bazarrStats,
-                            downloadClients,
-                            tracearrStats,
-                        ),
+                    resolveNetworkStatus(
+                        instances,
+                        seerrInstances,
+                        prowlarrStats,
+                        bazarrStats,
+                        downloadClients,
+                        tracearrStats,
+                    ),
                     isRefreshing = refreshing,
                     isLoadingMoreDiscover = isDiscoverLoadingMore,
                 )
@@ -560,49 +560,48 @@ class CombinedDashboardViewModel(
     private suspend fun enrichDiscoverResult(
         seerrRepo: SeerrInstanceRepository,
         item: DiscoverResult,
-    ): DiscoverResult =
-        try {
-            when (item.mediaType) {
-                RequestType.Movie -> {
-                    val detailsRes = seerrRepo.client.getMovieDetails(item.id)
-                    if (detailsRes is NetworkResult.Success) {
-                        val details = detailsRes.data
-                        item.copy(
-                            keywords = details.keywords,
-                            productionCompanies = details.productionCompanies,
-                            contentRating =
-                                details.getCertification("US") ?: details.releases
-                                    ?.results
-                                    ?.firstOrNull()
-                                    ?.rating,
-                        )
-                    } else {
-                        item
-                    }
+    ): DiscoverResult = try {
+        when (item.mediaType) {
+            RequestType.Movie -> {
+                val detailsRes = seerrRepo.client.getMovieDetails(item.id)
+                if (detailsRes is NetworkResult.Success) {
+                    val details = detailsRes.data
+                    item.copy(
+                        keywords = details.keywords,
+                        productionCompanies = details.productionCompanies,
+                        contentRating =
+                        details.getCertification("US") ?: details.releases
+                            ?.results
+                            ?.firstOrNull()
+                            ?.rating,
+                    )
+                } else {
+                    item
                 }
-                RequestType.Tv -> {
-                    val detailsRes = seerrRepo.client.getTvDetails(item.id)
-                    if (detailsRes is NetworkResult.Success) {
-                        val details = detailsRes.data
-                        item.copy(
-                            keywords = details.keywords,
-                            productionCompanies = details.productionCompanies,
-                            networks = details.networks,
-                            contentRating =
-                                details.getCertification("US") ?: details.contentRatings
-                                    ?.results
-                                    ?.firstOrNull()
-                                    ?.rating,
-                        )
-                    } else {
-                        item
-                    }
-                }
-                else -> item
             }
-        } catch (_: Exception) {
-            item
+            RequestType.Tv -> {
+                val detailsRes = seerrRepo.client.getTvDetails(item.id)
+                if (detailsRes is NetworkResult.Success) {
+                    val details = detailsRes.data
+                    item.copy(
+                        keywords = details.keywords,
+                        productionCompanies = details.productionCompanies,
+                        networks = details.networks,
+                        contentRating =
+                        details.getCertification("US") ?: details.contentRatings
+                            ?.results
+                            ?.firstOrNull()
+                            ?.rating,
+                    )
+                } else {
+                    item
+                }
+            }
+            else -> item
         }
+    } catch (_: Exception) {
+        item
+    }
 
     private suspend fun fetchDiscoverData() {
         val seerrRepo = instanceManager.getAllSeerrRepositories().firstOrNull() ?: return

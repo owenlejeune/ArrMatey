@@ -20,76 +20,71 @@ import kotlin.test.assertTrue
 class SABnzbdClientTest {
     private val queueResponseBody = """{"queue":{"paused":false,"slots":[]}}"""
 
-    private fun client(apiKey: String = "abc123") =
-        DownloadClient(
-            id = 1,
-            type = DownloadClientType.SABnzbd,
-            label = "sab",
-            url = "http://localhost:8080",
-            apiKey = EncryptedString(apiKey),
-        )
+    private fun client(apiKey: String = "abc123") = DownloadClient(
+        id = 1,
+        type = DownloadClientType.SABnzbd,
+        label = "sab",
+        url = "http://localhost:8080",
+        apiKey = EncryptedString(apiKey),
+    )
 
-    private fun httpClient(mockEngine: MockEngine) =
-        HttpClient(mockEngine) {
-            expectSuccess = true
-            install(ContentNegotiation) {
-                json(Json { ignoreUnknownKeys = true })
+    private fun httpClient(mockEngine: MockEngine) = HttpClient(mockEngine) {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+    }
+
+    @Test
+    fun testConnectionSendsCurrentApiKey() = runTest {
+        var seenKey: String? = null
+        val mockEngine =
+            MockEngine { request ->
+                seenKey = request.url.parameters["apikey"]
+                respond(
+                    content = queueResponseBody,
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
             }
-        }
+
+        val result = SABnzbdClient(client(apiKey = "abc123"), httpClient(mockEngine)).testConnection()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals("abc123", seenKey)
+    }
 
     @Test
-    fun testConnectionSendsCurrentApiKey() =
-        runTest {
-            var seenKey: String? = null
-            val mockEngine =
-                MockEngine { request ->
-                    seenKey = request.url.parameters["apikey"]
-                    respond(
-                        content = queueResponseBody,
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
-                    )
-                }
+    fun testConnectionEachCallPicksUpUpdatedApiKey() = runTest {
+        // Stateless api-key auth — no cache to invalidate on edit.
+        val seenKeys = mutableListOf<String?>()
+        val mockEngine =
+            MockEngine { request ->
+                seenKeys.add(request.url.parameters["apikey"])
+                respond(
+                    content = queueResponseBody,
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
 
-            val result = SABnzbdClient(client(apiKey = "abc123"), httpClient(mockEngine)).testConnection()
+        val engine = httpClient(mockEngine)
+        SABnzbdClient(client(apiKey = "old"), engine).testConnection()
+        SABnzbdClient(client(apiKey = "new"), engine).testConnection()
 
-            assertTrue(result is NetworkResult.Success)
-            assertEquals("abc123", seenKey)
-        }
-
-    @Test
-    fun testConnectionEachCallPicksUpUpdatedApiKey() =
-        runTest {
-            // Stateless api-key auth — no cache to invalidate on edit.
-            val seenKeys = mutableListOf<String?>()
-            val mockEngine =
-                MockEngine { request ->
-                    seenKeys.add(request.url.parameters["apikey"])
-                    respond(
-                        content = queueResponseBody,
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
-                    )
-                }
-
-            val engine = httpClient(mockEngine)
-            SABnzbdClient(client(apiKey = "old"), engine).testConnection()
-            SABnzbdClient(client(apiKey = "new"), engine).testConnection()
-
-            assertEquals(listOf<String?>("old", "new"), seenKeys)
-        }
+        assertEquals(listOf<String?>("old", "new"), seenKeys)
+    }
 
     @Test
-    fun testConnectionReturnsErrorOnUnauthorized() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(content = "unauthorized", status = HttpStatusCode.Unauthorized)
-                }
+    fun testConnectionReturnsErrorOnUnauthorized() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(content = "unauthorized", status = HttpStatusCode.Unauthorized)
+            }
 
-            val result = SABnzbdClient(client(), httpClient(mockEngine)).testConnection()
+        val result = SABnzbdClient(client(), httpClient(mockEngine)).testConnection()
 
-            assertTrue(result is NetworkResult.Error)
-            assertEquals(HttpStatusCode.Unauthorized.value, result.code)
-        }
+        assertTrue(result is NetworkResult.Error)
+        assertEquals(HttpStatusCode.Unauthorized.value, result.code)
+    }
 }

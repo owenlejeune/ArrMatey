@@ -41,12 +41,11 @@ class TransmissionClient(
             ignoreUnknownKeys = true
         }
 
-    override suspend fun testConnection(): NetworkResult<Unit> =
-        when (val result = executeTransmissionRequest<JsonObject>("session-stats")) {
-            is NetworkResult.Success -> result.data.toUnitResult()
-            is NetworkResult.Error -> result
-            is NetworkResult.Loading -> result
-        }
+    override suspend fun testConnection(): NetworkResult<Unit> = when (val result = executeTransmissionRequest<JsonObject>("session-stats")) {
+        is NetworkResult.Success -> result.data.toUnitResult()
+        is NetworkResult.Error -> result
+        is NetworkResult.Loading -> result
+    }
 
     override suspend fun getDownloads(): NetworkResult<List<DownloadItem>> {
         val arguments =
@@ -92,92 +91,87 @@ class TransmissionClient(
         }
     }
 
-    override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> =
-        executeTorrentAction(
-            method = "torrent-stop",
-            ids = ids,
-        )
+    override suspend fun pauseDownload(ids: List<String>): NetworkResult<Unit> = executeTorrentAction(
+        method = "torrent-stop",
+        ids = ids,
+    )
 
-    override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> =
-        executeTorrentAction(
-            method = "torrent-start",
-            ids = ids,
-        )
+    override suspend fun resumeDownload(ids: List<String>): NetworkResult<Unit> = executeTorrentAction(
+        method = "torrent-start",
+        ids = ids,
+    )
 
     override suspend fun deleteDownload(
         ids: List<String>,
         deleteFiles: Boolean,
-    ): NetworkResult<Unit> =
-        when (
-            val result =
-                executeTransmissionRequest<JsonObject>(
-                    method = "torrent-remove",
-                    arguments =
-                        buildJsonObject {
-                            put(
-                                "ids",
-                                buildJsonArray {
-                                    ids.forEach { id ->
-                                        add(id.toTransmissionId())
-                                    }
-                                },
-                            )
-                            put("delete-local-data", JsonPrimitive(deleteFiles))
+    ): NetworkResult<Unit> = when (
+        val result =
+            executeTransmissionRequest<JsonObject>(
+                method = "torrent-remove",
+                arguments =
+                buildJsonObject {
+                    put(
+                        "ids",
+                        buildJsonArray {
+                            ids.forEach { id ->
+                                add(id.toTransmissionId())
+                            }
                         },
-                )
-        ) {
-            is NetworkResult.Success -> result.data.toUnitResult()
-            is NetworkResult.Error -> result
-            is NetworkResult.Loading -> result
-        }
+                    )
+                    put("delete-local-data", JsonPrimitive(deleteFiles))
+                },
+            )
+    ) {
+        is NetworkResult.Success -> result.data.toUnitResult()
+        is NetworkResult.Error -> result
+        is NetworkResult.Loading -> result
+    }
 
-    override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> =
-        when (val result = executeTransmissionRequest<JsonObject>("session-stats")) {
-            is NetworkResult.Success -> {
-                when (val rpcResult = result.data.argumentsResultOrError()) {
-                    is NetworkResult.Success -> {
-                        val sessionStats = json.decodeFromJsonElement<TransmissionSessionStats>(rpcResult.data)
-                        NetworkResult.Success(
-                            DownloadTransferInfo(
-                                client = downloadClient,
-                                downloadSpeed = sessionStats.downloadSpeed,
-                                uploadSpeed = sessionStats.uploadSpeed,
-                            ),
-                        )
-                    }
-                    is NetworkResult.Error -> rpcResult
-                    is NetworkResult.Loading -> rpcResult
+    override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> = when (val result = executeTransmissionRequest<JsonObject>("session-stats")) {
+        is NetworkResult.Success -> {
+            when (val rpcResult = result.data.argumentsResultOrError()) {
+                is NetworkResult.Success -> {
+                    val sessionStats = json.decodeFromJsonElement<TransmissionSessionStats>(rpcResult.data)
+                    NetworkResult.Success(
+                        DownloadTransferInfo(
+                            client = downloadClient,
+                            downloadSpeed = sessionStats.downloadSpeed,
+                            uploadSpeed = sessionStats.uploadSpeed,
+                        ),
+                    )
                 }
+                is NetworkResult.Error -> rpcResult
+                is NetworkResult.Loading -> rpcResult
             }
-            is NetworkResult.Error -> result
-            is NetworkResult.Loading -> result
         }
+        is NetworkResult.Error -> result
+        is NetworkResult.Loading -> result
+    }
 
     private suspend fun executeTorrentAction(
         method: String,
         ids: List<String>,
-    ): NetworkResult<Unit> =
-        when (
-            val result =
-                executeTransmissionRequest<JsonObject>(
-                    method = method,
-                    arguments =
-                        buildJsonObject {
-                            put(
-                                "ids",
-                                buildJsonArray {
-                                    ids.forEach { id ->
-                                        add(id.toTransmissionId())
-                                    }
-                                },
-                            )
+    ): NetworkResult<Unit> = when (
+        val result =
+            executeTransmissionRequest<JsonObject>(
+                method = method,
+                arguments =
+                buildJsonObject {
+                    put(
+                        "ids",
+                        buildJsonArray {
+                            ids.forEach { id ->
+                                add(id.toTransmissionId())
+                            }
                         },
-                )
-        ) {
-            is NetworkResult.Success -> result.data.toUnitResult()
-            is NetworkResult.Error -> result
-            is NetworkResult.Loading -> result
-        }
+                    )
+                },
+            )
+    ) {
+        is NetworkResult.Success -> result.data.toUnitResult()
+        is NetworkResult.Error -> result
+        is NetworkResult.Loading -> result
+    }
 
     private suspend inline fun <reified T> executeTransmissionRequest(
         method: String,
@@ -211,15 +205,14 @@ class TransmissionClient(
         }
     }
 
-    private suspend fun HttpClient.postRpc(request: TransmissionRpcRequest): HttpResponse =
-        post("transmission/rpc") {
-            contentType(ContentType.Application.Json)
-            basicAuth(downloadClient.username.value, downloadClient.password.value)
-            if (sessionId.isNotEmpty()) {
-                header(HEADER_SESSION_ID, sessionId)
-            }
-            setBody(request)
+    private suspend fun HttpClient.postRpc(request: TransmissionRpcRequest): HttpResponse = post("transmission/rpc") {
+        contentType(ContentType.Application.Json)
+        basicAuth(downloadClient.username.value, downloadClient.password.value)
+        if (sessionId.isNotEmpty()) {
+            header(HEADER_SESSION_ID, sessionId)
         }
+        setBody(request)
+    }
 
     private fun String.toTransmissionId(): JsonPrimitive {
         val intId = toIntOrNull()
@@ -242,12 +235,11 @@ class TransmissionClient(
         return NetworkResult.Success(rpcArguments)
     }
 
-    private fun <T> TransmissionRpcResponse<T>.toUnitResult(): NetworkResult<Unit> =
-        if (result == "success") {
-            NetworkResult.Success(Unit)
-        } else {
-            NetworkResult.Error(message = "Transmission RPC error: $result")
-        }
+    private fun <T> TransmissionRpcResponse<T>.toUnitResult(): NetworkResult<Unit> = if (result == "success") {
+        NetworkResult.Success(Unit)
+    } else {
+        NetworkResult.Error(message = "Transmission RPC error: $result")
+    }
 
     private fun TransmissionTorrent.toDownloadItem(client: DownloadClient): DownloadItem {
         val coercedProgress = percentDone.coerceIn(0.0, 1.0)
@@ -267,15 +259,14 @@ class TransmissionClient(
         )
     }
 
-    private fun Int.toDownloadStatus(): DownloadItemStatus =
-        when (this) {
-            0 -> DownloadItemStatus.DownloadingPaused
-            1 -> DownloadItemStatus.Queued
-            2 -> DownloadItemStatus.Queued
-            3 -> DownloadItemStatus.Queued
-            4 -> DownloadItemStatus.Downloading
-            5 -> DownloadItemStatus.Queued
-            6 -> DownloadItemStatus.Uploading
-            else -> DownloadItemStatus.Unknown
-        }
+    private fun Int.toDownloadStatus(): DownloadItemStatus = when (this) {
+        0 -> DownloadItemStatus.DownloadingPaused
+        1 -> DownloadItemStatus.Queued
+        2 -> DownloadItemStatus.Queued
+        3 -> DownloadItemStatus.Queued
+        4 -> DownloadItemStatus.Downloading
+        5 -> DownloadItemStatus.Queued
+        6 -> DownloadItemStatus.Uploading
+        else -> DownloadItemStatus.Unknown
+    }
 }

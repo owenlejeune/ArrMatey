@@ -36,6 +36,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.SettingItem
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
@@ -74,138 +75,138 @@ fun ServicesSettingsScreen(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = navigationBarBottomInset() + 16.dp),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = navigationBarBottomInset() + 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             SettingsGroup(
                 title = mokoString(MR.strings.instances),
                 items =
-                    allInstances.map { instance ->
-                        SettingItem(
-                            icon = IconSource.Resource(instance.type.icon),
-                            title = instance.label,
-                            subtitle = instance.url,
-                            trailingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            },
-                            onClick = {
-                                onNavigateToInstance(instance.id, instance.type)
-                            },
-                            titleExtraContent = {
-                                Box(
-                                    modifier = Modifier.size(18.dp),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    when (instanceConnectionStatues[instance.id]) {
-                                        is OperationStatus.InProgress -> CircularProgressIndicator(strokeWidth = 2.dp)
-                                        is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
-                                        is OperationStatus.Error ->
-                                            Icon(
-                                                Icons.Default.WifiOff,
-                                                null,
-                                                tint = MaterialTheme.colorScheme.error,
-                                            )
-                                        else -> {}
-                                    }
+                allInstances.map { instance ->
+                    SettingItem(
+                        icon = IconSource.Resource(instance.type.icon),
+                        title = instance.label,
+                        subtitle = instance.url,
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
+                        onClick = {
+                            onNavigateToInstance(instance.id, instance.type)
+                        },
+                        titleExtraContent = {
+                            Box(
+                                modifier = Modifier.size(18.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                when (instanceConnectionStatues[instance.id]) {
+                                    is OperationStatus.InProgress -> CircularProgressIndicator(strokeWidth = 2.dp)
+                                    is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
+                                    is OperationStatus.Error ->
+                                        Icon(
+                                            Icons.Default.WifiOff,
+                                            null,
+                                            tint = MaterialTheme.colorScheme.error,
+                                        )
+                                    else -> {}
                                 }
-                            },
-                        )
-                    } +
-                        SettingItem(
-                            title = mokoString(MR.strings.add_instance),
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            icon = IconSource.Vector(Icons.Default.AddCircleOutline),
-                            onClick = {
-                                onNavigateToAddInstance()
-                            },
-                        ),
+                            }
+                        },
+                    )
+                } +
+                    SettingItem(
+                        title = mokoString(MR.strings.add_instance),
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        icon = IconSource.Vector(Icons.Default.AddCircleOutline),
+                        onClick = {
+                            onNavigateToAddInstance()
+                        },
+                    ),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.download_clients),
                 items =
-                    allDownloadClients.map { downloadClient ->
-                        SettingItem(
-                            icon = IconSource.Resource(downloadClient.type.icon),
-                            title = downloadClient.label,
-                            subtitle = downloadClient.url,
-                            trailingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            },
-                            onClick = {
-                                onNavigateToEditDownloadClient(downloadClient.id)
-                            },
-                            titleExtraContent = {
-                                Box(
-                                    modifier = Modifier.size(18.dp),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    when (instanceConnectionStatues[downloadClient.id + 100_000]) {
-                                        is OperationStatus.InProgress -> CircularProgressIndicator(strokeWidth = 2.dp)
-                                        is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
-                                        is OperationStatus.Error ->
-                                            Icon(
-                                                Icons.Default.WifiOff,
-                                                null,
-                                                tint = MaterialTheme.colorScheme.error,
-                                            )
-                                        else -> {}
-                                    }
+                allDownloadClients.map { downloadClient ->
+                    SettingItem(
+                        icon = IconSource.Resource(downloadClient.type.icon),
+                        title = downloadClient.label,
+                        subtitle = downloadClient.url,
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
+                        onClick = {
+                            onNavigateToEditDownloadClient(downloadClient.id)
+                        },
+                        titleExtraContent = {
+                            Box(
+                                modifier = Modifier.size(18.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                when (instanceConnectionStatues[downloadClient.id + 100_000]) {
+                                    is OperationStatus.InProgress -> CircularProgressIndicator(strokeWidth = 2.dp)
+                                    is OperationStatus.Success -> Icon(Icons.Default.Wifi, null)
+                                    is OperationStatus.Error ->
+                                        Icon(
+                                            Icons.Default.WifiOff,
+                                            null,
+                                            tint = MaterialTheme.colorScheme.error,
+                                        )
+                                    else -> {}
                                 }
-                            },
-                        )
-                    } +
-                        SettingItem(
-                            title = mokoString(MR.strings.add_download_client),
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            icon = IconSource.Vector(Icons.Default.AddCircleOutline),
-                            onClick = {
-                                onNavigateToAddDownloadClient()
-                            },
-                        ),
+                            }
+                        },
+                    )
+                } +
+                    SettingItem(
+                        title = mokoString(MR.strings.add_download_client),
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        icon = IconSource.Vector(Icons.Default.AddCircleOutline),
+                        onClick = {
+                            onNavigateToAddDownloadClient()
+                        },
+                    ),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.custom_webpages),
                 items =
-                    allCustomWebPages.map { webpage ->
-                        SettingItem(
-                            title = webpage.name,
-                            subtitle = webpage.url,
-                            icon = IconSource.Vector(Icons.Default.Language),
-                            onClick = {
-                                onNavigateToEditCustomWebpage(webpage.id)
-                            },
-                            trailingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            },
-                        )
-                    } +
-                        SettingItem(
-                            title = mokoString(MR.strings.add_custom_webpage),
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            icon = IconSource.Vector(Icons.Default.AddCircleOutline),
-                            onClick = {
-                                onNavigateToAddCustomWebpage()
-                            },
-                        ),
+                allCustomWebPages.map { webpage ->
+                    SettingItem(
+                        title = webpage.name,
+                        subtitle = webpage.url,
+                        icon = IconSource.Vector(Icons.Default.Language),
+                        onClick = {
+                            onNavigateToEditCustomWebpage(webpage.id)
+                        },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
+                    )
+                } +
+                    SettingItem(
+                        title = mokoString(MR.strings.add_custom_webpage),
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        icon = IconSource.Vector(Icons.Default.AddCircleOutline),
+                        onClick = {
+                            onNavigateToAddCustomWebpage()
+                        },
+                    ),
             )
         }
     }

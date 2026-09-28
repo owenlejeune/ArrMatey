@@ -48,6 +48,7 @@ import com.dnfapps.arrmatey.arr.state.ProwlarrSearchState
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.utils.mokoString
@@ -108,10 +109,10 @@ fun ProwlarrSearchContent(
             is ProwlarrSearchState.Error -> {
                 Card(
                     colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        ),
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(text = state.message, modifier = Modifier.padding(16.dp))
@@ -137,8 +138,8 @@ fun ProwlarrSearchContent(
                             SearchResultCard(
                                 result = result,
                                 isGrabbing =
-                                    grabStatus is OperationStatus.InProgress &&
-                                        grabbingGuid == result.guid,
+                                grabStatus is OperationStatus.InProgress &&
+                                    grabbingGuid == result.guid,
                                 onGrab = { grabTarget = result },
                             )
                         }
@@ -238,11 +239,11 @@ private fun SearchResultCard(
                     text = result.protocol?.name?.replaceFirstChar { it.uppercase() } ?: mokoString(MR.strings.unknown),
                     style = MaterialTheme.typography.labelSmall,
                     color =
-                        when (result.protocol) {
-                            ReleaseProtocol.Torrent -> MaterialTheme.colorScheme.primary
-                            ReleaseProtocol.Usenet, ReleaseProtocol.Soulseek -> MaterialTheme.colorScheme.tertiary
-                            else -> MaterialTheme.colorScheme.outline
-                        },
+                    when (result.protocol) {
+                        ReleaseProtocol.Torrent -> MaterialTheme.colorScheme.primary
+                        ReleaseProtocol.Usenet, ReleaseProtocol.Soulseek -> MaterialTheme.colorScheme.tertiary
+                        else -> MaterialTheme.colorScheme.outline
+                    },
                 )
 
                 Text("•", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

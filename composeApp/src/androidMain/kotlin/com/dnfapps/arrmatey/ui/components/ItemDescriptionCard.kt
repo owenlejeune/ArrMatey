@@ -27,12 +27,12 @@ fun ItemDescriptionCard(
     val parsed = overview.rememberHtml()
     Card(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .animateContentSize()
-                .clickable {
-                    expanded = !expanded
-                },
+        modifier
+            .fillMaxWidth()
+            .animateContentSize()
+            .clickable {
+                expanded = !expanded
+            },
         shape = MaterialTheme.shapes.large,
     ) {
         Column(

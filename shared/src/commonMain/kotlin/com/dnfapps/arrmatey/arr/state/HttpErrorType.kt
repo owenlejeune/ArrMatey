@@ -10,13 +10,12 @@ enum class HttpErrorType {
     ;
 
     companion object {
-        internal fun fromErrorType(type: ErrorType) =
-            when (type) {
-                ErrorType.Http -> Http
-                ErrorType.Network -> Network
-                ErrorType.Timeout -> Timeout
-                ErrorType.Unexpected -> Unexpected
-            }
+        internal fun fromErrorType(type: ErrorType) = when (type) {
+            ErrorType.Http -> Http
+            ErrorType.Network -> Network
+            ErrorType.Timeout -> Timeout
+            ErrorType.Unexpected -> Unexpected
+        }
     }
 }
 

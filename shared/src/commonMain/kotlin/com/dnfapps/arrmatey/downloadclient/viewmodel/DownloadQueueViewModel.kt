@@ -285,17 +285,17 @@ class DownloadQueueViewModel(
                     anySuccess ->
                         DownloadClientCommandState.Error(
                             message =
-                                "Partial failure on ${errors.size} of ${results.size} clients: " +
-                                    errors.mapNotNull { it.message }.joinToString("; "),
+                            "Partial failure on ${errors.size} of ${results.size} clients: " +
+                                errors.mapNotNull { it.message }.joinToString("; "),
                         )
                     else ->
                         DownloadClientCommandState.Error(
                             code = errors.first().code,
                             message =
-                                errors
-                                    .mapNotNull { it.message }
-                                    .joinToString("; ")
-                                    .ifBlank { "Operation failed" },
+                            errors
+                                .mapNotNull { it.message }
+                                .joinToString("; ")
+                                .ifBlank { "Operation failed" },
                             cause = errors.first().cause,
                         )
                 }
@@ -398,18 +398,17 @@ class DownloadQueueViewModel(
         return items.orderedSortedWith(sortState.sortOrder, comparator)
     }
 
-    private fun OperationStatus.toCommandState(): DownloadClientCommandState =
-        when (this) {
-            is OperationStatus.Idle -> DownloadClientCommandState.Initial
-            is OperationStatus.InProgress -> DownloadClientCommandState.Loading
-            is OperationStatus.Success -> DownloadClientCommandState.Success
-            is OperationStatus.Error ->
-                DownloadClientCommandState.Error(
-                    code = code,
-                    message = message,
-                    cause = cause,
-                )
-        }
+    private fun OperationStatus.toCommandState(): DownloadClientCommandState = when (this) {
+        is OperationStatus.Idle -> DownloadClientCommandState.Initial
+        is OperationStatus.InProgress -> DownloadClientCommandState.Loading
+        is OperationStatus.Success -> DownloadClientCommandState.Success
+        is OperationStatus.Error ->
+            DownloadClientCommandState.Error(
+                code = code,
+                message = message,
+                cause = cause,
+            )
+    }
 
     private fun safeSavePreference(transform: (DownloadQueueSortState) -> DownloadQueueSortState) {
         viewModelScope.launch {

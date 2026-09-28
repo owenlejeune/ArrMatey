@@ -34,51 +34,51 @@ fun DashboardTab(
         wideRailIsVisible = wideRailIsVisible,
         isMasterScreen = { it is DashboardScreen.Main },
         entryProvider =
-            entryProvider {
-                entry<DashboardScreen.Main> {
-                    CombinedDashboard(
-                        windowSizeClass = windowSizeClass,
-                        onNavigateToArrDashboard = { id -> navigation.openArrDashboard(id) },
-                        onNavigateToMediaDetails = { id, type -> navigation.toDetails(id = id, type = type) },
-                        onNavigateToSeerrMediaDetails = { tmdbId, type -> navigation.toDetails(tmdbId = tmdbId, requestType = type) },
-                        onNavigateToSeerrPersonDetails = { personId -> navigation.toPersonDetails(personId) },
-                        onNavigateToArrMediaDetailsOrPreview = { media, type -> navigation.toArrDetailsOrPreview(media, type) },
-                        onNavigateToSettings = { navigationManager.openSettings() },
-                        onNavigateToRequestsTab = { navigationManager.openRequestsTab() },
-                        onNavigateToProwlarrTab = { navigationManager.openProwlarrTab() },
-                        onNavigateToDownloadsTab = { navigationManager.openDownloadClientsTab() },
-                        onNavigateToActivityTab = { navigationManager.openActivityTab() },
-                        onNavigateToScheduleTab = { navigationManager.openScheduleTab() },
-                        onNavigateToBazarrTab = { navigationManager.openBazarrTab() },
-                        onNavigateToTracearrTab = { navigation.navigateTo(TracearrScreen.Main) },
-                        onNavigateToTracearrHistory = { navigation.navigateTo(TracearrScreen.History) },
-                        onNavigateToTracearrUsers = { navigation.navigateTo(TracearrScreen.Users) },
-                        onNavigateToTracearrViolations = { navigation.navigateTo(TracearrScreen.Violations) },
-                        onNavigateToTracearrActivity = { navigation.navigateTo(TracearrScreen.Activity) },
-                        onNavigateToDiscoverTab = { navigationManager.openDiscoverTab() },
-                    )
-                }
-                entry<DashboardScreen.ArrDashboard> {
-                    ArrInstanceDashboard(
-                        id = it.id,
-                        windowSizeClass = windowSizeClass,
-                        onBack = { navigation.popBackStack() },
-                        onNavigateToEditInstance = { instanceId ->
-                            navigationManager.openEditInstanceScreen(instanceId)
-                        },
-                    )
-                }
-                tracearrNavEntries(
-                    navigation = navigation,
-                    isExpanded = isExpanded,
-                    isLargeScreen = isLargeScreen,
-                    wideRailIsVisible = wideRailIsVisible,
+        entryProvider {
+            entry<DashboardScreen.Main> {
+                CombinedDashboard(
+                    windowSizeClass = windowSizeClass,
+                    onNavigateToArrDashboard = { id -> navigation.openArrDashboard(id) },
+                    onNavigateToMediaDetails = { id, type -> navigation.toDetails(id = id, type = type) },
+                    onNavigateToSeerrMediaDetails = { tmdbId, type -> navigation.toDetails(tmdbId = tmdbId, requestType = type) },
+                    onNavigateToSeerrPersonDetails = { personId -> navigation.toPersonDetails(personId) },
+                    onNavigateToArrMediaDetailsOrPreview = { media, type -> navigation.toArrDetailsOrPreview(media, type) },
+                    onNavigateToSettings = { navigationManager.openSettings() },
+                    onNavigateToRequestsTab = { navigationManager.openRequestsTab() },
+                    onNavigateToProwlarrTab = { navigationManager.openProwlarrTab() },
+                    onNavigateToDownloadsTab = { navigationManager.openDownloadClientsTab() },
+                    onNavigateToActivityTab = { navigationManager.openActivityTab() },
+                    onNavigateToScheduleTab = { navigationManager.openScheduleTab() },
+                    onNavigateToBazarrTab = { navigationManager.openBazarrTab() },
+                    onNavigateToTracearrTab = { navigation.navigateTo(TracearrScreen.Main) },
+                    onNavigateToTracearrHistory = { navigation.navigateTo(TracearrScreen.History) },
+                    onNavigateToTracearrUsers = { navigation.navigateTo(TracearrScreen.Users) },
+                    onNavigateToTracearrViolations = { navigation.navigateTo(TracearrScreen.Violations) },
+                    onNavigateToTracearrActivity = { navigation.navigateTo(TracearrScreen.Activity) },
+                    onNavigateToDiscoverTab = { navigationManager.openDiscoverTab() },
                 )
-                mediaNavEntries(
-                    navigation = navigation,
-                    isExpanded = isExpanded,
-                    wideRailIsVisible = wideRailIsVisible,
+            }
+            entry<DashboardScreen.ArrDashboard> {
+                ArrInstanceDashboard(
+                    id = it.id,
+                    windowSizeClass = windowSizeClass,
+                    onBack = { navigation.popBackStack() },
+                    onNavigateToEditInstance = { instanceId ->
+                        navigationManager.openEditInstanceScreen(instanceId)
+                    },
                 )
-            },
+            }
+            tracearrNavEntries(
+                navigation = navigation,
+                isExpanded = isExpanded,
+                isLargeScreen = isLargeScreen,
+                wideRailIsVisible = wideRailIsVisible,
+            )
+            mediaNavEntries(
+                navigation = navigation,
+                isExpanded = isExpanded,
+                wideRailIsVisible = wideRailIsVisible,
+            )
+        },
     )
 }

@@ -75,11 +75,10 @@ class TracearrRepository(
         }
     }
 
-    suspend fun getTodayStats(): NetworkResult<TracearrTodayStats> =
-        tracearrClient
-            .getTodayStats()
-            .onSuccess { _todayStats.value = it }
-            .onError { _, _, _ -> _todayStats.value = null }
+    suspend fun getTodayStats(): NetworkResult<TracearrTodayStats> = tracearrClient
+        .getTodayStats()
+        .onSuccess { _todayStats.value = it }
+        .onError { _, _, _ -> _todayStats.value = null }
 
     suspend fun getHistory(
         cursor: String? = null,
@@ -123,8 +122,7 @@ class TracearrRepository(
         pageSize: Int? = null,
     ): NetworkResult<TracearrViolationsResponse> = tracearrClient.getViolations(page = page, pageSize = pageSize)
 
-    suspend fun getActivity(period: TracearrPeriod = TracearrPeriod.Month): NetworkResult<TracearrActivityResponse> =
-        tracearrClient.getActivity(period)
+    suspend fun getActivity(period: TracearrPeriod = TracearrPeriod.Month): NetworkResult<TracearrActivityResponse> = tracearrClient.getActivity(period)
 
     suspend fun getUserDetails(ref: String): NetworkResult<TracearrUserDetail> = resolveUserDetail(ref)
 

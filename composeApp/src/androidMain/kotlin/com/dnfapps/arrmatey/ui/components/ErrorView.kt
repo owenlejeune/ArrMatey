@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.HttpErrorType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -75,17 +76,17 @@ fun ErrorView(
 
     Column(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+        modifier
+            .fillMaxWidth()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Box(
             modifier =
-                Modifier
-                    .size(80.dp)
-                    .background(containerColor, CircleShape),
+            Modifier
+                .size(80.dp)
+                .background(containerColor, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -112,10 +113,10 @@ fun ErrorView(
 
         Column(
             modifier =
-                Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 8.dp)
-                    .fillMaxWidth(),
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp)
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (errorType == HttpErrorType.Timeout) {
@@ -146,9 +147,9 @@ fun ErrorView(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier =
-                    Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 8.dp),
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 8.dp),
             )
         }
     }

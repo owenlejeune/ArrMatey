@@ -51,13 +51,12 @@ class GetInstancePresencesUseCase {
         activeRepoId: Long?,
         activeArrMedia: ArrMedia?,
         presencesMap: Map<Long, ArrMedia?>,
-    ): List<InstanceMediaPresence> =
-        buildPresencesListFromInstances(
-            instances = repositories.map { it.instance },
-            activeRepoId = activeRepoId,
-            activeArrMedia = activeArrMedia,
-            presencesMap = presencesMap,
-        )
+    ): List<InstanceMediaPresence> = buildPresencesListFromInstances(
+        instances = repositories.map { it.instance },
+        activeRepoId = activeRepoId,
+        activeArrMedia = activeArrMedia,
+        presencesMap = presencesMap,
+    )
 
     fun buildPresencesListFromInstances(
         instances: List<Instance>,

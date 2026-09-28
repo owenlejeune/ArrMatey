@@ -313,7 +313,7 @@ class GetUnifiedMediaDetailsUseCase(
                                     (task as? ReadarrQueueItem)?.authorId == targetId ||
                                     (task as? ReadarrQueueItem)?.bookId == targetId ||
                                     (task as? ListenarrQueueItem)?.audiobookId == targetId
-                            )
+                                )
                     }.groupByTask()
             } else {
                 emptyList()
@@ -372,35 +372,34 @@ class GetUnifiedMediaDetailsUseCase(
         query: String,
         targetTmdbId: Long? = null,
         targetTvdbId: Long? = null,
-    ): Flow<MediaDetailsUiState> =
-        flow {
-            emit(MediaDetailsUiState.Loading)
-            when (val result = repository.directLookup(query)) {
-                is NetworkResult.Success -> {
-                    val item =
-                        result.data.firstOrNull { media ->
-                            when (media) {
-                                is ArrSeries -> {
-                                    (targetTvdbId != null && targetTvdbId > 0 && media.tvdbId == targetTvdbId) ||
-                                        (targetTmdbId != null && targetTmdbId > 0 && media.tmdbId == targetTmdbId)
-                                }
-                                is ArrMovie -> {
-                                    targetTmdbId != null && targetTmdbId > 0 && media.tmdbId == targetTmdbId
-                                }
-                                else -> false
+    ): Flow<MediaDetailsUiState> = flow {
+        emit(MediaDetailsUiState.Loading)
+        when (val result = repository.directLookup(query)) {
+            is NetworkResult.Success -> {
+                val item =
+                    result.data.firstOrNull { media ->
+                        when (media) {
+                            is ArrSeries -> {
+                                (targetTvdbId != null && targetTvdbId > 0 && media.tvdbId == targetTvdbId) ||
+                                    (targetTmdbId != null && targetTmdbId > 0 && media.tmdbId == targetTmdbId)
                             }
-                        } ?: if (targetTmdbId == null && targetTvdbId == null) result.data.firstOrNull() else null
+                            is ArrMovie -> {
+                                targetTmdbId != null && targetTmdbId > 0 && media.tmdbId == targetTmdbId
+                            }
+                            else -> false
+                        }
+                    } ?: if (targetTmdbId == null && targetTvdbId == null) result.data.firstOrNull() else null
 
-                    if (item?.id != null && item.id != 0L) {
-                        emitAll(getMediaDetailsUseCase(item.id!!, repository.instance.id))
-                    } else if (item != null) {
-                        emit(MediaDetailsUiState.Success(item = item))
-                    } else {
-                        emit(MediaDetailsUiState.Initial)
-                    }
+                if (item?.id != null && item.id != 0L) {
+                    emitAll(getMediaDetailsUseCase(item.id!!, repository.instance.id))
+                } else if (item != null) {
+                    emit(MediaDetailsUiState.Success(item = item))
+                } else {
+                    emit(MediaDetailsUiState.Initial)
                 }
-                is NetworkResult.Error -> emit(MediaDetailsUiState.Error(result.message))
-                is NetworkResult.Loading -> emit(MediaDetailsUiState.Loading)
             }
+            is NetworkResult.Error -> emit(MediaDetailsUiState.Error(result.message))
+            is NetworkResult.Loading -> emit(MediaDetailsUiState.Loading)
         }
+    }
 }

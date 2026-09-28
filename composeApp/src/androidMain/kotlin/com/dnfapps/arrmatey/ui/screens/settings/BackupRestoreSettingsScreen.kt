@@ -34,6 +34,7 @@ import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.extensions.nowTimestamp
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
@@ -103,43 +104,43 @@ fun BackupRestoreSettingsScreen(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = navigationBarBottomInset() + 16.dp),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = navigationBarBottomInset() + 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             SettingsGroup(
                 title = mokoString(MR.strings.backup_restore),
                 items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Upload),
-                            title = mokoString(MR.strings.backup),
-                            subtitle = mokoString(MR.strings.backup_description),
-                            onClick = { showExportDialog = true },
-                        ),
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.Download),
-                            title = mokoString(MR.strings.restore),
-                            subtitle = mokoString(MR.strings.restore_description),
-                            onClick = { importLauncher.launch(arrayOf("application/json")) },
-                        ),
+                listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Upload),
+                        title = mokoString(MR.strings.backup),
+                        subtitle = mokoString(MR.strings.backup_description),
+                        onClick = { showExportDialog = true },
                     ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Download),
+                        title = mokoString(MR.strings.restore),
+                        subtitle = mokoString(MR.strings.restore_description),
+                        onClick = { importLauncher.launch(arrayOf("application/json")) },
+                    ),
+                ),
             )
 
             SettingsGroup(
                 title = mokoString(MR.strings.onboarding),
                 items =
-                    listOf(
-                        SettingItem(
-                            icon = IconSource.Vector(Icons.Default.RocketLaunch),
-                            title = mokoString(MR.strings.dev_settings_launch_onboarding),
-                            onClick = onNavigateToOnboarding,
-                        ),
+                listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.RocketLaunch),
+                        title = mokoString(MR.strings.dev_settings_launch_onboarding),
+                        onClick = onNavigateToOnboarding,
                     ),
+                ),
             )
         }
 

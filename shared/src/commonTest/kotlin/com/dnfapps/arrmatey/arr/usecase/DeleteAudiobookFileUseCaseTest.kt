@@ -20,34 +20,32 @@ import kotlin.test.assertTrue
 class DeleteAudiobookFileUseCaseTest {
     private val logger = LoggerFactory.get("test")
 
-    private fun instance(type: InstanceType) =
-        Instance(
-            id = 1,
-            label = "Test",
-            url = "http://localhost",
-            apiKey = EncryptedString("k"),
-            type = type,
-            enabled = true,
-        )
+    private fun instance(type: InstanceType) = Instance(
+        id = 1,
+        label = "Test",
+        url = "http://localhost",
+        apiKey = EncryptedString("k"),
+        type = type,
+        enabled = true,
+    )
 
     @Test
-    fun testWrongInstanceTypeEmitsError() =
-        runTest {
-            val mockEngine = MockEngine { respond("", HttpStatusCode.OK) }
-            val repository = ArrInstanceRepository(instance(InstanceType.Radarr), HttpClient(mockEngine), logger)
-            val useCase = DeleteAudiobookFileUseCase()
+    fun testWrongInstanceTypeEmitsError() = runTest {
+        val mockEngine = MockEngine { respond("", HttpStatusCode.OK) }
+        val repository = ArrInstanceRepository(instance(InstanceType.Radarr), HttpClient(mockEngine), logger)
+        val useCase = DeleteAudiobookFileUseCase()
 
-            useCase(
-                audiobookId = 99,
-                fileIds = listOf(1L, 2L, 3L),
-                repository = repository,
-            ).test {
-                assertTrue(awaitItem() is OperationStatus.InProgress)
-                val error = awaitItem()
-                assertTrue(error is OperationStatus.Error)
-                assertNotNull(error.message)
-                assertEquals("Not a Listenarr instance", error.message)
-                awaitComplete()
-            }
+        useCase(
+            audiobookId = 99,
+            fileIds = listOf(1L, 2L, 3L),
+            repository = repository,
+        ).test {
+            assertTrue(awaitItem() is OperationStatus.InProgress)
+            val error = awaitItem()
+            assertTrue(error is OperationStatus.Error)
+            assertNotNull(error.message)
+            assertEquals("Not a Listenarr instance", error.message)
+            awaitComplete()
         }
+    }
 }

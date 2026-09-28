@@ -50,21 +50,21 @@ fun ActiveQueueTabContent(
             if (queueItems.isEmpty()) {
                 EmptyActivityState(
                     modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
                 )
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding =
-                        PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = 16.dp + LocalFloatingBarBottomPadding.current,
-                        ),
+                    PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 16.dp,
+                        bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+                    ),
                 ) {
                     items(items = queueItems) { item ->
                         ActivityItem(

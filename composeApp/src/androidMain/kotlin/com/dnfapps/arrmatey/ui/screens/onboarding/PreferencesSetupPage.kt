@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
 import com.dnfapps.arrmatey.permissions.rememberNotificationPermissionHandler
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -64,10 +65,10 @@ fun PreferencesSetupPage(
 
     Column(
         modifier =
-            modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+        modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
     ) {
         Text(
@@ -111,26 +112,26 @@ fun PreferencesSetupPage(
                             }
                         Surface(
                             modifier =
-                                Modifier
-                                    .weight(1f)
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .clickable { onThemeChange(theme) }
-                                    .border(
-                                        width = if (isSelected) 2.dp else 1.dp,
-                                        color =
-                                            if (isSelected) {
-                                                MaterialTheme.colorScheme.primary
-                                            } else {
-                                                MaterialTheme.colorScheme.outlineVariant
-                                            },
-                                        shape = MaterialTheme.shapes.medium,
-                                    ),
+                            Modifier
+                                .weight(1f)
+                                .clip(MaterialTheme.shapes.medium)
+                                .clickable { onThemeChange(theme) }
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color =
+                                    if (isSelected) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.outlineVariant
+                                    },
+                                    shape = MaterialTheme.shapes.medium,
+                                ),
                             color =
-                                if (isSelected) {
-                                    MaterialTheme.colorScheme.primaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.surface
-                                },
+                            if (isSelected) {
+                                MaterialTheme.colorScheme.primaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            },
                         ) {
                             Column(
                                 modifier = Modifier.padding(vertical = 12.dp),
@@ -178,26 +179,26 @@ fun PreferencesSetupPage(
                         val isSelected = appColor == color
                         Surface(
                             modifier =
-                                Modifier
-                                    .weight(1f)
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .clickable { onColorChange(color) }
-                                    .border(
-                                        width = if (isSelected) 2.dp else 1.dp,
-                                        color =
-                                            if (isSelected) {
-                                                MaterialTheme.colorScheme.primary
-                                            } else {
-                                                MaterialTheme.colorScheme.outlineVariant
-                                            },
-                                        shape = MaterialTheme.shapes.medium,
-                                    ),
+                            Modifier
+                                .weight(1f)
+                                .clip(MaterialTheme.shapes.medium)
+                                .clickable { onColorChange(color) }
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color =
+                                    if (isSelected) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.outlineVariant
+                                    },
+                                    shape = MaterialTheme.shapes.medium,
+                                ),
                             color =
-                                if (isSelected) {
-                                    MaterialTheme.colorScheme.primaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.surface
-                                },
+                            if (isSelected) {
+                                MaterialTheme.colorScheme.primaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            },
                         ) {
                             Column(
                                 modifier = Modifier.padding(vertical = 12.dp),
@@ -224,9 +225,9 @@ fun PreferencesSetupPage(
         ) {
             Row(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {

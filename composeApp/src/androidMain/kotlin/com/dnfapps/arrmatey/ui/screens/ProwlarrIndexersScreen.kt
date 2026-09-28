@@ -47,6 +47,7 @@ import com.dnfapps.arrmatey.arr.api.model.ProwlarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ReleaseProtocol
 import com.dnfapps.arrmatey.arr.state.ProwlarrIndexersState
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
@@ -85,10 +86,10 @@ fun ProwlarrIndexersContent(
             is ProwlarrIndexersState.Error -> {
                 Card(
                     colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        ),
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
@@ -146,10 +147,10 @@ fun ProwlarrIndexersContent(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier =
-                    Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 24.dp),
+                Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
             ) {
                 indexersStatus.disabledTill?.let { disabledTill ->
                     ContainerCard(modifier = Modifier.fillMaxWidth()) {
@@ -245,10 +246,10 @@ private fun IndexerCard(
                     }
                 Box(
                     modifier =
-                        Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(dotColor),
+                    Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(dotColor),
                 )
 
                 Text(
@@ -291,10 +292,10 @@ private fun IndexerCard(
                         text = msg,
                         style = MaterialTheme.typography.bodySmall,
                         color =
-                            when (indexer.message?.type) {
-                                IndexerMessageType.Warning -> MaterialTheme.colorScheme.tertiary
-                                else -> MaterialTheme.colorScheme.error
-                            },
+                        when (indexer.message?.type) {
+                            IndexerMessageType.Warning -> MaterialTheme.colorScheme.tertiary
+                            else -> MaterialTheme.colorScheme.error
+                        },
                     )
                 }
             }

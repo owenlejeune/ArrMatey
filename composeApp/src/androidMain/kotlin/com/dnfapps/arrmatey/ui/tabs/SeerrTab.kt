@@ -36,21 +36,21 @@ fun SeerrTab(
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
         entryProvider =
-            entryProvider {
-                entry<SeerrScreen.Home> {
-                    RequestsScreen(
-                        isExpanded = isExpanded,
-                        wideRailIsVisible = wideRailIsVisible,
-                        onNavigateToDetails = { tmdbId, type ->
-                            navigation.toDetails(tmdbId = tmdbId, requestType = type)
-                        },
-                    )
-                }
-                mediaNavEntries(
-                    navigation = navigation,
+        entryProvider {
+            entry<SeerrScreen.Home> {
+                RequestsScreen(
                     isExpanded = isExpanded,
                     wideRailIsVisible = wideRailIsVisible,
+                    onNavigateToDetails = { tmdbId, type ->
+                        navigation.toDetails(tmdbId = tmdbId, requestType = type)
+                    },
                 )
-            },
+            }
+            mediaNavEntries(
+                navigation = navigation,
+                isExpanded = isExpanded,
+                wideRailIsVisible = wideRailIsVisible,
+            )
+        },
     )
 }

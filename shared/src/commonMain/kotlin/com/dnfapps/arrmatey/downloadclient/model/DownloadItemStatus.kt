@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.downloadclient.model
 import com.dnfapps.arrmatey.downloadclient.api.model.DelugeTorrentState
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTorrentState
 import com.dnfapps.arrmatey.downloadclient.api.model.SABnzbdQueueSlotStatus
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 
@@ -33,59 +34,56 @@ enum class DownloadItemStatus(
         get() = this == DownloadingPaused || this == UploadingPaused
 
     companion object {
-        fun from(state: QBittorrentTorrentState) =
-            when (state) {
-                QBittorrentTorrentState.Error -> Error
-                QBittorrentTorrentState.MissingFiles -> MissingFiles
-                QBittorrentTorrentState.Uploading,
-                QBittorrentTorrentState.UploadingStalled,
-                -> Uploading
-                QBittorrentTorrentState.UploadingPaused,
-                QBittorrentTorrentState.UploadingStopped,
-                -> UploadingPaused
-                QBittorrentTorrentState.UploadingQueued,
-                QBittorrentTorrentState.DownloadingQueued,
-                -> Queued
-                QBittorrentTorrentState.UploadingChecking,
-                QBittorrentTorrentState.DownloadingChecking,
-                -> Checking
-                QBittorrentTorrentState.UploadingForced -> UploadingForced
-                QBittorrentTorrentState.Downloading -> Downloading
-                QBittorrentTorrentState.DownloadingMetadata,
-                QBittorrentTorrentState.DownloadingMetadataForced,
-                -> DownloadingMetadataForced
-                QBittorrentTorrentState.DownloadingPaused,
-                QBittorrentTorrentState.DownloadingStopped,
-                -> DownloadingPaused
-                QBittorrentTorrentState.DownloadingStalled -> DownloadingStalled
-                QBittorrentTorrentState.DownloadingForced -> DownloadingForced
-                QBittorrentTorrentState.CheckingResumeData -> CheckingResumeData
-                QBittorrentTorrentState.Moving -> Moving
-                QBittorrentTorrentState.Allocating -> Allocating
-                else -> Unknown
-            }
+        fun from(state: QBittorrentTorrentState) = when (state) {
+            QBittorrentTorrentState.Error -> Error
+            QBittorrentTorrentState.MissingFiles -> MissingFiles
+            QBittorrentTorrentState.Uploading,
+            QBittorrentTorrentState.UploadingStalled,
+            -> Uploading
+            QBittorrentTorrentState.UploadingPaused,
+            QBittorrentTorrentState.UploadingStopped,
+            -> UploadingPaused
+            QBittorrentTorrentState.UploadingQueued,
+            QBittorrentTorrentState.DownloadingQueued,
+            -> Queued
+            QBittorrentTorrentState.UploadingChecking,
+            QBittorrentTorrentState.DownloadingChecking,
+            -> Checking
+            QBittorrentTorrentState.UploadingForced -> UploadingForced
+            QBittorrentTorrentState.Downloading -> Downloading
+            QBittorrentTorrentState.DownloadingMetadata,
+            QBittorrentTorrentState.DownloadingMetadataForced,
+            -> DownloadingMetadataForced
+            QBittorrentTorrentState.DownloadingPaused,
+            QBittorrentTorrentState.DownloadingStopped,
+            -> DownloadingPaused
+            QBittorrentTorrentState.DownloadingStalled -> DownloadingStalled
+            QBittorrentTorrentState.DownloadingForced -> DownloadingForced
+            QBittorrentTorrentState.CheckingResumeData -> CheckingResumeData
+            QBittorrentTorrentState.Moving -> Moving
+            QBittorrentTorrentState.Allocating -> Allocating
+            else -> Unknown
+        }
 
-        fun from(state: DelugeTorrentState) =
-            when (state) {
-                DelugeTorrentState.Downloading -> Downloading
-                DelugeTorrentState.Seeding -> Uploading
-                DelugeTorrentState.Paused -> DownloadingPaused
-                DelugeTorrentState.Queued -> Queued
-                DelugeTorrentState.Checking -> Checking
-                DelugeTorrentState.Error -> Error
-                DelugeTorrentState.Allocating -> Allocating
-                DelugeTorrentState.Moving -> Moving
-                DelugeTorrentState.Unknown -> Unknown
-            }
+        fun from(state: DelugeTorrentState) = when (state) {
+            DelugeTorrentState.Downloading -> Downloading
+            DelugeTorrentState.Seeding -> Uploading
+            DelugeTorrentState.Paused -> DownloadingPaused
+            DelugeTorrentState.Queued -> Queued
+            DelugeTorrentState.Checking -> Checking
+            DelugeTorrentState.Error -> Error
+            DelugeTorrentState.Allocating -> Allocating
+            DelugeTorrentState.Moving -> Moving
+            DelugeTorrentState.Unknown -> Unknown
+        }
 
-        fun from(state: SABnzbdQueueSlotStatus) =
-            when (state) {
-                SABnzbdQueueSlotStatus.Downloading -> Downloading
-                SABnzbdQueueSlotStatus.Queued -> Queued
-                SABnzbdQueueSlotStatus.Paused -> DownloadingPaused
-                SABnzbdQueueSlotStatus.Propagating -> Propagating
-                SABnzbdQueueSlotStatus.Fetching -> Fetching
-                SABnzbdQueueSlotStatus.Unknown -> Unknown
-            }
+        fun from(state: SABnzbdQueueSlotStatus) = when (state) {
+            SABnzbdQueueSlotStatus.Downloading -> Downloading
+            SABnzbdQueueSlotStatus.Queued -> Queued
+            SABnzbdQueueSlotStatus.Paused -> DownloadingPaused
+            SABnzbdQueueSlotStatus.Propagating -> Propagating
+            SABnzbdQueueSlotStatus.Fetching -> Fetching
+            SABnzbdQueueSlotStatus.Unknown -> Unknown
+        }
     }
 }

@@ -27,6 +27,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.InstanceMediaPresence
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -76,7 +77,7 @@ fun InstancePresenceChips(
                             arrMedia.isDownloaded ||
                                 (arrMedia as? ArrMovie)?.hasFile == true ||
                                 ((arrMedia as? ArrSeries)?.statistics?.episodeFileCount ?: 0) > 0
-                        ) ->
+                            ) ->
                         Pair(
                             mokoString(MR.strings.downloaded),
                             if (isSelected) Color(0xFF4ADE80) else Color(0xFF16A34A),
@@ -95,26 +96,26 @@ fun InstancePresenceChips(
 
             Surface(
                 modifier =
-                    Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable {
-                            if (isPresent) {
-                                onSelectInstance(presence.instance.id)
-                            } else {
-                                onAddInstance(presence.instance)
-                            }
-                        },
+                Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable {
+                        if (isPresent) {
+                            onSelectInstance(presence.instance.id)
+                        } else {
+                            onAddInstance(presence.instance)
+                        }
+                    },
                 shape = RoundedCornerShape(12.dp),
                 color = containerColor,
                 tonalElevation = if (isSelected) 4.dp else 0.dp,
                 border =
-                    if (isSelected) {
-                        androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
-                    } else if (!isPresent) {
-                        androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    } else {
-                        null
-                    },
+                if (isSelected) {
+                    androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                } else if (!isPresent) {
+                    androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                } else {
+                    null
+                },
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -131,10 +132,10 @@ fun InstancePresenceChips(
                     } else {
                         Box(
                             modifier =
-                                Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(statusColor),
+                            Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(statusColor),
                         )
                     }
 

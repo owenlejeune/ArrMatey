@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.UnifiedSearchViewModel
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.MediaInstanceFilterRow
@@ -99,31 +100,31 @@ fun UnifiedSearchScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize(),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
         ) {
             if (isSearching && searchState.isEmpty()) {
                 LoadingIndicator(
                     modifier =
-                        Modifier
-                            .size(96.dp)
-                            .align(Alignment.Center),
+                    Modifier
+                        .size(96.dp)
+                        .align(Alignment.Center),
                 )
             } else if (searchState.isEmpty() && textFieldState.text.isNotEmpty()) {
                 Column(
                     modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
+                    Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Box(
                         modifier =
-                            Modifier
-                                .size(72.dp)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
+                        Modifier
+                            .size(72.dp)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
@@ -153,9 +154,9 @@ fun UnifiedSearchScreen(
                     if (filteredSearchState.isEmpty() && selectedTypeFilter != null) {
                         Column(
                             modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(24.dp),
+                            Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
                         ) {

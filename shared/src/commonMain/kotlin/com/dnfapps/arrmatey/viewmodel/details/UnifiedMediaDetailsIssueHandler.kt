@@ -32,29 +32,28 @@ class UnifiedMediaDetailsIssueHandler(
         scope: CoroutineScope,
         uiStateFlow: Flow<UnifiedMediaDetailsUiState>,
         onSeerrMediaIdExtracted: (Long?) -> Unit,
-    ): StateFlow<ReportIssueUiState> =
-        _rawReportIssueState
-            .combine(uiStateFlow) { issueState, uiState ->
-                if (uiState is UnifiedMediaDetailsUiState.Success && uiState.seerrMedia != null) {
-                    val mediaId = uiState.seerrMedia.mediaInfo?.id
-                    onSeerrMediaIdExtracted(mediaId)
-                    if (issueState.saveSuccess) {
-                        _isReportIssueSheetVisible.value = false
-                    }
-                    issueState.copy(
-                        includeSeriesOptions = uiState.seerrMedia.requestType == RequestType.Tv,
-                        mediaTitle = uiState.seerrMedia.displayTitle,
-                        availableSeasons = (uiState.seerrMedia as? TvDetails)?.seasons ?: emptyList(),
-                        saveButtonEnabled = issueState.message.isNotEmpty() && !issueState.saveInProgress,
-                    )
-                } else {
-                    issueState
+    ): StateFlow<ReportIssueUiState> = _rawReportIssueState
+        .combine(uiStateFlow) { issueState, uiState ->
+            if (uiState is UnifiedMediaDetailsUiState.Success && uiState.seerrMedia != null) {
+                val mediaId = uiState.seerrMedia.mediaInfo?.id
+                onSeerrMediaIdExtracted(mediaId)
+                if (issueState.saveSuccess) {
+                    _isReportIssueSheetVisible.value = false
                 }
-            }.stateIn(
-                scope = scope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = ReportIssueUiState(),
-            )
+                issueState.copy(
+                    includeSeriesOptions = uiState.seerrMedia.requestType == RequestType.Tv,
+                    mediaTitle = uiState.seerrMedia.displayTitle,
+                    availableSeasons = (uiState.seerrMedia as? TvDetails)?.seasons ?: emptyList(),
+                    saveButtonEnabled = issueState.message.isNotEmpty() && !issueState.saveInProgress,
+                )
+            } else {
+                issueState
+            }
+        }.stateIn(
+            scope = scope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ReportIssueUiState(),
+        )
 
     fun showReportIssueSheet() {
         _isReportIssueSheetVisible.value = true

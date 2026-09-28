@@ -52,22 +52,22 @@ fun AlbumCover(
 
     Box(
         modifier =
-            modifier
-                .clip(RoundedCornerShape(radius))
-                .background(MaterialTheme.colorScheme.surface)
-                .then(shadowModifier)
-                .aspectRatio(1f, true),
+        modifier
+            .clip(RoundedCornerShape(radius))
+            .background(MaterialTheme.colorScheme.surface)
+            .then(shadowModifier)
+            .aspectRatio(1f, true),
     ) {
         AsyncImage(
             model =
-                rememberRemoteImageData(
-                    url = url,
-                    onError = { _, err ->
-                        println(err.throwable.message)
-                        imageLoadError = true
-                    },
-                    onSuccess = { _, _ -> imageLoaded = true },
-                ),
+            rememberRemoteImageData(
+                url = url,
+                onError = { _, err ->
+                    println(err.throwable.message)
+                    imageLoadError = true
+                },
+                onSuccess = { _, _ -> imageLoaded = true },
+            ),
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
         )

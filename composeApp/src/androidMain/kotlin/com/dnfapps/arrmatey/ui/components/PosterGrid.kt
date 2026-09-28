@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.MinColumnsAdaptiveGridCells
@@ -61,12 +62,12 @@ fun PosterGrid(
         modifier = modifier,
         columns = MinColumnsAdaptiveGridCells(minSize = gridDensity.minSize, minColumns = 3),
         contentPadding =
-            PaddingValues(
-                start = gridSpacing.spacing,
-                top = gridSpacing.spacing,
-                end = gridSpacing.spacing,
-                bottom = gridSpacing.spacing + bottomPadding,
-            ),
+        PaddingValues(
+            start = gridSpacing.spacing,
+            top = gridSpacing.spacing,
+            end = gridSpacing.spacing,
+            bottom = gridSpacing.spacing + bottomPadding,
+        ),
         horizontalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
         verticalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
         userScrollEnabled = userScrollEnabled,
@@ -107,9 +108,9 @@ fun BoxScope.PosterGridItemOverlay(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         shadowElevation = 2.dp,
         modifier =
-            Modifier
-                .align(Alignment.TopStart)
-                .padding(6.dp),
+        Modifier
+            .align(Alignment.TopStart)
+            .padding(6.dp),
     ) {
         Box(
             modifier = Modifier.padding(4.dp),
@@ -126,12 +127,12 @@ fun BoxScope.PosterGridItemOverlay(
     LinearProgressIndicator(
         progress = progress,
         modifier =
-            Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp)
-                .height(4.dp)
-                .clip(CircleShape),
+        Modifier
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .height(4.dp)
+            .clip(CircleShape),
         color = statusColor,
         trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
     )

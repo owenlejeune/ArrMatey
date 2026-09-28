@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BasePosterItem
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -72,38 +73,38 @@ fun AudiobookCalendarItem(
     ) {
         Card(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
             shape = MaterialTheme.shapes.large,
             colors =
-                CardDefaults.cardColors(
-                    containerColor = containerColor,
-                    contentColor = contentColor,
-                ),
+            CardDefaults.cardColors(
+                containerColor = containerColor,
+                contentColor = contentColor,
+            ),
         ) {
             Row(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min),
+                Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (!useFullColorCards) {
                     Box(
                         modifier =
-                            Modifier
-                                .width(6.dp)
-                                .fillMaxHeight()
-                                .background(associatedColor),
+                        Modifier
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .background(associatedColor),
                     )
                 }
 
                 Row(
                     modifier =
-                        Modifier
-                            .weight(1f)
-                            .padding(all = 12.dp),
+                    Modifier
+                        .weight(1f)
+                        .padding(all = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -124,10 +125,10 @@ fun AudiobookCalendarItem(
                         )
                         Text(
                             text =
-                                listOfNotNull(
-                                    audiobook.authors.joinToString(", "),
-                                    audiobook.series?.takeUnless { it.isEmpty() },
-                                ).joinToString(separator = BULLET),
+                            listOfNotNull(
+                                audiobook.authors.joinToString(", "),
+                                audiobook.series?.takeUnless { it.isEmpty() },
+                            ).joinToString(separator = BULLET),
                             style = MaterialTheme.typography.bodyMedium,
                             color = secondaryContentColor,
                         )

@@ -34,13 +34,12 @@ class SonarrRepositoryTest {
     private val fakeLogger = LoggerFactory.get("test")
 
     @Test
-    fun testGetEpisodes() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(
-                        content =
-                            """
+    fun testGetEpisodes() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content =
+                    """
                             [{
                                 "id": 10,
                                 "seriesId": 1,
@@ -51,40 +50,40 @@ class SonarrRepositoryTest {
                                  "monitored": true,
                                  "unverifiedSceneNumbering": false
                              }]
-                            """.trimIndent(),
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            isLenient = true
+                            ignoreUnknownKeys = true
+                            encodeDefaults = true
+                            explicitNulls = false
+                            coerceInputValues = true
+                            serializersModule =
+                                SerializersModule {
+                                    contextual(Instant::class, ListenarrInstantSerializer)
+                                }
+                        },
                     )
                 }
-            val httpClient =
-                HttpClient(mockEngine) {
-                    install(ContentNegotiation) {
-                        json(
-                            Json {
-                                isLenient = true
-                                ignoreUnknownKeys = true
-                                encodeDefaults = true
-                                explicitNulls = false
-                                coerceInputValues = true
-                                serializersModule =
-                                    SerializersModule {
-                                        contextual(Instant::class, ListenarrInstantSerializer)
-                                    }
-                            },
-                        )
-                    }
-                }
-            val repository = SonarrRepository(fakeInstance, httpClient, fakeLogger)
+            }
+        val repository = SonarrRepository(fakeInstance, httpClient, fakeLogger)
 
-            repository.getEpisodes(seriesId = 1)
+        repository.getEpisodes(seriesId = 1)
 
-            assertNotNull(repository.episodes.value[1])
-            assertEquals(1, repository.episodes.value[1]?.size)
-            assertEquals(
-                "Pilot",
-                repository.episodes.value[1]
-                    ?.first()
-                    ?.title,
-            )
-        }
+        assertNotNull(repository.episodes.value[1])
+        assertEquals(1, repository.episodes.value[1]?.size)
+        assertEquals(
+            "Pilot",
+            repository.episodes.value[1]
+                ?.first()
+                ?.title,
+        )
+    }
 }

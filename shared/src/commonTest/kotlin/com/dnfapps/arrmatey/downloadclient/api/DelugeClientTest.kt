@@ -19,61 +19,57 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DelugeClientTest {
-    private fun client(password: String = "secret") =
-        DownloadClient(
-            id = 1,
-            type = DownloadClientType.Deluge,
-            label = "deluge",
-            url = "http://localhost:8112",
-            password = EncryptedString(password),
-        )
+    private fun client(password: String = "secret") = DownloadClient(
+        id = 1,
+        type = DownloadClientType.Deluge,
+        label = "deluge",
+        url = "http://localhost:8112",
+        password = EncryptedString(password),
+    )
 
-    private fun httpClient(mockEngine: MockEngine) =
-        HttpClient(mockEngine) {
-            expectSuccess = true
-            install(ContentNegotiation) {
-                json(Json { ignoreUnknownKeys = true })
+    private fun httpClient(mockEngine: MockEngine) = HttpClient(mockEngine) {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+    }
+
+    @Test
+    fun testConnectionAlwaysReAuthenticates() = runTest {
+        // testConnection resets the auth flag so an edited password takes effect immediately.
+        val methods = mutableListOf<String>()
+        val mockEngine =
+            MockEngine { request ->
+                val body = (request.body as? TextContent)?.text.orEmpty()
+                if ("\"method\":\"auth.login\"" in body) methods.add("auth.login")
+                respond(
+                    content = """{"id":1,"result":true,"error":null}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
             }
-        }
+
+        val deluge = DelugeClient(client(), httpClient(mockEngine))
+        deluge.testConnection()
+        deluge.testConnection()
+
+        assertEquals(listOf("auth.login", "auth.login"), methods)
+    }
 
     @Test
-    fun testConnectionAlwaysReAuthenticates() =
-        runTest {
-            // testConnection resets the auth flag so an edited password takes effect immediately.
-            val methods = mutableListOf<String>()
-            val mockEngine =
-                MockEngine { request ->
-                    val body = (request.body as? TextContent)?.text.orEmpty()
-                    if ("\"method\":\"auth.login\"" in body) methods.add("auth.login")
-                    respond(
-                        content = """{"id":1,"result":true,"error":null}""",
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
-                    )
-                }
+    fun testConnectionReturnsErrorWhenLoginRejected() = runTest {
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content = """{"id":1,"result":false,"error":null}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
 
-            val deluge = DelugeClient(client(), httpClient(mockEngine))
-            deluge.testConnection()
-            deluge.testConnection()
+        val result = DelugeClient(client(), httpClient(mockEngine)).testConnection()
 
-            assertEquals(listOf("auth.login", "auth.login"), methods)
-        }
-
-    @Test
-    fun testConnectionReturnsErrorWhenLoginRejected() =
-        runTest {
-            val mockEngine =
-                MockEngine { _ ->
-                    respond(
-                        content = """{"id":1,"result":false,"error":null}""",
-                        status = HttpStatusCode.OK,
-                        headers = headersOf("Content-Type", "application/json"),
-                    )
-                }
-
-            val result = DelugeClient(client(), httpClient(mockEngine)).testConnection()
-
-            assertTrue(result is NetworkResult.Error)
-            assertEquals(401, result.code)
-        }
+        assertTrue(result is NetworkResult.Error)
+        assertEquals(401, result.code)
+    }
 }

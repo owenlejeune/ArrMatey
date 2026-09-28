@@ -31,10 +31,10 @@ fun DownloadTransferSpeedChips(
 ) {
     Row(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp)
-                .horizontalScroll(rememberScrollState()),
+        modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+            .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Spacer(Modifier.width(18.dp))
@@ -53,8 +53,8 @@ fun DownloadTransferSpeedChips(
                 label = {
                     Text(
                         text =
-                            "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  " +
-                                "↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s",
+                        "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  " +
+                            "↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 2.dp),

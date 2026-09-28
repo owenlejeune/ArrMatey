@@ -69,6 +69,7 @@ import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewM
 import com.dnfapps.arrmatey.entensions.openAppSettings
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.permissions.rememberLocationPermissionHandler
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
@@ -151,10 +152,10 @@ fun AddEditDownloadClientScreen(
                                 confirmDelete = true
                             },
                             colors =
-                                IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                                ),
+                            IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                            ),
                             modifier = Modifier.padding(end = 4.dp),
                         ) {
                             Icon(
@@ -195,12 +196,12 @@ fun AddEditDownloadClientScreen(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = navigationBarBottomInset() + 16.dp),
+            Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+                .padding(bottom = navigationBarBottomInset() + 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AnimatedVisibility(
@@ -208,9 +209,9 @@ fun AddEditDownloadClientScreen(
             ) {
                 Card(
                     colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                        ),
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Row(
@@ -278,20 +279,20 @@ fun AddEditDownloadClientScreen(
                     singleLine = true,
                     isError = uiState.endpointError || hasUrlConflict,
                     errorMessage =
-                        when {
-                            uiState.endpointError -> mokoString(MR.strings.invalid_host)
-                            hasUrlConflict -> mokoString(MR.strings.field_conflict, mokoString(MR.strings.client_url))
-                            else -> null
-                        },
+                    when {
+                        uiState.endpointError -> mokoString(MR.strings.invalid_host)
+                        hasUrlConflict -> mokoString(MR.strings.field_conflict, mokoString(MR.strings.client_url))
+                        else -> null
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 )
 
                 Card(
                     shape = MaterialTheme.shapes.large,
                     colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        ),
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(
@@ -330,11 +331,11 @@ fun AddEditDownloadClientScreen(
                             onValueChange = { viewModel.updatePassword(it) },
                             label = mokoString(MR.strings.client_password),
                             visualTransformation =
-                                if (showPassword) {
-                                    VisualTransformation.None
-                                } else {
-                                    PasswordVisualTransformation()
-                                },
+                            if (showPassword) {
+                                VisualTransformation.None
+                            } else {
+                                PasswordVisualTransformation()
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             trailingIcon = {
@@ -451,9 +452,9 @@ fun LocalNetworkArea(
     Card(
         shape = MaterialTheme.shapes.large,
         colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-            ),
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        ),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
@@ -508,11 +509,11 @@ fun LocalNetworkArea(
                         singleLine = true,
                         isError = uiState.localNetworkEndpointError,
                         errorMessage =
-                            if (uiState.localNetworkEndpointError) {
-                                mokoString(MR.strings.invalid_url)
-                            } else {
-                                null
-                            },
+                        if (uiState.localNetworkEndpointError) {
+                            mokoString(MR.strings.invalid_url)
+                        } else {
+                            null
+                        },
                     )
 
                     AMOutlinedTextField(
@@ -558,15 +559,15 @@ fun LocalNetworkArea(
                         Button(
                             onClick = onTestLocalConnection,
                             enabled =
-                                !uiState.localTesting &&
-                                    uiState.localNetworkEndpoint.isNotBlank(),
+                            !uiState.localTesting &&
+                                uiState.localNetworkEndpoint.isNotBlank(),
                         ) {
                             if (uiState.localTesting) {
                                 CircularProgressIndicator(
                                     modifier =
-                                        Modifier
-                                            .padding(end = 8.dp)
-                                            .size(16.dp),
+                                    Modifier
+                                        .padding(end = 8.dp)
+                                        .size(16.dp),
                                     strokeWidth = 2.dp,
                                 )
                             }

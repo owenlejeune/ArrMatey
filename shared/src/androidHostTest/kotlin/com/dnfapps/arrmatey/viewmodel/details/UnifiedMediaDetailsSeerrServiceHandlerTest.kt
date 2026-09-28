@@ -14,16 +14,15 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalCoroutinesApi::class)
 class UnifiedMediaDetailsSeerrServiceHandlerTest {
     @Test
-    fun testButtonStateInitial() =
-        runTest(UnconfinedTestDispatcher()) {
-            val handler =
-                UnifiedMediaDetailsSeerrServiceHandler(
-                    scope = TestScope(UnconfinedTestDispatcher()),
-                    resolvedRequestType = RequestType.Movie,
-                    uiStateFlow = flowOf(UnifiedMediaDetailsUiState.Initial),
-                    isSeerrConfiguredFlow = flowOf(false),
-                )
+    fun testButtonStateInitial() = runTest(UnconfinedTestDispatcher()) {
+        val handler =
+            UnifiedMediaDetailsSeerrServiceHandler(
+                scope = TestScope(UnconfinedTestDispatcher()),
+                resolvedRequestType = RequestType.Movie,
+                uiStateFlow = flowOf(UnifiedMediaDetailsUiState.Initial),
+                isSeerrConfiguredFlow = flowOf(false),
+            )
 
-            assertEquals(MediaButtonState(), handler.buttonState.value)
-        }
+        assertEquals(MediaButtonState(), handler.buttonState.value)
+    }
 }

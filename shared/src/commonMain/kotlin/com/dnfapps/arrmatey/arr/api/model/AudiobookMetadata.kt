@@ -46,21 +46,21 @@ data class AudiobookMetadata(
             language = language.orEmpty(),
             narrators = narrators.map { it.name },
             publishYear =
-                publishDate?.toLocalDateTime(TimeZone.UTC)?.year?.toString()
-                    ?: releaseDate?.take(4).orEmpty(),
+            publishDate?.toLocalDateTime(TimeZone.UTC)?.year?.toString()
+                ?: releaseDate?.take(4).orEmpty(),
             publishDate = releaseDate.orEmpty(),
             publisher = publisher.orEmpty(),
             runtime = lengthMinutes ?: 0,
             series = primarySeries?.name.orEmpty(),
             seriesMemberships =
-                series.mapIndexed { index, s ->
-                    SeriesMembership(
-                        seriesName = s.name,
-                        seriesNumber = s.position.orEmpty(),
-                        isPrimary = index == 0,
-                        sortOrder = index,
-                    )
-                },
+            series.mapIndexed { index, s ->
+                SeriesMembership(
+                    seriesName = s.name,
+                    seriesNumber = s.position.orEmpty(),
+                    isPrimary = index == 0,
+                    sortOrder = index,
+                )
+            },
             seriesNumber = primarySeries?.position.orEmpty(),
             source = source,
             tags = emptyList(),

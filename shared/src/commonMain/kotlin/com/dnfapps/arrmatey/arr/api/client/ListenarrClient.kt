@@ -46,39 +46,35 @@ class ListenarrClient(
     httpClient: HttpClient,
 ) : BaseArrClient(httpClient),
     ArrClient {
-    override suspend fun getLibrary(): NetworkResult<List<Audiobook>> =
-        get<List<Audiobook>>("library").map { books ->
-            books.map { it.copy(instanceId = instance.id) }
-        }
+    override suspend fun getLibrary(): NetworkResult<List<Audiobook>> = get<List<Audiobook>>("library").map { books ->
+        books.map { it.copy(instanceId = instance.id) }
+    }
 
     override suspend fun getDetail(id: Long): NetworkResult<Audiobook> = get("library/$id")
 
-    override suspend fun update(item: ArrMedia): NetworkResult<Audiobook> =
-        put<MonitorBody, AudiobookEditResponse>("library/${item.id}", MonitorBody(item.monitored))
-            .map { it.audiobook }
-            .rebuild()
+    override suspend fun update(item: ArrMedia): NetworkResult<Audiobook> = put<MonitorBody, AudiobookEditResponse>("library/${item.id}", MonitorBody(item.monitored))
+        .map { it.audiobook }
+        .rebuild()
 
     override suspend fun edit(
         item: ArrMedia,
         moveFiles: Boolean,
-    ): NetworkResult<Unit> =
-        (item as? Audiobook)?.let { audiobook ->
-            put("library/${item.id}", audiobook.toEditBody())
-        } ?: NetworkResult.Error(message = "Item must be an Audiobook")
+    ): NetworkResult<Unit> = (item as? Audiobook)?.let { audiobook ->
+        put("library/${item.id}", audiobook.toEditBody())
+    } ?: NetworkResult.Error(message = "Item must be an Audiobook")
 
     override suspend fun delete(
         id: Long,
         deleteFiles: Boolean,
         addImportExclusion: Boolean,
-    ): NetworkResult<Unit> =
-        delete(
-            endpoint = "library/$id",
-            params =
-                mapOf(
-                    "deleteFiles" to deleteFiles,
-                    "deleteFolder" to deleteFiles,
-                ),
-        )
+    ): NetworkResult<Unit> = delete(
+        endpoint = "library/$id",
+        params =
+        mapOf(
+            "deleteFiles" to deleteFiles,
+            "deleteFolder" to deleteFiles,
+        ),
+    )
 
     override suspend fun setMonitorStatus(
         id: Long,
@@ -95,31 +91,28 @@ class ListenarrClient(
         return NetworkResult.Error(message = "Failed to update monitor status")
     }
 
-    override suspend fun lookup(params: LookupParams): NetworkResult<List<SearchAudiobook>> =
-        post(
-            "search",
-            buildJsonObject {
-                put("title", params.query)
-                put("language", params.language ?: "english")
-                put("region", params.region ?: "us")
-                put("mode", "Advanced")
-                put(
-                    "pagination",
-                    buildJsonObject {
-                        put("page", 1)
-                        put("limit", 100)
-                    },
-                )
-            },
-        )
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<SearchAudiobook>> = post(
+        "search",
+        buildJsonObject {
+            put("title", params.query)
+            put("language", params.language ?: "english")
+            put("region", params.region ?: "us")
+            put("mode", "Advanced")
+            put(
+                "pagination",
+                buildJsonObject {
+                    put("page", 1)
+                    put("limit", 100)
+                },
+            )
+        },
+    )
 
-    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Audiobook> =
-        NetworkResult.Error(message = "Use addNewAudiobook instead")
+    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Audiobook> = NetworkResult.Error(message = "Use addNewAudiobook instead")
 
     suspend fun addNewAudiobook(body: AddAudiobookBody): NetworkResult<AddAudiobookResponse> = post("library/add", body)
 
-    override suspend fun performAutomaticSearch(id: Long): NetworkResult<Any> =
-        post<Map<String, Long>, ListenarrCommandResponse>("download/search-and-download", mapOf("audiobookId" to id))
+    override suspend fun performAutomaticSearch(id: Long): NetworkResult<Any> = post<Map<String, Long>, ListenarrCommandResponse>("download/search-and-download", mapOf("audiobookId" to id))
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<ListenarrRelease>> {
         val query =
@@ -137,63 +130,55 @@ class ListenarrClient(
         page: Int,
         pageSize: Int,
         altId: Long?,
-    ): NetworkResult<List<HistoryItem>> =
-        get<List<ListenarrHistoryItem>>("history/audiobook/$id")
-            .map { list ->
-                list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
-            }
+    ): NetworkResult<List<HistoryItem>> = get<List<ListenarrHistoryItem>>("history/audiobook/$id")
+        .map { list ->
+            list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+        }
 
     override suspend fun getHistory(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<List<HistoryItem>> =
-        get<List<ListenarrHistoryItem>>("history")
-            .map { list ->
-                list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
-            }
+    ): NetworkResult<List<HistoryItem>> = get<List<ListenarrHistoryItem>>("history")
+        .map { list ->
+            list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+        }
 
     override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate,
-    ): NetworkResult<List<Audiobook>> =
-        get<List<Audiobook>>("library")
-            .filterValues { it.publishedDate.isBetween(start, end) }
+    ): NetworkResult<List<Audiobook>> = get<List<Audiobook>>("library")
+        .filterValues { it.publishedDate.isBetween(start, end) }
 
-    override suspend fun command(payload: CommandPayload): NetworkResult<Any> =
-        when (payload) {
-            is CommandPayload.Audiobook ->
-                post<CommandPayload.Audiobook, ListenarrCommandResponse>(
-                    "download/search-and-download",
-                    payload,
-                )
+    override suspend fun command(payload: CommandPayload): NetworkResult<Any> = when (payload) {
+        is CommandPayload.Audiobook ->
+            post<CommandPayload.Audiobook, ListenarrCommandResponse>(
+                "download/search-and-download",
+                payload,
+            )
 
-            else -> super.command(payload)
-        }
+        else -> super.command(payload)
+    }
 
     override suspend fun fetchActivityTasks(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<QueuePage> =
-        get<ListenarrQueueResponse>("download/queue")
-            .map {
-                QueuePage(page, pageSize, it.items.size, it.items)
-                    .setInstance(instance.id, instance.label)
-            }
-
-    override suspend fun getHealth(): NetworkResult<List<ArrHealth>> =
-        get<ListenarrHealth>("system/health").map {
-            it.toArrHealthItems()
+    ): NetworkResult<QueuePage> = get<ListenarrQueueResponse>("download/queue")
+        .map {
+            QueuePage(page, pageSize, it.items.size, it.items)
+                .setInstance(instance.id, instance.label)
         }
 
-    override suspend fun getDiskSpace(): NetworkResult<List<ArrDiskSpace>> =
-        get<ListenarrDiskSpace>("system/storage").map {
-            listOf(it.toArrDiskSpace())
-        }
+    override suspend fun getHealth(): NetworkResult<List<ArrHealth>> = get<ListenarrHealth>("system/health").map {
+        it.toArrHealthItems()
+    }
 
-    override suspend fun getStatus(): NetworkResult<ArrSoftwareStatus> =
-        get<ListenarrSystemInfo>("system/info").map {
-            it.toArrSoftwareStatus()
-        }
+    override suspend fun getDiskSpace(): NetworkResult<List<ArrDiskSpace>> = get<ListenarrDiskSpace>("system/storage").map {
+        listOf(it.toArrDiskSpace())
+    }
+
+    override suspend fun getStatus(): NetworkResult<ArrSoftwareStatus> = get<ListenarrSystemInfo>("system/info").map {
+        it.toArrSoftwareStatus()
+    }
 
     suspend fun getEnabledIndexers(): NetworkResult<List<ListenarrIndexer>> = get("indexers/enabled")
 
@@ -214,25 +199,23 @@ class ListenarrClient(
         moveFiles: Boolean,
         sourcePath: String,
         destinationPath: String,
-    ): NetworkResult<Unit> =
-        post(
-            "library/$id/move",
-            buildJsonObject {
-                put("moveFiles", moveFiles)
-                put("deleteEmptySources", true)
-                put("sourcePath", sourcePath)
-                put("destinationPath", destinationPath)
-            },
-        )
+    ): NetworkResult<Unit> = post(
+        "library/$id/move",
+        buildJsonObject {
+            put("moveFiles", moveFiles)
+            put("deleteEmptySources", true)
+            put("sourcePath", sourcePath)
+            put("destinationPath", destinationPath)
+        },
+    )
 
     suspend fun deleteAudiobookFile(
         audiobookId: Long,
         fileId: Long,
-    ): NetworkResult<Unit> =
-        delete<Unit>("library/$audiobookId/file/$fileId")
-            .onError { _, _, _ ->
-                delete<Unit>("audiobookfile/$fileId")
-            }
+    ): NetworkResult<Unit> = delete<Unit>("library/$audiobookId/file/$fileId")
+        .onError { _, _, _ ->
+            delete<Unit>("audiobookfile/$fileId")
+        }
 
     suspend fun deleteAudiobookFiles(
         audiobookId: Long,

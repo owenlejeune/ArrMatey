@@ -23,16 +23,15 @@ internal object TabPreferencesSerializer {
                 return Json.decodeFromString<TabPreferences>(jsonString)
             }
 
-            fun extractKey(element: JsonElement): String? =
-                if (element is JsonPrimitive) {
-                    "standard_${element.content}"
-                } else {
-                    element.jsonObject["key"]?.jsonPrimitive?.content
-                        ?: element.jsonObject["id"]
-                            ?.jsonPrimitive
-                            ?.content
-                            ?.let { "webpage_$it" }
-                }
+            fun extractKey(element: JsonElement): String? = if (element is JsonPrimitive) {
+                "standard_${element.content}"
+            } else {
+                element.jsonObject["key"]?.jsonPrimitive?.content
+                    ?: element.jsonObject["id"]
+                        ?.jsonPrimitive
+                        ?.content
+                        ?.let { "webpage_$it" }
+            }
 
             val migratedVisible = jsonElement["bottomTabItems"]?.jsonArray?.mapNotNull { extractKey(it) } ?: emptyList()
             val migratedHidden = jsonElement["hiddenTabs"]?.jsonArray?.mapNotNull { extractKey(it) } ?: emptyList()

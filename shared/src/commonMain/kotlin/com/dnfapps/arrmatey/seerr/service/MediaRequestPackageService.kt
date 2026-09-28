@@ -15,41 +15,39 @@ import kotlinx.coroutines.coroutineScope
 class MediaRequestPackageService(
     private val client: SeerrClient,
 ) {
-    suspend fun enrichMedia(request: MediaRequest): MediaRequestPackage =
-        coroutineScope {
-            val detailsDeferred =
-                async {
+    suspend fun enrichMedia(request: MediaRequest): MediaRequestPackage = coroutineScope {
+        val detailsDeferred =
+            async {
+                when (request.type) {
+                    RequestType.Movie -> fetchMovieDetails(request.media.tmdbId)
+                    RequestType.Tv -> fetchTvDetails(request.media.tmdbId)
+                    RequestType.Person -> null
+                }
+            }
+
+        val serverDetailsDeferred =
+            async {
+                val serverId = request.serverId
+                if (serverId != null && serverId > 0) {
                     when (request.type) {
-                        RequestType.Movie -> fetchMovieDetails(request.media.tmdbId)
-                        RequestType.Tv -> fetchTvDetails(request.media.tmdbId)
+                        RequestType.Movie -> fetchRadarrDetails(serverId)
+                        RequestType.Tv -> fetchSonarrDetails(serverId)
                         RequestType.Person -> null
                     }
+                } else {
+                    null
                 }
+            }
 
-            val serverDetailsDeferred =
-                async {
-                    val serverId = request.serverId
-                    if (serverId != null && serverId > 0) {
-                        when (request.type) {
-                            RequestType.Movie -> fetchRadarrDetails(serverId)
-                            RequestType.Tv -> fetchSonarrDetails(serverId)
-                            RequestType.Person -> null
-                        }
-                    } else {
-                        null
-                    }
-                }
+        MediaRequestPackage(request, detailsDeferred.await(), serverDetailsDeferred.await())
+    }
 
-            MediaRequestPackage(request, detailsDeferred.await(), serverDetailsDeferred.await())
-        }
-
-    suspend fun enrichRequests(requests: List<MediaRequest>): List<MediaRequestPackage> =
-        coroutineScope {
-            requests
-                .map { request ->
-                    async { enrichMedia(request) }
-                }.awaitAll()
-        }
+    suspend fun enrichRequests(requests: List<MediaRequest>): List<MediaRequestPackage> = coroutineScope {
+        requests
+            .map { request ->
+                async { enrichMedia(request) }
+            }.awaitAll()
+    }
 
     private suspend fun fetchMovieDetails(tmdbId: Long): RequestMediaDetails? {
         var details: RequestMediaDetails? = null

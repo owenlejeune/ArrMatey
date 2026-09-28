@@ -2,7 +2,25 @@ package com.dnfapps.arrmatey.compose
 
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.activity
+import com.dnfapps.arrmatey.shared.audiobooks
+import com.dnfapps.arrmatey.shared.bazarr
+import com.dnfapps.arrmatey.shared.books
+import com.dnfapps.arrmatey.shared.custom_webpage
+import com.dnfapps.arrmatey.shared.dashboard
+import com.dnfapps.arrmatey.shared.discover
+import com.dnfapps.arrmatey.shared.downloads
+import com.dnfapps.arrmatey.shared.library
+import com.dnfapps.arrmatey.shared.movies
+import com.dnfapps.arrmatey.shared.music
+import com.dnfapps.arrmatey.shared.prowlarr
+import com.dnfapps.arrmatey.shared.requests
+import com.dnfapps.arrmatey.shared.schedule
+import com.dnfapps.arrmatey.shared.series
+import com.dnfapps.arrmatey.shared.settings
+import com.dnfapps.arrmatey.shared.tracearr
 import dev.icerock.moko.resources.StringResource
 
 sealed interface TabItem {
@@ -68,14 +86,13 @@ sealed interface TabItem {
     companion object {
         fun standardEntries(): List<Standard> = Standard.entries.filter { !it.isDisabled }
 
-        fun defaultStandardEntries(): List<Standard> =
-            listOf(
-                Standard.DASHBOARD,
-                Standard.LIBRARY,
-                Standard.DISCOVER,
-                Standard.ACTIVITY,
-                Standard.CALENDAR,
-            )
+        fun defaultStandardEntries(): List<Standard> = listOf(
+            Standard.DASHBOARD,
+            Standard.LIBRARY,
+            Standard.DISCOVER,
+            Standard.ACTIVITY,
+            Standard.CALENDAR,
+        )
 
         fun defaultHiddenStandard(): List<Standard> = standardEntries().filter { !defaultStandardEntries().contains(it) }
 

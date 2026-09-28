@@ -12,18 +12,17 @@ class DeleteAlbumFilesUseCase {
         artistId: Long,
         albumId: Long,
         repository: ArrInstanceRepository,
-    ): Flow<OperationStatus> =
-        flow {
-            emit(OperationStatus.InProgress)
-            repository
-                .deleteAlbumFiles(artistId, albumId)
-                .onSuccess {
-                    repository.getArtistAlbums(artistId)
-                    repository.getArtistTracks(artistId)
-                    repository.getArtistTrackFiles(artistId)
-                    emit(OperationStatus.Success(message = "Files deleted successfully"))
-                }.onError { code, message, cause ->
-                    emit(OperationStatus.Error(code, message, cause))
-                }
-        }
+    ): Flow<OperationStatus> = flow {
+        emit(OperationStatus.InProgress)
+        repository
+            .deleteAlbumFiles(artistId, albumId)
+            .onSuccess {
+                repository.getArtistAlbums(artistId)
+                repository.getArtistTracks(artistId)
+                repository.getArtistTrackFiles(artistId)
+                emit(OperationStatus.Success(message = "Files deleted successfully"))
+            }.onError { code, message, cause ->
+                emit(OperationStatus.Error(code, message, cause))
+            }
+    }
 }

@@ -37,15 +37,15 @@ fun CircularCheckbox(
 
     Box(
         modifier =
-            modifier
-                .size(24.dp)
-                .clip(CircleShape)
-                .background(checkboxColor)
-                .border(
-                    width = 2.dp,
-                    color = borderColor,
-                    shape = CircleShape,
-                ),
+        modifier
+            .size(24.dp)
+            .clip(CircleShape)
+            .background(checkboxColor)
+            .border(
+                width = 2.dp,
+                color = borderColor,
+                shape = CircleShape,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         if (checked) {

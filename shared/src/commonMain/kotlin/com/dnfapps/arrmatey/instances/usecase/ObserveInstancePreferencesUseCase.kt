@@ -14,14 +14,12 @@ class ObserveInstancePreferencesUseCase(
     private val preferencesStoreRepository: InstancePreferenceStoreRepository,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    operator fun invoke(type: InstanceType): Flow<InstancePreferences> =
-        instanceManager
-            .getSelectedArrRepository(type)
-            .filterNotNull()
-            .flatMapLatest {
-                preferencesStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
-            }
+    operator fun invoke(type: InstanceType): Flow<InstancePreferences> = instanceManager
+        .getSelectedArrRepository(type)
+        .filterNotNull()
+        .flatMapLatest {
+            preferencesStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
+        }
 
-    operator fun invoke(instanceId: Long): Flow<InstancePreferences> =
-        preferencesStoreRepository.getInstancePreferences(instanceId).observePreferences()
+    operator fun invoke(instanceId: Long): Flow<InstancePreferences> = preferencesStoreRepository.getInstancePreferences(instanceId).observePreferences()
 }

@@ -84,11 +84,11 @@ class DownloadClientSettingsViewModel(
             it.copy(
                 url = url,
                 saveButtonEnabled =
-                    url.isNotEmpty() &&
-                        (
-                            it.noApiKeyRequired ||
-                                it.apiKey.isNotEmpty() ||
-                                (it.username.isNotEmpty() && it.password.isNotEmpty())
+                url.isNotEmpty() &&
+                    (
+                        it.noApiKeyRequired ||
+                            it.apiKey.isNotEmpty() ||
+                            (it.username.isNotEmpty() && it.password.isNotEmpty())
                         ),
             )
         }
@@ -99,11 +99,11 @@ class DownloadClientSettingsViewModel(
             it.copy(
                 username = username,
                 saveButtonEnabled =
-                    it.url.isNotEmpty() &&
-                        (
-                            it.noApiKeyRequired ||
-                                it.apiKey.isNotEmpty() ||
-                                (username.isNotEmpty() && it.password.isNotEmpty())
+                it.url.isNotEmpty() &&
+                    (
+                        it.noApiKeyRequired ||
+                            it.apiKey.isNotEmpty() ||
+                            (username.isNotEmpty() && it.password.isNotEmpty())
                         ),
             )
         }
@@ -114,11 +114,11 @@ class DownloadClientSettingsViewModel(
             it.copy(
                 password = password,
                 saveButtonEnabled =
-                    it.url.isNotEmpty() &&
-                        (
-                            it.noApiKeyRequired ||
-                                it.apiKey.isNotEmpty() ||
-                                (it.username.isNotEmpty() && password.isNotEmpty())
+                it.url.isNotEmpty() &&
+                    (
+                        it.noApiKeyRequired ||
+                            it.apiKey.isNotEmpty() ||
+                            (it.username.isNotEmpty() && password.isNotEmpty())
                         ),
             )
         }
@@ -130,11 +130,11 @@ class DownloadClientSettingsViewModel(
             it.copy(
                 apiKey = newApiKey,
                 saveButtonEnabled =
-                    it.url.isNotEmpty() &&
-                        (
-                            it.noApiKeyRequired ||
-                                newApiKey.isNotEmpty() ||
-                                (!it.username.isNotEmpty() && !it.password.isNotEmpty())
+                it.url.isNotEmpty() &&
+                    (
+                        it.noApiKeyRequired ||
+                            newApiKey.isNotEmpty() ||
+                            (!it.username.isNotEmpty() && !it.password.isNotEmpty())
                         ),
             )
         }
@@ -151,11 +151,11 @@ class DownloadClientSettingsViewModel(
                 username = newUsername,
                 password = newPassword,
                 saveButtonEnabled =
-                    it.url.isNotEmpty() &&
-                        (
-                            enabled ||
-                                newApiKey.isNotEmpty() ||
-                                (!newUsername.isNotEmpty() && !newPassword.isNotEmpty())
+                it.url.isNotEmpty() &&
+                    (
+                        enabled ||
+                            newApiKey.isNotEmpty() ||
+                            (!newUsername.isNotEmpty() && !newPassword.isNotEmpty())
                         ),
             )
         }
@@ -221,24 +221,23 @@ class DownloadClientSettingsViewModel(
         }
     }
 
-    private fun buildDownloadClient(): DownloadClient =
-        DownloadClient(
-            id = downloadClient.value?.id ?: 0,
-            type = uiState.value.selectedType,
-            label =
-                uiState.value.label.takeUnless { it.isEmpty() }
-                    ?: uiState.value.selectedType.displayName,
-            url = uiState.value.url,
-            username = EncryptedString(uiState.value.username),
-            password = EncryptedString(uiState.value.password),
-            apiKey = EncryptedString(uiState.value.apiKey),
-            noApiKeyRequired = uiState.value.noApiKeyRequired,
-            headers = uiState.value.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
-            selected = downloadClient.value?.selected ?: false,
-            localNetworkEnabled = uiState.value.localNetworkEnabled,
-            localNetworkSsids = uiState.value.localNetworkSsids,
-            localNetworkEndpoint = uiState.value.localNetworkEndpoint,
-        )
+    private fun buildDownloadClient(): DownloadClient = DownloadClient(
+        id = downloadClient.value?.id ?: 0,
+        type = uiState.value.selectedType,
+        label =
+        uiState.value.label.takeUnless { it.isEmpty() }
+            ?: uiState.value.selectedType.displayName,
+        url = uiState.value.url,
+        username = EncryptedString(uiState.value.username),
+        password = EncryptedString(uiState.value.password),
+        apiKey = EncryptedString(uiState.value.apiKey),
+        noApiKeyRequired = uiState.value.noApiKeyRequired,
+        headers = uiState.value.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
+        selected = downloadClient.value?.selected ?: false,
+        localNetworkEnabled = uiState.value.localNetworkEnabled,
+        localNetworkSsids = uiState.value.localNetworkSsids,
+        localNetworkEndpoint = uiState.value.localNetworkEndpoint,
+    )
 
     fun deleteClient() {
         downloadClientId?.let { clientId ->
@@ -254,9 +253,9 @@ class DownloadClientSettingsViewModel(
                     _uiState.update {
                         it.copy(
                             mutationState =
-                                DownloadClientMutationState.Error(
-                                    error.message ?: "",
-                                ),
+                            DownloadClientMutationState.Error(
+                                error.message ?: "",
+                            ),
                         )
                     }
                 }
@@ -297,9 +296,9 @@ class DownloadClientSettingsViewModel(
                                     _uiState.update {
                                         it.copy(
                                             mutationState =
-                                                DownloadClientMutationState.Success(
-                                                    createdId,
-                                                ),
+                                            DownloadClientMutationState.Success(
+                                                createdId,
+                                            ),
                                             isTesting = false,
                                         )
                                     }
@@ -313,9 +312,9 @@ class DownloadClientSettingsViewModel(
                                     _uiState.update {
                                         it.copy(
                                             mutationState =
-                                                DownloadClientMutationState.ConnectionFailed(
-                                                    testStatus.message ?: "Connection test failed",
-                                                ),
+                                            DownloadClientMutationState.ConnectionFailed(
+                                                testStatus.message ?: "Connection test failed",
+                                            ),
                                             isTesting = false,
                                             isEditing = false,
                                         )
@@ -376,9 +375,9 @@ class DownloadClientSettingsViewModel(
                                     _uiState.update {
                                         it.copy(
                                             mutationState =
-                                                DownloadClientMutationState.ConnectionFailed(
-                                                    testStatus.message ?: "Connection test failed",
-                                                ),
+                                            DownloadClientMutationState.ConnectionFailed(
+                                                testStatus.message ?: "Connection test failed",
+                                            ),
                                             isTesting = false,
                                         )
                                     }

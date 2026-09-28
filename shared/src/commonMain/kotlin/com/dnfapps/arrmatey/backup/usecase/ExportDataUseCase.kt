@@ -120,17 +120,17 @@ class ExportDataUseCase(
                     useColoredCalendarCards = if (includeUiPreferences) preferencesStore.useColoredCalendarCards.first() else null,
                     showInfoCards = if (includeUiPreferences) preferencesStore.showInfoCards.first() else null,
                     discoverSectionPreferences =
-                        if (includeIntegrationsPreferences) preferencesStore.discoverSectionPreferences.first() else null,
+                    if (includeIntegrationsPreferences) preferencesStore.discoverSectionPreferences.first() else null,
                     smartAddSeerrAction =
-                        if (includeIntegrationsPreferences) preferencesStore.smartAddSeerrAction.first() else null,
+                    if (includeIntegrationsPreferences) preferencesStore.smartAddSeerrAction.first() else null,
                     combineSeerrArrMedia =
-                        if (includeIntegrationsPreferences) preferencesStore.combineSeerrArrMedia.first() else null,
+                    if (includeIntegrationsPreferences) preferencesStore.combineSeerrArrMedia.first() else null,
                     bazarrDetailsIntegration =
-                        if (includeIntegrationsPreferences) preferencesStore.bazarrDetailsIntegration.first() else null,
+                    if (includeIntegrationsPreferences) preferencesStore.bazarrDetailsIntegration.first() else null,
                     tracearrDetailsIntegration =
-                        if (includeIntegrationsPreferences) preferencesStore.tracearrDetailsIntegration.first() else null,
+                    if (includeIntegrationsPreferences) preferencesStore.tracearrDetailsIntegration.first() else null,
                     unifiedLibrarySearchAllInstances =
-                        if (includeIntegrationsPreferences) preferencesStore.unifiedLibrarySearchAllInstances.first() else null,
+                    if (includeIntegrationsPreferences) preferencesStore.unifiedLibrarySearchAllInstances.first() else null,
                     calendarFilterState = if (includeUiPreferences) preferencesStore.observeCalendarFilterState().first() else null,
                     downloadQueueSortState = if (includeUiPreferences) preferencesStore.observeDownloadClientUiState().first() else null,
                     dashboardCardsOrder = if (includeUiPreferences) preferencesStore.dashboardCardsOrder.first() else null,

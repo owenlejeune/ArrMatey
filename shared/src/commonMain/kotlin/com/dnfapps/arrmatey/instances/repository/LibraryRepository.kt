@@ -91,17 +91,16 @@ class LibraryRepository(
         onListenarrConfigUpdate?.invoke()
     }
 
-    suspend fun getMediaDetails(id: Long): NetworkResult<ArrMedia> =
-        client
-            .getDetail(id)
-            .onSuccess { media ->
-                logger.info { "Media details for $id: $media" }
-                val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache[id] = media
-                _mediaDetailsCache.value = currentCache
-            }.onError { code, message, cause ->
-                logger.error(cause) { "Error getting media details for $id: $message" }
-            }
+    suspend fun getMediaDetails(id: Long): NetworkResult<ArrMedia> = client
+        .getDetail(id)
+        .onSuccess { media ->
+            logger.info { "Media details for $id: $media" }
+            val currentCache = _mediaDetailsCache.value.toMutableMap()
+            currentCache[id] = media
+            _mediaDetailsCache.value = currentCache
+        }.onError { code, message, cause ->
+            logger.error(cause) { "Error getting media details for $id: $message" }
+        }
 
     suspend fun refreshActivityTasks(
         page: Int = 1,
@@ -282,10 +281,9 @@ class LibraryRepository(
     suspend fun refreshHistory(
         page: Int = 1,
         pageSize: Int = 100,
-    ): NetworkResult<List<HistoryItem>> =
-        client.getHistory(page, pageSize).onSuccess {
-            _history.value = it
-        }
+    ): NetworkResult<List<HistoryItem>> = client.getHistory(page, pageSize).onSuccess {
+        _history.value = it
+    }
 
     suspend fun editMediaItem(
         item: ArrMedia,
@@ -332,16 +330,15 @@ class LibraryRepository(
         id: Long,
         deleteFiles: Boolean,
         addImportExclusion: Boolean,
-    ): NetworkResult<Unit> =
-        client
-            .delete(id, deleteFiles, addImportExclusion)
-            .onSuccess {
-                val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache.remove(id)
-                _mediaDetailsCache.value = currentCache
+    ): NetworkResult<Unit> = client
+        .delete(id, deleteFiles, addImportExclusion)
+        .onSuccess {
+            val currentCache = _mediaDetailsCache.value.toMutableMap()
+            currentCache.remove(id)
+            _mediaDetailsCache.value = currentCache
 
-                removeItemFromLibraryCache(id)
-            }
+            removeItemFromLibraryCache(id)
+        }
 
     fun removeItemFromLibraryCache(id: Long) {
         val currentLibrary = _library.value
@@ -434,48 +431,45 @@ class LibraryRepository(
         _releases.value = null
     }
 
-    fun observeCacheMediaDetails(id: Long): Flow<ArrMedia?> =
-        _mediaDetailsCache.map {
-            it[id]
-        }
+    fun observeCacheMediaDetails(id: Long): Flow<ArrMedia?> = _mediaDetailsCache.map {
+        it[id]
+    }
 
     fun getCacheMediaDetails(id: Long): ArrMedia? = _mediaDetailsCache.value[id]
 
-    fun observeMediaDetails(id: Long): Flow<NetworkResult<ArrMedia>> =
-        flow {
-            emit(NetworkResult.Loading)
+    fun observeMediaDetails(id: Long): Flow<NetworkResult<ArrMedia>> = flow {
+        emit(NetworkResult.Loading)
 
-            val result = client.getDetail(id)
-            when (result) {
-                is NetworkResult.Success -> {
-                    val currentCache = _mediaDetailsCache.value.toMutableMap()
-                    currentCache[id] = result.data
-                    _mediaDetailsCache.value = currentCache
-                }
-
-                is NetworkResult.Error -> {
-                    emit(result)
-                    return@flow
-                }
-
-                is NetworkResult.Loading -> {}
+        val result = client.getDetail(id)
+        when (result) {
+            is NetworkResult.Success -> {
+                val currentCache = _mediaDetailsCache.value.toMutableMap()
+                currentCache[id] = result.data
+                _mediaDetailsCache.value = currentCache
             }
 
-            _mediaDetailsCache
-                .map { cache -> cache[id] }
-                .distinctUntilChanged()
-                .collect { cached ->
-                    emit(
-                        cached?.let { NetworkResult.Success(it) }
-                            ?: NetworkResult.Error(message = "Media not found in cache"),
-                    )
-                }
+            is NetworkResult.Error -> {
+                emit(result)
+                return@flow
+            }
+
+            is NetworkResult.Loading -> {}
         }
 
-    fun observeItemHistory(itemId: Long): Flow<List<HistoryItem>> =
-        historyCache.map { cache ->
-            cache[itemId] ?: emptyList()
-        }
+        _mediaDetailsCache
+            .map { cache -> cache[id] }
+            .distinctUntilChanged()
+            .collect { cached ->
+                emit(
+                    cached?.let { NetworkResult.Success(it) }
+                        ?: NetworkResult.Error(message = "Media not found in cache"),
+                )
+            }
+    }
+
+    fun observeItemHistory(itemId: Long): Flow<List<HistoryItem>> = historyCache.map { cache ->
+        cache[itemId] ?: emptyList()
+    }
 
     fun setMonitorStatus(status: OperationStatus) {
         _monitorStatus.value = status
