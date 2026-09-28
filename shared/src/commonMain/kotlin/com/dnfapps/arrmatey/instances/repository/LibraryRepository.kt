@@ -236,12 +236,11 @@ class LibraryRepository(
         removeFromClient: Boolean,
         addToBlocklist: Boolean,
         skipRedownload: Boolean,
-    ): NetworkResult<Unit> =
-        client
-            .deleteActivityTask(releaseId, removeFromClient, addToBlocklist, skipRedownload)
-            .onSuccess {
-                _activityTasks.value = _activityTasks.value.filter { it.id != releaseId }
-            }
+    ): NetworkResult<Unit> = client
+        .deleteActivityTask(releaseId, removeFromClient, addToBlocklist, skipRedownload)
+        .onSuccess {
+            _activityTasks.value = _activityTasks.value.filter { it.id != releaseId }
+        }
 
     suspend fun executeAutomaticSearch(itemId: Long) {
         _searchStatus.value = OperationStatus.InProgress
