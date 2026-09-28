@@ -87,6 +87,11 @@ interface ArrClient {
         altId: Long? = null,
     ): NetworkResult<List<HistoryItem>>
 
+    suspend fun getHistory(
+        page: Int = 1,
+        pageSize: Int = 100,
+    ): NetworkResult<List<HistoryItem>>
+
     suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any>
 
     suspend fun getCalendar(

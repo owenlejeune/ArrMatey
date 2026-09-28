@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.arr.api.model
 
 import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -26,6 +27,9 @@ data class ListenarrHistoryItem(
     override val customFormatScore: Int? = 0,
     @Serializable(with = ListenarrHistoryDataSerializer::class)
     override val data: Map<String, String?> = emptyMap(),
+    override val instanceId: Long? = null,
+    override val instanceName: String? = null,
+    override val instanceType: InstanceType? = null,
     val audiobookId: Long,
     val audiobookTitle: String,
     val message: String,

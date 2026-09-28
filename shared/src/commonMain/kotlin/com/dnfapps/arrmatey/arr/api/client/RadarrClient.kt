@@ -6,10 +6,12 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
+import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.MovieEditorBody
 import com.dnfapps.arrmatey.arr.api.model.MovieRelease
 import com.dnfapps.arrmatey.arr.api.model.RadarrHistoryItem
+import com.dnfapps.arrmatey.arr.api.model.RadarrHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
@@ -111,14 +113,30 @@ class RadarrClient(
         pageSize: Int,
         altId: Long?,
     ): NetworkResult<List<RadarrHistoryItem>> =
-        get(
+        get<List<RadarrHistoryItem>>(
             "history/movie",
-            mapOf(
+            mapOf<String, Any>(
                 "page" to page,
                 "pageSize" to pageSize,
                 "movieId" to id,
             ),
-        )
+        ).map { list ->
+            list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+        }
+
+    override suspend fun getHistory(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<List<HistoryItem>> =
+        get<RadarrHistoryResponse>(
+            "history",
+            mapOf<String, Any>(
+                "page" to page,
+                "pageSize" to pageSize,
+            ),
+        ).map { response ->
+            response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+        }
 
     override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =
         post("command", CommandPayload.Movie(listOf(id)))

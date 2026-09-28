@@ -114,12 +114,28 @@ class LidarrClient(
     ): NetworkResult<List<HistoryItem>> =
         get<LidarrHistoryResponse>(
             "history",
-            mapOf(
+            mapOf<String, Any>(
                 "page" to page,
                 "pageSize" to pageSize,
                 "albumId" to id,
             ),
-        ).map { it.records }
+        ).map { response ->
+            response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+        }
+
+    override suspend fun getHistory(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<List<HistoryItem>> =
+        get<LidarrHistoryResponse>(
+            "history",
+            mapOf<String, Any>(
+                "page" to page,
+                "pageSize" to pageSize,
+            ),
+        ).map { response ->
+            response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+        }
 
     override suspend fun getCalendar(
         start: LocalDate,

@@ -3,11 +3,14 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.HistoryStateFilter
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.groupByTask
 import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.arr.state.ActivityQueueUiState
+import com.dnfapps.arrmatey.arr.state.ActivityTabSegment
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.compose.utils.QueueSortBy
@@ -57,6 +60,16 @@ class ActivityQueueViewModel(
 
     val hasLoaded: StateFlow<Boolean> = activityQueueService.hasLoaded
 
+    val isHistoryLoading =
+        activityQueueService.isHistoryLoading
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
+    val hasHistoryLoaded: StateFlow<Boolean> = activityQueueService.hasHistoryLoaded
+
     val instances =
         instanceRepository
             .observeAllInstances()
@@ -78,10 +91,32 @@ class ActivityQueueViewModel(
         combine(
             activityTasks,
             _activityQueueUiState,
-        ) { tasks, (instanceId, sortBy, sortOrder) ->
+        ) { tasks, uiState ->
             val grouped = tasks.groupByTask()
-            val filtered = filterByInstance(grouped, instanceId)
-            applySorting(filtered, sortBy, sortOrder)
+            val filtered = filterByInstance(grouped, uiState.instanceId)
+            applySorting(filtered, uiState.sortBy, uiState.sortOrder)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
+
+    val historyItems: StateFlow<List<HistoryItem>> =
+        combine(
+            activityQueueService.allHistory,
+            _activityQueueUiState,
+        ) { history, uiState ->
+            val byInstance =
+                if (uiState.historyInstanceId != null) {
+                    history.filter { it.instanceId == uiState.historyInstanceId }
+                } else {
+                    history
+                }
+            if (uiState.historyStateFilter != HistoryStateFilter.All) {
+                byInstance.filter { uiState.historyStateFilter.matches(it.eventType) }
+            } else {
+                byInstance
+            }
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -100,6 +135,11 @@ class ActivityQueueViewModel(
         activityQueueService.stopPolling()
     }
 
+    fun setSelectedTab(tab: ActivityTabSegment) {
+        val currentState = _activityQueueUiState.value
+        _activityQueueUiState.value = currentState.copy(selectedTab = tab)
+    }
+
     fun setInstanceId(id: Long?) {
         val currentState = _activityQueueUiState.value
         _activityQueueUiState.value = currentState.copy(instanceId = id)
@@ -113,6 +153,16 @@ class ActivityQueueViewModel(
     fun setSortOrder(order: SortOrder) {
         val currentState = _activityQueueUiState.value
         _activityQueueUiState.value = currentState.copy(sortOrder = order)
+    }
+
+    fun setHistoryStateFilter(filter: HistoryStateFilter) {
+        val currentState = _activityQueueUiState.value
+        _activityQueueUiState.value = currentState.copy(historyStateFilter = filter)
+    }
+
+    fun setHistoryInstanceId(id: Long?) {
+        val currentState = _activityQueueUiState.value
+        _activityQueueUiState.value = currentState.copy(historyInstanceId = id)
     }
 
     fun getQueueItemForEpisode(episode: Episode): SonarrQueueItem? {

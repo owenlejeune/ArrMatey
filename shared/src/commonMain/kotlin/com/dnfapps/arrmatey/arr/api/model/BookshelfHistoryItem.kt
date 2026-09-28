@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -14,6 +15,9 @@ data class BookshelfHistoryItem(
     override val customFormats: List<CustomFormat> = emptyList(),
     override val customFormatScore: Int? = 0,
     override val data: Map<String, String?> = emptyMap(),
+    override val instanceId: Long? = null,
+    override val instanceName: String? = null,
+    override val instanceType: InstanceType? = null,
     val authorId: Long = 0,
     val bookId: Long = 0,
     val author: Author? = null,

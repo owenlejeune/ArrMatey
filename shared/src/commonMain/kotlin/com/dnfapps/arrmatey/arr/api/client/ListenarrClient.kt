@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.arr.api.model.ListenarrCommandResponse
 import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
 import com.dnfapps.arrmatey.arr.api.model.ListenarrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ListenarrHealth
+import com.dnfapps.arrmatey.arr.api.model.ListenarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ListenarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ListenarrQueueResponse
 import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
@@ -136,7 +137,20 @@ class ListenarrClient(
         page: Int,
         pageSize: Int,
         altId: Long?,
-    ): NetworkResult<List<HistoryItem>> = get("history/audiobook/$id")
+    ): NetworkResult<List<HistoryItem>> =
+        get<List<ListenarrHistoryItem>>("history/audiobook/$id")
+            .map { list ->
+                list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+            }
+
+    override suspend fun getHistory(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<List<HistoryItem>> =
+        get<List<ListenarrHistoryItem>>("history")
+            .map { list ->
+                list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+            }
 
     override suspend fun getCalendar(
         start: LocalDate,

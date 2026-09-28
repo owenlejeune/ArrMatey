@@ -400,6 +400,13 @@
     <string name="book_file_renamed">Book File Renamed</string>
     <string name="audiobook_file_deleted">File Delete</string>
     <string name="audiobook_file_added">File Added</string>
+    <string name="history_state_imported">Imported</string>
+    <string name="history_state_failed">Failed</string>
+    <string name="history_state_deleted">Deleted</string>
+    <string name="history_state_renamed">Renamed</string>
+    <string name="history_state_ignored">Ignored</string>
+    <string name="filter_by_state">State</string>
+    <string name="no_history">No history</string>
 
     <!-- Errors -->
     <string name="error">Error</string>

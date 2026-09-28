@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -22,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -84,6 +86,14 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.ExperimentalTime
 
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
+import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.state.ActivityTabSegment
+import com.dnfapps.arrmatey.entensions.PaddingValues
+import com.dnfapps.arrmatey.ui.components.HistoryItemView
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalTime::class)
 @Composable
 fun ActivityTab(
@@ -92,12 +102,21 @@ fun ActivityTab(
     preferences: PreferencesStore = koinInject(),
 ) {
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
+    val historyItems by viewModel.historyItems.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
     val uiState by viewModel.activityQueueUiState.collectAsStateWithLifecycle()
     val removeItemStatus by viewModel.removeItemState.collectAsStateWithLifecycle()
     val isLoading by viewModel.isPolling.collectAsStateWithLifecycle()
     val hasLoaded by viewModel.hasLoaded.collectAsStateWithLifecycle()
+    val isHistoryLoading by viewModel.isHistoryLoading.collectAsStateWithLifecycle()
+    val hasHistoryLoaded by viewModel.hasHistoryLoaded.collectAsStateWithLifecycle()
     val useColoredCards by preferences.useColoredActivityCards.collectAsStateWithLifecycle(false)
+
+    val historyListState = rememberLazyListState()
+
+    LaunchedEffect(uiState.historyStateFilter, uiState.historyInstanceId) {
+        historyListState.scrollToItem(0)
+    }
 
     var showConfirmRemove by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf<QueueItem?>(null) }
@@ -115,21 +134,23 @@ fun ActivityTab(
         topBar = {
             TopAppBar(
                 title = {
-                    val countText = if (queueItems.isNotEmpty()) " (${queueItems.size})" else ""
-                    Text(mokoString(MR.strings.activity) + countText)
+                    Text(mokoString(MR.strings.activity))
                 },
                 actions = {
-                    if (queueItems.isNotEmpty()) {
-                        ActivityFilterMenu(
-                            instances,
-                            selectedInstanceId = uiState.instanceId,
-                            onInstanceChange = { viewModel.setInstanceId(it) },
-                            sortBy = uiState.sortBy,
-                            onSortByChanged = { viewModel.setSortBy(it) },
-                            sortOrder = uiState.sortOrder,
-                            onSortOrderChanged = { viewModel.setSortOrder(it) },
-                        )
-                    }
+                    ActivityFilterMenu(
+                        instances = instances,
+                        selectedTab = uiState.selectedTab,
+                        selectedInstanceId = uiState.instanceId,
+                        onInstanceChange = { viewModel.setInstanceId(it) },
+                        sortBy = uiState.sortBy,
+                        onSortByChanged = { viewModel.setSortBy(it) },
+                        sortOrder = uiState.sortOrder,
+                        onSortOrderChanged = { viewModel.setSortOrder(it) },
+                        selectedHistoryInstanceId = uiState.historyInstanceId,
+                        onHistoryInstanceChange = { viewModel.setHistoryInstanceId(it) },
+                        historyStateFilter = uiState.historyStateFilter,
+                        onHistoryStateFilterChanged = { viewModel.setHistoryStateFilter(it) },
+                    )
                 },
                 navigationIcon = {
                     if (!wideRailIsVisible) {
@@ -140,71 +161,146 @@ fun ActivityTab(
         },
         contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
-        Box(
+        Column(
             modifier =
                 Modifier
                     .padding(paddingValues)
                     .fillMaxSize(),
-            contentAlignment = Alignment.Center,
         ) {
-            if (instances.isNotEmpty() && (!hasLoaded || (queueItems.isEmpty() && isLoading))) {
-                LoadingIndicator(
-                    modifier = Modifier.size(96.dp),
-                )
-            } else {
-                PullToRefreshBox(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                    isRefreshing = isLoading,
-                    onRefresh = { viewModel.refresh() },
-                ) {
-                    if (queueItems.isEmpty()) {
-                        EmptyActivityState(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(rememberScrollState()),
-                        )
-                    } else {
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier =
-                                Modifier
-                                    .padding(horizontal = 12.dp)
-                                    .fillMaxSize(),
-                        ) {
-                            items(items = queueItems) { item ->
-                                ActivityItem(
-                                    item = item,
-                                    useFullColorCards = useColoredCards,
-                                ) {
-                                    selectedItem = item
+            PrimaryTabRow(
+                selectedTabIndex = ActivityTabSegment.entries.indexOf(uiState.selectedTab),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                ActivityTabSegment.entries.forEachIndexed { index, tab ->
+                    Tab(
+                        selected = uiState.selectedTab == tab,
+                        onClick = { viewModel.setSelectedTab(tab) },
+                        text = {
+                            Text(
+                                text = mokoString(tab.resource),
+                                fontWeight = if (uiState.selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
+                            )
+                        },
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                when (uiState.selectedTab) {
+                    ActivityTabSegment.Activity -> {
+                        if (instances.isNotEmpty() && (!hasLoaded || (queueItems.isEmpty() && isLoading))) {
+                            LoadingIndicator(
+                                modifier = Modifier.size(96.dp),
+                            )
+                        } else {
+                            PullToRefreshBox(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center,
+                                isRefreshing = isLoading,
+                                onRefresh = { viewModel.refresh() },
+                            ) {
+                                if (queueItems.isEmpty()) {
+                                    EmptyActivityState(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .verticalScroll(rememberScrollState()),
+                                    )
+                                } else {
+                                    LazyColumn(
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentPadding = PaddingValues(
+                                            start = 16.dp,
+                                            end = 16.dp,
+                                            top = 16.dp,
+                                            bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+                                        ),
+                                    ) {
+                                        items(items = queueItems) { item ->
+                                            ActivityItem(
+                                                item = item,
+                                                useFullColorCards = useColoredCards,
+                                            ) {
+                                                selectedItem = item
+                                            }
+                                        }
+                                        item {
+                                            Spacer(Modifier.height(LocalFloatingBarBottomPadding.current + 16.dp))
+                                        }
+                                    }
                                 }
                             }
-                            item {
-                                Spacer(Modifier.height(LocalFloatingBarBottomPadding.current + 16.dp))
+                        }
+                    }
+
+                    ActivityTabSegment.History -> {
+                        if (instances.isNotEmpty() && (!hasHistoryLoaded && isHistoryLoading)) {
+                            LoadingIndicator(
+                                modifier = Modifier.size(96.dp),
+                            )
+                        } else {
+                            PullToRefreshBox(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center,
+                                isRefreshing = isHistoryLoading,
+                                onRefresh = { viewModel.refresh() },
+                            ) {
+                                if (historyItems.isEmpty()) {
+                                    EmptyHistoryState(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .verticalScroll(rememberScrollState()),
+                                    )
+                                } else {
+                                    LazyColumn(
+                                        state = historyListState,
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentPadding = PaddingValues(
+                                            start = 16.dp,
+                                            end = 16.dp,
+                                            top = 16.dp,
+                                            bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+                                        ),
+                                    ) {
+                                        items(
+                                            items = historyItems,
+                                            key = { "${it.instanceId}_${it.id}_${it.eventType}_${it.date}" },
+                                        ) { item ->
+                                            HistoryItemView(item = item)
+                                        }
+                                        item {
+                                            Spacer(Modifier.height(LocalFloatingBarBottomPadding.current + 16.dp))
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            selectedItem?.let { item ->
-                QueueItemInfoSheet(
-                    item = item,
-                    onDismiss = { selectedItem = null },
-                    onRemove = { showConfirmRemove = true },
-                )
-            }
+                selectedItem?.let { item ->
+                    QueueItemInfoSheet(
+                        item = item,
+                        onDismiss = { selectedItem = null },
+                        onRemove = { showConfirmRemove = true },
+                    )
+                }
 
-            if (showConfirmRemove && selectedItem != null) {
-                ConfirmDeleteItemSheet(
-                    onDismiss = { showConfirmRemove = false },
-                    deleteInProgress = removeItemStatus is OperationStatus.InProgress,
-                    onDelete = { clientRemove, blocklist, skipRedownload ->
-                        viewModel.removeQueueItem(selectedItem!!, clientRemove, blocklist, skipRedownload)
-                    },
-                )
+                if (showConfirmRemove && selectedItem != null) {
+                    ConfirmDeleteItemSheet(
+                        onDismiss = { showConfirmRemove = false },
+                        deleteInProgress = removeItemStatus is OperationStatus.InProgress,
+                        onDelete = { clientRemove, blocklist, skipRedownload ->
+                            viewModel.removeQueueItem(selectedItem!!, clientRemove, blocklist, skipRedownload)
+                        },
+                    )
+                }
             }
         }
     }
@@ -678,6 +774,26 @@ fun EmptyActivityState(modifier: Modifier = Modifier) {
         )
         Text(
             text = mokoString(MR.strings.no_activity),
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
+}
+
+@Composable
+fun EmptyHistoryState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+    ) {
+        Icon(
+            imageVector = Icons.Default.History,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = mokoString(MR.strings.no_history),
             style = MaterialTheme.typography.titleMedium,
         )
     }

@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
+import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueuePage
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
@@ -91,6 +92,11 @@ abstract class BaseArrClient(
         ids: List<Long>,
         monitor: Any,
     ): NetworkResult<Unit> = NetworkResult.Success(Unit)
+
+    override suspend fun getHistory(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<List<HistoryItem>> = NetworkResult.Success(emptyList())
 
     /**
      * Helpers

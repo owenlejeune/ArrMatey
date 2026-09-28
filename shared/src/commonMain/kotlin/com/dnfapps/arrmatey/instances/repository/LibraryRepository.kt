@@ -54,6 +54,9 @@ class LibraryRepository(
     private val _historyCache = MutableStateFlow<Map<Long, List<HistoryItem>>>(emptyMap())
     val historyCache: StateFlow<Map<Long, List<HistoryItem>>> = _historyCache.asStateFlow()
 
+    private val _history = MutableStateFlow<List<HistoryItem>>(emptyList())
+    val history: StateFlow<List<HistoryItem>> = _history.asStateFlow()
+
     private val _mediaDetailsCache = MutableStateFlow<Map<Long, ArrMedia>>(emptyMap())
     val mediaDetailsCache: StateFlow<Map<Long, ArrMedia>> = _mediaDetailsCache.asStateFlow()
 
@@ -274,6 +277,12 @@ class LibraryRepository(
             }.also {
                 _historyStatus.value = OperationStatus.Idle
             }
+    }
+
+    suspend fun refreshHistory(page: Int = 1, pageSize: Int = 100): NetworkResult<List<HistoryItem>> {
+        return client.getHistory(page, pageSize).onSuccess {
+            _history.value = it
+        }
     }
 
     suspend fun editMediaItem(

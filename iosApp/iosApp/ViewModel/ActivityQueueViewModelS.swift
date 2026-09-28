@@ -14,8 +14,10 @@ class ActivityQueueViewModelS: ObservableObject {
     private let preferencesStore: PreferencesStore
     
     @Published private(set) var queueItems: [QueueItem] = []
+    @Published private(set) var historyItems: [HistoryItem] = []
     @Published private(set) var tasksWithIssues: Int = 0
     @Published private(set) var isPolling: Bool = false
+    @Published private(set) var isHistoryLoading: Bool = false
     @Published private(set) var instances: [Instance] = []
     @Published private(set) var uiState: ActivityQueueUiState = ActivityQueueUiState()
     @Published private(set) var removeItemStatus: OperationStatus = OperationStatusIdle()
@@ -31,11 +33,15 @@ class ActivityQueueViewModelS: ObservableObject {
     
     private func startObserving() {
         viewModel.queueItems.observeAsync(on: self, to: \.queueItems)
+        viewModel.historyItems.observeAsync(on: self, to: \.historyItems)
         viewModel.tasksWithIssues.observeAsync(on: self) { owner, tasks in
             owner.tasksWithIssues = tasks.intValue
         }
         viewModel.isPolling.observeAsync(on: self) { owner, isPolling in
             owner.isPolling = isPolling.boolValue
+        }
+        viewModel.isHistoryLoading.observeAsync(on: self) { owner, isHistoryLoading in
+            owner.isHistoryLoading = isHistoryLoading.boolValue
         }
         viewModel.instances.observeAsync(on: self, to: \.instances)
         viewModel.activityQueueUiState.observeAsync(on: self, to: \.uiState)
@@ -57,6 +63,10 @@ class ActivityQueueViewModelS: ObservableObject {
         viewModel.stopPolling()
     }
     
+    func setSelectedTab(_ tab: ActivityTabSegment) {
+        viewModel.setSelectedTab(tab: tab)
+    }
+    
     func setInstanceId(_ id: Int64?) {
         viewModel.setInstanceId(id: id?.asKotlinLong)
     }
@@ -67,6 +77,14 @@ class ActivityQueueViewModelS: ObservableObject {
     
     func setSortOrder(_ order: Shared.SortOrder) {
         viewModel.setSortOrder(order: order)
+    }
+    
+    func setHistoryStateFilter(_ filter: HistoryStateFilter) {
+        viewModel.setHistoryStateFilter(filter: filter)
+    }
+    
+    func setHistoryInstanceId(_ id: Int64?) {
+        viewModel.setHistoryInstanceId(id: id?.asKotlinLong)
     }
     
     func getQueueItemForEpisode(_ episode: Episode) -> SonarrQueueItem? {

@@ -16,9 +16,11 @@ import com.dnfapps.arrmatey.arr.api.model.BookFileBulkDeleteBody
 import com.dnfapps.arrmatey.arr.api.model.BookMonitorBody
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryItem
+import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
+import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
@@ -108,13 +110,29 @@ class BookshelfClient(
         pageSize: Int,
         altId: Long?,
     ): NetworkResult<List<BookshelfHistoryItem>> =
-        get(
+        get<List<BookshelfHistoryItem>>(
             "history/author",
             buildMap {
                 put("authorId", id)
                 altId?.let { put("bookId", it) }
             },
-        )
+        ).map { list ->
+            list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+        }
+
+    override suspend fun getHistory(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<List<HistoryItem>> =
+        get<BookshelfHistoryResponse>(
+            "history",
+            mapOf<String, Any>(
+                "page" to page,
+                "pageSize" to pageSize,
+            ),
+        ).map { response ->
+            response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+        }
 
     suspend fun getAuthorSeries(id: Long): NetworkResult<List<BookSeries>> = get("series", mapOf("authorId" to id))
 

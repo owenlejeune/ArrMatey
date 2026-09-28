@@ -63,6 +63,7 @@ open class ArrInstanceRepository(
     val lastAddedItemId: StateFlow<Long?> = libraryRepository.lastAddedItemId
     val releases: StateFlow<NetworkResult<List<ArrRelease>>?> = libraryRepository.releases
     val historyCache: StateFlow<Map<Long, List<HistoryItem>>> = libraryRepository.historyCache
+    val history: StateFlow<List<HistoryItem>> = libraryRepository.history
     val mediaDetailsCache: StateFlow<Map<Long, ArrMedia>> = libraryRepository.mediaDetailsCache
     val activityTasks: StateFlow<List<QueueItem>> = libraryRepository.activityTasks
     val addItemStatus: StateFlow<OperationStatus> = libraryRepository.addItemStatus
@@ -220,6 +221,11 @@ open class ArrInstanceRepository(
         page: Int = 1,
         pageSize: Int = 100,
     ): NetworkResult<List<HistoryItem>> = libraryRepository.getItemHistory(itemId, altIt, page, pageSize)
+
+    open suspend fun refreshHistory(
+        page: Int = 1,
+        pageSize: Int = 100,
+    ): NetworkResult<List<HistoryItem>> = libraryRepository.refreshHistory(page, pageSize)
 
     open suspend fun editMediaItem(
         item: ArrMedia,

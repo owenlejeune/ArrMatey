@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.service
 
+import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.groupByTask
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
@@ -37,6 +38,15 @@ class ActivityQueueService(
     private val _tasksWithIssues = MutableStateFlow(0)
     val tasksWithIssues: StateFlow<Int> = _tasksWithIssues.asStateFlow()
 
+    private val _allHistory = MutableStateFlow<List<HistoryItem>>(emptyList())
+    val allHistory: StateFlow<List<HistoryItem>> = _allHistory.asStateFlow()
+
+    private val _isHistoryLoading = MutableStateFlow(false)
+    val isHistoryLoading: StateFlow<Boolean> = _isHistoryLoading.asStateFlow()
+
+    private val _hasHistoryLoaded = MutableStateFlow(false)
+    val hasHistoryLoaded: StateFlow<Boolean> = _hasHistoryLoaded.asStateFlow()
+
     fun startPolling() {
         if (pollingJob?.isActive == true) return
 
@@ -44,6 +54,7 @@ class ActivityQueueService(
             scope.launch {
                 while (isActive) {
                     pollActivityTasks()
+                    pollHistory()
                     delay(pollingDelay)
                 }
             }
@@ -81,6 +92,31 @@ class ActivityQueueService(
         _isPolling.value = false
     }
 
+    private suspend fun pollHistory() {
+        _isHistoryLoading.value = true
+        val repositories =
+            instanceManager
+                .getAllArrRepositories()
+                .filter { it.instance.type.supportsActivityQueue }
+
+        val allHistoryList =
+            repositories
+                .map { repo ->
+                    scope.async {
+                        repo.refreshHistory()
+                        repo.history.value
+                    }
+                }.awaitAll()
+                .flatten()
+                .sortedByDescending { it.date }
+
+        _allHistory.value = allHistoryList
+        if (repositories.isNotEmpty()) {
+            _hasHistoryLoaded.value = true
+        }
+        _isHistoryLoading.value = false
+    }
+
     fun cleanup() {
         stopPolling()
         scope.cancel()
@@ -88,5 +124,6 @@ class ActivityQueueService(
 
     suspend fun manualRefresh() {
         pollActivityTasks()
+        pollHistory()
     }
 }

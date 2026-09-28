@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -19,6 +20,9 @@ sealed interface HistoryItem {
     val customFormats: List<CustomFormat>
     val customFormatScore: Int?
     val data: Map<String, String?>
+    val instanceId: Long?
+    val instanceName: String?
+    val instanceType: InstanceType?
 
     val displayTitle: String?
         get() = sourceTitle?.split("/")?.last()

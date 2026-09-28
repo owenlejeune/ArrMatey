@@ -38,6 +38,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.api.model.HistoryStateFilter
+import com.dnfapps.arrmatey.arr.state.ActivityTabSegment
 import com.dnfapps.arrmatey.compose.utils.QueueSortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -49,22 +51,38 @@ import dev.icerock.moko.resources.compose.painterResource
 @Composable
 fun ActivityFilterMenu(
     instances: List<Instance>,
+    selectedTab: ActivityTabSegment,
     selectedInstanceId: Long?,
     onInstanceChange: (Long?) -> Unit,
     sortBy: QueueSortBy,
     onSortByChanged: (QueueSortBy) -> Unit,
     sortOrder: SortOrder,
     onSortOrderChanged: (SortOrder) -> Unit,
+    selectedHistoryInstanceId: Long?,
+    onHistoryInstanceChange: (Long?) -> Unit,
+    historyStateFilter: HistoryStateFilter,
+    onHistoryStateFilterChanged: (HistoryStateFilter) -> Unit,
 ) {
     var showSheet by remember { mutableStateOf(false) }
-    val isFiltered = selectedInstanceId != null
+
+    val filterCount =
+        when (selectedTab) {
+            ActivityTabSegment.Activity -> if (selectedInstanceId != null) 1 else 0
+            ActivityTabSegment.History -> {
+                var count = 0
+                if (selectedHistoryInstanceId != null) count++
+                if (historyStateFilter != HistoryStateFilter.All) count++
+                count
+            }
+        }
+    val isFiltered = filterCount > 0
 
     Box {
         IconButton(onClick = { showSheet = true }) {
             BadgedBox(
                 badge = {
                     if (isFiltered) {
-                        Badge { Text("1") }
+                        Badge { Text(filterCount.toString()) }
                     }
                 },
             ) {
@@ -103,7 +121,17 @@ fun ActivityFilterMenu(
                             fontWeight = FontWeight.Bold,
                         )
                         if (isFiltered) {
-                            TextButton(onClick = { onInstanceChange(null) }) {
+                            TextButton(
+                                onClick = {
+                                    when (selectedTab) {
+                                        ActivityTabSegment.Activity -> onInstanceChange(null)
+                                        ActivityTabSegment.History -> {
+                                            onHistoryInstanceChange(null)
+                                            onHistoryStateFilterChanged(HistoryStateFilter.All)
+                                        }
+                                    }
+                                },
+                            ) {
                                 Text(
                                     text = mokoString(MR.strings.clear_all),
                                     style = MaterialTheme.typography.labelMedium,
@@ -112,10 +140,189 @@ fun ActivityFilterMenu(
                         }
                     }
 
-                    if (instances.size > 1) {
+                    if (selectedTab == ActivityTabSegment.Activity) {
+                        if (instances.size > 1) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    text = mokoString(MR.strings.instances),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                                ) {
+                                    val isAllSelected = selectedInstanceId == null
+                                    FilterChip(
+                                        selected = isAllSelected,
+                                        onClick = { onInstanceChange(null) },
+                                        label = { Text(mokoString(MR.strings.all)) },
+                                        leadingIcon =
+                                            if (isAllSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
+                                        shape = MaterialTheme.shapes.small,
+                                    )
+                                    instances.forEach { instance ->
+                                        val isSelected = selectedInstanceId == instance.id
+                                        FilterChip(
+                                            selected = isSelected,
+                                            onClick = { onInstanceChange(instance.id) },
+                                            label = { Text(instance.label) },
+                                            leadingIcon = {
+                                                if (isSelected) {
+                                                    Icon(
+                                                        Icons.Default.Check,
+                                                        null,
+                                                        Modifier.size(16.dp),
+                                                    )
+                                                } else {
+                                                    Icon(
+                                                        painter = painterResource(instance.type.tabIcon),
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(16.dp),
+                                                        tint = instance.type.associatedColor,
+                                                    )
+                                                }
+                                            },
+                                            shape = MaterialTheme.shapes.small,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Sort By Section
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = mokoString(MR.strings.sort_by),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+
+                                // Asc / Desc toggle
+                                FilterChip(
+                                    selected = true,
+                                    onClick = {
+                                        onSortOrderChanged(
+                                            if (sortOrder == SortOrder.Asc) SortOrder.Desc else SortOrder.Asc,
+                                        )
+                                    },
+                                    label = {
+                                        Text(
+                                            if (sortOrder == SortOrder.Asc) {
+                                                mokoString(MR.strings.sort_ascending)
+                                            } else {
+                                                mokoString(MR.strings.sort_descending)
+                                            },
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector =
+                                                if (sortOrder == SortOrder.Asc) {
+                                                    Icons.Default.ArrowUpward
+                                                } else {
+                                                    Icons.Default.ArrowDownward
+                                                },
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                    },
+                                    shape = MaterialTheme.shapes.small,
+                                )
+                            }
+
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(0.dp),
+                            ) {
+                                QueueSortBy.entries.forEach { sort ->
+                                    val isSelected = sortBy == sort
+                                    FilterChip(
+                                        selected = isSelected,
+                                        onClick = { onSortByChanged(sort) },
+                                        label = { Text(mokoString(sort.resource)) },
+                                        leadingIcon =
+                                            if (isSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
+                                        shape = MaterialTheme.shapes.small,
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        // History Tab Filters
+                        if (instances.size > 1) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    text = mokoString(MR.strings.instances),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                                ) {
+                                    val isAllSelected = selectedHistoryInstanceId == null
+                                    FilterChip(
+                                        selected = isAllSelected,
+                                        onClick = { onHistoryInstanceChange(null) },
+                                        label = { Text(mokoString(MR.strings.all)) },
+                                        leadingIcon =
+                                            if (isAllSelected) {
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                                            } else {
+                                                null
+                                            },
+                                        shape = MaterialTheme.shapes.small,
+                                    )
+                                    instances.forEach { instance ->
+                                        val isSelected = selectedHistoryInstanceId == instance.id
+                                        FilterChip(
+                                            selected = isSelected,
+                                            onClick = { onHistoryInstanceChange(instance.id) },
+                                            label = { Text(instance.label) },
+                                            leadingIcon = {
+                                                if (isSelected) {
+                                                    Icon(
+                                                        Icons.Default.Check,
+                                                        null,
+                                                        Modifier.size(16.dp),
+                                                    )
+                                                } else {
+                                                    Icon(
+                                                        painter = painterResource(instance.type.tabIcon),
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(16.dp),
+                                                        tint = instance.type.associatedColor,
+                                                    )
+                                                }
+                                            },
+                                            shape = MaterialTheme.shapes.small,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // State Filter Section
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
-                                text = mokoString(MR.strings.instances),
+                                text = mokoString(MR.strings.filter_by_state),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface,
@@ -124,113 +331,21 @@ fun ActivityFilterMenu(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalArrangement = Arrangement.spacedBy(0.dp),
                             ) {
-                                val isAllSelected = selectedInstanceId == null
-                                FilterChip(
-                                    selected = isAllSelected,
-                                    onClick = { onInstanceChange(null) },
-                                    label = { Text(mokoString(MR.strings.all)) },
-                                    leadingIcon =
-                                        if (isAllSelected) {
-                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                        } else {
-                                            null
-                                        },
-                                    shape = MaterialTheme.shapes.small,
-                                )
-                                instances.forEach { instance ->
-                                    val isSelected = selectedInstanceId == instance.id
+                                HistoryStateFilter.entries.forEach { stateFilter ->
+                                    val isSelected = historyStateFilter == stateFilter
                                     FilterChip(
                                         selected = isSelected,
-                                        onClick = { onInstanceChange(instance.id) },
-                                        label = { Text(instance.label) },
-                                        leadingIcon = {
+                                        onClick = { onHistoryStateFilterChanged(stateFilter) },
+                                        label = { Text(mokoString(stateFilter.resource)) },
+                                        leadingIcon =
                                             if (isSelected) {
-                                                Icon(
-                                                    Icons.Default.Check,
-                                                    null,
-                                                    Modifier.size(16.dp),
-                                                )
+                                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
                                             } else {
-                                                Icon(
-                                                    painter = painterResource(instance.type.tabIcon),
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(16.dp),
-                                                    tint = instance.type.associatedColor,
-                                                )
-                                            }
-                                        },
+                                                null
+                                            },
                                         shape = MaterialTheme.shapes.small,
                                     )
                                 }
-                            }
-                        }
-                    }
-
-                    // Sort By Section
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = mokoString(MR.strings.sort_by),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-
-                            // Asc / Desc toggle
-                            FilterChip(
-                                selected = true,
-                                onClick = {
-                                    onSortOrderChanged(
-                                        if (sortOrder == SortOrder.Asc) SortOrder.Desc else SortOrder.Asc,
-                                    )
-                                },
-                                label = {
-                                    Text(
-                                        if (sortOrder == SortOrder.Asc) {
-                                            mokoString(MR.strings.sort_ascending)
-                                        } else {
-                                            mokoString(MR.strings.sort_descending)
-                                        },
-                                    )
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector =
-                                            if (sortOrder == SortOrder.Asc) {
-                                                Icons.Default.ArrowUpward
-                                            } else {
-                                                Icons.Default.ArrowDownward
-                                            },
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                    )
-                                },
-                                shape = MaterialTheme.shapes.small,
-                            )
-                        }
-
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(0.dp),
-                        ) {
-                            QueueSortBy.entries.forEach { sort ->
-                                val isSelected = sortBy == sort
-                                FilterChip(
-                                    selected = isSelected,
-                                    onClick = { onSortByChanged(sort) },
-                                    label = { Text(mokoString(sort.resource)) },
-                                    leadingIcon =
-                                        if (isSelected) {
-                                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                        } else {
-                                            null
-                                        },
-                                    shape = MaterialTheme.shapes.small,
-                                )
                             }
                         }
                     }
@@ -239,3 +354,4 @@ fun ActivityFilterMenu(
         }
     }
 }
+

@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteEpisodeBody
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
@@ -89,9 +90,11 @@ class SonarrClient(
                 ),
         )
 
-    override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrSeries>> = get("series/lookup", mapOf("term" to params.query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrSeries>> =
+        get("series/lookup", mapOf("term" to params.query))
 
-    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrSeries> = post<ArrMedia, ArrSeries>("series", item)
+    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrSeries> =
+        post<ArrMedia, ArrSeries>("series", item)
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<SeriesRelease>> {
         if (params !is ReleaseParams.Series) {
@@ -129,14 +132,43 @@ class SonarrClient(
     ): NetworkResult<List<SonarrHistoryItem>> =
         get<SonarrHistoryResponse>(
             "history",
-            mapOf(
+            mapOf<String, Any>(
                 "page" to page,
                 "pageSize" to pageSize,
                 "episodeId" to id,
             ),
-        ).map { it.records }
+        ).map { response ->
+            response.records.map {
+                it.copy(
+                    instanceId = instance.id,
+                    instanceName = instance.label,
+                    instanceType = instance.type,
+                )
+            }
+        }
 
-    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> = post("command", CommandPayload.Series(id))
+    override suspend fun getHistory(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<List<HistoryItem>> =
+        get<SonarrHistoryResponse>(
+            "history",
+            mapOf<String, Any>(
+                "page" to page,
+                "pageSize" to pageSize,
+            ),
+        ).map { response ->
+            response.records.map {
+                it.copy(
+                    instanceId = instance.id,
+                    instanceName = instance.label,
+                    instanceType = instance.type,
+                )
+            }
+        }
+
+    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =
+        post("command", CommandPayload.Series(id))
 
     override suspend fun getCalendar(
         start: LocalDate,
