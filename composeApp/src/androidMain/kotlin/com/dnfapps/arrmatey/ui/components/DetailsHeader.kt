@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,6 +39,7 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.RatingItem
 import com.dnfapps.arrmatey.arr.api.model.toRatingItems
 import com.dnfapps.arrmatey.entensions.BULLET
+import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
@@ -95,7 +99,7 @@ fun DetailsHeader(
                             detailHeight = it.size.height
                         },
                 ) {
-                    val ratings = item.ratings?.toRatingItems() ?: emptyList()
+                    val ratings = item.toRatingItems()
                     RatingsSection(ratings)
 
                     if (item !is Arrtist && item !is Author) {
@@ -131,6 +135,7 @@ fun DetailsHeader(
 @Composable
 fun RatingsSection(ratings: List<RatingItem>) {
     if (ratings.isNotEmpty()) {
+        val context = LocalContext.current
         FlowRow(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -140,6 +145,12 @@ fun RatingsSection(ratings: List<RatingItem>) {
                     shape = MaterialTheme.shapes.small,
                     color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.95f),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)),
+                    modifier =
+                        Modifier
+                            .clip(MaterialTheme.shapes.small)
+                            .clickable(enabled = rating.url != null) {
+                                rating.url?.let { context.openLink(it) }
+                            },
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

@@ -9,6 +9,7 @@ import Shared
 struct UnifiedMediaDetailsHeader: View {
     let success: UnifiedMediaDetailsUiStateSuccess
     let type: InstanceType?
+    @Environment(\.openURL) private var openURL
     @State private var infoHeight: CGFloat = 0
 
     private var infoString: String {
@@ -68,6 +69,12 @@ struct UnifiedMediaDetailsHeader: View {
                                         Text(rating.score)
                                             .font(.system(size: 16, weight: .bold))
                                             .fixedSize(horizontal: true, vertical: false)
+                                    }
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        if let url = rating.url.flatMap(URL.init(string:)) {
+                                            openURL(url)
+                                        }
                                     }
                                 }
                             }
