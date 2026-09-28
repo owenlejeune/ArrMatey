@@ -23,6 +23,7 @@ struct MediaDetailsHeader: View {
     let type: InstanceType
 
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.openURL) private var openURL
     @State private var infoHeight: CGFloat = 0
 
     private var infoString: String {
@@ -55,7 +56,7 @@ struct MediaDetailsHeader: View {
                     ClearLogoView(item: item)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        let ratings = item.ratings?.toRatingItems() ?? []
+                        let ratings = item.toRatingItems()
                         if !ratings.isEmpty {
                             FlowLayout(spacing: 12) {
                                 ForEach(ratings, id: \.self) { rating in
@@ -72,6 +73,12 @@ struct MediaDetailsHeader: View {
                                         Text(rating.score)
                                             .font(.system(size: 16, weight: .bold))
                                             .fixedSize(horizontal: true, vertical: false)
+                                    }
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        if let url = rating.url.flatMap(URL.init(string:)) {
+                                            openURL(url)
+                                        }
                                     }
                                 }
                             }

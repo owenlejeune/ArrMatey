@@ -162,7 +162,6 @@ dependencies {
     implementation(libs.androidx.browser)
     implementation(libs.aboutlibraries.compose)
     implementation(libs.compose.markdown)
-    implementation(libs.google.fonts)
     implementation(libs.flexible.bottomsheet)
 
     implementation(libs.kmp.logger)

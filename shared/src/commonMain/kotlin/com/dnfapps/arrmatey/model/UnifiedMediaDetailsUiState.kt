@@ -151,23 +151,27 @@ sealed interface UnifiedMediaDetailsUiState {
                     if (seerrMedia != null) {
                         buildList {
                             rtRatings?.let { rt ->
+                                val rtUrl = rt.url.takeIf { it.startsWith("http") }
                                 if (rt.criticsScore != null && rt.criticsRating != null) {
-                                    add(RatingItem("${rt.criticsScore}%", rt.criticsRating.icon))
+                                    add(RatingItem("${rt.criticsScore}%", rt.criticsRating.icon, rtUrl))
                                 }
                                 if (rt.audienceRating != null && rt.audienceScore != null) {
-                                    add(RatingItem("${rt.audienceScore}%", rt.audienceRating.icon))
+                                    add(RatingItem("${rt.audienceScore}%", rt.audienceRating.icon, rtUrl))
                                 }
                             }
                             imdbRatings?.let { imdb ->
-                                add(RatingItem("${(imdb.criticsScore * 10).roundToInt()}%", MR.images.imdb))
+                                val imdbUrl = imdb.url.takeIf { it.startsWith("http") }
+                                add(RatingItem("${(imdb.criticsScore * 10).roundToInt()}%", MR.images.imdb, imdbUrl))
                             }
-                            add(RatingItem("${(seerrMedia.voteAverage * 10).roundToInt()}%", MR.images.tmdb))
+                            val tmdbPath = if (seerrMedia is TvDetails) "tv" else "movie"
+                            val tmdbUrl = "https://www.themoviedb.org/$tmdbPath/${seerrMedia.id}"
+                            add(RatingItem("${(seerrMedia.voteAverage * 10).roundToInt()}%", MR.images.tmdb, tmdbUrl))
                         }
                     } else {
                         emptyList()
                     }
 
-                val arrRatings = arrMedia?.ratings?.toRatingItems() ?: emptyList()
+                val arrRatings = arrMedia?.toRatingItems() ?: emptyList()
 
                 val combined = ArrayList(seerrRatings)
                 val addedProviders = combined.mapNotNull { it.provider }.toMutableSet()
