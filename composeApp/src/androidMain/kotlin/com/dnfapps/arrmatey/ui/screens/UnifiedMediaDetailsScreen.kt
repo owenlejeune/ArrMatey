@@ -93,9 +93,9 @@ import com.dnfapps.arrmatey.ui.components.unifiedmedia.tabs.SeasonsFilesTabConte
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
+import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.sheets.MediaRequestOrAddSheet
-import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
-import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
+import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.handleWatchClick
 import com.dnfapps.arrmatey.utils.mokoPlural

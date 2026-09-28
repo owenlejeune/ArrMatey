@@ -66,8 +66,8 @@ import com.dnfapps.arrmatey.ui.components.unifiedmedia.dialogs.ConfirmDeleteEpis
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
-import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
-import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
+import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
+import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
