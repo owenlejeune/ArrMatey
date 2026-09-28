@@ -5,6 +5,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.net.http.SslError
+import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -271,6 +273,17 @@ fun CustomWebpageViewerScreen(
                                             canGoBack = view?.canGoBack() == true
                                             canGoForward = view?.canGoForward() == true
                                             currentUrl = url ?: ""
+                                        }
+
+                                        @SuppressLint("WebViewClientOnReceivedSslError")
+                                        override fun onReceivedSslError(
+                                            view: WebView?,
+                                            handler: SslErrorHandler?,
+                                            error: SslError?
+                                        ) {
+                                            if (webpage.allowSelfSignedCerts) {
+                                                handler?.proceed()
+                                            }
                                         }
                                     }
 

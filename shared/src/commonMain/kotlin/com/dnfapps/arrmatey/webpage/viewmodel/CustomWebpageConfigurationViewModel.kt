@@ -64,6 +64,10 @@ class CustomWebpageConfigurationViewModel(
         _uiState.value = _uiState.value.copy(headers = headers)
     }
 
+    fun setAllowSelfSignedCerts(allowSelfSignedCerts: Boolean) {
+        _uiState.value = _uiState.value.copy(allowSelfSignedCerts = allowSelfSignedCerts)
+    }
+
     private fun loadWebpage(id: Long) {
         viewModelScope.launch {
             val webpage = repository.getWebpageById(id)
@@ -74,6 +78,7 @@ class CustomWebpageConfigurationViewModel(
                         name = webpage.name,
                         url = webpage.url,
                         headers = webpage.headers,
+                        allowSelfSignedCerts = webpage.allowSelfSignedCerts,
                         isEditing = true,
                     )
             }
@@ -93,6 +98,7 @@ class CustomWebpageConfigurationViewModel(
                     name = _uiState.value.name,
                     url = _uiState.value.url,
                     headers = _uiState.value.headers,
+                    allowSelfSignedCerts = _uiState.value.allowSelfSignedCerts,
                 )
 
             val result =

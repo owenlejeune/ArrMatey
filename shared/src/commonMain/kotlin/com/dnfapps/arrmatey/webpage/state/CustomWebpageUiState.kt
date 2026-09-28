@@ -8,6 +8,7 @@ data class CustomWebpageUiState(
     val name: String = "",
     val url: String = "",
     val headers: List<InstanceHeader> = emptyList(),
+    val allowSelfSignedCerts: Boolean = false,
     val isEditing: Boolean = false,
     val error: String? = null,
     val saveButtonEnabled: Boolean = false,

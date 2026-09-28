@@ -9,16 +9,16 @@ import Shared
 import SwiftUI
 
 struct AddEditCustomWebpageScreen: View {
-    
+
     @ObservedObject private var viewModel: CustomWebpageConfigurationViewModelS
     @Environment(\.dismiss) private var dismiss
-    
+
     @State private var confirmDelete: Bool = false
-    
+
     init(id: Int64? = nil) {
         self.viewModel = CustomWebpageConfigurationViewModelS(webpageId: id)
     }
-    
+
     var body: some View {
         Form {
             infoSection
@@ -36,7 +36,7 @@ struct AddEditCustomWebpageScreen: View {
             Text(MR.strings().confirm_delete_custom_webpage.localized())
         }
     }
-    
+
     @ViewBuilder
     private func confirmDeleteButtons() -> some View {
         Button(MR.strings().yes.localized(), role: .destructive) {
@@ -47,7 +47,7 @@ struct AddEditCustomWebpageScreen: View {
             confirmDelete = false
         }
     }
-    
+
     private var infoSection: some View {
         Section {
             HStack(spacing: 24) {
@@ -63,7 +63,7 @@ struct AddEditCustomWebpageScreen: View {
                 .multilineTextAlignment(.trailing)
                 .textInputAutocapitalization(.never)
             }
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 24) {
                     Text(MR.strings().url.localized()).layoutPriority(2)
@@ -78,16 +78,21 @@ struct AddEditCustomWebpageScreen: View {
                     .multilineTextAlignment(.trailing)
                     .textInputAutocapitalization(.never)
                 }
-                
+
                 if viewModel.uiState.endpointError {
                     Text(MR.strings().invalid_host.localized())
                         .font(.caption)
                         .foregroundColor(.red)
                 }
             }
+
+            Toggle(MR.strings().allow_self_signed_certs.localized(), isOn: Binding(
+                get: { viewModel.uiState.allowSelfSignedCerts },
+                set: { viewModel.setAllowSelfSignedCerts($0) }
+            ))
         }
     }
-    
+
     @ViewBuilder
     private var headersSection: some View {
         Section {
@@ -109,7 +114,7 @@ struct AddEditCustomWebpageScreen: View {
                     .tint(.red)
                 }
             }
-            
+
             Button(action: {
                 var headers = viewModel.uiState.headers
                 headers.append(InstanceHeader(key: "", value: ""))
@@ -123,7 +128,7 @@ struct AddEditCustomWebpageScreen: View {
             Text(MR.strings().custom_headers_description.localized())
         }
     }
-    
+
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         if viewModel.uiState.isEditing {

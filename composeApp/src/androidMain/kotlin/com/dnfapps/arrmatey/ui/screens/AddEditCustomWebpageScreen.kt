@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
+import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
@@ -157,6 +158,12 @@ fun AddEditCustomWebpageScreen(
                         else -> null
                     },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+            )
+
+            LabelledSwitch(
+                label = mokoString(MR.strings.allow_self_signed_certs),
+                checked = uiState.allowSelfSignedCerts,
+                onCheckedChange = { viewModel.setAllowSelfSignedCerts(it) },
             )
 
             CustomHeaderSection(

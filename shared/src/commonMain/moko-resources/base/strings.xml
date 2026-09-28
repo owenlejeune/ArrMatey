@@ -343,6 +343,7 @@
     <string name="custom_page_description">Full URL including https://</string>
     <string name="add_webpage">Add Webpage</string>
     <string name="edit_webpage">Edit Webpage</string>
+    <string name="allow_self_signed_certs">Allow self-signed certificates</string>
     <string name="comment">Comment</string>
     <string name="comments">Comments</string>
     <string name="description">Description</string>
