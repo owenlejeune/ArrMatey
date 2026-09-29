@@ -107,7 +107,7 @@ class UnifiedMediaDetailsUiStateTest {
                 seasons = listOf(SeasonWrapper(seasonNumber = 1)),
             )
         assertEquals(
-            listOf(UnifiedMediaDetailsTab.SeasonsFiles, UnifiedMediaDetailsTab.Overview, UnifiedMediaDetailsTab.History),
+            listOf(UnifiedMediaDetailsTab.SeasonsFiles, UnifiedMediaDetailsTab.Overview, UnifiedMediaDetailsTab.Activity),
             stateWithArrId.getAvailableTabs(isTracearrConfigured = false),
         )
     }

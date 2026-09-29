@@ -84,6 +84,10 @@ sealed interface MediaScreen : NavKey {
     data class PersonWebView(
         val url: String,
     ) : MediaScreen
+
+    data class TracearrUser(
+        val userRef: String,
+    ) : MediaScreen
 }
 
 sealed interface ArrScreen : NavKey {

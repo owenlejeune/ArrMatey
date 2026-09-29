@@ -43,6 +43,17 @@ struct UnifiedMediaDetailsScreen: View {
         viewModel.buttonState.serviceName ?? (viewModel.resolvedRequestType == RequestType.movie ? "Radarr" : "Sonarr")
     }
 
+    private var seasonsOrFilesTabTitle: String {
+        switch viewModel.resolvedInstanceType {
+        case .sonarr:
+            return MR.strings().seasons_header.localized()
+        case .lidarr:
+            return MR.strings().albums_header.localized()
+        default:
+            return MR.strings().files.localized()
+        }
+    }
+
     init(
         arrId: Int64? = nil,
         tmdbId: Int64? = nil,
@@ -222,19 +233,20 @@ extension UnifiedMediaDetailsScreen {
                     if hasSeasonsOrFiles || success.hasArrId || hasTracearr {
                         Picker("View Mode", selection: $selectedTab) {
                             if hasSeasonsOrFiles {
-                                Text(!success.seasons.isEmpty ? MR.plurals().seasons.localized(2) : MR.strings().files.localized())
+                                Text(seasonsOrFilesTabTitle)
                                     .tag(DetailsTab.seasonsFiles)
                             }
                             Text(MR.strings().overview.localized())
                                 .tag(DetailsTab.overview)
                             if success.hasArrId {
-                                Text(MR.strings().history.localized())
-                                    .tag(DetailsTab.history)
+                                Text(MR.strings().activity.localized())
+                                    .tag(DetailsTab.activity)
+                                    .badge(success.queueItems.count)
                             }
                             if hasTracearr {
                                 Text(MR.strings().statistics.localized())
                                     .tag(DetailsTab.analytics)
-                                Text(MR.strings().streams.localized())
+                                Text(MR.strings().streams_label.localized())
                                     .tag(DetailsTab.steams)
                             }
                         }
@@ -246,7 +258,7 @@ extension UnifiedMediaDetailsScreen {
                         seasonsAndFilesTabContent(success)
                     case .overview:
                         overviewTabContent(success)
-                    case .history:
+                    case .activity:
                         VStack(alignment: .leading, spacing: 16) {
                             if !success.queueItems.isEmpty {
                                 VStack(alignment: .leading, spacing: 12) {

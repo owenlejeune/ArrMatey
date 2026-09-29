@@ -20,6 +20,7 @@ import com.dnfapps.arrmatey.navigation.toEpisodeDetails
 import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.navigation.toSeriesRelease
+import com.dnfapps.arrmatey.navigation.toTracearrUser
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.ui.screens.ArrSearchScreen
 import com.dnfapps.arrmatey.ui.screens.BookDetailsScreen
@@ -27,6 +28,7 @@ import com.dnfapps.arrmatey.ui.screens.EpisodeDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.InteractiveSearchScreen
 import com.dnfapps.arrmatey.ui.screens.MediaPreviewScreen
 import com.dnfapps.arrmatey.ui.screens.SeerrPersonDetailsScreen
+import com.dnfapps.arrmatey.ui.screens.TracearrUserScreen
 import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.UnifiedSearchScreen
 import com.dnfapps.arrmatey.ui.screens.WebViewScreen
@@ -68,6 +70,16 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onNavigateToAlbumRelease = { artistId, albumId, instId -> navigation.toAlbumRelease(albumId, artistId, instId) },
             onPersonClick = { navigation.toPersonDetails(it) },
             onMediaClick = { tmdbId, type -> navigation.toDetails(tmdbId = tmdbId, requestType = type) },
+            onNavigateToUser = { userRef -> navigation.toTracearrUser(userRef) },
+        )
+    }
+    entry<MediaScreen.TracearrUser> { user ->
+        TracearrUserScreen(
+            userRef = user.userRef,
+            onNavigateBack = { navigation.popBackStack() },
+            onNavigateToDetails = { requestType, tmdbId ->
+                navigation.toDetails(tmdbId = tmdbId, requestType = requestType)
+            },
         )
     }
     entry<MediaScreen.PersonDetails> { details ->

@@ -114,7 +114,7 @@ sealed interface UnifiedMediaDetailsUiState {
         fun getAvailableTabs(isTracearrConfigured: Boolean): List<UnifiedMediaDetailsTab> = buildList {
             if (hasSeasonsOrFiles) add(UnifiedMediaDetailsTab.SeasonsFiles)
             add(UnifiedMediaDetailsTab.Overview)
-            if (hasArrId) add(UnifiedMediaDetailsTab.History)
+            if (hasArrId) add(UnifiedMediaDetailsTab.Activity)
             if (hasTracearr(isTracearrConfigured)) {
                 add(UnifiedMediaDetailsTab.Analytics)
                 add(UnifiedMediaDetailsTab.Steams)

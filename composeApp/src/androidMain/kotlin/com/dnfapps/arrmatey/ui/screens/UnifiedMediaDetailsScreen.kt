@@ -10,6 +10,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -113,8 +115,6 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-private typealias DetailsTab = UnifiedMediaDetailsTab
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun UnifiedMediaDetailsScreen(
@@ -136,6 +136,7 @@ fun UnifiedMediaDetailsScreen(
     onNavigateToAlbumRelease: (artistId: Long, albumId: Long, instanceId: Long?) -> Unit,
     onPersonClick: (Long) -> Unit,
     onMediaClick: ((Long, RequestType) -> Unit)? = null,
+    onNavigateToUser: ((String) -> Unit)? = null,
     instanceId: Long? = null,
     viewModel: UnifiedMediaDetailsViewModel =
         koinViewModel(key = "${arrId}_${tmdbId}_${tvdbId}_${instanceType}_${requestType}_$instanceId", parameters = {
@@ -198,7 +199,7 @@ fun UnifiedMediaDetailsScreen(
     var confirmRemoveFromService by remember { mutableStateOf(false) }
     var confirmClearData by remember { mutableStateOf(false) }
     var selectedTracearrStreamSession by remember { mutableStateOf<TracearrStreamSession?>(null) }
-    var selectedTab by remember { mutableStateOf(DetailsTab.Overview) }
+    var selectedTab by remember { mutableStateOf(UnifiedMediaDetailsTab.Overview) }
     var previousHasSeasonsOrFiles by remember { mutableStateOf<Boolean?>(null) }
 
     val qualityProfiles by viewModel.qualityProfiles.collectAsStateWithLifecycle()
@@ -537,13 +538,13 @@ fun UnifiedMediaDetailsScreen(
                                         val prev = previousHasSeasonsOrFiles
                                         if (prev == null) {
                                             if (successState.hasSeasonsOrFiles) {
-                                                selectedTab = DetailsTab.SeasonsFiles
+                                                selectedTab = UnifiedMediaDetailsTab.SeasonsFiles
                                             }
                                         } else if (!prev && successState.hasSeasonsOrFiles) {
-                                            selectedTab = DetailsTab.SeasonsFiles
+                                            selectedTab = UnifiedMediaDetailsTab.SeasonsFiles
                                         } else if (prev && !successState.hasSeasonsOrFiles) {
-                                            if (selectedTab == DetailsTab.SeasonsFiles) {
-                                                selectedTab = DetailsTab.Overview
+                                            if (selectedTab == UnifiedMediaDetailsTab.SeasonsFiles) {
+                                                selectedTab = UnifiedMediaDetailsTab.Overview
                                             }
                                         }
                                         previousHasSeasonsOrFiles = successState.hasSeasonsOrFiles
@@ -569,23 +570,33 @@ fun UnifiedMediaDetailsScreen(
                                                     selected = selectedTab == tab,
                                                     onClick = { selectedTab = tab },
                                                     text = {
-                                                        Text(
-                                                            when (tab) {
-                                                                DetailsTab.SeasonsFiles ->
-                                                                    when (instanceType) {
-                                                                        InstanceType.Sonarr ->
-                                                                            mokoString(MR.strings.seasons_header)
-                                                                        InstanceType.Lidarr ->
-                                                                            mokoString(MR.strings.albums_header)
-                                                                        else ->
-                                                                            mokoString(MR.strings.files)
-                                                                    }
-                                                                DetailsTab.Overview -> mokoString(MR.strings.overview)
-                                                                DetailsTab.History -> mokoString(MR.strings.history)
-                                                                DetailsTab.Analytics -> mokoString(MR.strings.statistics)
-                                                                DetailsTab.Steams -> mokoString(MR.strings.streams)
-                                                            },
-                                                        )
+                                                        Row(
+                                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                        ) {
+                                                            Text(
+                                                                when (tab) {
+                                                                    UnifiedMediaDetailsTab.SeasonsFiles ->
+                                                                        when (instanceType) {
+                                                                            InstanceType.Sonarr ->
+                                                                                mokoString(MR.strings.seasons_header)
+                                                                            InstanceType.Lidarr ->
+                                                                                mokoString(MR.strings.albums_header)
+                                                                            else ->
+                                                                                mokoString(MR.strings.files)
+                                                                        }
+                                                                    UnifiedMediaDetailsTab.Overview -> mokoString(MR.strings.overview)
+                                                                    UnifiedMediaDetailsTab.Activity -> mokoString(MR.strings.activity)
+                                                                    UnifiedMediaDetailsTab.Analytics -> mokoString(MR.strings.statistics)
+                                                                    UnifiedMediaDetailsTab.Steams -> mokoString(MR.strings.streams_label)
+                                                                },
+                                                            )
+                                                            if (tab == UnifiedMediaDetailsTab.Activity && successState.queueItems.isNotEmpty()) {
+                                                                Badge {
+                                                                    Text(successState.queueItems.size.toString())
+                                                                }
+                                                            }
+                                                        }
                                                     },
                                                 )
                                             }
@@ -594,7 +605,7 @@ fun UnifiedMediaDetailsScreen(
                                 }
 
                                 when (selectedTab) {
-                                    DetailsTab.SeasonsFiles -> {
+                                    UnifiedMediaDetailsTab.SeasonsFiles -> {
                                         val currentInstanceId =
                                             successState.selectedInstanceId ?: instanceId ?: selectedInstanceId
                                         SeasonsFilesTabContent(
@@ -637,7 +648,7 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    DetailsTab.Overview -> {
+                                    UnifiedMediaDetailsTab.Overview -> {
                                         OverviewTabContent(
                                             state = successState,
                                             qualityProfiles = qualityProfiles,
@@ -656,7 +667,7 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    DetailsTab.History -> {
+                                    UnifiedMediaDetailsTab.Activity -> {
                                         Column(
                                             modifier = Modifier.padding(horizontal = 24.dp),
                                             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -672,16 +683,10 @@ fun UnifiedMediaDetailsScreen(
                                                 )
                                             }
 
-                                            AnimatedVisibility(
-                                                visible = successState.queueItems.isNotEmpty(),
-                                                enter = expandVertically() + fadeIn(),
-                                                exit = shrinkVertically() + fadeOut(),
-                                            ) {
-                                                Text(
-                                                    text = mokoString(MR.strings.history),
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                )
-                                            }
+                                            Text(
+                                                text = mokoString(MR.strings.history),
+                                                style = MaterialTheme.typography.titleMedium,
+                                            )
 
                                             successState.history.forEach { historyItem ->
                                                 HistoryItemView(
@@ -715,7 +720,7 @@ fun UnifiedMediaDetailsScreen(
                                         }
                                     }
 
-                                    DetailsTab.Analytics -> {
+                                    UnifiedMediaDetailsTab.Analytics -> {
                                         TracearrAnalyticsSection(
                                             uiState = tracearrState,
                                             onWindowSelected = { viewModel.selectTracearrStatsWindow(it) },
@@ -723,7 +728,7 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    DetailsTab.Steams -> {
+                                    UnifiedMediaDetailsTab.Steams -> {
                                         TracearrHistorySection(
                                             uiState = tracearrState,
                                             onLoadMore = { viewModel.loadMoreTracearrHistory() },
@@ -1008,8 +1013,15 @@ fun UnifiedMediaDetailsScreen(
                     TracearrStreamDetailsSheet(
                         session = session,
                         onDismissRequest = { selectedTracearrStreamSession = null },
-                        onNavigateToDetails = { _, _ -> },
-                        onNavigateToUser = { /* user profile */ },
+                        onNavigateToDetails = { tracearrType, tracearrTmdbId ->
+                            if (tracearrTmdbId != null) {
+                                val requestType = tracearrType?.requestType
+                                if (requestType != null) {
+                                    onMediaClick?.invoke(tracearrTmdbId, requestType)
+                                }
+                            }
+                        },
+                        onNavigateToUser = { onNavigateToUser?.invoke(it) },
                     )
                 }
             }

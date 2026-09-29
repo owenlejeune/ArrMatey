@@ -51,8 +51,6 @@ import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
-import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
-import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
@@ -62,7 +60,6 @@ import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InteractiveSearchViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
-import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
@@ -499,9 +496,7 @@ val viewModelModule =
         viewModel { (type: InstanceType, defaultFilter: ReleaseFilterBy, instanceId: Long?) ->
             InteractiveSearchViewModel(type, defaultFilter, instanceId, get(), get(), get(), get())
         }
-        viewModel { (movieId: Long) ->
-            MovieFilesViewModel(movieId, get(), get(), get())
-        }
+
         viewModel { (seriesId: Long, episode: Episode) ->
             EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
@@ -544,12 +539,7 @@ val viewModelModule =
         viewModel { (authorId: Long, book: Book) ->
             BookDetailsViewModel(authorId, book, get(), get(), get(), get(), get(), get())
         }
-        viewModel { (authorId: Long) ->
-            AuthorFilesViewModel(authorId, get(), get(), get())
-        }
-        viewModel { (audiobookId: Long) ->
-            AudiobookFilesViewModel(audiobookId, get(), get(), get())
-        }
+
         viewModel { (id: Long, type: BazarrMediaType) ->
             BazarrDetailsViewModel(id, type, get(), get(), get(), get(), get())
         }

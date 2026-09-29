@@ -20,7 +20,7 @@ struct EpisodeDetailsScreen: View {
     private enum DetailsTab: Hashable {
         case overview
         case analytics
-        case history
+        case streams
     }
 
     @State private var confirmDelete: Bool = false
@@ -69,7 +69,7 @@ struct EpisodeDetailsScreen: View {
 
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                MediaHeaderBanner(bannerUrl: URL(string: episode.getBanner()?.remoteUrl ?? ""), height: 250, gradientHeight: 100)
+                MediaHeaderBanner(bannerUrl: URL(string: episode.getBanner()?.remoteUrl ?? ""), height: 250, gradientHeight: 150)
 
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 4) {
@@ -101,8 +101,8 @@ struct EpisodeDetailsScreen: View {
                                 .tag(DetailsTab.overview)
                             Text(MR.strings().statistics.localized())
                                 .tag(DetailsTab.analytics)
-                            Text(MR.strings().history.localized())
-                                .tag(DetailsTab.history)
+                            Text(MR.strings().streams_label.localized())
+                                .tag(DetailsTab.streams)
                         }
                         .pickerStyle(.segmented)
                     }
@@ -115,7 +115,7 @@ struct EpisodeDetailsScreen: View {
                             uiState: tracearrState,
                             onWindowSelected: { viewModel.selectTracearrStatsWindow(window: $0) }
                         )
-                    case .history:
+                    case .streams:
                         TracearrHistorySectionView(
                             uiState: tracearrState,
                             onLoadMore: { viewModel.loadMoreTracearrHistory() },
@@ -131,7 +131,7 @@ struct EpisodeDetailsScreen: View {
             .frame(alignment: .top)
         }
         .onChange(of: hasTracearr) { _, newValue in
-            if !newValue && (selectedTab == .analytics || selectedTab == .history) {
+            if !newValue && (selectedTab == .analytics || selectedTab == .streams) {
                 selectedTab = .overview
             }
         }

@@ -9,8 +9,6 @@ import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
-import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
-import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
@@ -20,7 +18,6 @@ import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InteractiveSearchViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
-import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
@@ -82,8 +79,6 @@ object KoinBridge : KoinComponent {
         defaultFilter: ReleaseFilterBy,
         instanceId: Long? = null,
     ): InteractiveSearchViewModel = getKoin().get { parametersOf(type, defaultFilter, instanceId) }
-
-    fun getMovieFilesViewModel(movieId: Long): MovieFilesViewModel = getKoin().get { parametersOf(movieId) }
 
     fun getEpisodeDetailsViewModel(
         seriesId: Long,
@@ -149,10 +144,6 @@ object KoinBridge : KoinComponent {
         authorId: Long,
         book: Book,
     ): BookDetailsViewModel = getKoin().get { parametersOf(authorId, book) }
-
-    fun getAuthorFilesViewModel(authorId: Long): AuthorFilesViewModel = getKoin().get { parametersOf(authorId) }
-
-    fun getAudiobookFilesViewModel(audiobookId: Long): AudiobookFilesViewModel = getKoin().get { parametersOf(audiobookId) }
 
     fun getDashboardViewModel(): CombinedDashboardViewModel = getKoin().get()
 

@@ -221,6 +221,8 @@ fun Navigator<*>.toPersonDetails(personId: Long) = nav().navigateTo(MediaScreen.
 
 fun Navigator<*>.toPersonWebView(url: String) = nav().navigateTo(MediaScreen.PersonWebView(url))
 
+fun Navigator<*>.toTracearrUser(userRef: String) = nav().navigateTo(MediaScreen.TracearrUser(userRef))
+
 /**
  * Domain-specific navigation extensions for Settings feature set.
  */

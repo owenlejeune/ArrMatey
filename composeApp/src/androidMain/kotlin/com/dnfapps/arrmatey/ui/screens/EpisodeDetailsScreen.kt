@@ -76,7 +76,7 @@ import org.koin.core.parameter.parametersOf
 private enum class EpisodeDetailsTab {
     Overview,
     Analytics,
-    History,
+    Streams,
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -199,7 +199,7 @@ fun EpisodeDetailsScreen(
                 Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
                     DetailHeaderBanner(
                         bannerUrl = currentEpisode.getBanner()?.remoteUrl,
-                        gradientHeight = 100.dp,
+                        gradientHeight = 50.dp,
                         startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
                     )
                 }
@@ -243,7 +243,7 @@ fun EpisodeDetailsScreen(
                                 listOf(
                                     EpisodeDetailsTab.Overview to mokoString(MR.strings.overview),
                                     EpisodeDetailsTab.Analytics to mokoString(MR.strings.statistics),
-                                    EpisodeDetailsTab.History to mokoString(MR.strings.history),
+                                    EpisodeDetailsTab.Streams to mokoString(MR.strings.streams_label),
                                 )
                             PrimaryScrollableTabRow(
                                 selectedTabIndex =
@@ -375,7 +375,7 @@ fun EpisodeDetailsScreen(
                             )
                         }
 
-                        EpisodeDetailsTab.History -> {
+                        EpisodeDetailsTab.Streams -> {
                             TracearrHistorySection(
                                 uiState = tracearrState,
                                 onLoadMore = { viewModel.loadMoreTracearrHistory() },

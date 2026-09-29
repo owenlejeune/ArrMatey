@@ -368,7 +368,7 @@
     <string name="replace_url_with_current">Replace saved URL with current</string>
     <string name="now_playing">Now Playing</string>
     <string name="no_active_streams">No active streams</string>
-    <string name="streams">Streams</string>
+    <string name="streams_label">Streams</string>
 
     <string name="search_results">Search Results</string>
     <string name="unified_library_search_all_instances_title">Search all services on add</string>
