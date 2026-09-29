@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.arr.api.model
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
 import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.SerialName
@@ -50,12 +51,12 @@ data class SearchAudiobook(
 ) : ArrMedia,
     HasArrImages<SearchAudiobook>,
     InstanceTypeIdentifiable {
-    override fun withLocalImages(instanceUrl: String): SearchAudiobook {
+    override fun withLocalImages(instance: Instance): SearchAudiobook {
         val localImages =
             imageUrl?.let { path ->
                 listOf(
                     ArrImage(CoverType.Poster, path, path)
-                        .rebuildWithLocalUrls(instanceUrl),
+                        .rebuildWithLocalUrls(instance),
                 )
             } ?: emptyList()
         return copy(images = localImages)

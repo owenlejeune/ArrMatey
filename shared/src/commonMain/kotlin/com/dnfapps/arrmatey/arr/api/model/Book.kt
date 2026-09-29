@@ -1,5 +1,7 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.arr.api.client.HasArrImages
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
@@ -22,7 +24,7 @@ data class Book(
     @Contextual val releaseDate: Instant? = null,
     val pageCount: Int? = null,
     val genres: List<String> = emptyList(),
-    val images: List<ArrImage> = emptyList(),
+    override val images: List<ArrImage> = emptyList(),
     val links: List<ArrLink> = emptyList(),
     val statistics: BookshelfStatistics? = null,
     @Contextual val added: Instant? = null,
@@ -32,7 +34,13 @@ data class Book(
     override val instanceId: Long? = null,
     override val instanceIds: List<Long> = listOfNotNull(instanceId),
 ) : CalendarItem,
-    InstanceTypeIdentifiable {
+    InstanceTypeIdentifiable,
+    HasArrImages<Book> {
+    override fun withLocalImages(instance: Instance): Book = copy(
+        images = images.map { it.rebuildWithLocalUrls(instance) },
+        author = author?.withLocalImages(instance),
+    )
+
     override val instanceType: InstanceType
         get() = InstanceType.Bookshelf
 

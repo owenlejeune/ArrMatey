@@ -91,12 +91,12 @@ class BazarrInstanceRepository(
 
     suspend fun getSeries(): NetworkResult<List<BazarrSeries>> = bazarrClient
         .getSeries()
-        .mapValues { it.withLocalImages(instance.url) as BazarrSeries }
+        .mapValues { it.withLocalImages(instance) as BazarrSeries }
         .onSuccess { _series.value = NetworkResult.Success(it) }
 
     suspend fun getMovies(): NetworkResult<List<BazarrMovie>> = bazarrClient
         .getMovies()
-        .mapValues { it.withLocalImages(instance.url) as BazarrMovie }
+        .mapValues { it.withLocalImages(instance) as BazarrMovie }
         .onSuccess { _movies.value = NetworkResult.Success(it) }
 
     suspend fun getEpisodes(seriesId: Long): NetworkResult<List<BazarrEpisode>> = bazarrClient

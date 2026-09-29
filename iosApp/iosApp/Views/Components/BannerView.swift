@@ -19,7 +19,7 @@ struct BannerView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fill)
         } else if let bannerUrl = item.getBanner()?.remoteUrl {
-            AsyncImage(url: URL(string: bannerUrl)) { image in
+            ArrAsyncImage(url: URL(string: bannerUrl)) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)

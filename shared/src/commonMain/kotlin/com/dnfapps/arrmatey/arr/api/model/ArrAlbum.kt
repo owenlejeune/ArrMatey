@@ -1,5 +1,7 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.arr.api.client.HasArrImages
+import com.dnfapps.arrmatey.instances.model.Instance
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -14,7 +16,7 @@ data class ArrAlbum(
     @Contextual val releaseDate: Instant? = null,
     val genres: List<String> = emptyList(),
     val statistics: AlbumStatistics? = null,
-    val images: List<ArrImage> = emptyList(),
+    override val images: List<ArrImage> = emptyList(),
     val artist: Arrtist? = null,
     val artistId: Long,
     val foreignAlbumId: String,
@@ -26,7 +28,13 @@ data class ArrAlbum(
     override val instanceId: Long? = null,
     override val instanceIds: List<Long> = listOfNotNull(instanceId),
 ) : CalendarItem,
-    InstanceTypeIdentifiable {
+    InstanceTypeIdentifiable,
+    HasArrImages<ArrAlbum> {
+    override fun withLocalImages(instance: Instance): ArrAlbum = copy(
+        images = images.map { it.rebuildWithLocalUrls(instance) },
+        artist = artist?.withLocalImages(instance),
+    )
+
     override val calendarId: Long
         get() = id
 

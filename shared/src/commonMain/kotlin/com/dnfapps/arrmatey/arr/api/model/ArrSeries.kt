@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
@@ -61,7 +62,7 @@ data class ArrSeries(
 ) : ArrMedia,
     HasArrImages<ArrSeries>,
     InstanceTypeIdentifiable {
-    override fun withLocalImages(instanceUrl: String): ArrSeries = copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
+    override fun withLocalImages(instance: Instance): ArrSeries = copy(images = images.map { it.rebuildWithLocalUrls(instance) })
 
     override val guid: Long
         get() = id ?: tvdbId.plus(100_000)

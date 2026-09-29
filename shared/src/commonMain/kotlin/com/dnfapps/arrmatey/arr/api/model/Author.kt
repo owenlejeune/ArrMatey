@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
@@ -85,7 +86,7 @@ data class Author(
     override val statusProgress: Float
         get() = statistics?.percentOfBooks?.div(100f) ?: 0f
 
-    override fun withLocalImages(instanceUrl: String): Author = copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
+    override fun withLocalImages(instance: Instance): Author = copy(images = images.map { it.rebuildWithLocalUrls(instance) })
 
     fun copyForCreation(
         monitor: AuthorMonitorType,

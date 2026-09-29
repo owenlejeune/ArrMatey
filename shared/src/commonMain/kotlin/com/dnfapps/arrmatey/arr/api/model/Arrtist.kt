@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
@@ -120,5 +121,5 @@ data class Arrtist(
         currentRootFolderPath: String?,
     ): ArrMedia = copy(rootFolderPath = rootFolderPath)
 
-    override fun withLocalImages(instanceUrl: String): Arrtist = copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
+    override fun withLocalImages(instance: Instance): Arrtist = copy(images = images.map { it.rebuildWithLocalUrls(instance) })
 }

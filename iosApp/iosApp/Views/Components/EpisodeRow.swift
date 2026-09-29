@@ -217,7 +217,7 @@ struct EpisodeRow: View {
             if hasStill || hasOverview || episode.bazarrEpisode != nil {
                 HStack(alignment: .top, spacing: 10) {
                     if let stillUrl = resolvedStillUrl {
-                        AsyncImage(url: stillUrl) { phase in
+                        ArrAsyncImage(url: stillUrl) { phase in
                             switch phase {
                             case .success(let image):
                                 image

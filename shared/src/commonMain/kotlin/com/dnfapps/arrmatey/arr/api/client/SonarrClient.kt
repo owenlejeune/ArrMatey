@@ -31,7 +31,7 @@ class SonarrClient(
     override suspend fun getLibrary(): NetworkResult<List<ArrSeries>> = get<List<ArrSeries>>("series")
         .map { shows ->
             shows.map { series ->
-                series.withLocalImages(instance.url).copy(instanceId = instance.id)
+                series.withLocalImages(instance).copy(instanceId = instance.id)
             }
         }
 
@@ -129,12 +129,8 @@ class SonarrClient(
                 instanceId = instance.id,
                 instanceName = instance.label,
                 instanceType = instance.type,
-                series = it.series?.withLocalImages(instance.url),
-                episode =
-                it.episode?.copy(
-                    images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
-                    series = it.series?.withLocalImages(instance.url),
-                ),
+                series = it.series?.withLocalImages(instance),
+                episode = it.episode?.copy(series = it.series)?.withLocalImages(instance),
             )
         }
     }
@@ -156,12 +152,8 @@ class SonarrClient(
                 instanceId = instance.id,
                 instanceName = instance.label,
                 instanceType = instance.type,
-                series = it.series?.withLocalImages(instance.url),
-                episode =
-                it.episode?.copy(
-                    images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
-                    series = it.series?.withLocalImages(instance.url),
-                ),
+                series = it.series?.withLocalImages(instance),
+                episode = it.episode?.copy(series = it.series)?.withLocalImages(instance),
             )
         }
     }

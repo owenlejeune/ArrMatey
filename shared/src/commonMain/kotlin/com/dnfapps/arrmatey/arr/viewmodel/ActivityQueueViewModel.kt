@@ -185,12 +185,12 @@ class ActivityQueueViewModel(
                     val instName = hist.instanceName ?: repo?.instance?.label ?: ""
                     val instId = hist.instanceId ?: repo?.instance?.id ?: 0L
 
-                    val instanceUrl = repo?.instance?.url
+                    val repoInstance = repo?.instance
 
                     when (hist) {
                         is SonarrHistoryItem -> {
                             val rawSeries = hist.series ?: (library.firstOrNull { it.id == hist.seriesId } as? ArrSeries)
-                            val series = if (instanceUrl != null) rawSeries?.withLocalImages(instanceUrl) else rawSeries
+                            val series = if (repoInstance != null) rawSeries?.withLocalImages(repoInstance) else rawSeries
                             val episode = hist.episode
                             val epLabel = episode?.seasonEpLabel
                             val epTitle = episode?.title
@@ -222,7 +222,7 @@ class ActivityQueueViewModel(
 
                         is RadarrHistoryItem -> {
                             val rawMovie = hist.movie ?: (library.firstOrNull { it.id == hist.movieId } as? ArrMovie)
-                            val movie = if (instanceUrl != null) rawMovie?.withLocalImages(instanceUrl) else rawMovie
+                            val movie = if (repoInstance != null) rawMovie?.withLocalImages(repoInstance) else rawMovie
                             DownloadedMediaItem(
                                 id = "history_${instId}_${hist.id}",
                                 title = movie?.title ?: hist.data["movieTitle"] ?: hist.sourceTitle ?: "Unknown Movie",
@@ -242,7 +242,7 @@ class ActivityQueueViewModel(
 
                         is LidarrHistoryItem -> {
                             val rawArtist = hist.artist ?: (library.firstOrNull { it.id == hist.artistId } as? Arrtist)
-                            val artist = if (instanceUrl != null) rawArtist?.withLocalImages(instanceUrl) else rawArtist
+                            val artist = if (repoInstance != null) rawArtist?.withLocalImages(repoInstance) else rawArtist
                             val title =
                                 when {
                                     hist.track?.title != null -> hist.track.title
@@ -266,7 +266,7 @@ class ActivityQueueViewModel(
 
                         is BookshelfHistoryItem -> {
                             val rawAuthor = hist.author ?: (library.firstOrNull { it.id == hist.authorId } as? Author)
-                            val author = if (instanceUrl != null) rawAuthor?.withLocalImages(instanceUrl) else rawAuthor
+                            val author = if (repoInstance != null) rawAuthor?.withLocalImages(repoInstance) else rawAuthor
                             DownloadedMediaItem(
                                 id = "history_${instId}_${hist.id}",
                                 title = hist.book?.title ?: hist.displayTitle ?: "Unknown Book",

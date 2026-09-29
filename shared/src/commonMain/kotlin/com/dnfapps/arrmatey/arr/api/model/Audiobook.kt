@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.arr.api.client.ListenarrNullableInstantSerializer
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.formatSecondsAsRuntime
 import com.dnfapps.arrmatey.extensions.toJsonArray
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
 import com.dnfapps.arrmatey.ui.theme.ArrRed
@@ -74,12 +75,12 @@ data class Audiobook(
     override val notificationMessage: String
         get() = "$title - ${authors.joinToString(", ")}"
 
-    override fun withLocalImages(instanceUrl: String): Audiobook {
+    override fun withLocalImages(instance: Instance): Audiobook {
         val localImages =
             imageUrl?.let { path ->
                 listOf(
                     ArrImage(CoverType.Cover, path, path)
-                        .rebuildWithLocalUrls(instanceUrl),
+                        .rebuildWithLocalUrls(instance),
                 )
             } ?: emptyList()
 

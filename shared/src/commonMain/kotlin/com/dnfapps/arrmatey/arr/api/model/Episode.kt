@@ -1,8 +1,10 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import com.dnfapps.arrmatey.arr.api.client.HasArrImages
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.isBeforeToday
 import com.dnfapps.arrmatey.extensions.padStart
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.shared.midseason_finale
@@ -46,12 +48,18 @@ data class Episode(
     val unverifiedSceneNumbering: Boolean,
     val endTime: String? = null,
     val grabDate: String? = null,
-    val images: List<ArrImage> = emptyList(),
+    override val images: List<ArrImage> = emptyList(),
     val series: ArrSeries? = null,
     override val instanceId: Long? = null,
     override val instanceIds: List<Long> = listOfNotNull(instanceId),
 ) : CalendarItem,
-    InstanceTypeIdentifiable {
+    InstanceTypeIdentifiable,
+    HasArrImages<Episode> {
+    override fun withLocalImages(instance: Instance): Episode = copy(
+        images = images.map { it.rebuildWithLocalUrls(instance) },
+        series = series?.withLocalImages(instance),
+    )
+
     override val calendarId: Long
         get() = tvdbId ?: id
 

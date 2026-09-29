@@ -158,10 +158,10 @@ abstract class BaseArrClient(
     @Suppress("UNCHECKED_CAST")
     protected fun <T> NetworkResult<T>.rebuild(): NetworkResult<T> = this.map { data ->
         when (data) {
-            is HasArrImages<*> -> data.withLocalImages(instance.url) as T
+            is HasArrImages<*> -> data.withLocalImages(instance) as T
             is List<*> ->
                 data.map { item ->
-                    if (item is HasArrImages<*>) item.withLocalImages(instance.url) else item
+                    if (item is HasArrImages<*>) item.withLocalImages(instance) else item
                 } as T
             else -> data
         }

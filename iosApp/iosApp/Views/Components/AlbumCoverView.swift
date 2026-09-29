@@ -21,7 +21,7 @@ struct AlbumCoverView: View {
                 .fill(Color(UIColor.systemBackground))
                 .shadow(radius: elevation)
 
-            AsyncImage(url: URL(string: album.getCover()?.remoteUrl ?? "")) { phase in
+            ArrAsyncImage(url: URL(string: album.getCover()?.remoteUrl ?? "")) { phase in
                 switch phase {
                 case .success(let image):
                     image

@@ -26,7 +26,7 @@ class RadarrClient(
     override suspend fun getLibrary(): NetworkResult<List<ArrMovie>> = get<List<ArrMovie>>("movie")
         .map { movies ->
             movies.map { movie ->
-                movie.withLocalImages(instance.url).copy(instanceId = instance.id)
+                movie.withLocalImages(instance).copy(instanceId = instance.id)
             }
         }
 
@@ -112,7 +112,7 @@ class RadarrClient(
                 instanceId = instance.id,
                 instanceName = instance.label,
                 instanceType = instance.type,
-                movie = it.movie?.withLocalImages(instance.url),
+                movie = it.movie?.withLocalImages(instance),
             )
         }
     }
@@ -133,7 +133,7 @@ class RadarrClient(
                 instanceId = instance.id,
                 instanceName = instance.label,
                 instanceType = instance.type,
-                movie = it.movie?.withLocalImages(instance.url),
+                movie = it.movie?.withLocalImages(instance),
             )
         }
     }

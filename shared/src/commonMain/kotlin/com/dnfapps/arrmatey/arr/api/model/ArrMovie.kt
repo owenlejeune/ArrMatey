@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR.strings
 import com.dnfapps.arrmatey.shared.digital_release
@@ -74,7 +75,7 @@ data class ArrMovie(
     HasArrImages<ArrMovie>,
     CalendarItem,
     InstanceTypeIdentifiable {
-    override fun withLocalImages(instanceUrl: String): ArrMovie = copy(images = images.map { it.rebuildWithLocalUrls(instanceUrl) })
+    override fun withLocalImages(instance: Instance): ArrMovie = copy(images = images.map { it.rebuildWithLocalUrls(instance) })
 
     override val calendarId: Long
         get() = tmdbId

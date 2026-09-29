@@ -41,6 +41,7 @@ import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewM
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
@@ -182,4 +183,6 @@ object KoinBridge : KoinComponent {
     fun getUnifiedSearchViewModel(): UnifiedSearchViewModel = getKoin().get()
 
     fun getInstanceRepository(): InstanceRepository = getKoin().get()
+
+    fun getInstanceManager(): InstanceManager = getKoin().get()
 }

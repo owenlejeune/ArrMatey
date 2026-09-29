@@ -3,6 +3,8 @@ package com.dnfapps.arrmatey.bazarr.api.model
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
 import com.dnfapps.arrmatey.arr.api.model.ArrImage
 import com.dnfapps.arrmatey.arr.api.model.CoverType
+import com.dnfapps.arrmatey.arr.api.model.joinInstanceUrl
+import com.dnfapps.arrmatey.instances.model.Instance
 import kotlinx.serialization.Transient
 
 sealed interface BazarrMedia : HasArrImages<BazarrMedia> {
@@ -35,16 +37,16 @@ sealed interface BazarrMedia : HasArrImages<BazarrMedia> {
                 fanart?.let { ArrImage(CoverType.FanArt, it, it) },
             )
 
-    override fun withLocalImages(instanceUrl: String): BazarrMedia = when (this) {
+    override fun withLocalImages(instance: Instance): BazarrMedia = when (this) {
         is BazarrMovie ->
             copy(
-                poster = if (poster?.startsWith("/") == true) "$instanceUrl$poster" else poster,
-                fanart = if (fanart?.startsWith("/") == true) "$instanceUrl$fanart" else fanart,
+                poster = poster?.let { if (it.startsWith("/")) joinInstanceUrl(instance.url, it) else it },
+                fanart = fanart?.let { if (it.startsWith("/")) joinInstanceUrl(instance.url, it) else it },
             )
         is BazarrSeries ->
             copy(
-                poster = if (poster?.startsWith("/") == true) "$instanceUrl$poster" else poster,
-                fanart = if (fanart?.startsWith("/") == true) "$instanceUrl$fanart" else fanart,
+                poster = poster?.let { if (it.startsWith("/")) joinInstanceUrl(instance.url, it) else it },
+                fanart = fanart?.let { if (it.startsWith("/")) joinInstanceUrl(instance.url, it) else it },
             )
     }
 }

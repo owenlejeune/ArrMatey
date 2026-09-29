@@ -15,7 +15,7 @@ struct ClearLogoView: View {
     
     var body: some View {
         if let clearLogo = item.getClearLogo()?.remoteUrl {
-            AsyncImage(url: URL(string: clearLogo)) { phase in
+            ArrAsyncImage(url: URL(string: clearLogo)) { phase in
                 if let image = phase.image {
                     image
                         .resizable()

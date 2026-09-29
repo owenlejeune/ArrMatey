@@ -497,7 +497,7 @@ private struct PosterImageView: View {
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .clipped()
         } else if let urlString = urlString, let url = URL(string: urlString) {
-            AsyncImage(url: url) { phase in
+            ArrAsyncImage(url: url) { phase in
                 switch phase {
                 case .success(let image):
                     image

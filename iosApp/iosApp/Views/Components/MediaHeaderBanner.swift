@@ -24,7 +24,7 @@ struct MediaHeaderBanner: View {
                 Color(.systemBackground)
                 
                 if let url = bannerUrl {
-                    AsyncImage(url: url) { phase in
+                    ArrAsyncImage(url: url) { phase in
                         switch phase {
                         case .success(let image):
                             image
