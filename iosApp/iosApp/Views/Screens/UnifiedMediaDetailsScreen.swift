@@ -222,7 +222,7 @@ extension UnifiedMediaDetailsScreen {
                     if hasSeasonsOrFiles || hasTracearr {
                         Picker("View Mode", selection: $selectedTab) {
                             if hasSeasonsOrFiles {
-                                Text(!success.seasons.isEmpty ? MR.plurals().seasons.localized(2) : MR.strings().media.localized())
+                                Text(!success.seasons.isEmpty ? MR.plurals().seasons.localized(2) : MR.strings().files.localized())
                                     .tag(DetailsTab.seasonsFiles)
                             }
                             Text(MR.strings().overview.localized())
@@ -230,7 +230,7 @@ extension UnifiedMediaDetailsScreen {
                             if hasTracearr {
                                 Text(MR.strings().statistics.localized())
                                     .tag(DetailsTab.analytics)
-                                Text(MR.strings().history.localized())
+                                Text(MR.strings().streams.localized())
                                     .tag(DetailsTab.history)
                             }
                         }

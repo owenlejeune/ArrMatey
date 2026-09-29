@@ -571,11 +571,11 @@ fun UnifiedMediaDetailsScreen(
                                                                     if (successState.seasons.isNotEmpty()) {
                                                                         mokoString(MR.strings.seasons_header)
                                                                     } else {
-                                                                        mokoString(MR.strings.media)
+                                                                        mokoString(MR.strings.files)
                                                                     }
                                                                 DetailsTab.Overview -> mokoString(MR.strings.overview)
                                                                 DetailsTab.Analytics -> mokoString(MR.strings.statistics)
-                                                                DetailsTab.History -> mokoString(MR.strings.history)
+                                                                DetailsTab.Steams -> mokoString(MR.strings.streams)
                                                             },
                                                         )
                                                     },
@@ -660,7 +660,7 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
-                                    DetailsTab.History -> {
+                                    DetailsTab.Steams -> {
                                         TracearrHistorySection(
                                             uiState = tracearrState,
                                             onLoadMore = { viewModel.loadMoreTracearrHistory() },

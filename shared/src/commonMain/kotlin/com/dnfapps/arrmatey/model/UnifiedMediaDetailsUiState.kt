@@ -114,7 +114,7 @@ sealed interface UnifiedMediaDetailsUiState {
             add(UnifiedMediaDetailsTab.Overview)
             if (hasTracearr(isTracearrConfigured)) {
                 add(UnifiedMediaDetailsTab.Analytics)
-                add(UnifiedMediaDetailsTab.History)
+                add(UnifiedMediaDetailsTab.Steams)
             }
         }
 

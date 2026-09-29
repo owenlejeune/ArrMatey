@@ -4,5 +4,5 @@ enum class UnifiedMediaDetailsTab {
     SeasonsFiles,
     Overview,
     Analytics,
-    History,
+    Steams,
 }
