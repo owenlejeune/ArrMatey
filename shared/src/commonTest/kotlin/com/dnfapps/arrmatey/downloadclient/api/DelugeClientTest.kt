@@ -72,4 +72,82 @@ class DelugeClientTest {
         assertTrue(result is NetworkResult.Error)
         assertEquals(401, result.code)
     }
+
+    @Test
+    fun getTransferInfoParsesFloatingPointRatesCorrectly() = runTest {
+        val mockEngine =
+            MockEngine { request ->
+                val body = (request.body as? TextContent)?.text.orEmpty()
+                if ("\"method\":\"auth.login\"" in body) {
+                    respond(
+                        content = """{"id":1,"result":true,"error":null}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                } else {
+                    respond(
+                        content = """{"id":2,"result":{"download_rate":102450.5,"upload_rate":0.0},"error":null}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                }
+            }
+
+        val deluge = DelugeClient(client(), httpClient(mockEngine))
+        val result = deluge.getTransferInfo()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(102450L, result.data.downloadSpeed)
+        assertEquals(0L, result.data.uploadSpeed)
+    }
+
+    @Test
+    fun getDownloadsParsesTorrentsCorrectly() = runTest {
+        val mockEngine =
+            MockEngine { request ->
+                val body = (request.body as? TextContent)?.text.orEmpty()
+                if ("\"method\":\"auth.login\"" in body) {
+                    respond(
+                        content = """{"id":1,"result":true,"error":null}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                } else {
+                    respond(
+                        content = """
+                        {
+                            "id": 2,
+                            "result": {
+                                "hash123": {
+                                    "name": "Ubuntu.iso",
+                                    "total_size": 2147483648,
+                                    "progress": 50.0,
+                                    "download_payload_rate": 512000.0,
+                                    "upload_payload_rate": 0.0,
+                                    "eta": 3600,
+                                    "state": "Downloading",
+                                    "label": "linux",
+                                    "time_added": 1700000000,
+                                    "hash": "hash123"
+                                }
+                            },
+                            "error": null
+                        }
+                        """.trimIndent(),
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                }
+            }
+
+        val deluge = DelugeClient(client(), httpClient(mockEngine))
+        val result = deluge.getDownloads()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(1, result.data.size)
+        val item = result.data.first()
+        assertEquals("Ubuntu.iso", item.name)
+        assertEquals(0.5, item.progress)
+        assertEquals(512000L, item.downloadSpeed)
+    }
 }
