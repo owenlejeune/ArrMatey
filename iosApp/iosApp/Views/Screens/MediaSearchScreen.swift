@@ -11,7 +11,7 @@ import Shared
 struct MediaSearchScreen: View {
     private let type: InstanceType
     
-    @ObservedObject private var viewModel: ArrSearchViewModelS
+    @StateObject private var viewModel: ArrSearchViewModelS
     
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject private var navigation: NavigationManager
@@ -22,7 +22,7 @@ struct MediaSearchScreen: View {
     init(query: String, type: InstanceType, instanceId: Int64? = nil) {
         self.searchQuery = query
         self.type = type
-        self.viewModel = ArrSearchViewModelS(type: type, instanceId: instanceId)
+        _viewModel = StateObject(wrappedValue: ArrSearchViewModelS(type: type, instanceId: instanceId))
     }
     
     private var uiState: ArrLibrary {

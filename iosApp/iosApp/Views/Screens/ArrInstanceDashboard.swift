@@ -11,13 +11,13 @@ import SwiftUI
 struct ArrInstanceDashboard: View {
     private let id: Int64
     
-    @ObservedObject private var viewModel: ArrInstanceDashboardViewModelS
+    @StateObject private var viewModel: ArrInstanceDashboardViewModelS
     
     @EnvironmentObject private var navigationManager: NavigationManager
     
     init(id: Int64) {
         self.id = id
-        self.viewModel = ArrInstanceDashboardViewModelS(id)
+        _viewModel = StateObject(wrappedValue: ArrInstanceDashboardViewModelS(id))
     }
     
     var body: some View {

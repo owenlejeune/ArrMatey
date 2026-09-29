@@ -13,7 +13,7 @@ struct EditInstanceScreen: View {
     
     @Environment(\.dismiss) var dismiss
     
-    @ObservedObject private var viewModel: EditInstanceViewModelS
+    @StateObject private var viewModel: EditInstanceViewModelS
     
     @State private var showDeleteConfirmation: Bool = false
     @State private var saveClicked: Bool = false
@@ -22,7 +22,7 @@ struct EditInstanceScreen: View {
     
     init(id: Int64, onSaveSuccess: @escaping () -> Void, onDelete: (() -> Void)? = nil) {
         self.id = id
-        self.viewModel = EditInstanceViewModelS(id)
+        _viewModel = StateObject(wrappedValue: EditInstanceViewModelS(id))
         self.onSaveSuccess = onSaveSuccess
         self.onDelete = onDelete
     }

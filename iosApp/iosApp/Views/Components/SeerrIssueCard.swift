@@ -49,7 +49,7 @@ struct SeerrIssueCard: View {
     @ViewBuilder
     private var backdropLayer: some View {
         if let posterUrl = details?.fullPosterPath, let url = URL(string: posterUrl) {
-            AsyncImage(url: url) { image in
+            CachedAsyncImage(url: url) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -115,7 +115,7 @@ struct SeerrIssueCard: View {
     @ViewBuilder
     private var posterImage: some View {
         if let posterUrl = details?.fullPosterPath, let url = URL(string: posterUrl) {
-            AsyncImage(url: url) { image in
+            CachedAsyncImage(url: url) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)

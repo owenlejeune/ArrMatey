@@ -12,7 +12,7 @@ struct BookDetailsScreen: View {
     private let author: Author
     private let instanceId: Int64?
 
-    @ObservedObject private var viewModel: BookDetailsViewModelS
+    @StateObject private var viewModel: BookDetailsViewModelS
 
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var navigation: NavigationManager
@@ -28,7 +28,7 @@ struct BookDetailsScreen: View {
         let author = Author.companion.fromJson(value: authorJson)
         self.author = author
         self.instanceId = instanceId
-        self.viewModel = BookDetailsViewModelS(authorId: author.id?.int64Value ?? 0, book: book)
+        _viewModel = StateObject(wrappedValue: BookDetailsViewModelS(authorId: author.id?.int64Value ?? 0, book: book))
     }
 
     var body: some View {

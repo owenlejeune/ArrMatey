@@ -12,7 +12,7 @@ struct EpisodeDetailsScreen: View {
     private let series: ArrSeries
     private let instanceId: Int64?
 
-    @ObservedObject private var viewModel: EpisodeDetailsViewModelS
+    @StateObject private var viewModel: EpisodeDetailsViewModelS
 
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject private var navigation: NavigationManager
@@ -32,11 +32,12 @@ struct EpisodeDetailsScreen: View {
     }
 
     init(seriesJson: String, episodeJson: String, instanceId: Int64? = nil) {
-        self.series = ArrMediaCompanion().fromJson(value: seriesJson) as! ArrSeries
+        let series = ArrMediaCompanion().fromJson(value: seriesJson) as! ArrSeries
+        self.series = series
         self.instanceId = instanceId
 
         let episode = Episode.companion.fromJson(json: episodeJson)
-        self.viewModel = EpisodeDetailsViewModelS(seriesId: series.id?.int64Value ?? 0, episode: episode)
+        _viewModel = StateObject(wrappedValue: EpisodeDetailsViewModelS(seriesId: series.id?.int64Value ?? 0, episode: episode))
     }
 
     var body: some View {

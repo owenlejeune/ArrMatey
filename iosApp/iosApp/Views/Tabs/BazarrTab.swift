@@ -200,7 +200,7 @@ private struct BazarrItemRow: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             if let fanart {
-                AsyncImage(url: URL(string: fanart)) { image in
+                CachedAsyncImage(url: URL(string: fanart)) { image in
                     image.resizable().scaledToFill()
                 } placeholder: {
                     Color.gray.opacity(0.3)
@@ -214,7 +214,7 @@ private struct BazarrItemRow: View {
 
             HStack(alignment: .top, spacing: 12) {
                 if let poster {
-                    AsyncImage(url: URL(string: poster)) { image in
+                    CachedAsyncImage(url: URL(string: poster)) { image in
                         image.resizable().scaledToFit()
                     } placeholder: {
                         Color.gray

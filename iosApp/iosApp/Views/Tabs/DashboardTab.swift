@@ -1611,7 +1611,7 @@ struct CompactRequestCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .top, spacing: 8) {
                     if let posterUrl = details?.fullPosterPath, let url = URL(string: posterUrl) {
-                        AsyncImage(url: url) { image in
+                        CachedAsyncImage(url: url) { image in
                             image.resizable().aspectRatio(contentMode: .fill)
                         } placeholder: {
                             Color(.systemGray4)
@@ -1645,7 +1645,7 @@ struct CompactRequestCard: View {
                 if let requestedBy = request.requestedBy {
                     HStack(spacing: 6) {
                         if let avatar = requestedBy.avatar, let avatarUrl = URL(string: avatar) {
-                            AsyncImage(url: avatarUrl) { image in
+                            CachedAsyncImage(url: avatarUrl) { image in
                                 image.resizable().aspectRatio(contentMode: .fill)
                             } placeholder: {
                                 Image(systemName: "person.circle.fill")
@@ -1756,7 +1756,7 @@ struct CompactIssueCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .top, spacing: 8) {
                     if let posterUrl = details?.fullPosterPath, let url = URL(string: posterUrl) {
-                        AsyncImage(url: url) { image in
+                        CachedAsyncImage(url: url) { image in
                             image.resizable().aspectRatio(contentMode: .fill)
                         } placeholder: {
                             Color(.systemGray4)
@@ -1805,7 +1805,7 @@ struct CompactIssueCard: View {
                 if let createdBy = issue.createdBy {
                     HStack(spacing: 6) {
                         if let avatar = createdBy.avatar, let avatarUrl = URL(string: avatar) {
-                            AsyncImage(url: avatarUrl) { image in
+                            CachedAsyncImage(url: avatarUrl) { image in
                                 image.resizable().aspectRatio(contentMode: .fill)
                             } placeholder: {
                                 Image(systemName: "person.circle.fill")
@@ -1965,7 +1965,7 @@ struct DashboardDiscoverSpotlightSection: View {
                                 let item = spotlightItems[index]
                                 ZStack {
                                     if let backdrop = item.fullBackdropPath ?? item.fullPosterPath, let url = URL(string: backdrop) {
-                                        AsyncImage(url: url) { phase in
+                                        CachedAsyncImage(url: url) { phase in
                                             switch phase {
                                             case .success(let img):
                                                 img.resizable().aspectRatio(contentMode: .fill)

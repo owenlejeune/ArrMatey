@@ -19,7 +19,7 @@ struct CastMemberView: View {
             VStack(spacing: 4) {
                 if let profilePath = member.fullProfilePath,
                    let url = URL(string: profilePath) {
-                    AsyncImage(url: url) { image in
+                    CachedAsyncImage(url: url) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)
@@ -64,7 +64,7 @@ struct CrewMemberView: View {
             VStack(spacing: 4) {
                 if let profilePath = member.fullProfilePath,
                    let url = URL(string: profilePath) {
-                    AsyncImage(url: url) { image in
+                    CachedAsyncImage(url: url) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)
