@@ -658,7 +658,7 @@ enum MediaRoute: Hashable {
     case globalSearch(query: String = "")
     case preview(_ json: String, type: InstanceType)
     case movieRelease(movieId: Int64, instanceId: Int64? = nil)
-    case movieFiles(String)
+
     case seriesReleases(
         seriesId: Int64? = nil,
         seasonNumber: Int32? = nil,
@@ -672,8 +672,7 @@ enum MediaRoute: Hashable {
     )
     case bookReleases(bookId: Int64, instanceId: Int64? = nil)
     case audiobookReleases(id: Int64?, query: String, instanceId: Int64? = nil)
-    case authorFiles(authorJson: String)
-    case audiobookFiles(audiobookJson: String)
+
     case bookDetails(bookJson: String, authorJson: String, instanceId: Int64? = nil)
     case episodeDetails(String, String, instanceId: Int64? = nil)
 }

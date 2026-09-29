@@ -30,6 +30,7 @@ import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.instances.repository.SonarrRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
@@ -327,6 +328,13 @@ class UnifiedMediaDetailsViewModel(
                     launch { repository.refreshTags() }
                     if (effectiveId != null && effectiveId != 0L) {
                         launch { repository.getMediaDetails(effectiveId) }
+                        launch {
+                            if (repository is SonarrRepository) {
+                                repository.getSeriesHistory(effectiveId)
+                            } else {
+                                repository.getItemHistory(effectiveId)
+                            }
+                        }
                     }
                 }
                 if (seerrRepository != null && tmdbId != null && resolvedRequestType != null) {

@@ -2,22 +2,23 @@ package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.AudiobookFile
+import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.screens.AudiobookFileCard
+import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -26,7 +27,6 @@ fun AudiobookFileView(
     audiobook: Audiobook,
     searchIds: Set<Long>,
     onAutomaticSearch: () -> Unit,
-    onNavigateToAudiobookFiles: (Audiobook) -> Unit,
     onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -34,22 +34,6 @@ fun AudiobookFileView(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = mokoString(MR.strings.files),
-                style = MaterialTheme.typography.titleLargeEmphasized,
-            )
-            TextButton(
-                onClick = { onNavigateToAudiobookFiles(audiobook) },
-            ) {
-                Text(mokoString(MR.strings.history))
-            }
-        }
-
         ReleaseDownloadButtons(
             onInteractiveClicked = {
                 onNavigateToAudiobookRelease(audiobook.id, audiobook.releaseQuery)
@@ -76,6 +60,40 @@ fun AudiobookFileView(
                     .padding(vertical = 12.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun AudiobookFileCard(
+    file: AudiobookFile,
+    modifier: Modifier = Modifier,
+) {
+    ContainerCard(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = MaterialTheme.shapes.large,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Text(
+            text = file.path?.substringAfterLast('/') ?: mokoString(MR.strings.unknown),
+            style = MaterialTheme.typography.titleSmallEmphasized,
+        )
+        Text(
+            text =
+            listOfNotNull(
+                file.format,
+                file.size?.bytesAsFileSizeString(),
+            ).joinToString(BULLET),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        file.createdAt?.format("MMM d, yyyy")?.let { formattedDate ->
+            Text(
+                text = mokoString(MR.strings.added_on, formattedDate),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

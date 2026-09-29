@@ -2,6 +2,11 @@ package com.dnfapps.arrmatey.ui.screens
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +23,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -45,9 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
@@ -65,7 +70,9 @@ import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
+import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.ui.components.InstancePresenceChips
+import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
@@ -122,12 +129,9 @@ fun UnifiedMediaDetailsScreen(
     onBack: () -> Unit,
     onNavigateToEpisodeDetails: (ArrSeries, Episode, Long?) -> Unit,
     onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?, instanceId: Long?) -> Unit,
-    onNavigateToMovieFiles: (ArrMovie, Long?) -> Unit,
     onNavigateToMovieReleases: (movieId: Long, instanceId: Long?) -> Unit,
-    onNavigateToAuthorFiles: (Author, Long?) -> Unit,
     onNavigateToBookDetails: (Author, Book, Long?) -> Unit,
     onNavigateToBookRelease: (bookId: Long, instanceId: Long?) -> Unit,
-    onNavigateToAudiobookFiles: (Audiobook, Long?) -> Unit,
     onNavigateToAudiobookRelease: (audiobookId: Long?, query: String?, instanceId: Long?) -> Unit,
     onNavigateToAlbumRelease: (artistId: Long, albumId: Long, instanceId: Long?) -> Unit,
     onPersonClick: (Long) -> Unit,
@@ -568,12 +572,16 @@ fun UnifiedMediaDetailsScreen(
                                                         Text(
                                                             when (tab) {
                                                                 DetailsTab.SeasonsFiles ->
-                                                                    if (successState.seasons.isNotEmpty()) {
-                                                                        mokoString(MR.strings.seasons_header)
-                                                                    } else {
-                                                                        mokoString(MR.strings.files)
+                                                                    when (instanceType) {
+                                                                        InstanceType.Sonarr ->
+                                                                            mokoString(MR.strings.seasons_header)
+                                                                        InstanceType.Lidarr ->
+                                                                            mokoString(MR.strings.albums_header)
+                                                                        else ->
+                                                                            mokoString(MR.strings.files)
                                                                     }
                                                                 DetailsTab.Overview -> mokoString(MR.strings.overview)
+                                                                DetailsTab.History -> mokoString(MR.strings.history)
                                                                 DetailsTab.Analytics -> mokoString(MR.strings.statistics)
                                                                 DetailsTab.Steams -> mokoString(MR.strings.streams)
                                                             },
@@ -594,7 +602,6 @@ fun UnifiedMediaDetailsScreen(
                                             automaticSearchIds = automaticSearchIds,
                                             deleteSeasonStatus = deleteSeasonStatus,
                                             deleteAlbumStatus = deleteAlbumStatus,
-                                            onQueueItemClicked = { item -> selectedQueueItem = item },
                                             onToggleSeasonMonitor = { viewModel.toggleSeasonMonitored(it) },
                                             onToggleEpisodeMonitor = { viewModel.toggleEpisodeMonitored(it) },
                                             onEpisodeAutomaticSearch = { viewModel.performEpisodeAutomaticLookup(it) },
@@ -609,7 +616,6 @@ fun UnifiedMediaDetailsScreen(
                                             },
                                             onPerformAutomaticLookup = { viewModel.performAutomaticLookup() },
                                             onDeleteMovieFile = { confirmDeleteMovie = true },
-                                            onNavigateToMovieFiles = { onNavigateToMovieFiles(it, currentInstanceId) },
                                             onNavigateToMovieReleases = { onNavigateToMovieReleases(it, currentInstanceId) },
                                             onToggleAlbumMonitor = { viewModel.toggleAlbumMonitored(it) },
                                             onEditAlbum = { editAlbum = it },
@@ -621,12 +627,10 @@ fun UnifiedMediaDetailsScreen(
                                             onToggleBookMonitor = { viewModel.toggleBookMonitored(it) },
                                             onToggleBookSeriesMonitor = { viewModel.toggleBookSeriesMonitored(it) },
                                             onBookAutomaticSearch = { viewModel.performBookAutomaticLookup(it) },
-                                            onNavigateToAuthorFiles = { onNavigateToAuthorFiles(it, currentInstanceId) },
                                             onNavigateToBookDetails = { author, book ->
                                                 onNavigateToBookDetails(author, book, currentInstanceId)
                                             },
                                             onNavigateToBookRelease = { onNavigateToBookRelease(it, currentInstanceId) },
-                                            onNavigateToAudiobookFiles = { onNavigateToAudiobookFiles(it, currentInstanceId) },
                                             onNavigateToAudiobookRelease = { id, query ->
                                                 onNavigateToAudiobookRelease(id, query, currentInstanceId)
                                             },
@@ -650,6 +654,65 @@ fun UnifiedMediaDetailsScreen(
                                             onLoadMoreRecommendations = { viewModel.loadNextRecommendationsPage() },
                                             onLoadMoreSimilar = { viewModel.loadNextSimilarPage() },
                                         )
+                                    }
+
+                                    DetailsTab.History -> {
+                                        Column(
+                                            modifier = Modifier.padding(horizontal = 24.dp),
+                                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                                        ) {
+                                            AnimatedVisibility(
+                                                visible = successState.queueItems.isNotEmpty(),
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut(),
+                                            ) {
+                                                MediaActivitySection(
+                                                    queueItems = successState.queueItems,
+                                                    onQueueItemClicked = { item -> selectedQueueItem = item },
+                                                )
+                                            }
+
+                                            AnimatedVisibility(
+                                                visible = successState.queueItems.isNotEmpty(),
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut(),
+                                            ) {
+                                                Text(
+                                                    text = mokoString(MR.strings.history),
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                )
+                                            }
+
+                                            successState.history.forEach { historyItem ->
+                                                HistoryItemView(
+                                                    item = historyItem,
+                                                )
+                                            }
+
+                                            if (successState.history.isEmpty()) {
+                                                Card(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    colors =
+                                                    CardDefaults.cardColors(
+                                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                                    ),
+                                                ) {
+                                                    Box(
+                                                        modifier =
+                                                        Modifier
+                                                            .padding(24.dp)
+                                                            .fillMaxWidth(),
+                                                        contentAlignment = Alignment.Center,
+                                                    ) {
+                                                        Text(
+                                                            text = mokoString(MR.strings.no_history),
+                                                            style = MaterialTheme.typography.bodyLarge,
+                                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
 
                                     DetailsTab.Analytics -> {

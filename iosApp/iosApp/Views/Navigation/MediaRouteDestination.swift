@@ -37,8 +37,7 @@ struct MediaRouteDestination: View {
             let releaseParams = ReleaseParamsMovie(mediaId: movieId)
             InteractiveSearchScreen(type: .radarr, releaseParams: releaseParams, instanceId: instanceId)
 
-        case .movieFiles(let json):
-            MovieFilesScreen(json: json)
+
 
         case .seriesReleases(let seriesId, let seasonNumber, let episodeId, let instanceId):
             let releaseParams = ReleaseParamsSeries(
@@ -67,11 +66,7 @@ struct MediaRouteDestination: View {
             let releaseParams = ReleaseParamsAudiobook(mediaId: id?.asKotlinLong, query: query)
             InteractiveSearchScreen(type: .listenarr, releaseParams: releaseParams, instanceId: instanceId)
 
-        case .authorFiles(let authorJson):
-            AuthorFilesScreen(authorJson: authorJson)
 
-        case .audiobookFiles(let audiobookJson):
-            AudiobookFilesScreen(audiobookJson: audiobookJson)
 
         case .bookDetails(let bookJson, let authorJson, let instanceId):
             BookDetailsScreen(bookJson: bookJson, authorJson: authorJson, instanceId: instanceId)

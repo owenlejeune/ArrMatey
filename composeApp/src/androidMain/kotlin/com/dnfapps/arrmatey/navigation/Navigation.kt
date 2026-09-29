@@ -6,7 +6,6 @@ import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
@@ -181,21 +180,6 @@ fun Navigator<*>.toMovieReleases(
     movieId: Long,
     instanceId: Long? = null,
 ) = nav().navigateTo(MediaScreen.MovieReleases(movieId, instanceId))
-
-fun Navigator<*>.toMovieFiles(
-    movie: ArrMovie,
-    instanceId: Long? = null,
-) = nav().navigateTo(MediaScreen.MovieFiles(movie, instanceId))
-
-fun Navigator<*>.toAuthorFiles(
-    author: Author,
-    instanceId: Long? = null,
-) = nav().navigateTo(MediaScreen.AuthorFiles(author, instanceId))
-
-fun Navigator<*>.toAudiobookFiles(
-    audiobook: Audiobook,
-    instanceId: Long? = null,
-) = nav().navigateTo(MediaScreen.AudiobookFiles(audiobook, instanceId))
 
 fun Navigator<*>.toEpisodeDetails(
     series: ArrSeries,

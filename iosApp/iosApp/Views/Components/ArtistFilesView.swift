@@ -20,9 +20,9 @@ struct ArtistFilesView: View {
     let onAlbumAutomaticSearch: (Int64) -> Void
     let deleteAlbumFiles: (ArrAlbum) -> Void
     let albumDeleteInProgress: Bool
-    
+
     var body: some View {
-        Section {
+        VStack(spacing: 12) {
             ForEach(albums, id: \.id) { album in
                 AlbumRowView(
                     artist: artist,
@@ -38,9 +38,6 @@ struct ArtistFilesView: View {
                     albumDeleteInProgress: albumDeleteInProgress
                 )
             }
-        } header: {
-            Text(MR.strings().albums_header.localized())
-                .font(.system(size: 26, weight: .medium))
         }
     }
 }

@@ -20,7 +20,6 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
-import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.model.OperationStatus
@@ -28,7 +27,6 @@ import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
 import com.dnfapps.arrmatey.ui.components.AudiobookFileView
 import com.dnfapps.arrmatey.ui.components.BooksArea
-import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.MovieFileView
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
@@ -39,7 +37,6 @@ fun SeasonsFilesTabContent(
     automaticSearchIds: Set<Long>,
     deleteSeasonStatus: OperationStatus,
     deleteAlbumStatus: OperationStatus,
-    onQueueItemClicked: (QueueItem) -> Unit,
     onToggleSeasonMonitor: (Int) -> Unit,
     onToggleEpisodeMonitor: (Episode) -> Unit,
     onEpisodeAutomaticSearch: (Long) -> Unit,
@@ -50,7 +47,6 @@ fun SeasonsFilesTabContent(
     onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?) -> Unit,
     onPerformAutomaticLookup: () -> Unit,
     onDeleteMovieFile: () -> Unit,
-    onNavigateToMovieFiles: (ArrMovie) -> Unit,
     onNavigateToMovieReleases: (Long) -> Unit,
     onToggleAlbumMonitor: (ArrAlbum) -> Unit,
     onEditAlbum: (ArrAlbum) -> Unit,
@@ -60,27 +56,13 @@ fun SeasonsFilesTabContent(
     onToggleBookMonitor: (Book) -> Unit,
     onToggleBookSeriesMonitor: (List<Book>) -> Unit,
     onBookAutomaticSearch: (Long) -> Unit,
-    onNavigateToAuthorFiles: (Author) -> Unit,
     onNavigateToBookDetails: (Author, Book) -> Unit,
     onNavigateToBookRelease: (Long) -> Unit,
-    onNavigateToAudiobookFiles: (Audiobook) -> Unit,
     onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        AnimatedVisibility(
-            visible = state.queueItems.isNotEmpty(),
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut(),
-        ) {
-            MediaActivitySection(
-                queueItems = state.queueItems,
-                onQueueItemClicked = onQueueItemClicked,
-                modifier = Modifier.padding(horizontal = 24.dp),
-            )
-        }
-
         if (state.seasons.isNotEmpty()) {
             val arrSeries = state.arrMedia as? ArrSeries
             SeasonsArea(
@@ -118,7 +100,6 @@ fun SeasonsFilesTabContent(
                             searchIds = automaticSearchIds,
                             onAutomaticSearch = onPerformAutomaticLookup,
                             onDeleteFile = onDeleteMovieFile,
-                            onNavigateToMovieFiles = onNavigateToMovieFiles,
                             onNavigateToMovieReleases = onNavigateToMovieReleases,
                         )
                         item.id?.let { movieId ->
@@ -159,7 +140,6 @@ fun SeasonsFilesTabContent(
                         onToggleMonitor = onToggleBookMonitor,
                         onToggleSeriesMonitor = onToggleBookSeriesMonitor,
                         onAutomaticSearch = onBookAutomaticSearch,
-                        onNavigateToAuthorFiles = onNavigateToAuthorFiles,
                         onNavigateToBookDetails = onNavigateToBookDetails,
                         onNavigateToBookRelease = onNavigateToBookRelease,
                     )
@@ -170,7 +150,6 @@ fun SeasonsFilesTabContent(
                         audiobook = item,
                         searchIds = automaticSearchIds,
                         onAutomaticSearch = { item.id?.let { onBookAutomaticSearch(it) } },
-                        onNavigateToAudiobookFiles = onNavigateToAudiobookFiles,
                         onNavigateToAudiobookRelease = onNavigateToAudiobookRelease,
                     )
 

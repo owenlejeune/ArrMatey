@@ -25,24 +25,12 @@ struct BooksArea: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Picker("", selection: $selectedTab) {
-                    Text(MR.strings().books_area_books_tab.formatted(args: [books.count])).tag(0)
-                    Text(MR.strings().books_area_series_tab.formatted(args: [series.count])).tag(1)
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-
-                Spacer()
-
-                Button(action: {
-                    let authorJson = author.toJson()
-                    navigation.go(to: .authorFiles(authorJson: authorJson), of: .bookshelf)
-                }) {
-                    Text(MR.strings().history.localized())
-                        .font(.system(size: 18, weight: .medium))
-                }
+            Picker("", selection: $selectedTab) {
+                Text(MR.strings().books_area_books_tab.formatted(args: [books.count])).tag(0)
+                Text(MR.strings().books_area_series_tab.formatted(args: [series.count])).tag(1)
             }
+            .pickerStyle(.segmented)
+            .labelsHidden()
 
             if selectedTab == 0 {
                 booksView

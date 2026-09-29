@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.arr.api.client.ArrClient
 import com.dnfapps.arrmatey.arr.api.client.LookupParams
+import com.dnfapps.arrmatey.arr.api.client.SonarrClient
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrRelease
@@ -280,6 +281,27 @@ class LibraryRepository(
             }.also {
                 _historyStatus.value = OperationStatus.Idle
             }
+    }
+
+    suspend fun getSeriesHistory(
+        seriesId: Long,
+        page: Int = 1,
+        pageSize: Int = 100,
+    ): NetworkResult<List<HistoryItem>> {
+        _historyStatus.value = OperationStatus.InProgress
+
+        return (client as? SonarrClient)
+            ?.getSeriesHistory(seriesId, page, pageSize)
+            ?.onSuccess { history ->
+                val currentCache = _historyCache.value.toMutableMap()
+                currentCache[seriesId] = history
+                _historyCache.value = currentCache
+                _historyStatus.value = OperationStatus.Success()
+            }?.onError { code, message, cause ->
+                _historyStatus.value = OperationStatus.Error(code, message, cause)
+            }?.also {
+                _historyStatus.value = OperationStatus.Idle
+            } ?: NetworkResult.Error(message = "Not a Sonarr instance")
     }
 
     suspend fun refreshHistory(

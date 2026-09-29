@@ -1,9 +1,7 @@
 package com.dnfapps.arrmatey.navigation
 
 import androidx.navigation3.runtime.NavKey
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
@@ -40,21 +38,6 @@ sealed interface MediaScreen : NavKey {
 
     data class MovieReleases(
         val movieId: Long,
-        val instanceId: Long? = null,
-    ) : MediaScreen
-
-    data class MovieFiles(
-        val movie: ArrMovie,
-        val instanceId: Long? = null,
-    ) : MediaScreen
-
-    data class AuthorFiles(
-        val author: Author,
-        val instanceId: Long? = null,
-    ) : MediaScreen
-
-    data class AudiobookFiles(
-        val audiobook: Audiobook,
         val instanceId: Long? = null,
     ) : MediaScreen
 

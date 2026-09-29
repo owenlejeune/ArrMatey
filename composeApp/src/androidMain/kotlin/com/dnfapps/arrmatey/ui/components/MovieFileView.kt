@@ -2,16 +2,12 @@ package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -30,7 +26,6 @@ fun MovieFileView(
     searchIds: Set<Long>,
     onAutomaticSearch: () -> Unit,
     onDeleteFile: () -> Unit,
-    onNavigateToMovieFiles: (ArrMovie) -> Unit,
     onNavigateToMovieReleases: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -38,24 +33,6 @@ fun MovieFileView(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = mokoString(MR.strings.files),
-                style = MaterialTheme.typography.titleLargeEmphasized,
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            if (movie.movieFile != null || movieExtraFiles.isNotEmpty()) {
-                TextButton(
-                    onClick = { onNavigateToMovieFiles(movie) },
-                ) {
-                    Text(mokoString(MR.strings.history))
-                }
-            }
-        }
         ReleaseDownloadButtons(
             onInteractiveClicked = {
                 onNavigateToMovieReleases(movie.id!!)

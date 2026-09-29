@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -31,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -74,7 +72,6 @@ fun BooksArea(
     onToggleMonitor: (Book) -> Unit,
     onToggleSeriesMonitor: (List<Book>) -> Unit,
     onAutomaticSearch: (Long) -> Unit,
-    onNavigateToAuthorFiles: (Author) -> Unit,
     onNavigateToBookDetails: (Author, Book) -> Unit,
     onNavigateToBookRelease: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -84,34 +81,21 @@ fun BooksArea(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier,
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
+        SecondaryTabRow(
+            selectedTabIndex = selectedTabIndex,
         ) {
-            SecondaryTabRow(
-                selectedTabIndex = selectedTabIndex,
-                modifier =
-                Modifier
-                    .weight(1.5f),
-            ) {
-                Tab(
-                    selected = selectedTabIndex == 0,
-                    onClick = { selectedTabIndex = 0 },
-                    text = { Text(mokoString(MR.strings.books_area_books_tab, books.size)) },
-                )
-                Tab(
-                    selected = selectedTabIndex == 1,
-                    onClick = { selectedTabIndex = 1 },
-                    text = { Text(mokoString(MR.strings.books_area_series_tab, series.size)) },
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            TextButton(
-                onClick = { onNavigateToAuthorFiles(author) },
-            ) {
-                Text(mokoString(MR.strings.history))
-            }
+            Tab(
+                selected = selectedTabIndex == 0,
+                onClick = { selectedTabIndex = 0 },
+                text = { Text(mokoString(MR.strings.books_area_books_tab, books.size)) },
+            )
+            Tab(
+                selected = selectedTabIndex == 1,
+                onClick = { selectedTabIndex = 1 },
+                text = { Text(mokoString(MR.strings.books_area_series_tab, series.size)) },
+            )
         }
+
         AnimatedContent(
             targetState = selectedTabIndex,
             transitionSpec = {

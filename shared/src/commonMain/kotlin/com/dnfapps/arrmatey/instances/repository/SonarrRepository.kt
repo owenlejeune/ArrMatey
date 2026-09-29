@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.client.SonarrClient
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.NetworkResult
@@ -162,4 +163,6 @@ class SonarrRepository(
         .onSuccess {
             getEpisodes(seriesId)
         }
+
+    override suspend fun getSeriesHistory(seriesId: Long): NetworkResult<List<HistoryItem>> = libraryRepository.getSeriesHistory(seriesId)
 }

@@ -20,16 +20,6 @@ struct SeasonsFilesTabContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            if !success.queueItems.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(MR.strings().activity.localized())
-                        .font(.title3.bold())
-                    ForEach(success.queueItems, id: \.id) { item in
-                        ActivityQueueItem(item: item, onClick: { onSelectQueueItem(item) })
-                    }
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
 
             let arrSeries = success.arrMedia as? ArrSeries
             let seriesId = arrSeries?.id?.int64Value

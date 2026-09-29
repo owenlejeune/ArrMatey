@@ -12,27 +12,20 @@ import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.toAlbumRelease
 import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
-import com.dnfapps.arrmatey.navigation.toAudiobookFiles
 import com.dnfapps.arrmatey.navigation.toAudiobookRelease
-import com.dnfapps.arrmatey.navigation.toAuthorFiles
 import com.dnfapps.arrmatey.navigation.toBookDetails
 import com.dnfapps.arrmatey.navigation.toBookRelease
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toEpisodeDetails
-import com.dnfapps.arrmatey.navigation.toMovieFiles
 import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.shared.*
-import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.ArrSearchScreen
-import com.dnfapps.arrmatey.ui.screens.AudiobookFilesScreen
-import com.dnfapps.arrmatey.ui.screens.AuthorFilesScreen
 import com.dnfapps.arrmatey.ui.screens.BookDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.EpisodeDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.InteractiveSearchScreen
 import com.dnfapps.arrmatey.ui.screens.MediaPreviewScreen
-import com.dnfapps.arrmatey.ui.screens.MovieFilesScreen
 import com.dnfapps.arrmatey.ui.screens.SeerrPersonDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.UnifiedSearchScreen
@@ -68,12 +61,9 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                     instId,
                 )
             },
-            onNavigateToMovieFiles = { movie, instId -> navigation.toMovieFiles(movie, instId) },
             onNavigateToMovieReleases = { movieId, instId -> navigation.toMovieReleases(movieId, instId) },
-            onNavigateToAuthorFiles = { author, instId -> navigation.toAuthorFiles(author, instId) },
             onNavigateToBookDetails = { author, book, instId -> navigation.toBookDetails(author, book, instId) },
             onNavigateToBookRelease = { bookId, instId -> navigation.toBookRelease(bookId, instId) },
-            onNavigateToAudiobookFiles = { audiobook, instId -> navigation.toAudiobookFiles(audiobook, instId) },
             onNavigateToAudiobookRelease = { id, query, instId -> navigation.toAudiobookRelease(id, query ?: "", instId) },
             onNavigateToAlbumRelease = { artistId, albumId, instId -> navigation.toAlbumRelease(albumId, artistId, instId) },
             onPersonClick = { navigation.toPersonDetails(it) },
@@ -155,18 +145,6 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onBack = { navigation.popBackStack() },
         )
     }
-    entry<MediaScreen.MovieFiles> { params ->
-        MovieFilesScreen(
-            movie = params.movie,
-            onBack = { navigation.popBackStack() },
-        )
-    }
-    entry<MediaScreen.AuthorFiles> { params ->
-        AuthorFilesScreen(
-            author = params.author,
-            onBack = { navigation.popBackStack() },
-        )
-    }
     entry<MediaScreen.EpisodeDetails> { params ->
         val effectiveInstanceId = params.instanceId
         EpisodeDetailsScreen(
@@ -195,12 +173,6 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onNavigateToBookRelease = { bookId ->
                 navigation.toBookRelease(bookId = bookId, instanceId = effectiveInstanceId)
             },
-        )
-    }
-    entry<MediaScreen.AudiobookFiles> { params ->
-        AudiobookFilesScreen(
-            audiobook = params.audiobook,
-            onBack = { navigation.popBackStack() },
         )
     }
     entry<MediaScreen.AudiobookRelease> { params ->

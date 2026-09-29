@@ -65,10 +65,6 @@ fun AlbumsArea(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier,
     ) {
-        Text(
-            text = mokoString(MR.strings.albums_header),
-            style = MaterialTheme.typography.titleLargeEmphasized,
-        )
         albums.forEach { album ->
             var expanded by rememberSaveable { mutableStateOf(false) }
             val iconRotation by animateFloatAsState(

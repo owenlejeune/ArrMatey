@@ -135,6 +135,31 @@ class SonarrClient(
         }
     }
 
+    suspend fun getSeriesHistory(
+        seriesId: Long,
+        page: Int = 1,
+        pageSize: Int = 100,
+    ): NetworkResult<List<SonarrHistoryItem>> = get<SonarrHistoryResponse>(
+        "history",
+        mapOf<String, Any>(
+            "page" to page,
+            "pageSize" to pageSize,
+            "seriesId" to seriesId,
+            "includeSeries" to true,
+            "includeEpisode" to true,
+        ),
+    ).map { response ->
+        response.records.map {
+            it.copy(
+                instanceId = instance.id,
+                instanceName = instance.label,
+                instanceType = instance.type,
+                series = it.series?.withLocalImages(instance),
+                episode = it.episode?.copy(series = it.series)?.withLocalImages(instance),
+            )
+        }
+    }
+
     override suspend fun getHistory(
         page: Int,
         pageSize: Int,

@@ -221,6 +221,8 @@ open class ArrInstanceRepository(
         pageSize: Int = 100,
     ): NetworkResult<List<HistoryItem>> = libraryRepository.getItemHistory(itemId, altIt, page, pageSize)
 
+    open suspend fun getSeriesHistory(seriesId: Long): NetworkResult<List<HistoryItem>> = libraryRepository.getSeriesHistory(seriesId)
+
     open suspend fun refreshHistory(
         page: Int = 1,
         pageSize: Int = 100,

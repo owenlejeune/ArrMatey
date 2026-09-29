@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
+import com.dnfapps.arrmatey.instances.repository.SonarrRepository
 import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
@@ -165,6 +166,24 @@ class UnifiedMediaDetailsDataObserver(
 
                 val effectiveSeerrRepo = if (!combineMedia && targetArrId != null) null else seerrRepo
                 val effectiveArrRepo = if (!combineMedia && targetArrId == null && seerrRepo != null) null else activeRepo
+
+                if (targetArrId != null && targetArrId != 0L && activeRepo != null) {
+                    launch {
+                        if (activeRepo is SonarrRepository) {
+                            activeRepo.getSeriesHistory(targetArrId)
+                        } else {
+                            activeRepo.getItemHistory(targetArrId)
+                        }
+                    }
+                    launch {
+                        activeRepo.observeItemHistory(targetArrId).collect { history ->
+                            val current = uiStateFlow.value as? UnifiedMediaDetailsUiState.Success ?: return@collect
+                            if (current.history != history) {
+                                uiStateFlow.value = current.copy(history = history)
+                            }
+                        }
+                    }
+                }
 
                 getUnifiedMediaDetailsUseCase(
                     arrId = targetArrId,

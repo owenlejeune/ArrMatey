@@ -31,9 +31,6 @@ struct SeasonsArea: View {
             EmptyView()
         } else {
             VStack(alignment: .leading, spacing: 4) {
-                Text(MR.strings().seasons_header.localized())
-                    .font(.title3.bold())
-
                 ForEach(seasons, id: \.seasonNumber) { season in
                     SeasonAreaRow(
                         season: season,

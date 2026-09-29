@@ -82,11 +82,6 @@ fun SeasonsArea(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier,
     ) {
-        Text(
-            text = mokoString(MR.strings.seasons_header),
-            style = MaterialTheme.typography.titleLargeEmphasized,
-        )
-
         seasons.forEach { season ->
             var expanded by rememberSaveable { mutableStateOf(false) }
             val iconRotation by animateFloatAsState(

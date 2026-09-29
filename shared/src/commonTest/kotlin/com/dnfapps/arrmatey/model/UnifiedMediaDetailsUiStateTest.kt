@@ -100,5 +100,15 @@ class UnifiedMediaDetailsUiStateTest {
             listOf(UnifiedMediaDetailsTab.Overview),
             stateEmpty.getAvailableTabs(isTracearrConfigured = false),
         )
+
+        val stateWithArrId =
+            UnifiedMediaDetailsUiState.Success(
+                arrMedia = MockMedia.Default,
+                seasons = listOf(SeasonWrapper(seasonNumber = 1)),
+            )
+        assertEquals(
+            listOf(UnifiedMediaDetailsTab.SeasonsFiles, UnifiedMediaDetailsTab.Overview, UnifiedMediaDetailsTab.History),
+            stateWithArrId.getAvailableTabs(isTracearrConfigured = false),
+        )
     }
 }
