@@ -15,6 +15,7 @@ fun HomeFloatingNavBar(
     visibleTabs: List<TabItem>,
     selectedTab: TabItem?,
     useServiceNavIcons: Boolean,
+    hideLabels: Boolean,
     activityQueueIssuesCount: Int,
     onSelectTab: (TabItem) -> Unit,
     onLongPressTab: () -> Unit,
@@ -33,6 +34,7 @@ fun HomeFloatingNavBar(
         visibleTabs.forEach { entry ->
             FloatingNavigationBarItem(
                 selected = entry == selectedTab,
+                hideLabels = hideLabels,
                 onClick = { onSelectTab(entry) },
                 onLongClick = handleLongPress,
                 icon = {

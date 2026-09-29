@@ -74,6 +74,7 @@ fun HomeScreen(
 
     val useServiceNavIcons by preferencesStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
     val useFloatingNavigationBar by preferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
+    val hideFloatingNavigationBarLabels by preferencesStore.hideFloatingNavigationBarLabels.collectAsStateWithLifecycle(false)
     val overlayTabBackOpensDrawer by preferencesStore.overlayTabBackOpensDrawer.collectAsStateWithLifecycle(true)
     val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle()
     if (tabConfig.isInitialValue) return
@@ -219,6 +220,7 @@ fun HomeScreen(
                             visibleTabs = visibleTabs,
                             selectedTab = selectedTab,
                             useServiceNavIcons = useServiceNavIcons,
+                            hideLabels = hideFloatingNavigationBarLabels,
                             activityQueueIssuesCount = activityQueueIssuesCount,
                             onSelectTab = { navigationManager.setSelectedTab(it) },
                             onLongPressTab = { showReorderSheet = true },

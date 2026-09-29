@@ -333,11 +333,13 @@ fun FloatingNavigationBarItem(
     shape: Shape = CircleShape,
     colors: FloatingNavigationBarItemColors = FloatingNavigationBarItemDefaults.colors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    hideLabels: Boolean = false,
 ) {
     val isCompact = LocalFloatingNavBarCompact.current
+    val shouldShowLabel = selected && !hideLabels
     val targetHorizontalPadding =
         when {
-            selected -> if (isCompact) 12.dp else 16.dp
+            shouldShowLabel -> if (isCompact) 12.dp else 16.dp
             else -> if (isCompact) 8.dp else 12.dp
         }
     val verticalPadding = if (isCompact) 8.dp else 10.dp
@@ -408,7 +410,7 @@ fun FloatingNavigationBarItem(
                     }
 
                     AnimatedVisibility(
-                        visible = selected,
+                        visible = shouldShowLabel,
                         enter =
                         fadeIn(
                             animationSpec =

@@ -183,4 +183,24 @@ class PreferencesStoreTest {
         scope.awaitWrites()
         assertTrue(scope.isActive)
     }
+
+    @Test
+    fun testHideFloatingNavigationBarLabels() = runTest {
+        val file = tmpFolder.newFile("test_hide_floating_nav_labels.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create { file }
+
+        every { dataStoreFactory.provideDataStore() } returns dataStore
+        every { dataStoreFactory.defaultAppColor } returns AppColor.ArrMatey
+
+        val preferencesStore = PreferencesStore(dataStoreFactory)
+
+        // Default is false
+        assertEquals(false, preferencesStore.hideFloatingNavigationBarLabels.first())
+
+        // Set to true via dataStore
+        dataStore.edit { prefs ->
+            prefs[PreferenceKeys.HIDE_FLOATING_NAVIGATION_BAR_LABELS] = true
+        }
+        assertEquals(true, preferencesStore.hideFloatingNavigationBarLabels.first())
+    }
 }

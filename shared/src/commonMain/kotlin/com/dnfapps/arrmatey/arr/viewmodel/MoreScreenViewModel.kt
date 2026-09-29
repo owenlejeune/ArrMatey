@@ -55,6 +55,14 @@ class MoreScreenViewModel(
                 initialValue = false,
             )
 
+    val hideFloatingNavigationBarLabels =
+        preferencesStore.hideFloatingNavigationBarLabels
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
     val overlayTabBackOpensDrawer =
         preferencesStore.overlayTabBackOpensDrawer
             .stateIn(
@@ -317,6 +325,10 @@ class MoreScreenViewModel(
 
     fun toggleUseFloatingNavigationBar() {
         preferencesStore.toggleUseFloatingNavigationBar()
+    }
+
+    fun toggleHideFloatingNavigationBarLabels() {
+        preferencesStore.toggleHideFloatingNavigationBarLabels()
     }
 
     fun toggleOverlayTabBackOpensDrawer() {

@@ -360,6 +360,8 @@
     <string name="instance_switcher_toggle_description">Automatically hide the switcher when only one service is configured</string>
     <string name="floating_navigation_bar_toggle_title">Floating navigation bar</string>
     <string name="floating_navigation_bar_toggle_description">Use a floating pill navigation bar on phone screens</string>
+    <string name="hide_floating_navigation_bar_labels_title">Hide floating navigation bar labels</string>
+    <string name="hide_floating_navigation_bar_labels_description">Hide labels for all navigation items, including the selected one</string>
     <string name="overlay_tab_back_opens_drawer_title">Back gesture opens drawer</string>
     <string name="overlay_tab_back_opens_drawer_description">Open the navigation drawer when backing out of overlay tabs instead of returning to the home screen</string>
     <string name="open_in_browser">Open in Browser</string>

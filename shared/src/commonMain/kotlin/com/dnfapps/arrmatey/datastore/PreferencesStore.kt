@@ -52,6 +52,7 @@ interface PreferencesStore {
     val useServiceNavLogos: Flow<Boolean>
     val hideInstanceSwitcher: Flow<Boolean>
     val useFloatingNavigationBar: Flow<Boolean>
+    val hideFloatingNavigationBarLabels: Flow<Boolean>
     val overlayTabBackOpensDrawer: Flow<Boolean>
 
     val dashboardCardsOrder: Flow<List<DashboardCards>>
@@ -136,6 +137,10 @@ interface PreferencesStore {
     fun toggleUseFloatingNavigationBar()
 
     fun setUseFloatingNavigationBar(value: Boolean)
+
+    fun toggleHideFloatingNavigationBarLabels()
+
+    fun setHideFloatingNavigationBarLabels(value: Boolean)
 
     fun toggleOverlayTabBackOpensDrawer()
 
@@ -602,6 +607,28 @@ class DefaultPreferencesStore(
     override fun setUseFloatingNavigationBar(value: Boolean) {
         scope.launch {
             dataStore.edit { it[PreferenceKeys.USE_FLOATING_NAVIGATION_BAR] = value }
+        }
+    }
+
+    override val hideFloatingNavigationBarLabels: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.HIDE_FLOATING_NAVIGATION_BAR_LABELS] ?: PreferenceDefaults.HIDE_FLOATING_NAVIGATION_BAR_LABELS
+        }
+
+    override fun toggleHideFloatingNavigationBarLabels() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current =
+                    preferences[PreferenceKeys.HIDE_FLOATING_NAVIGATION_BAR_LABELS]
+                        ?: PreferenceDefaults.HIDE_FLOATING_NAVIGATION_BAR_LABELS
+                preferences[PreferenceKeys.HIDE_FLOATING_NAVIGATION_BAR_LABELS] = !current
+            }
+        }
+    }
+
+    override fun setHideFloatingNavigationBarLabels(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[PreferenceKeys.HIDE_FLOATING_NAVIGATION_BAR_LABELS] = value }
         }
     }
 

@@ -59,6 +59,7 @@ internal object PreferenceKeys {
     val TRACEARR_DETAILS_INTEGRATION = booleanPreferencesKey("tracearrDetailsIntegration")
     val UNIFIED_LIBRARY_SEARCH_ALL_INSTANCES = booleanPreferencesKey("unifiedLibrarySearchAllInstances")
     val USE_FLOATING_NAVIGATION_BAR = booleanPreferencesKey("useFloatingNavigationBar")
+    val HIDE_FLOATING_NAVIGATION_BAR_LABELS = booleanPreferencesKey("hideFloatingNavigationBarLabels")
     val OVERLAY_TAB_BACK_OPENS_DRAWER = booleanPreferencesKey("overlayTabBackOpensDrawer")
     val USE_COLORED_ACTIVITY_CARDS = booleanPreferencesKey("useColoredActivityCards")
     val USE_COLORED_CALENDAR_CARDS = booleanPreferencesKey("useColoredCalendarCards")

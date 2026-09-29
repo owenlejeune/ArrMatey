@@ -78,6 +78,7 @@ fun UiSettingsScreen(
     val useColoredCalendarCards by viewModel.useColoredCalendarCards.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
     val useFloatingNavigationBar by viewModel.useFloatingNavigationBar.collectAsStateWithLifecycle()
+    val hideFloatingNavigationBarLabels by viewModel.hideFloatingNavigationBarLabels.collectAsStateWithLifecycle()
     val overlayTabBackOpensDrawer by viewModel.overlayTabBackOpensDrawer.collectAsStateWithLifecycle()
     val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
@@ -257,6 +258,24 @@ fun UiSettingsScreen(
                             )
                         },
                         onClick = { viewModel.toggleUseFloatingNavigationBar() },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.MoreHoriz),
+                        title = mokoString(MR.strings.hide_floating_navigation_bar_labels_title),
+                        subtitle = mokoString(MR.strings.hide_floating_navigation_bar_labels_description),
+                        enabled = useFloatingNavigationBar,
+                        trailingContent = {
+                            Switch(
+                                checked = hideFloatingNavigationBarLabels,
+                                onCheckedChange = { viewModel.toggleHideFloatingNavigationBarLabels() },
+                                enabled = useFloatingNavigationBar,
+                            )
+                        },
+                        onClick = {
+                            if (useFloatingNavigationBar) {
+                                viewModel.toggleHideFloatingNavigationBarLabels()
+                            }
+                        },
                     ),
                     SettingItem(
                         icon = IconSource.Vector(Icons.AutoMirrored.Default.ArrowBack),

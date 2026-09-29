@@ -19,6 +19,7 @@ data class GlobalPreferencesExport(
     val useServiceNavLogos: Boolean? = null,
     val hideInstanceSwitcher: Boolean? = null,
     val useFloatingNavigationBar: Boolean? = null,
+    val hideFloatingNavigationBarLabels: Boolean? = null,
     val overlayTabBackOpensDrawer: Boolean? = null,
     // UI & Appearance
     val appTheme: AppTheme? = null,
@@ -49,6 +50,7 @@ data class GlobalPreferencesExport(
             useServiceNavLogos != null ||
                 hideInstanceSwitcher != null ||
                 useFloatingNavigationBar != null ||
+                hideFloatingNavigationBarLabels != null ||
                 overlayTabBackOpensDrawer != null ||
                 appTheme != null ||
                 appColor != null ||

@@ -170,6 +170,7 @@ class ImportDataUseCase(
                 global.useServiceNavLogos?.let { preferencesStore.setUseServiceNavLogos(it) }
                 global.hideInstanceSwitcher?.let { preferencesStore.setHideInstanceSwitcher(it) }
                 global.useFloatingNavigationBar?.let { preferencesStore.setUseFloatingNavigationBar(it) }
+                global.hideFloatingNavigationBarLabels?.let { preferencesStore.setHideFloatingNavigationBarLabels(it) }
                 global.overlayTabBackOpensDrawer?.let { preferencesStore.setOverlayTabBackOpensDrawer(it) }
                 global.appTheme?.let { preferencesStore.setAppTheme(it) }
                 global.appColor?.let { preferencesStore.setAppColor(it) }
