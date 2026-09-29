@@ -143,6 +143,43 @@ struct SeasonAreaRow: View {
                 Spacer()
 
                 if showArrControls {
+                    if !expanded {
+                        HStack(spacing: 8) {
+                            Button {
+                                if let sId = seriesId {
+                                    if let onNavigateToSeriesRelease = onNavigateToSeriesRelease {
+                                        onNavigateToSeriesRelease(sId, season.seasonNumber, nil)
+                                    } else {
+                                        navigation.go(to: .seriesReleases(seriesId: sId, seasonNumber: season.seasonNumber, episodeId: nil, instanceId: instanceId), of: .sonarr)
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "person.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.primary)
+                            }
+                            .buttonStyle(.plain)
+
+                            let isSearching = searchIds.contains(Int64(season.seasonNumber)) || (seriesId != nil && searchIds.contains(seriesId!))
+                            Button {
+                                onSeasonAutomaticSearch(season.seasonNumber)
+                            } label: {
+                                if isSearching {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                        .frame(width: 16, height: 16)
+                                } else {
+                                    Image(systemName: "magnifyingglass")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.primary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(!season.episodes.contains { $0.isMonitored } || isSearching)
+                        }
+                        .transition(.opacity)
+                    }
+
                     Button {
                         onToggleSeasonMonitor(season.seasonNumber)
                     } label: {

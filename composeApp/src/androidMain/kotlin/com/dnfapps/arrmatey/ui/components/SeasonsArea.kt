@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
@@ -22,14 +23,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ExpandCircleDown
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -158,6 +164,47 @@ fun SeasonsArea(
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
+                            }
+                        }
+
+                        val showArrControls = season.arrSeason != null && seriesId != null && seriesId > 0
+                        AnimatedVisibility(
+                            visible = showArrControls && !expanded,
+                            enter = fadeIn(),
+                            exit = fadeOut(),
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = mokoString(MR.strings.interactive),
+                                    modifier = Modifier.clickable {
+                                        if (seriesId != null) {
+                                            onNavigateToSeriesRelease(seriesId, season.seasonNumber, null)
+                                        }
+                                    },
+                                )
+                                val isSearching = searchIds.contains(season.seasonNumber.toLong())
+                                Crossfade(
+                                    targetState = isSearching,
+                                ) { isSearching ->
+                                    if (isSearching) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(18.dp),
+                                            strokeWidth = 2.dp,
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.Search,
+                                            contentDescription = mokoString(MR.strings.automatic),
+                                            modifier = Modifier.clickable {
+                                                onSeasonAutomaticSearch(season.seasonNumber)
+                                            },
+                                        )
+                                    }
+                                }
                             }
                         }
 
