@@ -11,7 +11,7 @@ import Shared
 
 struct LibraryTab: View {
     @StateObject private var libraryViewModel = UnifiedLibraryViewModelS()
-    
+
     var body: some View {
         LibraryTabContent(libraryViewModel: libraryViewModel)
     }
@@ -20,7 +20,7 @@ struct LibraryTab: View {
 struct LibraryTabContent: View {
     @ObservedObject var libraryViewModel: UnifiedLibraryViewModelS
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+
     @State private var searchPresented: Bool = false
     @State private var customizationSheetPresented: Bool = false
     @State private var confirmDelete: Bool = false
@@ -28,19 +28,19 @@ struct LibraryTabContent: View {
     @State private var selectedItemForEdit: ArrMedia? = nil
     @State private var selectedItemForAction: ArrMedia? = nil
     @State private var showMonitorOptions: Bool = false
-    
+
     private var selectedInstance: Instance? {
         libraryViewModel.selectedInstance
     }
-    
+
     private var currentType: InstanceType {
         selectedInstance?.type ?? .sonarr
     }
-    
+
     private var uiState: ArrLibrary {
         libraryViewModel.currentLibraryState
     }
-    
+
     private var preferences: InstancePreferences {
         libraryViewModel.preferences
     }
@@ -54,7 +54,7 @@ struct LibraryTabContent: View {
                 if libraryViewModel.arrInstances.count > 1 && !libraryViewModel.isInSelectionMode {
                     topTabsRow
                 }
-                
+
                 contentForState(instance: instance)
             }
         }
@@ -107,7 +107,7 @@ struct LibraryTabContent: View {
             MediaRouteDestination(route: value)
         }
     }
-    
+
     private var topTabsRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
@@ -139,7 +139,7 @@ struct LibraryTabContent: View {
         .frame(height: 48)
         .background(Color(UIColor.systemBackground))
     }
-    
+
     @ViewBuilder
     private func tabPill(tabInstance: Instance, isSelected: Bool, isOffline: Bool) -> some View {
         HStack(spacing: 6) {
@@ -150,7 +150,7 @@ struct LibraryTabContent: View {
                 .foregroundColor(isSelected ? Color.white : tabInstance.type.associatedColor.toSwiftUI())
             Text(tabInstance.label)
                 .font(.subheadline.weight(isSelected ? .semibold : .regular))
-            
+
             if isOffline {
                 Image(systemName: "wifi.slash")
                     .font(.system(size: 12, weight: .semibold))
@@ -164,7 +164,7 @@ struct LibraryTabContent: View {
         .clipShape(Capsule())
         .contentShape(Capsule())
     }
-    
+
     @ViewBuilder
     private func contentForState(instance: Instance) -> some View {
         if uiState is ArrLibraryInitial || uiState is ArrLibraryLoading {
@@ -185,7 +185,7 @@ struct LibraryTabContent: View {
                         contentView(items: success.items, prefs: preferences)
                     }
                 }
-                
+
                 if libraryViewModel.isInSelectionMode {
                     selectionBottomBar
                         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -211,7 +211,7 @@ struct LibraryTabContent: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
-    
+
     private func contentView(
         items: [ArrMedia],
         prefs: InstancePreferences
@@ -251,7 +251,7 @@ struct LibraryTabContent: View {
         }
         .id(items.count)
     }
-    
+
     @ViewBuilder
     private func mediaView(
         viewType: ViewType,
@@ -261,100 +261,132 @@ struct LibraryTabContent: View {
         onItemClicked: @escaping (ArrMedia) -> Void,
         itemIsActive: @escaping (ArrMedia) -> Bool
     ) -> some View {
-        ScrollView {
-            if viewType == .grid {
-                let columns = [GridItem(.adaptive(minimum: prefs.gridDensity.iosSize), spacing: prefs.gridSpacing.iosSpacing)]
-                
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(items, id: \.id) { item in
-                        let isSelected = libraryViewModel.selectedItems.contains(item.id?.int64Value ?? -1)
-                        
-                        ZStack(alignment: .topTrailing) {
-                            PosterItem(
-                                item: item,
-                                instanceType: currentType,
-                                aspectRatio: aspectRatio,
-                                elevation: prefs.posterElevation,
-                                radius: prefs.posterRadius,
-                                showFooter: prefs.showFullDetails,
-                                onItemClick: { item in onItemClicked(item) }
-                            ) {
-                                if prefs.showOverlay {
-                                    VStack {
-                                        HStack {
-                                            if item.id != nil {
-                                                Image(systemName: item.monitored ? "bookmark.fill" : "bookmark")
-                                                    .foregroundColor(.white)
-                                                    .padding(8)
+        let isSortByTitle = prefs.sortBy.isTitleSort
+        let alphabet = FastScrollUtils.shared.getAlphabet(sortOrder: prefs.sortOrder)
+        let letterIndexMap = FastScrollUtils.shared.buildLetterIndexMap(items: items, sortBy: prefs.sortBy)
+
+        ScrollViewReader { proxy in
+            ZStack(alignment: .trailing) {
+                ScrollView {
+                    if viewType == .grid {
+                        let columns = [GridItem(.adaptive(minimum: prefs.gridDensity.iosSize), spacing: prefs.gridSpacing.iosSpacing)]
+
+                        LazyVGrid(columns: columns, spacing: 16) {
+                            ForEach(items, id: \.id) { item in
+                                let isSelected = libraryViewModel.selectedItems.contains(item.id?.int64Value ?? -1)
+
+                                ZStack(alignment: .topTrailing) {
+                                    PosterItem(
+                                        item: item,
+                                        instanceType: currentType,
+                                        aspectRatio: aspectRatio,
+                                        elevation: prefs.posterElevation,
+                                        radius: prefs.posterRadius,
+                                        showFooter: prefs.showFullDetails,
+                                        onItemClick: { item in onItemClicked(item) }
+                                    ) {
+                                        if prefs.showOverlay {
+                                            VStack {
+                                                HStack {
+                                                    if item.id != nil {
+                                                        Image(systemName: item.monitored ? "bookmark.fill" : "bookmark")
+                                                            .foregroundColor(.white)
+                                                            .padding(8)
+                                                    }
+                                                    Spacer()
+                                                }
+                                                Spacer()
+                                                if item.id != nil {
+                                                    ProgressView(value: Double(item.statusProgress))
+                                                        .tint(itemIsActive(item) ? Color.blue : Color(argb: item.statusColor))
+                                                        .padding(8)
+                                                }
                                             }
-                                            Spacer()
                                         }
-                                        Spacer()
-                                        if item.id != nil {
-                                            ProgressView(value: Double(item.statusProgress))
-                                                .tint(itemIsActive(item) ? Color.blue : Color(argb: item.statusColor))
-                                                .padding(8)
-                                        }
+                                    }
+                                    .contextMenu {
+                                        itemContextMenu(item)
+                                    }
+
+                                    if libraryViewModel.isInSelectionMode {
+                                        Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                            .foregroundColor(isSelected ? .blue : .white)
+                                            .background(Circle().fill(isSelected ? .white : .black.opacity(0.3)))
+                                            .padding(8)
                                     }
                                 }
-                            }
-                            .contextMenu {
-                                itemContextMenu(item)
-                            }
-                            
-                            if libraryViewModel.isInSelectionMode {
-                                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                                    .foregroundColor(isSelected ? .blue : .white)
-                                    .background(Circle().fill(isSelected ? .white : .black.opacity(0.3)))
-                                    .padding(8)
+                                .id(item.id?.int64Value ?? 0)
                             }
                         }
-                    }
-                }
-                .padding(16)
-                .padding(.bottom, libraryViewModel.isInSelectionMode ? 100 : 0)
-            } else {
-                LazyVStack(spacing: 12) {
-                    ForEach(items, id: \.id) { item in
-                        let isSelected = libraryViewModel.selectedItems.contains(item.id?.int64Value ?? -1)
+                        .padding(16)
+                        .padding(.trailing, isSortByTitle && !items.isEmpty ? 24 : 0)
+                        .padding(.bottom, libraryViewModel.isInSelectionMode ? 100 : 0)
+                    } else {
+                        LazyVStack(spacing: 12) {
+                            ForEach(items, id: \.id) { item in
+                                let isSelected = libraryViewModel.selectedItems.contains(item.id?.int64Value ?? -1)
 
-                        HStack {
-                            if libraryViewModel.isInSelectionMode {
-                                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                                    .foregroundColor(isSelected ? .blue : .secondary)
-                                    .onTapGesture {
-                                        if let id = item.id?.int64Value {
-                                            libraryViewModel.toggleItemSelection(id)
-                                        }
+                                HStack {
+                                    if libraryViewModel.isInSelectionMode {
+                                        Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                            .foregroundColor(isSelected ? .blue : .secondary)
+                                            .onTapGesture {
+                                                if let id = item.id?.int64Value {
+                                                    libraryViewModel.toggleItemSelection(id)
+                                                }
+                                            }
                                     }
-                            }
-                            
-                            MediaItemView(
-                                item: item,
-                                aspectRatio: aspectRatio,
-                                instanceType: currentType,
-                                isActive: itemIsActive(item),
-                                showBannerBackground: prefs.showBannerBackground,
-                                includeOverview: prefs.includeOverview,
-                                bannerBlur: prefs.bannerBlur,
-                                posterElevation: prefs.posterElevation,
-                                posterRadius: prefs.posterRadius
-                            )
-                            .onTapGesture {
-                                onItemClicked(item)
-                            }
-                            .contextMenu {
-                                itemContextMenu(item)
+
+                                    MediaItemView(
+                                        item: item,
+                                        aspectRatio: aspectRatio,
+                                        instanceType: currentType,
+                                        isActive: itemIsActive(item),
+                                        showBannerBackground: prefs.showBannerBackground,
+                                        includeOverview: prefs.includeOverview,
+                                        bannerBlur: prefs.bannerBlur,
+                                        posterElevation: prefs.posterElevation,
+                                        posterRadius: prefs.posterRadius
+                                    )
+                                    .onTapGesture {
+                                        onItemClicked(item)
+                                    }
+                                    .contextMenu {
+                                        itemContextMenu(item)
+                                    }
+                                }
+                                .id(item.id?.int64Value ?? 0)
                             }
                         }
+                        .padding(16)
+                        .padding(.trailing, isSortByTitle && !items.isEmpty ? 24 : 0)
+                        .padding(.bottom, libraryViewModel.isInSelectionMode ? 100 : 0)
                     }
                 }
-                .padding(16)
-                .padding(.bottom, libraryViewModel.isInSelectionMode ? 100 : 0)
+
+                if isSortByTitle && !items.isEmpty {
+                    AlphabetFastScroller(
+                        alphabet: alphabet,
+                        onLetterSelected: { selectedLetter in
+                            let targetIndex = Int(FastScrollUtils.shared.findTargetIndex(
+                                selectedLetter: selectedLetter,
+                                letterIndexMap: letterIndexMap,
+                                alphabet: alphabet,
+                                itemCount: Int32(items.count)
+                            ))
+                            if targetIndex < items.count, let targetId = items[targetIndex].id?.int64Value {
+                                proxy.scrollTo(targetId, anchor: .top)
+                            }
+                        }
+                    )
+                    .padding(.vertical, 12)
+                    .padding(.trailing, 2)
+                    .padding(.bottom, libraryViewModel.isInSelectionMode ? 100 : 0)
+                }
             }
         }
     }
-    
+
     @ViewBuilder
     private func itemContextMenu(_ item: ArrMedia) -> some View {
         Button(action: {
@@ -365,35 +397,35 @@ struct LibraryTabContent: View {
         }) {
             Label("Select", systemImage: "checkmark.circle")
         }
-        
+
         Divider()
-        
+
         Button(action: {
             selectedItemForEdit = item
             showEditSheet = true
         }) {
             Label(MR.strings().edit.localized(), systemImage: "pencil")
         }
-        
+
         Button(action: {
             libraryViewModel.toggleMonitored(item)
         }) {
             Label(item.monitored ? MR.strings().unmonitored.localized() : MR.strings().monitored.localized(),
                   systemImage: item.monitored ? "bookmark" : "bookmark.fill")
         }
-        
+
         Button(action: {
             libraryViewModel.performRefresh(item)
         }) {
             Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
         }
-        
+
         Button(action: {
             libraryViewModel.performAutomaticLookup(item)
         }) {
             Label(MR.strings().search.localized(), systemImage: "magnifyingglass")
         }
-        
+
         if libraryViewModel.hasBazarr && (currentType == .sonarr || currentType == .radarr) {
             Button(action: {
                 libraryViewModel.performSubtitleSearch(item)
@@ -401,7 +433,7 @@ struct LibraryTabContent: View {
                 Label(MR.strings().bazarr_search_subtitles.localized(), systemImage: "captions.bubble")
             }
         }
-        
+
         if currentType != .radarr {
             Button(action: {
                 if let id = item.id?.int64Value {
@@ -412,9 +444,9 @@ struct LibraryTabContent: View {
                 Label(MR.strings().update_monitoring.localized(), systemImage: "bookmark.circle")
             }
         }
-        
+
         Divider()
-        
+
         Button(role: .destructive, action: {
             selectedItemForAction = item
             confirmDelete = true
@@ -422,7 +454,7 @@ struct LibraryTabContent: View {
             Label(MR.strings().delete.localized(), systemImage: "trash")
         }
     }
-    
+
     private var selectionBottomBar: some View {
         HStack {
             if libraryViewModel.selectionCount == 1 {
@@ -432,9 +464,9 @@ struct LibraryTabContent: View {
                 }) {
                     Label(MR.strings().edit.localized(), systemImage: "pencil")
                 }
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     libraryViewModel.toggleMonitoringForSelected()
                 }) {
@@ -442,25 +474,25 @@ struct LibraryTabContent: View {
                     Label(isMonitored ? MR.strings().monitored.localized() : MR.strings().unmonitored.localized(),
                           systemImage: isMonitored ? "bookmark.fill" : "bookmark")
                 }
-                
+
                 Spacer()
             }
-            
+
             Menu {
                 Button(action: { libraryViewModel.refreshSelectedItems() }) {
                     Label(MR.strings().refresh.localized(), systemImage: "arrow.clockwise")
                 }
-                
+
                 Button(action: { libraryViewModel.performAutomaticLookupSelected() }) {
                     Label(MR.strings().search_monitored.localized(), systemImage: "magnifyingglass")
                 }
-                
+
                 if libraryViewModel.hasBazarr && (currentType == .sonarr || currentType == .radarr) {
                     Button(action: { libraryViewModel.performSubtitleSearchSelected() }) {
                         Label(MR.strings().bazarr_search_subtitles.localized(), systemImage: "captions.bubble")
                     }
                 }
-                
+
                 if currentType != .radarr {
                     Button(action: { showMonitorOptions = true }) {
                         Label(MR.strings().update_monitoring.localized(), systemImage: "bookmark.circle")
@@ -469,9 +501,9 @@ struct LibraryTabContent: View {
             } label: {
                 Image(systemName: "ellipsis.circle")
             }
-            
+
             Spacer()
-            
+
             Button(role: .destructive, action: {
                 confirmDelete = true
             }) {
@@ -489,7 +521,7 @@ struct LibraryTabContent: View {
         .padding(.horizontal, 16)
         .padding(.bottom, 20)
     }
-    
+
     @ViewBuilder
     private func editSheet(for item: ArrMedia) -> some View {
         let profiles = libraryViewModel.instanceData?.qualityProfiles ?? []
@@ -519,7 +551,7 @@ struct LibraryTabContent: View {
             }
         }
     }
-    
+
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         if libraryViewModel.arrInstances.isEmpty || selectedInstance == nil {
@@ -552,12 +584,12 @@ struct LibraryTabContent: View {
                     libraryViewModel.exitSelectionMode()
                 }
             }
-            
+
             ToolbarItem(placement: .principal) {
                 Text(MR.plurals().selected_count.localized(libraryViewModel.selectionCount))
                     .font(.headline)
             }
-            
+
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
                     if libraryViewModel.areAllItemsSelected() {
@@ -571,7 +603,7 @@ struct LibraryTabContent: View {
             }
         }
     }
-    
+
     @ToolbarContentBuilder
     private var toolbarViewOptions: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
@@ -585,7 +617,7 @@ struct LibraryTabContent: View {
                 Image(systemName: "plus")
                     .imageScale(.medium)
             }
-            
+
             Menu {
                 Button(action: {
                     customizationSheetPresented = true
@@ -605,7 +637,7 @@ struct LibraryTabContent: View {
                         libraryViewModel.updateCustomFilter(newValue)
                     })
                     .menuIndicator(.hidden)
-                
+
                 SortByPickerMenu(
                     type: currentType,
                     sortBy: preferences.sortBy,

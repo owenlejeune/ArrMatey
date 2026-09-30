@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
@@ -47,6 +49,7 @@ fun PosterGrid(
     onItemClick: (ArrMedia) -> Unit,
     itemIsActive: (ArrMedia) -> Boolean,
     modifier: Modifier = Modifier,
+    lazyGridState: LazyGridState = rememberLazyGridState(),
     userScrollEnabled: Boolean = true,
     showFullDetails: Boolean = false,
     showOverlay: Boolean = true,
@@ -59,6 +62,7 @@ fun PosterGrid(
     val bottomPadding = LocalFloatingBarBottomPadding.current
 
     LazyVerticalGrid(
+        state = lazyGridState,
         modifier = modifier,
         columns = MinColumnsAdaptiveGridCells(minSize = gridDensity.minSize, minColumns = 3),
         contentPadding =

@@ -100,6 +100,9 @@ enum class SortBy(
     }
 }
 
+val SortBy.isTitleSort: Boolean
+    get() = this == SortBy.Title || this == SortBy.TitleLastFirst || this == SortBy.Name
+
 @Serializable
 enum class SortOrder(
     val iosIcon: String,
@@ -108,3 +111,10 @@ enum class SortOrder(
     Asc("arrow.up", MR.strings.sort_ascending),
     Desc("arrow.down", MR.strings.sort_descending),
 }
+
+val SortOrder.alphabet: List<String>
+    get() = if (this == SortOrder.Desc) {
+        ('Z' downTo 'A').map { it.toString() } + "#"
+    } else {
+        listOf("#") + ('A'..'Z').map { it.toString() }
+    }

@@ -91,6 +91,7 @@ fun <T : ArrMedia> MediaList(
     onItemClick: (T) -> Unit,
     itemIsActive: (T) -> Boolean,
     modifier: Modifier = Modifier,
+    lazyListState: LazyListState = rememberLazyListState(),
     userScrollEnabled: Boolean = true,
     showBannerBackground: Boolean = true,
     includeOverview: Boolean = false,
@@ -104,6 +105,7 @@ fun <T : ArrMedia> MediaList(
     val bottomPadding = LocalFloatingBarBottomPadding.current
 
     LazyColumn(
+        state = lazyListState,
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
         userScrollEnabled = userScrollEnabled,
