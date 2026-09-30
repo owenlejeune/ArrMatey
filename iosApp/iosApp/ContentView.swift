@@ -6,6 +6,7 @@ struct ContentView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @StateObject private var queueViewModel = ActivityQueueViewModelS()
     @StateObject private var preferences = PreferencesViewModel()
+    @State private var hasInitializedSelection = false
 
     init() {
         let appearance = UITabBarAppearance()
@@ -48,11 +49,16 @@ struct ContentView: View {
     }
 
     private func validateSelection(items: [AnyTabItem]) {
-        guard !items.isEmpty else { return }
+        guard let firstTab = items.first else { return }
 
-        let allTabs = items + preferences.drawerTabs
-        if !allTabs.contains(where: { $0.key == navigationManager.selectedTab.key }) {
-            navigationManager.selectedTab = items.first!
+        if !hasInitializedSelection {
+            hasInitializedSelection = true
+            navigationManager.selectedTab = firstTab
+            return
+        }
+
+        if !items.contains(where: { $0.key == navigationManager.selectedTab.key }) {
+            navigationManager.selectedTab = firstTab
         }
     }
 }

@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
@@ -260,6 +261,18 @@ class LibraryRepository(
     }
 
     suspend fun executeCommand(payload: CommandPayload): NetworkResult<Any> = client.command(payload)
+
+    suspend fun getManualImportFiles(
+        downloadId: String?,
+        folder: String?,
+        filterExistingFiles: Boolean = true,
+    ): NetworkResult<List<ManualImportFile>> = client.getManualImportFiles(downloadId, folder, filterExistingFiles)
+
+    suspend fun executeManualImport(
+        files: List<ManualImportFile>,
+        importMode: String = "auto",
+    ): NetworkResult<Any> = client.command(CommandPayload.ManualImport(files, importMode))
+
 
     suspend fun getItemHistory(
         itemId: Long,

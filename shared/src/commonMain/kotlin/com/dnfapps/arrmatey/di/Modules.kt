@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.usecase.AddMediaItemUseCase
@@ -39,6 +40,7 @@ import com.dnfapps.arrmatey.arr.usecase.GetProwlarrIndexersUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetReleasesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetUnifiedMediaDetailsUseCase
 import com.dnfapps.arrmatey.arr.usecase.GrabProwlarrReleaseUseCase
+import com.dnfapps.arrmatey.arr.usecase.ManualImportUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformLookupUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformProwlarrSearchUseCase
@@ -58,6 +60,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InteractiveSearchViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.ManualImportViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
@@ -325,6 +328,7 @@ val useCaseModule =
         factory { GetEpisodeHistoryUseCase() }
         factory { DeleteEpisodeFileUseCase() }
         factory { DeleteQueueItemUseCase(get()) }
+        factory { ManualImportUseCase(get()) }
         factory { PerformRefreshUseCase() }
         factory { ExecuteArrCommandUseCase(get()) }
         factory { GetCalendarUseCase(get()) }
@@ -571,6 +575,9 @@ val viewModelModule =
                 get(),
                 get(),
             )
+        }
+        viewModel { (item: QueueItem) ->
+            ManualImportViewModel(item, get(), get())
         }
         viewModelOf(::UnifiedSearchViewModel)
     }

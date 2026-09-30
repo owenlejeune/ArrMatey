@@ -47,6 +47,8 @@ import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrActivityViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrHistoryViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUserViewModel
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
+import com.dnfapps.arrmatey.arr.viewmodel.ManualImportViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUsersViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViolationsViewModel
@@ -59,6 +61,8 @@ import org.koin.core.parameter.parametersOf
 
 object KoinBridge : KoinComponent {
     fun getActivityQueueViewModel(): ActivityQueueViewModel = getKoin().get()
+
+    fun getManualImportViewModel(item: QueueItem): ManualImportViewModel = getKoin().get { parametersOf(item) }
 
     fun getArrMediaViewModel(type: InstanceType): ArrMediaViewModel = getKoin().get { parametersOf(type) }
 

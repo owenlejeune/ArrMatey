@@ -27,6 +27,8 @@ import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
+import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
 import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
@@ -213,6 +215,18 @@ open class ArrInstanceRepository(
     }
 
     open suspend fun executeCommand(payload: CommandPayload): NetworkResult<Any> = libraryRepository.executeCommand(payload)
+
+    open suspend fun getManualImportFiles(
+        downloadId: String?,
+        folder: String? = null,
+        filterExistingFiles: Boolean = true,
+    ): NetworkResult<List<ManualImportFile>> = libraryRepository.getManualImportFiles(downloadId, folder, filterExistingFiles)
+
+    open suspend fun executeManualImport(
+        files: List<ManualImportFile>,
+        importMode: String = "auto",
+    ): NetworkResult<Any> = libraryRepository.executeManualImport(files, importMode)
+
 
     open suspend fun getItemHistory(
         itemId: Long,

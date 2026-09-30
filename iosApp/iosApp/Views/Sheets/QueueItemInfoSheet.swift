@@ -13,6 +13,7 @@ struct QueueItemInfoSheet: View {
     let item: QueueItem
     let deleteInProgress: Bool
     let onDelete: (Bool, Bool, Bool) -> Void
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         NavigationStack {
@@ -93,10 +94,10 @@ struct QueueItemInfoSheet: View {
                         }
                         .buttonStyle(.borderedProminent)
                         
-                        if item.needsManualImport && isDebug() {
+                        if item.needsManualImport {
                             NavigationLink {
-                                // todo
-                            } label : {
+                                ManualImportSheet(item: item, onDismiss: { dismiss() })
+                            } label: {
                                 Label {
                                     Text(MR.strings().manual_import.localized())
                                         .font(.callout)

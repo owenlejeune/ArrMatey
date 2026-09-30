@@ -51,7 +51,7 @@ sealed interface QueueItem {
     val needsManualImport: Boolean
         get() =
             downloadId != null &&
-                trackedDownloadStatus != QueueDownloadStatus.Warning &&
+                trackedDownloadStatus == QueueDownloadStatus.Warning &&
                 trackedDownloadState.isManualImport()
 
     val taskGroup: String

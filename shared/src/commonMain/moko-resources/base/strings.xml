@@ -134,6 +134,10 @@
     <string name="error_deleting_item">Error deleting item</string>
     <string name="remove">Remove</string>
     <string name="manual_import">Manual Import</string>
+    <string name="import_action">Import</string>
+    <string name="no_importable_files_found">No importable files found.</string>
+    <string name="import_queued">Import queued</string>
+    <string name="manual_import_failed">Manual import failed</string>
     <string name="refresh">Refresh</string>
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>

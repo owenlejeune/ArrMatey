@@ -28,6 +28,10 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
@@ -54,6 +58,8 @@ fun QueueItemInfoSheet(
     onRemove: () -> Unit,
     item: QueueItem,
 ) {
+    var showManualImportSheet by remember { mutableStateOf(false) }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -243,10 +249,10 @@ fun QueueItemInfoSheet(
                 Box(
                     modifier = Modifier.weight(1f),
                 ) {
-                    if (isDebug() && item.needsManualImport) {
+                    if (item.needsManualImport) {
                         Button(
                             onClick = {
-                                // todo
+                                showManualImportSheet = true
                             },
                             modifier = Modifier.fillMaxWidth(),
                         ) {
@@ -262,5 +268,16 @@ fun QueueItemInfoSheet(
                 }
             }
         }
+    }
+
+    if (showManualImportSheet) {
+        ManualImportSheet(
+            item = item,
+            onDismiss = { showManualImportSheet = false },
+            onImportSuccess = {
+                showManualImportSheet = false
+                onDismiss()
+            },
+        )
     }
 }

@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueuePage
@@ -103,4 +104,10 @@ interface ArrClient {
         ids: List<Long>,
         monitor: Any,
     ): NetworkResult<Unit>
+
+    suspend fun getManualImportFiles(
+        downloadId: String? = null,
+        folder: String? = null,
+        filterExistingFiles: Boolean = true,
+    ): NetworkResult<List<ManualImportFile>>
 }

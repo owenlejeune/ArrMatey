@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueuePage
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
@@ -95,6 +96,19 @@ abstract class BaseArrClient(
         page: Int,
         pageSize: Int,
     ): NetworkResult<List<HistoryItem>> = NetworkResult.Success(emptyList())
+
+    override suspend fun getManualImportFiles(
+        downloadId: String?,
+        folder: String?,
+        filterExistingFiles: Boolean,
+    ): NetworkResult<List<ManualImportFile>> {
+        val params = buildMap {
+            downloadId?.let { put("downloadId", it) }
+            folder?.let { put("folder", it) }
+            put("filterExistingFiles", filterExistingFiles)
+        }
+        return get("manualimport", params)
+    }
 
     /**
      * Helpers

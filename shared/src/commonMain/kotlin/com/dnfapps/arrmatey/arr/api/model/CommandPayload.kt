@@ -97,4 +97,11 @@ sealed class CommandPayload(
 
     @Serializable
     data object Backup : CommandPayload("Backup")
+
+    @Serializable
+    data class ManualImport(
+        val files: List<ManualImportFile>,
+        val importMode: String = "auto",
+    ) : CommandPayload("ManualImport")
 }
+
