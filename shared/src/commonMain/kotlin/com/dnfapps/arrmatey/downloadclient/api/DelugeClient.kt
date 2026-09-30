@@ -141,8 +141,8 @@ class DelugeClient(
                             NetworkResult.Success(
                                 DownloadTransferInfo(
                                     client = downloadClient,
-                                    downloadSpeed = rpcResult.data.downloadRate,
-                                    uploadSpeed = rpcResult.data.uploadRate,
+                                    downloadSpeed = rpcResult.data.downloadRate.toLong(),
+                                    uploadSpeed = rpcResult.data.uploadRate.toLong(),
                                 ),
                             )
                         }
@@ -329,8 +329,8 @@ class DelugeClient(
             size = totalSize,
             downloaded = (totalSize.toDouble() * coercedProgress).toLong(),
             progress = coercedProgress,
-            downloadSpeed = downloadPayloadRate,
-            uploadSpeed = uploadPayloadRate,
+            downloadSpeed = downloadPayloadRate.toLong(),
+            uploadSpeed = uploadPayloadRate.toLong(),
             eta = eta,
             status = DownloadItemStatus.from(state),
             category = label,

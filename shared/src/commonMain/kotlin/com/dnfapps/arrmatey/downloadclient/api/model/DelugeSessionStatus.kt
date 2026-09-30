@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DelugeSessionStatus(
-    @SerialName("download_rate") val downloadRate: Long = 0,
-    @SerialName("upload_rate") val uploadRate: Long = 0,
+    @SerialName("download_rate") val downloadRate: Double = 0.0,
+    @SerialName("upload_rate") val uploadRate: Double = 0.0,
 )

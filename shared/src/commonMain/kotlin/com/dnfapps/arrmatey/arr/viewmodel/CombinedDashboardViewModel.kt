@@ -346,45 +346,30 @@ class CombinedDashboardViewModel(
                 initialValue = emptyList(),
             )
 
+    private val _downloadClientStatuses = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
+
     private val downloadClientsFlow =
         combine(
             downloadsFlow,
             downloadClientManager.downloadClientApis,
-        ) { downloads, clientApis ->
-            val downloadClients =
-                downloads.transferInfo
-                    .asSequence()
-                    .map { transfer ->
-                        val clientItems = downloads.queueItems.filter { it.client.id == transfer.client.id }
-                        DownloadClientDashboardState(
-                            client = transfer.client,
-                            transferInfo = transfer,
-                            isOnline = true,
-                            activeDownloadsCount =
-                            clientItems.count {
-                                (it.downloadSpeed > 0) || (it.uploadSpeed > 0) || (it.progress < 1.0)
-                            },
-                        )
-                    }.toMutableList()
+            _downloadClientStatuses,
+        ) { downloads, clientApis, statuses ->
+            clientApis.keys.mapNotNull { clientId ->
+                val client = downloadClientManager.getDownloadClientById(clientId) ?: return@mapNotNull null
+                val transfer = downloads.transferInfo.firstOrNull { it.client.id == clientId }
+                val clientItems = downloads.queueItems.filter { it.client.id == clientId }
+                val isOnline = statuses[clientId] ?: (transfer != null || clientItems.isNotEmpty())
 
-            clientApis.keys.forEach { clientId ->
-                if (downloadClients.none { it.client.id == clientId }) {
-                    downloadClientManager.getDownloadClientById(clientId)?.let { client ->
-                        val clientItems = downloads.queueItems.filter { it.client.id == clientId }
-                        downloadClients.add(
-                            DownloadClientDashboardState(
-                                client = client,
-                                isOnline = false,
-                                activeDownloadsCount =
-                                clientItems.count {
-                                    (it.downloadSpeed > 0) || (it.uploadSpeed > 0) || (it.progress < 1.0)
-                                },
-                            ),
-                        )
-                    }
-                }
+                DownloadClientDashboardState(
+                    client = client,
+                    transferInfo = transfer,
+                    isOnline = isOnline,
+                    activeDownloadsCount =
+                    clientItems.count {
+                        (it.downloadSpeed > 0) || (it.uploadSpeed > 0) || (it.progress < 1.0)
+                    },
+                )
             }
-            downloadClients
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -417,6 +402,11 @@ class CombinedDashboardViewModel(
         viewModelScope.launch {
             instanceManager.instanceRepositories.collect {
                 fetchDiscoverData()
+            }
+        }
+        viewModelScope.launch {
+            downloadClientManager.downloadClientApis.collect {
+                checkDownloadClientStatuses()
             }
         }
         refresh()
@@ -983,11 +973,36 @@ class CombinedDashboardViewModel(
                 }
             }
 
+            checkDownloadClientStatuses()
             downloadQueueService.manualRefresh()
 
             calendarService.load()
             _isRefreshing.value = false
         }
+    }
+
+    private suspend fun checkDownloadClientStatuses() {
+        val apis = downloadClientManager.downloadClientApis.value
+        if (apis.isEmpty()) {
+            _downloadClientStatuses.value = emptyMap()
+            return
+        }
+        val statuses =
+            coroutineScope {
+                apis.map { (id, api) ->
+                    async {
+                        val result =
+                            try {
+                                api.testConnection()
+                            } catch (e: Exception) {
+                                logger.error(e) { "Error testing connection for download client $id" }
+                                NetworkResult.Error(message = e.message ?: "Connection error")
+                            }
+                        id to (result is NetworkResult.Success)
+                    }
+                }.awaitAll().toMap()
+            }
+        _downloadClientStatuses.value = statuses
     }
 
     fun toggleEditing() {
