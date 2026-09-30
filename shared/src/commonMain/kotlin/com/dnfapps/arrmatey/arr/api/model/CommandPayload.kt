@@ -104,4 +104,3 @@ sealed class CommandPayload(
         val importMode: String = "auto",
     ) : CommandPayload("ManualImport")
 }
-

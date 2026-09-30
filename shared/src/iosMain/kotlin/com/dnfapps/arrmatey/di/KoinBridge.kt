@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.client.GenericClient
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
@@ -16,6 +17,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InteractiveSearchViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.ManualImportViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
@@ -47,8 +49,6 @@ import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrActivityViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrHistoryViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUserViewModel
-import com.dnfapps.arrmatey.arr.api.model.QueueItem
-import com.dnfapps.arrmatey.arr.viewmodel.ManualImportViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUsersViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViolationsViewModel

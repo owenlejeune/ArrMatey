@@ -273,7 +273,6 @@ class LibraryRepository(
         importMode: String = "auto",
     ): NetworkResult<Any> = client.command(CommandPayload.ManualImport(files, importMode))
 
-
     suspend fun getItemHistory(
         itemId: Long,
         altIt: Long? = null,
