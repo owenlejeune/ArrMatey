@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.datastore
 
-import com.dnfapps.arrmatey.arr.api.client.LoggerLevel
+import com.dnfapps.arrmatey.arr.api.client.logging.LoggerLevel
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.state.ContentFilter
 import com.dnfapps.arrmatey.compose.DashboardCards

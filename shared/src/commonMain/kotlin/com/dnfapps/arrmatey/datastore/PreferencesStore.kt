@@ -3,7 +3,7 @@ package com.dnfapps.arrmatey.datastore
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import com.dnfapps.arrmatey.arr.api.client.LoggerLevel
+import com.dnfapps.arrmatey.arr.api.client.logging.LoggerLevel
 import com.dnfapps.arrmatey.arr.state.CalendarFilterState
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.state.ContentFilter

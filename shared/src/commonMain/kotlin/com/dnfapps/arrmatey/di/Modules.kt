@@ -1,8 +1,8 @@
 package com.dnfapps.arrmatey.di
 
-import com.dnfapps.arrmatey.arr.api.client.DynamicLogger
 import com.dnfapps.arrmatey.arr.api.client.GenericClient
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
+import com.dnfapps.arrmatey.arr.api.client.logging.DynamicLogger
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode

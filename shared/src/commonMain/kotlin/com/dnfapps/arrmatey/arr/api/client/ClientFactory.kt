@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.arr.api.client
 
-import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
@@ -22,9 +21,6 @@ import io.ktor.client.request.basicAuth
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 private const val HEADER_X_API_KEY = "X-Api-Key"
@@ -172,93 +168,4 @@ open class HttpClientFactory(
     }
 
     fun createGeneric(): HttpClient = createInstanceClient(null, json, logger)
-}
-
-enum class LoggerLevel(
-    internal val ktorValue: LogLevel,
-) {
-    All(LogLevel.ALL),
-    Headers(LogLevel.HEADERS),
-    Body(LogLevel.BODY),
-    Info(LogLevel.INFO),
-    None(LogLevel.NONE),
-}
-
-class DynamicLogger(
-    private val preferencesStore: PreferencesStore,
-    private val logger: dev.shivathapaa.logger.api.Logger,
-) : Logger {
-    private var currentLogLevel = LogLevel.HEADERS
-
-    init {
-        CoroutineScope(Dispatchers.Default).launch {
-            preferencesStore.httpLogLevel
-                .collect { level ->
-                    currentLogLevel = level.ktorValue
-                }
-        }
-    }
-
-    override fun log(message: String) {
-        if (currentLogLevel == LogLevel.NONE) return
-
-        if (isExceptionMessage(message)) {
-            logger.error { message }
-            return
-        }
-
-        if (currentLogLevel == LogLevel.ALL) {
-            logger.info { message }
-            return
-        }
-
-        val lines = message.split("\n")
-        val filteredOutput = StringBuilder()
-
-        lines.forEach { line ->
-            val shouldInclude =
-                when (currentLogLevel) {
-                    LogLevel.INFO -> {
-                        line.startsWith("REQUEST:") ||
-                            line.startsWith("RESPONSE:") ||
-                            line.startsWith("METHOD:")
-                    }
-                    LogLevel.HEADERS -> {
-                        // Include everything except the body sections
-                        !isBodyLine(line) &&
-                            !line.contains("X-Api-Key", ignoreCase = true) &&
-                            !line.contains("Authorization", ignoreCase = true)
-                    }
-                    LogLevel.BODY -> {
-                        // Include Request/Response lines and the JSON body, skip headers
-                        line.startsWith("REQUEST:") ||
-                            line.startsWith("RESPONSE:") ||
-                            line.startsWith("METHOD:") ||
-                            isBodyLine(line)
-                    }
-                    else -> false
-                }
-
-            if (shouldInclude) {
-                filteredOutput.append(line).append("\n")
-            }
-        }
-
-        val result = filteredOutput.toString().trim()
-        if (result.isNotEmpty()) {
-            logger.info { result }
-        }
-    }
-}
-
-private fun isExceptionMessage(message: String): Boolean = message.contains("failed with exception", ignoreCase = true)
-
-private fun isBodyLine(line: String): Boolean {
-    val trimmed = line.trim()
-    return trimmed.startsWith("BODY") ||
-        trimmed.startsWith("{") ||
-        trimmed.startsWith("}") ||
-        trimmed.startsWith("[") ||
-        trimmed.startsWith("]") ||
-        trimmed.startsWith("\"")
 }
