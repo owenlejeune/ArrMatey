@@ -1078,4 +1078,10 @@
     <string name="enable_activity_polling">Enable activity polling</string>
     <string name="recently_downloaded">Recently Downloaded</string>
     <string name="no_downloaded_media">No downloaded media</string>
+    <string name="activity_cards">Activity Cards</string>
+    <string name="activity_cards_description">Customize activity card appearance</string>
+    <string name="calendar_cards">Calendar Cards</string>
+    <string name="calendar_cards_description">Customize calendar card appearance</string>
+    <string name="search_result_cards">Search Result Cards</string>
+    <string name="search_result_cards_description">Customize search result card appearance</string>
 </resources>

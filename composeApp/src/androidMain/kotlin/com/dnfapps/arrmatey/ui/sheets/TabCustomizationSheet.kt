@@ -39,6 +39,8 @@ fun TabCustomizationSheet(
 ) {
     val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle()
     val useServiceNavLogos by preferenceStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
+    val useFloatingNavigationBar by preferenceStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
+    val hideFloatingNavigationBarLabels by preferenceStore.hideFloatingNavigationBarLabels.collectAsStateWithLifecycle(false)
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -70,6 +72,10 @@ fun TabCustomizationSheet(
 
             TabCustomizationContent(
                 useServiceNavLogos = useServiceNavLogos,
+                useFloatingNavigationBar = useFloatingNavigationBar,
+                hideFloatingNavigationBarLabels = hideFloatingNavigationBarLabels,
+                onToggleUseFloatingNavigationBar = { preferenceStore.toggleUseFloatingNavigationBar() },
+                onToggleHideFloatingNavigationBarLabels = { preferenceStore.toggleHideFloatingNavigationBarLabels() },
                 visibleTabs = tabConfig.visibleTabs,
                 drawerTabs = tabConfig.drawerTabs,
                 hiddenTabs = tabConfig.hiddenTabs,

@@ -14,7 +14,8 @@ struct CalendarFilterMenu: View {
     @Binding var onlyPremiers: Bool
     @Binding var onlyFinales: Bool
     let instances: [Instance]
-    
+    var onOpenViewCustomization: (() -> Void)? = nil
+
     private var availableContentFilters: [ContentFilter] {
         let configuredTypes = Set(instances.map { $0.type })
         return ContentFilter.allCases.filter { filter in
@@ -22,25 +23,33 @@ struct CalendarFilterMenu: View {
             return configuredTypes.contains(instanceType)
         }
     }
-    
+
     var body: some View {
         Menu {
+            if let onOpenViewCustomization = onOpenViewCustomization {
+                Section {
+                    Button(action: onOpenViewCustomization) {
+                        Label(MR.strings().view_customization.localized(), systemImage: "paintpalette")
+                    }
+                }
+            }
+
             Picker("contentfilter", selection: $contentFilter) {
                 ForEach(availableContentFilters, id: \.self) { filter in
                     Label(filter.resource.localized(), systemImage: filter.systemImage)
                 }
             }
             .pickerStyle(.inline)
-            
+
             Toggle(isOn: $onlyMonitored) {
                 Label(MR.strings().monitored.localized(), systemImage: "bookmark.fill")
             }
-            
+
             Section {
                 Toggle(isOn: $onlyPremiers) {
                     Label(MR.strings().premiers_only.localized(), systemImage: "party.popper")
                 }
-                
+
                 Toggle(isOn: $onlyFinales) {
                     Label(MR.strings().finales_only.localized(), systemImage: "curtains.closed")
                 }

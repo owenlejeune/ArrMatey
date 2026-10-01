@@ -24,14 +24,18 @@ struct TabConfigurationScreen: View {
                 InfoCard()
                     .padding(.horizontal)
 
+                floatingNavBarSection
+
+                Divider().padding(.vertical, 8)
+
                 navigationBarItemsSection
 
                 Divider().padding(.vertical, 8)
 
                 drawerItemsSection
-                
+
                 Divider().padding(.vertical, 8)
-                
+
                 hiddenItemsSection
             }
             .padding(.vertical)
@@ -47,6 +51,36 @@ struct TabConfigurationScreen: View {
                 }
             }
         }
+    }
+
+    private var floatingNavBarSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Toggle(isOn: Binding(
+                get: { viewModel.useFloatingNavigationBar },
+                set: { _ in viewModel.toggleUseFloatingNavigationBar() }
+            )) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(MR.strings().floating_navigation_bar_toggle_title.localized())
+                    Text(MR.strings().floating_navigation_bar_toggle_description.localized())
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Toggle(isOn: Binding(
+                get: { viewModel.hideFloatingNavigationBarLabels },
+                set: { _ in viewModel.toggleHideFloatingNavigationBarLabels() }
+            )) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(MR.strings().hide_floating_navigation_bar_labels_title.localized())
+                    Text(MR.strings().hide_floating_navigation_bar_labels_description.localized())
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .disabled(!viewModel.useFloatingNavigationBar)
+        }
+        .padding(.horizontal)
     }
 
     private var navigationBarItemsSection: some View {
@@ -138,7 +172,7 @@ struct TabConfigurationScreen: View {
             ))
         }
     }
-    
+
     private var hiddenItemsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(MR.strings().navigation_items_hidden.localized())
@@ -206,7 +240,7 @@ struct TabDropDelegate: DropDelegate {
     let targetTab: AnyTabItem?
     let navigationManager: NavigationManager
     var viewModel: PreferencesViewModel
-    
+
     @Binding var draggedTab: AnyTabItem?
     @Binding var dropTargetID: String?
 
@@ -215,7 +249,7 @@ struct TabDropDelegate: DropDelegate {
             dropTargetID = target.key
         }
     }
-    
+
     func dropExited(info: DropInfo) {
         if dropTargetID == targetTab?.key {
             dropTargetID = nil
@@ -228,7 +262,7 @@ struct TabDropDelegate: DropDelegate {
 
     func performDrop(info: DropInfo) -> Bool {
         guard let dragged = draggedTab else { return false }
-        
+
         var mutBottomTabs = viewModel.bottomTabItems
         var mutDrawerTabs = viewModel.drawerTabs
         var mutRemovedTabs = viewModel.removedTabs
@@ -261,7 +295,7 @@ struct TabDropDelegate: DropDelegate {
                     mutRemovedTabs.append(dragged)
                 }
             }
-            
+
             if mutBottomTabs.count > 5 {
                 let extra = mutBottomTabs.removeLast()
                 mutDrawerTabs.insert(extra, at: 0)
@@ -273,7 +307,7 @@ struct TabDropDelegate: DropDelegate {
             orderedHiddenKeys: mutDrawerTabs.map(\.key),
             orderedRemovedKeys: mutRemovedTabs.map(\.key)
         ))
-        
+
         draggedTab = nil
         dropTargetID = nil
         return true
@@ -292,7 +326,7 @@ struct DraggableTabCard: View {
         HStack(spacing: 16) {
             Image(systemName: "line.3.horizontal")
                 .foregroundColor(.secondary)
-            
+
             Group {
                 if useServiceNavIcons, let logo = tab.associatedType?.tabIcon {
                     logo.toImage(renderingMode: .template)
@@ -302,11 +336,11 @@ struct DraggableTabCard: View {
             }
             .foregroundColor(isHidden ? .secondary : .primary)
             .frame(width: 24)
-            
+
             Text(tabName)
                 .font(.body)
                 .foregroundColor(isHidden ? .secondary : .primary)
-            
+
             Spacer()
         }
         .padding(16)

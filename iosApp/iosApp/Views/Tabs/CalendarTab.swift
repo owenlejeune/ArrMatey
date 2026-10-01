@@ -15,14 +15,16 @@ struct CalendarTab: View {
 }
 
 struct CalendarTabContent: View {
-    
+
     @StateObject private var viewModel = CalendarViewModelS()
+    @StateObject private var moreViewModel = MoreScreenViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+    @State private var showCalendarCustomizationSheet = false
+
     private var viewModeIcon: String {
         viewModel.calendarState.filterState.viewMode == .list ? "calendar" : "list.bullet"
     }
-    
+
     var body: some View {
         Group {
             if !viewModel.calendarState.hasLoaded && viewModel.calendarState.isLoading && viewModel.calendarState.items.isEmpty {
@@ -93,7 +95,7 @@ struct CalendarTabContent: View {
         default: break
         }
     }
-    
+
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         if navigationManager.shouldShowDrawerButton(for: TabItemStandard.calendar.key) {
@@ -112,7 +114,7 @@ struct CalendarTabContent: View {
             }) {
                 Image(systemName: viewModeIcon)
             }
-        
+
             CalendarFilterMenu(
                 contentFilter: Binding(
                     get: { viewModel.calendarState.filterState.contentFilter },
@@ -130,9 +132,15 @@ struct CalendarTabContent: View {
                     get: { viewModel.calendarState.filterState.showFinalesOnly },
                     set: { _ in viewModel.toggleShowFinalesOnly() }
                 ),
-                instances: viewModel.instances
+                instances: viewModel.instances,
+                onOpenViewCustomization: {
+                    showCalendarCustomizationSheet = true
+                }
             )
             .menuIndicator(.hidden)
+        }
+        .sheet(isPresented: $showCalendarCustomizationSheet) {
+            CalendarCardCustomizationSheet(viewModel: moreViewModel)
         }
     }
 }

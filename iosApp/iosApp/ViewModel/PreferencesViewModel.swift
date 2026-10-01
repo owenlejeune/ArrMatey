@@ -22,17 +22,19 @@ class PreferencesViewModel: ObservableObject {
     @Published var isFirstLaunch: Bool = false
     @Published var useColoredActivityCards: Bool = false
     @Published var useColoredCalendarCards: Bool = false
-    
+    @Published var useFloatingNavigationBar: Bool = false
+    @Published var hideFloatingNavigationBarLabels: Bool = false
+
     @Published var bottomTabItems: [AnyTabItem] = []
     @Published var drawerTabs: [AnyTabItem] = []
     @Published var removedTabs: [AnyTabItem] = []
-    
+
     init() {
         self.preferenceStore = KoinBridge.shared.getPreferencesStore()
         self.tabManager = KoinBridge.shared.getTabManager()
         observeFlows()
     }
-    
+
     private func observeFlows() {
         preferenceStore.isFirstLaunch.observeAsync(on: self) { owner, firstLaunch in
             owner.isFirstLaunch = firstLaunch.boolValue
@@ -57,14 +59,20 @@ class PreferencesViewModel: ObservableObject {
         preferenceStore.useColoredCalendarCards.observeAsync(on: self) { owner, val in
             owner.useColoredCalendarCards = val.boolValue
         }
-        
+        preferenceStore.useFloatingNavigationBar.observeAsync(on: self) { owner, val in
+            owner.useFloatingNavigationBar = val.boolValue
+        }
+        preferenceStore.hideFloatingNavigationBarLabels.observeAsync(on: self) { owner, val in
+            owner.hideFloatingNavigationBarLabels = val.boolValue
+        }
+
         tabManager.tabConfiguration.observeAsync(on: self) { owner, config in
             owner.bottomTabItems = config.visibleTabs.map({ AnyTabItem(item: $0) })
             owner.drawerTabs = config.drawerTabs.map({ AnyTabItem(item: $0) })
             owner.removedTabs = config.hiddenTabs.map({ AnyTabItem(item: $0) })
         }
     }
-    
+
     func setInfoCardVisibility(type: InstanceType, visible: Bool) {
         preferenceStore.setInfoCardVisibility(type: type, value: visible)
     }
@@ -72,19 +80,19 @@ class PreferencesViewModel: ObservableObject {
     func setLoggingLevel(_ level: LoggerLevel) {
         preferenceStore.setLogLevel(level: level)
     }
-    
+
     func resetTabPreferences() {
         preferenceStore.resetTabPreferences()
     }
-    
+
     func saveTabPreferences(_ preferences: TabPreferences) {
         preferenceStore.saveTabPreferences(tabPreferences: preferences)
     }
-    
+
     func updateTabPreferences(_ preferences: TabPreferences) {
         preferenceStore.updateTabPreferences(tabPreferences: preferences)
     }
-    
+
     func saveNavigationLayout(visible: [TabItem], hidden: [TabItem], removed: [TabItem]) {
         let newPrefs = TabPreferences(
             orderedVisibleKeys: visible.map { $0.key },
@@ -93,21 +101,29 @@ class PreferencesViewModel: ObservableObject {
         )
         preferenceStore.updateTabPreferences(tabPreferences: newPrefs)
     }
-    
+
     func markReleaseNotesAsSeen() {
         preferenceStore.markReleaseNotesAsSeen()
     }
-    
+
     func markFirstLaunchComplete() {
         preferenceStore.markFirstLaunchComplete()
     }
-    
+
     func toggleUseServiceNavLogos() {
         preferenceStore.toggleUseServiceNavLogos()
     }
-    
+
     func setUseServiceNavLogos(_ value: Bool) {
         preferenceStore.setUseServiceNavLogos(value: value)
     }
-    
+
+    func toggleUseFloatingNavigationBar() {
+        preferenceStore.toggleUseFloatingNavigationBar()
+    }
+
+    func toggleHideFloatingNavigationBarLabels() {
+        preferenceStore.toggleHideFloatingNavigationBarLabels()
+    }
+
 }

@@ -24,6 +24,11 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.ui.sheets.CalendarCardCustomizationSheet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -158,9 +163,12 @@ fun CalendarHomeScreen(
     onItemClick: (CalendarItem, Long?) -> Unit,
     onBack: (() -> Unit)? = null,
     viewModel: CalendarViewModel = koinViewModel(),
+    preferencesStore: PreferencesStore = koinInject(),
 ) {
     val calendarState by viewModel.calendarState.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
+    val useColoredCalendarCards by preferencesStore.useColoredCalendarCards.collectAsStateWithLifecycle(false)
+    var showCalendarCustomizationSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -197,6 +205,7 @@ fun CalendarHomeScreen(
                         onToggleFilterMonitored = { viewModel.toggleShowMonitoredOnly() },
                         onToggleFilterPremiersOnly = { viewModel.toggleShowPremiersOnly() },
                         onToggleFilterFinalesOnly = { viewModel.toggleShowFinalesOnly() },
+                        onOpenViewCustomization = { showCalendarCustomizationSheet = true },
                     )
                 },
             )
@@ -266,5 +275,13 @@ fun CalendarHomeScreen(
                 }
             }
         }
+    }
+
+    if (showCalendarCustomizationSheet) {
+        CalendarCardCustomizationSheet(
+            useColoredCalendarCards = useColoredCalendarCards,
+            onToggleUseColoredCalendarCards = { preferencesStore.toggleUseColoredCalendarCards() },
+            onDismissRequest = { showCalendarCustomizationSheet = false },
+        )
     }
 }

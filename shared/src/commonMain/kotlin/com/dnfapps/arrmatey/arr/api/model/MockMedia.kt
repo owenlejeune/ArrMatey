@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import kotlin.time.Clock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlin.time.Instant
@@ -70,6 +71,43 @@ sealed class MockMedia(
     data object Readarr : MockMedia(title = "A Totally Awesome Book")
 
     data object Listenarr : MockMedia(title = "A Totally Awesome Book")
+}
+
+object MockData {
+    val mockMovie: ArrMovie by lazy {
+        ArrMovie(
+            id = 1,
+            title = "A Totally Awesome Movie",
+            cleanTitle = "atotallyawesomemovie",
+            originalLanguage = Language(1, "English"),
+            year = 2026,
+            qualityProfileId = 1,
+            monitored = true,
+            runtime = 120,
+            status = MediaStatus.Released,
+            certification = "PG-13",
+            studio = "Awesome Studios",
+            tmdbId = 1,
+            secondaryYearSourceId = 0,
+            minimumAvailability = MediaStatus.Announced,
+            inCinemas = Clock.System.now(),
+        )
+    }
+
+    val mockQueueItem: QueueItem by lazy {
+        RadarrQueueItem(
+            id = 1,
+            instanceName = "Radarr Main",
+            title = "A Totally Awesome Movie",
+            protocol = ReleaseProtocol.Torrent,
+            size = 2000000000f,
+            sizeleft = 1073741824f,
+            quality = QualityInfo(Quality(1, "WEBDL-1080p", resolution = 1080), Revision(1, 0, false)),
+            status = QueueItemStatus.Downloading,
+            trackedDownloadStatus = QueueDownloadStatus.Ok,
+            trackedDownloadState = QueueDownloadState.Downloading,
+        )
+    }
 }
 // data class MockMedia(
 //    override val id: Long = 1,

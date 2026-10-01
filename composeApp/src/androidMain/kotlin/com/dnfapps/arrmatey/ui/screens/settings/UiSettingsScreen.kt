@@ -14,11 +14,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Shortcut
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MiscellaneousServices
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
@@ -55,7 +55,10 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.icons.Hard_drive
+import com.dnfapps.arrmatey.ui.sheets.ActivityCardCustomizationSheet
+import com.dnfapps.arrmatey.ui.sheets.CalendarCardCustomizationSheet
 import com.dnfapps.arrmatey.ui.sheets.DiscoverSectionCustomizationSheet
+import com.dnfapps.arrmatey.ui.sheets.SearchResultCardCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import org.koin.compose.viewmodel.koinViewModel
@@ -77,8 +80,6 @@ fun UiSettingsScreen(
     val useColoredActivityCards by viewModel.useColoredActivityCards.collectAsStateWithLifecycle()
     val useColoredCalendarCards by viewModel.useColoredCalendarCards.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
-    val useFloatingNavigationBar by viewModel.useFloatingNavigationBar.collectAsStateWithLifecycle()
-    val hideFloatingNavigationBarLabels by viewModel.hideFloatingNavigationBarLabels.collectAsStateWithLifecycle()
     val overlayTabBackOpensDrawer by viewModel.overlayTabBackOpensDrawer.collectAsStateWithLifecycle()
     val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
@@ -86,6 +87,9 @@ fun UiSettingsScreen(
     val discoverSectionPreferences by viewModel.discoverSectionPreferences.collectAsStateWithLifecycle()
 
     var showDiscoverCustomizationSheet by remember { mutableStateOf(false) }
+    var showActivityCustomizationSheet by remember { mutableStateOf(false) }
+    var showCalendarCustomizationSheet by remember { mutableStateOf(false) }
+    var showSearchResultCustomizationSheet by remember { mutableStateOf(false) }
 
     val isLargeScreenSupported =
         remember(windowSizeClass, configuration) {
@@ -190,30 +194,6 @@ fun UiSettingsScreen(
                         },
                         onClick = { viewModel.toggleUseServiceNavLogos() },
                     ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.ColorLens),
-                        title = mokoString(MR.strings.use_colored_activity_cards),
-                        subtitle = mokoString(MR.strings.use_colored_activity_cards_desc),
-                        trailingContent = {
-                            Switch(
-                                checked = useColoredActivityCards,
-                                onCheckedChange = { viewModel.toggleUseColoredActivityCards() },
-                            )
-                        },
-                        onClick = { viewModel.toggleUseColoredActivityCards() },
-                    ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.ColorLens),
-                        title = mokoString(MR.strings.use_colored_calendar_cards),
-                        subtitle = mokoString(MR.strings.use_colored_calendar_cards_desc),
-                        trailingContent = {
-                            Switch(
-                                checked = useColoredCalendarCards,
-                                onCheckedChange = { viewModel.toggleUseColoredCalendarCards() },
-                            )
-                        },
-                        onClick = { viewModel.toggleUseColoredCalendarCards() },
-                    ),
                 ),
             )
 
@@ -248,36 +228,6 @@ fun UiSettingsScreen(
                         onClick = { viewModel.toggleInstanceSwitcher() },
                     ),
                     SettingItem(
-                        icon = IconSource.Vector(Icons.Default.MoreHoriz),
-                        title = mokoString(MR.strings.floating_navigation_bar_toggle_title),
-                        subtitle = mokoString(MR.strings.floating_navigation_bar_toggle_description),
-                        trailingContent = {
-                            Switch(
-                                checked = useFloatingNavigationBar,
-                                onCheckedChange = { viewModel.toggleUseFloatingNavigationBar() },
-                            )
-                        },
-                        onClick = { viewModel.toggleUseFloatingNavigationBar() },
-                    ),
-                    SettingItem(
-                        icon = IconSource.Vector(Icons.Default.MoreHoriz),
-                        title = mokoString(MR.strings.hide_floating_navigation_bar_labels_title),
-                        subtitle = mokoString(MR.strings.hide_floating_navigation_bar_labels_description),
-                        enabled = useFloatingNavigationBar,
-                        trailingContent = {
-                            Switch(
-                                checked = hideFloatingNavigationBarLabels,
-                                onCheckedChange = { viewModel.toggleHideFloatingNavigationBarLabels() },
-                                enabled = useFloatingNavigationBar,
-                            )
-                        },
-                        onClick = {
-                            if (useFloatingNavigationBar) {
-                                viewModel.toggleHideFloatingNavigationBarLabels()
-                            }
-                        },
-                    ),
-                    SettingItem(
                         icon = IconSource.Vector(Icons.AutoMirrored.Default.ArrowBack),
                         title = mokoString(MR.strings.overlay_tab_back_opens_drawer_title),
                         subtitle = mokoString(MR.strings.overlay_tab_back_opens_drawer_description),
@@ -301,6 +251,24 @@ fun UiSettingsScreen(
                         title = mokoString(MR.strings.discover_sections),
                         subtitle = mokoString(MR.strings.reorganize_hide_sections),
                         onClick = { showDiscoverCustomizationSheet = true },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.ColorLens),
+                        title = mokoString(MR.strings.activity_cards),
+                        subtitle = mokoString(MR.strings.activity_cards_description),
+                        onClick = { showActivityCustomizationSheet = true },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.CalendarMonth),
+                        title = mokoString(MR.strings.calendar_cards),
+                        subtitle = mokoString(MR.strings.calendar_cards_description),
+                        onClick = { showCalendarCustomizationSheet = true },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Image),
+                        title = mokoString(MR.strings.search_result_cards),
+                        subtitle = mokoString(MR.strings.search_result_cards_description),
+                        onClick = { showSearchResultCustomizationSheet = true },
                     ),
                 ),
             )
@@ -331,18 +299,6 @@ fun UiSettingsScreen(
                 items =
                 listOf(
                     SettingItem(
-                        icon = IconSource.Vector(Icons.Default.Image),
-                        title = mokoString(MR.strings.search_show_banners),
-                        subtitle = mokoString(MR.strings.search_show_banners_description),
-                        trailingContent = {
-                            Switch(
-                                checked = searchShowBanners,
-                                onCheckedChange = { viewModel.toggleSearchShowBanners() },
-                            )
-                        },
-                        onClick = { viewModel.toggleSearchShowBanners() },
-                    ),
-                    SettingItem(
                         icon = IconSource.Vector(Icons.Default.Search),
                         title = mokoString(MR.strings.unified_library_search_all_instances_title),
                         subtitle = mokoString(MR.strings.unified_library_search_all_instances_description),
@@ -365,6 +321,30 @@ fun UiSettingsScreen(
             onUpdatePreferences = { viewModel.updateDiscoverSectionPreferences(it) },
             onResetPreferences = { viewModel.resetDiscoverSectionPreferences() },
             onDismissRequest = { showDiscoverCustomizationSheet = false },
+        )
+    }
+
+    if (showActivityCustomizationSheet) {
+        ActivityCardCustomizationSheet(
+            useColoredActivityCards = useColoredActivityCards,
+            onToggleUseColoredActivityCards = { viewModel.toggleUseColoredActivityCards() },
+            onDismissRequest = { showActivityCustomizationSheet = false },
+        )
+    }
+
+    if (showCalendarCustomizationSheet) {
+        CalendarCardCustomizationSheet(
+            useColoredCalendarCards = useColoredCalendarCards,
+            onToggleUseColoredCalendarCards = { viewModel.toggleUseColoredCalendarCards() },
+            onDismissRequest = { showCalendarCustomizationSheet = false },
+        )
+    }
+
+    if (showSearchResultCustomizationSheet) {
+        SearchResultCardCustomizationSheet(
+            searchShowBanners = searchShowBanners,
+            onToggleSearchShowBanners = { viewModel.toggleSearchShowBanners() },
+            onDismissRequest = { showSearchResultCustomizationSheet = false },
         )
     }
 }

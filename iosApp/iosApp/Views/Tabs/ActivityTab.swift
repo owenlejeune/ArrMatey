@@ -15,12 +15,14 @@ struct ActivityTab: View {
 }
 
 struct ActivityTabContent: View {
-    
+
     @StateObject private var viewModel = ActivityQueueViewModelS()
+    @StateObject private var moreViewModel = MoreScreenViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+
     @State private var selectedItem: IdentifiableQueueItem? = nil
-    
+    @State private var showActivityCustomizationSheet = false
+
     private var titleText: String {
         switch viewModel.uiState.selectedTab {
         case .activity:
@@ -36,7 +38,7 @@ struct ActivityTabContent: View {
             return MR.strings().activity.localized()
         }
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             Picker("", selection: Binding(
@@ -50,7 +52,7 @@ struct ActivityTabContent: View {
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
-            
+
             tabContent
         }
         .navigationTitle(titleText)
@@ -93,9 +95,15 @@ struct ActivityTabContent: View {
                         get: { viewModel.uiState.downloadedInstanceId?.int64Value },
                         set: { viewModel.setDownloadedInstanceId($0) }
                     ),
-                    instances: viewModel.instances
+                    instances: viewModel.instances,
+                    onOpenViewCustomization: {
+                        showActivityCustomizationSheet = true
+                    }
                 )
             }
+        }
+        .sheet(isPresented: $showActivityCustomizationSheet) {
+            ActivityCardCustomizationSheet(viewModel: moreViewModel)
         }
         .sheet(item: $selectedItem) { wrapper in
             QueueItemInfoSheet(item: wrapper.item, deleteInProgress: viewModel.removeInProgress, onDelete: { remove, block, skip in
@@ -114,7 +122,7 @@ struct ActivityTabContent: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var tabContent: some View {
         switch viewModel.uiState.selectedTab {
@@ -128,7 +136,7 @@ struct ActivityTabContent: View {
             queueItemContent
         }
     }
-    
+
     @ViewBuilder
     private var queueItemContent: some View {
         if viewModel.queueItems.isEmpty {
@@ -162,7 +170,7 @@ struct ActivityTabContent: View {
             .listStyle(.plain)
         }
     }
-    
+
     @ViewBuilder
     private var historyContent: some View {
         if viewModel.historyItems.isEmpty {

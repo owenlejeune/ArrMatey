@@ -23,7 +23,10 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -55,6 +58,7 @@ fun CalendarFilterMenu(
     onToggleFilterMonitored: () -> Unit,
     onToggleFilterPremiersOnly: () -> Unit,
     onToggleFilterFinalesOnly: () -> Unit,
+    onOpenViewCustomization: (() -> Unit)? = null,
 ) {
     var showSheet by remember { mutableStateOf(false) }
 
@@ -118,27 +122,51 @@ fun CalendarFilterMenu(
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                         )
-                        if (activeFiltersCount > 0) {
-                            TextButton(
-                                onClick = {
-                                    if (filterState.contentFilter != ContentFilter.All) {
-                                        onContentFilterChanged(ContentFilter.All)
-                                    }
-                                    if (filterState.showMonitoredOnly) {
-                                        onToggleFilterMonitored()
-                                    }
-                                    if (filterState.showPremiersOnly) {
-                                        onToggleFilterPremiersOnly()
-                                    }
-                                    if (filterState.showFinalesOnly) {
-                                        onToggleFilterFinalesOnly()
-                                    }
-                                },
-                            ) {
-                                Text(
-                                    text = mokoString(MR.strings.clear_all),
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            onOpenViewCustomization?.let { openCustomization ->
+                                OutlinedButton(
+                                    onClick = {
+                                        openCustomization()
+                                        showSheet = false
+                                    },
+                                ) {
+                                    Icon(
+                                        Icons.Default.Palette,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Spacer(Modifier.size(8.dp))
+                                    Text(
+                                        text = mokoString(MR.strings.view_customization),
+                                        style = MaterialTheme.typography.labelMedium,
+                                    )
+                                }
+                            }
+                            if (activeFiltersCount > 0) {
+                                TextButton(
+                                    onClick = {
+                                        if (filterState.contentFilter != ContentFilter.All) {
+                                            onContentFilterChanged(ContentFilter.All)
+                                        }
+                                        if (filterState.showMonitoredOnly) {
+                                            onToggleFilterMonitored()
+                                        }
+                                        if (filterState.showPremiersOnly) {
+                                            onToggleFilterPremiersOnly()
+                                        }
+                                        if (filterState.showFinalesOnly) {
+                                            onToggleFilterFinalesOnly()
+                                        }
+                                    },
+                                ) {
+                                    Text(
+                                        text = mokoString(MR.strings.clear_all),
+                                        style = MaterialTheme.typography.labelMedium,
+                                    )
+                                }
                             }
                         }
                     }

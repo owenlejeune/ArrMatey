@@ -13,12 +13,13 @@ struct MovieCalendarItem: View {
     let date: LocalDate
     let instances: [Instance]
     var useFullColorCards: Bool = false
+    var posterImage: Shared.ImageResource? = nil
     let onNavigate: (Int64?) -> Void
-    
+
     private var associatedColor: Color {
         .arrOrange
     }
-    
+
     private var statusIcon: String? {
         if movie.isDownloaded {
             return "checkmark.circle.fill"
@@ -31,7 +32,7 @@ struct MovieCalendarItem: View {
         }
         return nil
     }
-    
+
     private var releaseTypeText: String? {
         if movie.inCinemas?.isEqual(date: date) == true {
             MR.strings().in_cinemas.localized()
@@ -43,13 +44,13 @@ struct MovieCalendarItem: View {
             nil
         }
     }
-    
+
     private var infoString: String {
         [movie.certification, movie.studio]
             .compactMap{ $0 }
             .joined(separator: " • ")
     }
-    
+
     var body: some View {
         SlidableCalendarItem(
             instanceIds: movie.instanceIds,
@@ -64,14 +65,14 @@ struct MovieCalendarItem: View {
                 }
 
                 HStack(spacing: 12) {
-                    PosterItem(item: movie)
+                    PosterItem(item: movie, posterImage: posterImage ?? movie.associatedType?.mockCover)
                         .frame(width: 50)
-                    
+
                     VStack(alignment: .leading, spacing: 6) {
                         Text(movie.title ?? MR.strings().unknown.localized())
                             .font(.headline)
                             .foregroundColor(useFullColorCards ? .black : .primary)
-                        
+
                         if let releaseType = releaseTypeText {
                             HStack(spacing: 8) {
                                 Text(releaseType)
@@ -79,16 +80,16 @@ struct MovieCalendarItem: View {
                                     .foregroundColor(useFullColorCards ? .black.opacity(0.85) : .secondary)
                             }
                         }
-                        
+
                         if !infoString.isEmpty {
                             Text(infoString)
                                 .font(.footnote)
                                 .foregroundColor(useFullColorCards ? .black.opacity(0.75) : .secondary)
                         }
                     }
-                    
+
                     Spacer()
-                    
+
                     if let icon = statusIcon {
                         Image(systemName: icon)
                             .font(.system(size: 20))

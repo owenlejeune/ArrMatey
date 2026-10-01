@@ -17,12 +17,13 @@ struct ActivityFilterMenu: View {
     @Binding var historyStateFilter: HistoryStateFilter
     @Binding var downloadedInstanceId: Int64?
     let instances: [Instance]
-    
+    var onOpenViewCustomization: (() -> Void)? = nil
+
     private var instancePickerTitle: String {
         guard let id = instanceId else { return MR.strings().instances.localized() }
         return instances.first(where: { $0.id == id })?.label ?? MR.strings().all.localized()
     }
-    
+
     private var historyInstancePickerTitle: String {
         guard let id = historyInstanceId else { return MR.strings().instances.localized() }
         return instances.first(where: { $0.id == id })?.label ?? MR.strings().all.localized()
@@ -32,13 +33,21 @@ struct ActivityFilterMenu: View {
         guard let id = downloadedInstanceId else { return MR.strings().instances.localized() }
         return instances.first(where: { $0.id == id })?.label ?? MR.strings().all.localized()
     }
-    
+
     private var statePickerTitle: String {
         return historyStateFilter.resource.localized()
     }
-    
+
     var body: some View {
         Menu {
+            if let onOpenViewCustomization = onOpenViewCustomization {
+                Section {
+                    Button(action: onOpenViewCustomization) {
+                        Label(MR.strings().view_customization.localized(), systemImage: "paintpalette")
+                    }
+                }
+            }
+
             switch selectedTab {
             case .activity:
                 Menu {
@@ -52,7 +61,7 @@ struct ActivityFilterMenu: View {
                 } label: {
                     Label(instancePickerTitle, systemImage: "externaldrive.connected.to.line.below.fill")
                 }
-                
+
                 Section {
                     ForEach(QueueSortBy.allCases, id: \.self) { sortOption in
                         Button(action: {
@@ -82,7 +91,7 @@ struct ActivityFilterMenu: View {
                 } label: {
                     Label(historyInstancePickerTitle, systemImage: "externaldrive.connected.to.line.below.fill")
                 }
-                
+
                 Menu {
                     Picker(statePickerTitle, selection: $historyStateFilter) {
                         ForEach(HistoryStateFilter.allCases, id: \.self) { filter in

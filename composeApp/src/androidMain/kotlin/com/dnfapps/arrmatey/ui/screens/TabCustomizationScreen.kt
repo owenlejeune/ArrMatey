@@ -43,6 +43,7 @@ import com.dnfapps.arrmatey.entensions.androidIcon
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
+import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.utils.mokoString
@@ -60,6 +61,8 @@ fun TabCustomizationScreen(
 ) {
     val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle()
     val useServiceNavLogos by preferenceStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
+    val useFloatingNavigationBar by preferenceStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
+    val hideFloatingNavigationBarLabels by preferenceStore.hideFloatingNavigationBarLabels.collectAsStateWithLifecycle(false)
 
     Scaffold(
         topBar = {
@@ -77,6 +80,10 @@ fun TabCustomizationScreen(
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             TabCustomizationContent(
                 useServiceNavLogos = useServiceNavLogos,
+                useFloatingNavigationBar = useFloatingNavigationBar,
+                hideFloatingNavigationBarLabels = hideFloatingNavigationBarLabels,
+                onToggleUseFloatingNavigationBar = { preferenceStore.toggleUseFloatingNavigationBar() },
+                onToggleHideFloatingNavigationBarLabels = { preferenceStore.toggleHideFloatingNavigationBarLabels() },
                 visibleTabs = tabConfig.visibleTabs,
                 drawerTabs = tabConfig.drawerTabs,
                 hiddenTabs = tabConfig.hiddenTabs,
@@ -93,6 +100,10 @@ fun TabCustomizationContent(
     drawerTabs: List<TabItem>,
     hiddenTabs: List<TabItem>,
     updatePreferences: (TabPreferences) -> Unit,
+    useFloatingNavigationBar: Boolean = false,
+    hideFloatingNavigationBarLabels: Boolean = false,
+    onToggleUseFloatingNavigationBar: () -> Unit = {},
+    onToggleHideFloatingNavigationBarLabels: () -> Unit = {},
     modifier: Modifier = Modifier.fillMaxSize(),
     contentPadding: PaddingValues = PaddingValues(bottom = 16.dp + LocalFloatingBarBottomPadding.current),
 ) {
@@ -191,6 +202,32 @@ fun TabCustomizationContent(
                     text = mokoString(MR.strings.customize_navigation_description),
                     style = MaterialTheme.typography.bodyMedium,
                 )
+            }
+        }
+
+        item(key = "floating_nav_options") {
+            ContainerCard(
+                modifier = Modifier.padding(vertical = 4.dp),
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LabelledSwitch(
+                        label = mokoString(MR.strings.floating_navigation_bar_toggle_title),
+                        sublabel = mokoString(MR.strings.floating_navigation_bar_toggle_description),
+                        checked = useFloatingNavigationBar,
+                        onCheckedChange = { onToggleUseFloatingNavigationBar() },
+                    )
+                    LabelledSwitch(
+                        label = mokoString(MR.strings.hide_floating_navigation_bar_labels_title),
+                        sublabel = mokoString(MR.strings.hide_floating_navigation_bar_labels_description),
+                        checked = hideFloatingNavigationBarLabels,
+                        enabled = useFloatingNavigationBar,
+                        onCheckedChange = {
+                            if (useFloatingNavigationBar) {
+                                onToggleHideFloatingNavigationBarLabels()
+                            }
+                        },
+                    )
+                }
             }
         }
 

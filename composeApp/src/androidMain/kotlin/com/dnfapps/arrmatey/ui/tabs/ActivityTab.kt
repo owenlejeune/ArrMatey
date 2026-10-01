@@ -37,6 +37,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
+import com.dnfapps.arrmatey.ui.sheets.ActivityCardCustomizationSheet
 import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
 import com.dnfapps.arrmatey.ui.tabs.activity.ActiveQueueTabContent
 import com.dnfapps.arrmatey.ui.tabs.activity.DownloadedTabContent
@@ -80,6 +81,7 @@ fun ActivityTab(
 
     var showConfirmRemove by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf<QueueItem?>(null) }
+    var showActivityCustomizationSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(removeItemStatus) {
         if (removeItemStatus is OperationStatus.Success) {
@@ -112,6 +114,7 @@ fun ActivityTab(
                         onHistoryStateFilterChanged = { viewModel.setHistoryStateFilter(it) },
                         selectedDownloadedInstanceId = uiState.downloadedInstanceId,
                         onDownloadedInstanceChange = { viewModel.setDownloadedInstanceId(it) },
+                        onOpenViewCustomization = { showActivityCustomizationSheet = true },
                     )
                 },
                 navigationIcon = {
@@ -207,6 +210,14 @@ fun ActivityTab(
                         onDelete = { clientRemove, blocklist, skipRedownload ->
                             viewModel.removeQueueItem(selectedItem!!, clientRemove, blocklist, skipRedownload)
                         },
+                    )
+                }
+
+                if (showActivityCustomizationSheet) {
+                    ActivityCardCustomizationSheet(
+                        useColoredActivityCards = useColoredCards,
+                        onToggleUseColoredActivityCards = { preferences.toggleUseColoredActivityCards() },
+                        onDismissRequest = { showActivityCustomizationSheet = false },
                     )
                 }
             }

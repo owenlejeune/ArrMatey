@@ -11,6 +11,9 @@ import Shared
 struct UiSettingsView: View {
     @StateObject private var viewModel = MoreScreenViewModelS()
     @State private var showDiscoverCustomizationSheet = false
+    @State private var showActivityCustomizationSheet = false
+    @State private var showCalendarCustomizationSheet = false
+    @State private var showSearchResultCustomizationSheet = false
 
     var body: some View {
         Form {
@@ -20,28 +23,6 @@ struct UiSettingsView: View {
                     set: { _ in viewModel.toggleUseServiceNavLogos() }
                 )) {
                     Text(MR.strings().service_icons_title.localized())
-                }
-                Toggle(isOn: Binding(
-                    get: { viewModel.useColoredActivityCards },
-                    set: { _ in viewModel.toggleUseColoredActivityCards() }
-                )) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(MR.strings().use_colored_activity_cards.localized())
-                        Text(MR.strings().use_colored_activity_cards_desc.localized())
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                Toggle(isOn: Binding(
-                    get: { viewModel.useColoredCalendarCards },
-                    set: { _ in viewModel.toggleUseColoredCalendarCards() }
-                )) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(MR.strings().use_colored_calendar_cards.localized())
-                        Text(MR.strings().use_colored_calendar_cards_desc.localized())
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
                 }
             } header: {
                 Text(MR.strings().appearance.localized())
@@ -84,22 +65,65 @@ struct UiSettingsView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+
+                Button {
+                    showActivityCustomizationSheet = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(MR.strings().activity_cards.localized())
+                                .foregroundColor(.primary)
+                            Text(MR.strings().activity_cards_description.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Button {
+                    showCalendarCustomizationSheet = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(MR.strings().calendar_cards.localized())
+                                .foregroundColor(.primary)
+                            Text(MR.strings().calendar_cards_description.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Button {
+                    showSearchResultCustomizationSheet = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(MR.strings().search_result_cards.localized())
+                                .foregroundColor(.primary)
+                            Text(MR.strings().search_result_cards_description.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             } header: {
                 Text(MR.strings().view_customization.localized())
             }
 
             Section {
-                Toggle(isOn: Binding(
-                    get: { viewModel.searchShowBanners },
-                    set: { _ in viewModel.toggleSearchShowBanners() }
-                )) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(MR.strings().search_show_banners.localized())
-                        Text(MR.strings().search_show_banners_description.localized())
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
                 Toggle(isOn: Binding(
                     get: { viewModel.unifiedLibrarySearchAllInstances },
                     set: { _ in viewModel.toggleUnifiedLibrarySearchAllInstances() }
@@ -122,6 +146,15 @@ struct UiSettingsView: View {
                 onUpdatePreferences: { viewModel.updateDiscoverSectionPreferences($0) },
                 onResetPreferences: { viewModel.resetDiscoverSectionPreferences() }
             )
+        }
+        .sheet(isPresented: $showActivityCustomizationSheet) {
+            ActivityCardCustomizationSheet(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showCalendarCustomizationSheet) {
+            CalendarCardCustomizationSheet(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showSearchResultCustomizationSheet) {
+            SearchResultCardCustomizationSheet(viewModel: viewModel)
         }
     }
 }
