@@ -121,7 +121,7 @@ class MediaPreviewViewModel(
     private val selectedRepository =
         activeArrRepoFlow
             .filterNotNull()
-            .distinctUntilChanged { old, new -> old.instance.id == new.instance.id }
+            .distinctUntilChanged { old, new -> old.instance == new.instance }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),

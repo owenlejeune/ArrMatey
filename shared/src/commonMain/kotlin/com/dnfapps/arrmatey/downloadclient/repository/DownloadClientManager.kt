@@ -31,6 +31,9 @@ class DownloadClientManager(
     private val cachedClients: MutableMap<Long, DownloadClient> = mutableMapOf()
 
     init {
+        scope.launch {
+            downloadClientRepository.ensureFirstSelectedIfNone()
+        }
         observeDownloadClients()
     }
 

@@ -13,7 +13,7 @@ class TestInstanceConnectionUseCase(
     operator fun invoke(id: Long): Flow<OperationStatus> = flow {
         emit(OperationStatus.InProgress)
 
-        val repository = instanceManager.getRepository(id)
+        val repository = instanceManager.getOrCreateRepository(id)
         if (repository == null) {
             emit(OperationStatus.Error(message = "Instance cannot be found"))
             return@flow

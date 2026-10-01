@@ -31,7 +31,7 @@ class TracearrHistoryViewModel(
     val currentRepository: StateFlow<TracearrRepository?> =
         getTracearrInstanceRepositoryUseCase
             .observeSelected()
-            .distinctUntilChanged { old, new -> old?.instance?.id == new?.instance?.id }
+            .distinctUntilChanged { old, new -> old?.instance == new?.instance }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),

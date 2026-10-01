@@ -265,7 +265,8 @@ class MoreScreenViewModel(
         viewModelScope.launch {
             instances.collect { currentInstances ->
                 currentInstances.forEach { instance ->
-                    if (!_testingStatus.value.containsKey(instance.id)) {
+                    val status = _testingStatus.value[instance.id]
+                    if (status == null || status is OperationStatus.Error) {
                         testInstance(instance.id)
                     }
                 }
@@ -274,7 +275,8 @@ class MoreScreenViewModel(
         viewModelScope.launch {
             downloadClients.collect { currentClients ->
                 currentClients.forEach { client ->
-                    if (!_testingStatus.value.containsKey(client.id + 100_000)) {
+                    val status = _testingStatus.value[client.id + 100_000]
+                    if (status == null || status is OperationStatus.Error) {
                         testClient(client.id)
                     }
                 }

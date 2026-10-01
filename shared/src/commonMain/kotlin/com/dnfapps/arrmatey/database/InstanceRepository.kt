@@ -101,4 +101,10 @@ class InstanceRepository(
             instanceDao.setInstanceAsSelected(instance.id, instance.type)
         }
     }
+
+    suspend fun ensureFirstSelectedIfNone(type: InstanceType) {
+        withContext(Dispatchers.IO) {
+            instanceDao.ensureFirstSelectedIfNone(type)
+        }
+    }
 }

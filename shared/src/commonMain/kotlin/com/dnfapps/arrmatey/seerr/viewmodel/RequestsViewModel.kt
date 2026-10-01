@@ -107,7 +107,7 @@ class RequestsViewModel(
             .observeSelected()
             .filterNotNull()
             .distinctUntilChanged { old, new ->
-                old.instance.id == new.instance.id
+                old.instance == new.instance
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),

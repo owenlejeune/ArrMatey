@@ -79,7 +79,7 @@ interface InstanceDao {
     @Query(
         """
         UPDATE instances
-        SET selected = true
+        SET selected = 1
         WHERE id = (
             SELECT id
             FROM instances AS i
@@ -88,7 +88,7 @@ interface InstanceDao {
                     SELECT 1
                     FROM instances AS j
                     WHERE j.type = :type
-                        AND j.selected = true
+                        AND j.selected = 1
                 )
             ORDER BY i.id
             LIMIT 1
