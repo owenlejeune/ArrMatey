@@ -13,7 +13,7 @@ struct ArrTab: View {
     private let type: InstanceType
     
     @ObservedObject private var arrMediaViewModel: ArrMediaViewModelS
-    @ObservedObject private var instancesViewModel: InstancesViewModelS
+    @StateObject private var instancesViewModel: InstancesViewModelS
     @StateObject private var networkViewModel: NetworkConnectivityViewModel = NetworkConnectivityViewModel()
     @StateObject private var globalPreferences = PreferencesViewModel()
     
@@ -38,7 +38,7 @@ struct ArrTab: View {
     init(type: InstanceType, viewModel: ArrMediaViewModelS) {
         self.type = type
         self.arrMediaViewModel = viewModel
-        self.instancesViewModel = InstancesViewModelS(type: type)
+        _instancesViewModel = StateObject(wrappedValue: InstancesViewModelS(type: type))
     }
     
     var body: some View {

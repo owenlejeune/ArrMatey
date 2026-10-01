@@ -10,13 +10,13 @@ struct BazarrDetailsScreen: View {
     private let id: Int64
     private let type: BazarrMediaType
     
-    @ObservedObject private var viewModel: BazarrDetailsViewModelS
+    @StateObject private var viewModel: BazarrDetailsViewModelS
     @State private var searchTarget: SearchTarget?
 
     init(id: Int64, type: BazarrMediaType) {
         self.id = id
         self.type = type
-        self.viewModel = BazarrDetailsViewModelS(id: id, type: type)
+        _viewModel = StateObject(wrappedValue: BazarrDetailsViewModelS(id: id, type: type))
     }
 
     var body: some View {

@@ -10,13 +10,13 @@ import SwiftUI
 
 struct AddEditCustomWebpageScreen: View {
 
-    @ObservedObject private var viewModel: CustomWebpageConfigurationViewModelS
+    @StateObject private var viewModel: CustomWebpageConfigurationViewModelS
     @Environment(\.dismiss) private var dismiss
 
     @State private var confirmDelete: Bool = false
 
     init(id: Int64? = nil) {
-        self.viewModel = CustomWebpageConfigurationViewModelS(webpageId: id)
+        _viewModel = StateObject(wrappedValue: CustomWebpageConfigurationViewModelS(webpageId: id))
     }
 
     var body: some View {

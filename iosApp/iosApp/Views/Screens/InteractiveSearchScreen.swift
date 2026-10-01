@@ -12,53 +12,63 @@ struct InteractiveSearchScreen: View {
     private let type: InstanceType
     private let releaseParams: ReleaseParams
 
-    @ObservedObject private var viewModel: InteractiveSearchViewModelS
-    @ObservedObject private var instancesViewModel: InstancesViewModelS
+    @StateObject private var viewModel: InteractiveSearchViewModelS
+    @StateObject private var instancesViewModel: InstancesViewModelS
 
     @EnvironmentObject private var navigationManager: NavigationManager
 
     @State private var searchPresented: Bool = false
     @State private var confirmRelease: ArrRelease? = nil
 
-    private var filterBinding: Binding<ReleaseFilterBy>
-    private var filterLanguageBinding: Binding<Language?>
-    private var filterQualityBinding: Binding<QualityInfo?>
-    private var filterCustomFormatBinding: Binding<CustomFormat?>
-    private var filterProtocolBinding: Binding<ReleaseProtocol?>
-    private var filterIndexerBinding: Binding<String?>
+    private var filterBinding: Binding<ReleaseFilterBy> {
+        let vm = viewModel
+        return Binding(
+            get: { vm.filterUiState.filterBy },
+            set: { vm.setFilterby($0) }
+        )
+    }
+    private var filterLanguageBinding: Binding<Language?> {
+        let vm = viewModel
+        return Binding(
+            get: { vm.filterUiState.language },
+            set: { vm.setFilterLanguage($0) }
+        )
+    }
+    private var filterQualityBinding: Binding<QualityInfo?> {
+        let vm = viewModel
+        return Binding(
+            get: { vm.filterUiState.quality },
+            set: { vm.setFilterQuality($0) }
+        )
+    }
+    private var filterCustomFormatBinding: Binding<CustomFormat?> {
+        let vm = viewModel
+        return Binding(
+            get: { vm.filterUiState.customFormat },
+            set: { vm.setFilterCustomFormat($0) }
+        )
+    }
+    private var filterProtocolBinding: Binding<ReleaseProtocol?> {
+        let vm = viewModel
+        return Binding(
+            get: { vm.filterUiState.protocol },
+            set: { vm.setFilterProtocol($0) }
+        )
+    }
+    private var filterIndexerBinding: Binding<String?> {
+        let vm = viewModel
+        return Binding(
+            get: { vm.filterUiState.indexer },
+            set: { vm.setFilterIndexer($0) }
+        )
+    }
 
     init(type: InstanceType, releaseParams: ReleaseParams, defaultFilter: ReleaseFilterBy = .any, instanceId: Int64? = nil) {
         self.type = type
         self.releaseParams = releaseParams
 
-        let vm = InteractiveSearchViewModelS(type: type, defaultFilter: defaultFilter, instanceId: instanceId)
-        self.viewModel = vm
-        self.instancesViewModel = InstancesViewModelS(type: type)
-
-        self.filterBinding = Binding(
-            get: { vm.filterUiState.filterBy },
-            set: { vm.setFilterby($0) }
-        )
-        self.filterLanguageBinding = Binding(
-            get: { vm.filterUiState.language },
-            set: { vm.setFilterLanguage($0) }
-        )
-        self.filterQualityBinding = Binding(
-            get: { vm.filterUiState.quality },
-            set: { vm.setFilterQuality($0) }
-        )
-        self.filterCustomFormatBinding = Binding(
-            get: { vm.filterUiState.customFormat },
-            set: { vm.setFilterCustomFormat($0) }
-        )
-        self.filterProtocolBinding = Binding(
-            get: { vm.filterUiState.protocol },
-            set: { vm.setFilterProtocol($0) }
-        )
-        self.filterIndexerBinding = Binding(
-            get: { vm.filterUiState.indexer },
-            set: { vm.setFilterIndexer($0) }
-        )
+        _viewModel = StateObject(wrappedValue: InteractiveSearchViewModelS(type: type, defaultFilter: defaultFilter, instanceId: instanceId))
+        _instancesViewModel = StateObject(wrappedValue: InstancesViewModelS(type: type))
     }
 
     var body: some View {

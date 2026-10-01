@@ -11,7 +11,7 @@ struct SeerrIssueDetailsSheet: View {
     let onDismiss: () -> Void
     let onIssueClosed: (() -> Void)?
     
-    @ObservedObject private var viewModel: IssueDetailsViewModelS
+    @StateObject private var viewModel: IssueDetailsViewModelS
     @State private var newComment = ""
     @State private var showCloseConfirmation = false
     
@@ -19,7 +19,7 @@ struct SeerrIssueDetailsSheet: View {
         self.issuePackage = issuePackage
         self.onDismiss = onDismiss
         self.onIssueClosed = onIssueClosed
-        self.viewModel = IssueDetailsViewModelS(issuePackage: issuePackage)
+        _viewModel = StateObject(wrappedValue: IssueDetailsViewModelS(issuePackage: issuePackage))
     }
     
     private var commentsList: [Comment] {
@@ -155,7 +155,7 @@ struct SeerrIssueDetailsSheet: View {
                         .font(.caption.bold())
                     
                     if let avatar = user.avatar, let url = URL(string: avatar) {
-                        AsyncImage(url: url) { image in
+                        CachedAsyncImage(url: url) { image in
                             image.resizable().aspectRatio(contentMode: .fill)
                         } placeholder: {
                             Color(.systemGray4)
@@ -185,7 +185,7 @@ struct SeerrIssueDetailsSheet: View {
             ForEach(additionalComments, id: \.id) { comment in
                 HStack(alignment: .top, spacing: 12) {
                     if let avatar = comment.user?.avatar, let url = URL(string: avatar) {
-                        AsyncImage(url: url) { image in
+                        CachedAsyncImage(url: url) { image in
                             image.resizable().aspectRatio(contentMode: .fill)
                         } placeholder: {
                             Color(.systemGray4)

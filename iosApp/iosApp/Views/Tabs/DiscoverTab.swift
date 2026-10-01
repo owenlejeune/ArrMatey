@@ -363,7 +363,7 @@ struct SeerrMediaSearchResultView: View {
             ZStack {
                 if showBannerBackground {
                     if let backdrop = item.backdropPath {
-                        AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/original\(backdrop)")) { image in
+                        CachedAsyncImage(url: URL(string: "https://image.tmdb.org/t/p/original\(backdrop)")) { image in
                             image.resizable().aspectRatio(contentMode: .fill)
                         } placeholder: {
                             Color.gray
@@ -395,7 +395,7 @@ struct SeerrPersonSearchResultView: View {
             }
 
             HStack(alignment: .top, spacing: 16) {
-                AsyncImage(url: URL(string: item.fullPosterPath ?? "")) { image in
+                CachedAsyncImage(url: URL(string: item.fullPosterPath ?? "")) { image in
                     image.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     ZStack {

@@ -11,8 +11,6 @@ struct ArrAsyncImage<Content: View>: View {
     private let url: URL?
     private let content: (AsyncImagePhase) -> Content
 
-    @State private var phase: AsyncImagePhase = .empty
-
     init(url: URL?, @ViewBuilder content: @escaping (AsyncImagePhase) -> Content) {
         self.url = url
         self.content = content
@@ -33,48 +31,25 @@ struct ArrAsyncImage<Content: View>: View {
     }
 
     var body: some View {
-        content(phase)
-            .task(id: url) {
-                await loadImage()
-            }
+        CachedAsyncImage(url: url, authenticated: true, content: content)
     }
+}
 
-    @MainActor
-    private func loadImage() async {
-        phase = .empty
-        guard let url else { return }
+func arrImageRequest(for url: URL) -> URLRequest {
+    var request = URLRequest(url: url)
+    request.setValue("image/*", forHTTPHeaderField: "Accept")
 
-        do {
-            let (data, response) = try await URLSession.shared.data(for: authenticatedRequest(for: url))
-            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode),
-               let uiImage = UIImage(data: data) {
-                phase = .success(Image(uiImage: uiImage))
-            } else {
-                phase = .failure(URLError(.badServerResponse))
-            }
-        } catch {
-            if !Task.isCancelled {
-                phase = .failure(error)
-            }
+    let urlStr = url.absoluteString
+    let instance = KoinBridge.shared.getInstanceManager().getAllRepositories()
+        .map { $0.instance }
+        .first { urlStr.hasPrefix($0.url) || urlStr.hasPrefix($0.getEffectiveBaseUrl()) }
+
+    if let instance {
+        if instance.type == .tracearr {
+            request.setValue("Bearer \(instance.apiKey)", forHTTPHeaderField: "Authorization")
+        } else {
+            request.setValue("\(instance.apiKey)", forHTTPHeaderField: "X-Api-Key")
         }
     }
-
-    private func authenticatedRequest(for url: URL) -> URLRequest {
-        var request = URLRequest(url: url)
-        request.setValue("image/*", forHTTPHeaderField: "Accept")
-
-        let urlStr = url.absoluteString
-        let instance = KoinBridge.shared.getInstanceManager().getAllRepositories()
-            .map { $0.instance }
-            .first { urlStr.hasPrefix($0.url) || urlStr.hasPrefix($0.getEffectiveBaseUrl()) }
-
-        if let instance {
-            if instance.type == .tracearr {
-                request.setValue("Bearer \(instance.apiKey)", forHTTPHeaderField: "Authorization")
-            } else {
-                request.setValue("\(instance.apiKey)", forHTTPHeaderField: "X-Api-Key")
-            }
-        }
-        return request
-    }
+    return request
 }

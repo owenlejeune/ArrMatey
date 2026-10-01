@@ -338,7 +338,7 @@ struct CastMemberProfileView: View {
             VStack(spacing: 4) {
                 if let profilePath = profilePath,
                    let url = URL(string: profilePath) {
-                    AsyncImage(url: url) { image in
+                    CachedAsyncImage(url: url) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)

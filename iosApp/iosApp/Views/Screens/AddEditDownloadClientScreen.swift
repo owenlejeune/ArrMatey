@@ -8,7 +8,7 @@ import Shared
 
 struct AddEditDownloadClientScreen: View {
 
-    @ObservedObject private var viewModel: DownloadClientSettingsViewModelS
+    @StateObject private var viewModel: DownloadClientSettingsViewModelS
     @Environment(\.dismiss) private var dismiss
     
     @State private var confirmDelete: Bool = false
@@ -17,7 +17,7 @@ struct AddEditDownloadClientScreen: View {
     @State private var showRationale = false
 
     init(id: Int64? = nil) {
-        self.viewModel = DownloadClientSettingsViewModelS(id: id)
+        _viewModel = StateObject(wrappedValue: DownloadClientSettingsViewModelS(id: id))
     }
     
     var hasLabelConflict: Bool {

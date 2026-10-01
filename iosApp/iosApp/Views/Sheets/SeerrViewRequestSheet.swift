@@ -132,7 +132,7 @@ struct SeerrViewRequestSheet: View {
                         Section(header: Text(MR.strings().requested_by.localized())) {
                             HStack(spacing: 12) {
                                 if let avatar = requestedBy.avatar, let avatarUrl = URL(string: avatar) {
-                                    AsyncImage(url: avatarUrl) { image in
+                                    CachedAsyncImage(url: avatarUrl) { image in
                                         image.resizable()
                                     } placeholder: {
                                         Image(systemName: "person.circle.fill")

@@ -8,6 +8,33 @@
 import Shared
 import SwiftUI
 
+// Holds an owner's observation tasks and cancels them when the owner is deallocated.
+private final class ObservationBag {
+    private let lock = NSLock()
+    private var tasks: [Task<Void, Error>] = []
+
+    func add(_ task: Task<Void, Error>) {
+        lock.lock()
+        tasks.append(task)
+        lock.unlock()
+    }
+
+    deinit {
+        tasks.forEach { $0.cancel() }
+    }
+}
+
+private var observationBagKey: UInt8 = 0
+
+private func observationBag(for owner: AnyObject) -> ObservationBag {
+    if let bag = objc_getAssociatedObject(owner, &observationBagKey) as? ObservationBag {
+        return bag
+    }
+    let bag = ObservationBag()
+    objc_setAssociatedObject(owner, &observationBagKey, bag, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    return bag
+}
+
 extension SkieSwiftStateFlow {
     func observeAsync(_ consumer: @escaping (_ emission: T) -> Void) {
         _ = Task {
@@ -20,7 +47,7 @@ extension SkieSwiftStateFlow {
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, _ consumer: @escaping (Owner, T) -> Void) {
-        _ = Task { [weak owner] in
+        let task = Task { [weak owner] in
             for try await value in self {
                 await MainActor.run { [weak owner] in
                     guard let owner = owner else { return }
@@ -28,6 +55,7 @@ extension SkieSwiftStateFlow {
                 }
             }
         }
+        observationBag(for: owner).add(task)
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, to keyPath: ReferenceWritableKeyPath<Owner, T>) {
@@ -49,7 +77,7 @@ extension SkieSwiftOptionalStateFlow {
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, _ consumer: @escaping (Owner, T?) -> Void) {
-        _ = Task { [weak owner] in
+        let task = Task { [weak owner] in
             for try await value in self {
                 await MainActor.run { [weak owner] in
                     guard let owner = owner else { return }
@@ -57,6 +85,7 @@ extension SkieSwiftOptionalStateFlow {
                 }
             }
         }
+        observationBag(for: owner).add(task)
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, to keyPath: ReferenceWritableKeyPath<Owner, T?>) {
@@ -78,7 +107,7 @@ extension SkieSwiftFlow {
     }
 
     func observeAsync<Owner: AnyObject>(on owner: Owner, _ consumer: @escaping (Owner, T) -> Void) {
-        _ = Task { [weak owner] in
+        let task = Task { [weak owner] in
             for try await value in self {
                 await MainActor.run { [weak owner] in
                     guard let owner = owner else { return }
@@ -86,6 +115,7 @@ extension SkieSwiftFlow {
                 }
             }
         }
+        observationBag(for: owner).add(task)
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, to keyPath: ReferenceWritableKeyPath<Owner, T>) {
