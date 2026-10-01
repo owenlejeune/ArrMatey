@@ -40,8 +40,15 @@ class InstanceManager(
     init {
         scope.launch {
             credentialMigrationUseCase()
+            ensureFirstSelectedIfNone()
         }
         observeInstances()
+    }
+
+    private suspend fun ensureFirstSelectedIfNone() {
+        InstanceType.entries.forEach { type ->
+            instanceRepository.ensureFirstSelectedIfNone(type)
+        }
     }
 
     private fun observeInstances() {
@@ -65,10 +72,13 @@ class InstanceManager(
             }
 
         instances.forEach { instance ->
-            if (!currentRepos.containsKey(instance.id)) {
+            val existingRepo = currentRepos[instance.id]
+            if (existingRepo == null || existingRepo.instance != instance) {
                 try {
                     val httpClient = httpClientFactory.create(instance)
-                    currentRepos[instance.id] = createScopedRepository(instance, httpClient, logger)
+                    val newRepo = createScopedRepository(instance, httpClient, logger)
+                    currentRepos[instance.id] = newRepo
+                    refreshRepositoryStatus(newRepo)
                 } catch (e: Exception) {
                     logger.error(e) { "Failed to create repository for instance ${instance.id} (${instance.type}): ${instance.label}" }
                 }
@@ -76,6 +86,44 @@ class InstanceManager(
         }
 
         _instanceRepositories.value = currentRepos
+    }
+
+    private fun refreshRepositoryStatus(repository: InstanceScopedRepository) {
+        scope.launch {
+            try {
+                when (repository) {
+                    is ArrInstanceRepository -> repository.refreshInstanceStatuses()
+                    is ProwlarrInstanceRepository -> {
+                        repository.refreshStatus()
+                        repository.getIndexers()
+                        repository.getIndexerStatus()
+                    }
+                    is BazarrInstanceRepository -> {
+                        repository.getSystemStatus()
+                        repository.refreshBadges()
+                    }
+                    is TracearrRepository -> {
+                        repository.getTodayStats()
+                        repository.getPublicStreams()
+                    }
+                    is SeerrInstanceRepository -> repository.refreshCounts()
+                }
+            } catch (e: Exception) {
+                logger.error(e) { "Error refreshing status for instance ${repository.instance.id} (${repository.instance.label})" }
+            }
+        }
+    }
+
+    suspend fun getOrCreateRepository(instanceId: Long): InstanceScopedRepository? {
+        _instanceRepositories.value[instanceId]?.let { return it }
+
+        val instance = instanceRepository.getInstanceById(instanceId) ?: return null
+        val httpClient = httpClientFactory.create(instance)
+        val repo = createScopedRepository(instance, httpClient, logger)
+
+        _instanceRepositories.value += (instanceId to repo)
+        refreshRepositoryStatus(repo)
+        return repo
     }
 
     private fun createScopedRepository(
@@ -137,10 +185,17 @@ class InstanceManager(
         .observeSelectedInstance(type)
         .flatMapLatest { instance ->
             if (instance == null) {
-                _instanceRepositories.map { repos -> repos.values.filterIsInstance<T>().firstOrNull() }
+                _instanceRepositories.map { repos ->
+                    repos.values.filterIsInstance<T>().firstOrNull { it.instance.type == type }
+                }
             } else {
                 _instanceRepositories.map { repos ->
-                    (repos[instance.id] as? T) ?: repos.values.filterIsInstance<T>().firstOrNull()
+                    val repo = repos[instance.id] as? T
+                    if (repo != null && repo.instance.type == type) {
+                        repo
+                    } else {
+                        repos.values.filterIsInstance<T>().firstOrNull { it.instance.type == type }
+                    }
                 }
             }
         }
@@ -150,12 +205,16 @@ class InstanceManager(
         .flatMapLatest { instance ->
             if (instance == null) {
                 _instanceRepositories.map { repos ->
-                    repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull()
+                    repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull { it.instance.type == InstanceType.Seerr }
                 }
             } else {
                 _instanceRepositories.map { repos ->
-                    (repos[instance.id] as? SeerrInstanceRepository)
-                        ?: repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull()
+                    val repo = repos[instance.id] as? SeerrInstanceRepository
+                    if (repo != null && repo.instance.type == InstanceType.Seerr) {
+                        repo
+                    } else {
+                        repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull { it.instance.type == InstanceType.Seerr }
+                    }
                 }
             }
         }
@@ -165,12 +224,16 @@ class InstanceManager(
         .flatMapLatest { instance ->
             if (instance == null) {
                 _instanceRepositories.map { repos ->
-                    repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull()
+                    repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull { it.instance.type == InstanceType.Prowlarr }
                 }
             } else {
                 _instanceRepositories.map { repos ->
-                    (repos[instance.id] as? ProwlarrInstanceRepository)
-                        ?: repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull()
+                    val repo = repos[instance.id] as? ProwlarrInstanceRepository
+                    if (repo != null && repo.instance.type == InstanceType.Prowlarr) {
+                        repo
+                    } else {
+                        repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull { it.instance.type == InstanceType.Prowlarr }
+                    }
                 }
             }
         }
@@ -180,12 +243,16 @@ class InstanceManager(
         .flatMapLatest { instance ->
             if (instance == null) {
                 _instanceRepositories.map { repos ->
-                    repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull()
+                    repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull { it.instance.type == InstanceType.Bazarr }
                 }
             } else {
                 _instanceRepositories.map { repos ->
-                    (repos[instance.id] as? BazarrInstanceRepository)
-                        ?: repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull()
+                    val repo = repos[instance.id] as? BazarrInstanceRepository
+                    if (repo != null && repo.instance.type == InstanceType.Bazarr) {
+                        repo
+                    } else {
+                        repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull { it.instance.type == InstanceType.Bazarr }
+                    }
                 }
             }
         }
@@ -194,11 +261,17 @@ class InstanceManager(
         .observeSelectedInstance(InstanceType.Tracearr)
         .flatMapLatest { instance ->
             if (instance == null) {
-                _instanceRepositories.map { r -> r.values.filterIsInstance<TracearrRepository>().firstOrNull() }
+                _instanceRepositories.map { r ->
+                    r.values.filterIsInstance<TracearrRepository>().firstOrNull { it.instance.type == InstanceType.Tracearr }
+                }
             } else {
                 _instanceRepositories.map { r ->
-                    (r[instance.id] as? TracearrRepository)
-                        ?: r.values.filterIsInstance<TracearrRepository>().firstOrNull()
+                    val repo = r[instance.id] as? TracearrRepository
+                    if (repo != null && repo.instance.type == InstanceType.Tracearr) {
+                        repo
+                    } else {
+                        r.values.filterIsInstance<TracearrRepository>().firstOrNull { it.instance.type == InstanceType.Tracearr }
+                    }
                 }
             }
         }

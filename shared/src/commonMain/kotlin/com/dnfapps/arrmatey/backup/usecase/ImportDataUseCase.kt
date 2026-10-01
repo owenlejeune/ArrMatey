@@ -49,16 +49,32 @@ class ImportDataUseCase(
     ) {
         backup.instances.forEachIndexed { index, export ->
             if (index in selectedInstanceIndices) {
+                val existingByUrl = instanceDao.findByUrl(export.url)
+                val existingByLabel = instanceDao.findByLabel(export.label)
+                val existingInstanceId = existingByUrl ?: existingByLabel
+                val existingInstance = existingInstanceId?.let { instanceDao.getInstanceById(it) }
+
+                var uniqueLabel = export.label
+                if (existingByUrl != null && existingByLabel != null && existingByLabel != existingByUrl) {
+                    uniqueLabel = "${export.label} (Imported)"
+                }
+
+                val currentInstancesOfSameType = instanceDao.getInstancesOfType(export.type)
+                val shouldBeSelected = existingInstance?.selected
+                    ?: currentInstancesOfSameType.none { it.selected }
+
                 val instance =
                     Instance(
+                        id = existingInstanceId ?: 0L,
                         type = export.type,
-                        label = export.label,
+                        label = uniqueLabel,
                         url = export.url,
                         apiKey = EncryptedString(export.apiKey),
                         noApiKeyRequired = export.noApiKeyRequired,
                         enabled = export.enabled,
                         slowInstance = export.slowInstance,
                         customTimeout = export.customTimeout,
+                        selected = shouldBeSelected,
                         notificationsEnabled = export.notificationsEnabled,
                         headers = export.headers,
                         localNetworkEnabled = export.localNetworkEnabled,
@@ -66,32 +82,12 @@ class ImportDataUseCase(
                         localNetworkEndpoint = export.localNetworkEndpoint,
                     )
 
-                val existingByUrl = instanceDao.findByUrl(instance.url)
-                val existingByLabel = instanceDao.findByLabel(instance.label)
-
-                val finalInstance =
-                    when {
-                        existingByUrl != null -> {
-                            var uniqueLabel = instance.label
-                            if (existingByLabel != null && existingByLabel != existingByUrl) {
-                                uniqueLabel = "${instance.label} (Imported)"
-                            }
-                            instance.copy(id = existingByUrl, label = uniqueLabel)
-                        }
-                        existingByLabel != null -> {
-                            instance.copy(id = existingByLabel)
-                        }
-                        else -> {
-                            instance
-                        }
-                    }
-
                 val id =
-                    if (finalInstance.id != 0L) {
-                        instanceDao.update(finalInstance)
-                        finalInstance.id
+                    if (instance.id != 0L) {
+                        instanceDao.update(instance)
+                        instance.id
                     } else {
-                        instanceDao.insert(finalInstance)
+                        instanceDao.insert(instance)
                     }
 
                 if (id > 0 && export.preferences != null) {
@@ -107,48 +103,46 @@ class ImportDataUseCase(
 
         backup.downloadClients.forEachIndexed { index, export ->
             if (index in selectedDownloadClientIndices) {
+                val existingByUrl = downloadClientDao.findByUrl(export.url)
+                val existingByLabel = downloadClientDao.findByLabel(export.label)
+                val existingClientId = existingByUrl ?: existingByLabel
+                val existingClient = existingClientId?.let { downloadClientDao.getDownloadClientById(it) }
+
+                var uniqueLabel = export.label
+                if (existingByUrl != null && existingByLabel != null && existingByLabel != existingByUrl) {
+                    uniqueLabel = "${export.label} (Imported)"
+                }
+
+                val currentClients = downloadClientDao.getAllDownloadClients()
+                val shouldBeSelected = existingClient?.selected
+                    ?: currentClients.none { it.selected }
+
                 val client =
                     DownloadClient(
+                        id = existingClientId ?: 0L,
                         type = export.type,
-                        label = export.label,
+                        label = uniqueLabel,
                         url = export.url,
                         username = EncryptedString(export.username),
                         password = EncryptedString(export.password),
                         apiKey = EncryptedString(export.apiKey),
                         noApiKeyRequired = export.noApiKeyRequired,
+                        selected = shouldBeSelected,
                         headers = export.headers,
                         localNetworkEnabled = export.localNetworkEnabled,
                         localNetworkSsids = export.localNetworkSsids,
                         localNetworkEndpoint = export.localNetworkEndpoint,
                     )
 
-                val existingByUrl = downloadClientDao.findByUrl(client.url)
-                val existingByLabel = downloadClientDao.findByLabel(client.label)
-
-                val finalClient =
-                    when {
-                        existingByUrl != null -> {
-                            var uniqueLabel = client.label
-                            if (existingByLabel != null && existingByLabel != existingByUrl) {
-                                uniqueLabel = "${client.label} (Imported)"
-                            }
-                            client.copy(id = existingByUrl, label = uniqueLabel)
-                        }
-                        existingByLabel != null -> {
-                            client.copy(id = existingByLabel)
-                        }
-                        else -> {
-                            client
-                        }
-                    }
-
-                if (finalClient.id != 0L) {
-                    downloadClientDao.update(finalClient)
+                if (client.id != 0L) {
+                    downloadClientDao.update(client)
                 } else {
-                    downloadClientDao.insert(finalClient)
+                    downloadClientDao.insert(client)
                 }
             }
         }
+
+        downloadClientDao.ensureFirstSelectedIfNone()
 
         backup.customWebpages.forEachIndexed { index, export ->
             if (index in selectedCustomWebpageIndices) {

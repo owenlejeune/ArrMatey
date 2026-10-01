@@ -114,8 +114,7 @@ class ArrMediaViewModel(
             .observeSelected(instanceType)
             .filterNotNull()
             .distinctUntilChanged { old, new ->
-                // Only emit if the instance ID actually changed
-                old.instance.id == new.instance.id
+                old.instance == new.instance
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
@@ -213,7 +212,7 @@ class ArrMediaViewModel(
         selectedRepository
             .filterNotNull()
             .distinctUntilChanged { old, new ->
-                old.instance.id == new.instance.id
+                old.instance == new.instance
             }.flatMapLatest { repository ->
                 combine(
                     repository.qualityProfiles,

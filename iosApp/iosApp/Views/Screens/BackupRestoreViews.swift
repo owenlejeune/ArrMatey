@@ -13,7 +13,7 @@ struct ExportSheet: View {
     @ObservedObject var viewModel: BackupViewModelS
     @Binding var isPresented: Bool
     var onExport: (String) -> Void
-    
+
     var body: some View {
         NavigationStack {
             Form {
@@ -23,7 +23,7 @@ struct ExportSheet: View {
                         set: { viewModel.setExportPassword(password: $0) }
                     ))
                 }
-                
+
                 Section(header: Text(MR.strings().onboarding_preferences_title.localized())) {
                     Toggle(isOn: Binding(
                         get: { viewModel.exportState.includeInstancePreferences },
@@ -31,14 +31,14 @@ struct ExportSheet: View {
                     )) {
                         Label(MR.strings().include_preferences.localized(), systemImage: "gearshape")
                     }
-                    
+
                     Toggle(isOn: Binding(
                         get: { viewModel.exportState.includeTabPreferences },
                         set: { _ in viewModel.toggleIncludeTabPreferences() }
                     )) {
                         Label(MR.strings().navigation_bar_configuration.localized(), systemImage: "sidebar.left")
                     }
-                    
+
                     Toggle(isOn: Binding(
                         get: { viewModel.exportState.includeUiPreferences },
                         set: { _ in viewModel.toggleIncludeUiPreferences() }
@@ -53,7 +53,7 @@ struct ExportSheet: View {
                         Label(MR.strings().integrations.localized(), systemImage: "link")
                     }
                 }
-                
+
                 if !viewModel.exportState.instances.isEmpty {
                     Section(header: HStack {
                         Label(MR.strings().instances.localized(), systemImage: "server.rack")
@@ -70,7 +70,7 @@ struct ExportSheet: View {
                         }
                     }
                 }
-                
+
                 if !viewModel.exportState.downloadClients.isEmpty {
                     Section(header: HStack {
                         Label(MR.strings().download_clients.localized(), systemImage: "arrow.down.circle")
@@ -142,7 +142,8 @@ struct ImportSheet: View {
     @Binding var isPresented: Bool
     var encryptedData: String
     var onComplete: () -> Void
-    
+    @FocusState private var isPasswordFocused: Bool
+
     var body: some View {
         NavigationStack {
             Form {
@@ -152,7 +153,11 @@ struct ImportSheet: View {
                             get: { viewModel.importState.password },
                             set: { viewModel.setImportPassword(password: $0) }
                         ))
-                        
+                        .focused($isPasswordFocused)
+                        .onAppear {
+                            isPasswordFocused = true
+                        }
+
                         if let error = viewModel.importState.error {
                             Text(error)
                                 .font(.caption)
@@ -164,7 +169,7 @@ struct ImportSheet: View {
                         (backup.globalPreferences?.tabPreferences != nil ||
                          backup.globalPreferences?.hasUiPreferences == true ||
                          backup.globalPreferences?.hasIntegrationsPreferences == true)
-                    
+
                     if hasAnyPreferences {
                         Section(header: Label(MR.strings().onboarding_preferences_title.localized(), systemImage: "slider.horizontal.3")) {
                             if backup.globalPreferences?.tabPreferences != nil {
@@ -175,7 +180,7 @@ struct ImportSheet: View {
                                     Label(MR.strings().navigation_bar_configuration.localized(), systemImage: "sidebar.left")
                                 }
                             }
-                            
+
                             if backup.globalPreferences?.hasUiPreferences == true {
                                 Toggle(isOn: Binding(
                                     get: { viewModel.importState.importUiPreferences },
@@ -212,7 +217,7 @@ struct ImportSheet: View {
                             }
                         }
                     }
-                    
+
                     if !backup.downloadClients.isEmpty {
                         Section(header: HStack {
                             Label(MR.strings().download_clients.localized(), systemImage: "arrow.down.circle")
@@ -289,13 +294,13 @@ struct ImportSheet: View {
 
 struct BackupFile: FileDocument {
     static var readableContentTypes: [UTType] { [.json] }
-    
+
     var data: String
-    
+
     init(data: String) {
         self.data = data
     }
-    
+
     init(configuration: ReadConfiguration) throws {
         if let data = configuration.file.regularFileContents {
             self.data = String(data: data, encoding: .utf8) ?? ""
@@ -303,7 +308,7 @@ struct BackupFile: FileDocument {
             self.data = ""
         }
     }
-    
+
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         let data = self.data.data(using: .utf8) ?? Data()
         return FileWrapper(regularFileWithContents: data)

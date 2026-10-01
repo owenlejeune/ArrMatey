@@ -60,6 +60,34 @@ class CalendarService(
 
     private val daysRange = 45
 
+    init {
+        observeRepositoriesAndReload()
+    }
+
+    private fun observeRepositoriesAndReload() {
+        scope.launch {
+            instanceManager.instanceRepositories.collect { repoMap ->
+                val arrRepos = repoMap.values.filterIsInstance<ArrInstanceRepository>()
+                if (arrRepos.isNotEmpty()) {
+                    val now =
+                        Clock.System
+                            .now()
+                            .toLocalDateTime(TimeZone.currentSystemDefault())
+                            .date
+                    val start = _dates.value.firstOrNull() ?: now.minus(daysRange, DateTimeUnit.DAY)
+                    val end = _dates.value.lastOrNull() ?: now.plus(daysRange, DateTimeUnit.DAY)
+
+                    insertDates(start, end)
+                    fetchForRepositories(arrRepos, start, end)
+                    _hasLoaded.value = true
+                } else {
+                    _items.value = emptyMap()
+                    _hasLoaded.value = false
+                }
+            }
+        }
+    }
+
     suspend fun load() {
         if (_isLoading.value) return
 

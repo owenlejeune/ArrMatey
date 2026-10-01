@@ -44,6 +44,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class GlobalSearchUseCaseTest {
     private val json = Json { ignoreUnknownKeys = true }
@@ -417,14 +418,19 @@ class GlobalSearchUseCaseTest {
         var cancelled = false
         val mockFactory =
             MockHttpClientFactory(json) { _ ->
-                MockEngine { _ ->
-                    try {
-                        requestStarted.complete(Unit)
-                        delay(10_000)
-                        respond("[]", HttpStatusCode.OK)
-                    } catch (e: CancellationException) {
-                        cancelled = true
-                        throw e
+                MockEngine { request ->
+                    val path = request.url.encodedPath
+                    if (path.contains("system/status") || path.contains("diskspace") || path.contains("health")) {
+                        respond("{}", HttpStatusCode.OK)
+                    } else {
+                        try {
+                            requestStarted.complete(Unit)
+                            delay(10.seconds)
+                            respond("[]", HttpStatusCode.OK)
+                        } catch (e: CancellationException) {
+                            cancelled = true
+                            throw e
+                        }
                     }
                 }
             }

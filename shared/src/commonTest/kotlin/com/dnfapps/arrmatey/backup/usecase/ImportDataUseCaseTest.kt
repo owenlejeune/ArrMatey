@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -222,5 +223,81 @@ class ImportDataUseCaseTest {
         assertEquals(1, result.instances.size)
         assertEquals(InstanceType.Bookshelf, result.instances.first().type)
         assertEquals("My Books 2", result.instances.first().label)
+    }
+
+    @Test
+    fun testImportSelectedSetsSelectedOnFirstInstanceAndDownloadClient() = runTest {
+        val insertedInstances = mutableListOf<Instance>()
+        val insertedClients = mutableListOf<DownloadClient>()
+        var ensureFirstSelectedDownloadClientCalled = false
+
+        val testInstanceDao = object : InstanceDao by dummyInstanceDao {
+            override suspend fun getInstancesOfType(type: InstanceType): List<Instance> = insertedInstances.filter { it.type == type }
+
+            override suspend fun insert(instance: Instance): Long {
+                insertedInstances.add(instance)
+                return insertedInstances.size.toLong()
+            }
+        }
+
+        val testDownloadClientDao = object : DownloadClientDao by dummyDownloadClientDao {
+            override suspend fun getAllDownloadClients(): List<DownloadClient> = insertedClients
+
+            override suspend fun insert(downloadClient: DownloadClient): Long {
+                insertedClients.add(downloadClient)
+                return insertedClients.size.toLong()
+            }
+
+            override suspend fun ensureFirstSelectedIfNone() {
+                ensureFirstSelectedDownloadClientCalled = true
+            }
+        }
+
+        val importUseCase = ImportDataUseCase(
+            instanceDao = testInstanceDao,
+            downloadClientDao = testDownloadClientDao,
+            customWebpageDao = dummyCustomWebpageDao,
+            instancePreferenceStoreRepository = InstancePreferenceStoreRepository(dataStoreFactory),
+            preferencesStore = PreferencesStore(dataStoreFactory),
+            transportEncryptor = fakeEncryptor,
+            json = json,
+        )
+
+        val jsonBackup = """
+            {
+                "instances": [
+                    {
+                        "type": "Sonarr",
+                        "label": "Sonarr 1",
+                        "url": "http://192.168.1.100:8989",
+                        "apiKey": "key1"
+                    }
+                ],
+                "downloadClients": [
+                    {
+                        "type": "QBittorrent",
+                        "label": "qBit 1",
+                        "url": "http://192.168.1.100:8080"
+                    }
+                ]
+            }
+        """.trimIndent()
+
+        val backup = importUseCase.decryptBackup(jsonBackup, "password")
+        importUseCase.importSelected(
+            backup = backup,
+            selectedInstanceIndices = setOf(0),
+            selectedDownloadClientIndices = setOf(0),
+            importTabPreferences = false,
+            importUiPreferences = false,
+            importIntegrationsPreferences = false,
+        )
+
+        assertEquals(1, insertedInstances.size)
+        assertEquals(true, insertedInstances.first().selected)
+
+        assertEquals(1, insertedClients.size)
+        assertEquals(true, insertedClients.first().selected)
+        assertEquals(true, ensureFirstSelectedDownloadClientCalled)
     }
 }

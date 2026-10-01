@@ -69,14 +69,14 @@ interface DownloadClientDao {
     @Query(
         """
         UPDATE download_clients
-        SET selected = true
+        SET selected = 1
         WHERE id = (
             SELECT id
             FROM download_clients
             WHERE NOT EXISTS (
                 SELECT 1
                 FROM download_clients
-                WHERE selected = true
+                WHERE selected = 1
             )
             ORDER BY id
             LIMIT 1

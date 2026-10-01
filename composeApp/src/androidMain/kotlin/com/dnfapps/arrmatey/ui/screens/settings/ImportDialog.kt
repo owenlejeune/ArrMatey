@@ -34,12 +34,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -68,6 +71,15 @@ fun ImportDialog(
     onToggleImportIntegrationsPreferences: () -> Unit,
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
+    val passwordFocusRequester = remember { FocusRequester() }
+
+    val backup = importState.decryptedBackup
+
+    LaunchedEffect(backup) {
+        if (backup == null) {
+            passwordFocusRequester.requestFocus()
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -134,7 +146,7 @@ fun ImportDialog(
                             )
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().focusRequester(passwordFocusRequester),
                     singleLine = true,
                     isError = importState.error != null,
                     errorMessage = importState.error,

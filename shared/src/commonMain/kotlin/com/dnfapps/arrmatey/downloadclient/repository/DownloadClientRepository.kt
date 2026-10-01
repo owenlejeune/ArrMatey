@@ -94,4 +94,10 @@ class DownloadClientRepository(
             downloadClientDao.setDownloadClientAsSelected(downloadClient.id)
         }
     }
+
+    suspend fun ensureFirstSelectedIfNone() {
+        withContext(Dispatchers.IO) {
+            downloadClientDao.ensureFirstSelectedIfNone()
+        }
+    }
 }
