@@ -11,6 +11,10 @@ import Shared
 @MainActor
 protocol ArrViewCustomizationViewModel: ObservableObject {
     var preferences: InstancePreferences { get }
+    var showInstancePicker: Bool { get }
+    var availableInstances: [Instance] { get }
+    var selectedInstance: Instance? { get }
+    func selectInstance(_ instance: Instance)
     func updateViewType(_ viewType: ViewType)
     func updateApplyGlobally(_ applyGlobally: Bool)
     func updateShowBannerBackground(_ show: Bool)
@@ -22,6 +26,13 @@ protocol ArrViewCustomizationViewModel: ObservableObject {
     func updateGridSpacing(_ spacing: GridSpacing)
     func updatePosterElevation(_ elevation: PosterElevation)
     func updatePosterRadius(_ radius: PosterRadius)
+}
+
+extension ArrViewCustomizationViewModel {
+    var showInstancePicker: Bool { false }
+    var availableInstances: [Instance] { [] }
+    var selectedInstance: Instance? { nil }
+    func selectInstance(_ instance: Instance) {}
 }
 
 extension ArrMediaViewModelS: ArrViewCustomizationViewModel {}
@@ -72,12 +83,23 @@ struct ArrViewCustomizationSheet<VM: ArrViewCustomizationViewModel>: View {
                         }
                     }
 
+                    if viewModel.showInstancePicker && !preferences.applyGlobally && viewModel.availableInstances.count > 1 {
+                        Picker(MR.strings().instances.localized(), selection: Binding(
+                            get: { viewModel.selectedInstance ?? viewModel.availableInstances.first! },
+                            set: { viewModel.selectInstance($0) }
+                        )) {
+                            ForEach(viewModel.availableInstances, id: \.self) { inst in
+                                Text(inst.label).tag(inst)
+                            }
+                        }
+                    }
+
                     if preferences.viewType == .list {
                         listOptions
                     } else {
                         gridOptions
                     }
-                    
+
                     posterOptions
                 }
                 .padding()
@@ -115,32 +137,57 @@ struct ArrViewCustomizationSheet<VM: ArrViewCustomizationViewModel>: View {
                 )
                 .padding(.horizontal)
             } else {
-                PosterItem(
-                    item: type.mockMedia,
-                    instanceType: type,
-                    aspectRatio: type.aspectRatio,
-                    elevation: preferences.posterElevation,
-                    radius: preferences.posterRadius,
-                    posterImage: type.mockCover,
-                    showFooter: preferences.showFullDetails,
-                    additionalContent: {
-                        if preferences.showOverlay {
-                            VStack {
-                                HStack {
-                                    Image(systemName: "bookmark.fill")
-                                        .foregroundColor(.white)
-                                        .padding(8)
-                                    Spacer()
+                GeometryReader { geometry in
+                    let availableWidth = geometry.size.width
+                    let minSize = CGFloat(truncating: preferences.gridDensity.minSize as NSNumber)
+                    let spacing = CGFloat(truncating: preferences.gridSpacing.spacing as NSNumber)
+                    let count = max(Int((availableWidth + spacing) / (minSize + spacing)), 3)
+
+                    let columns = Array(repeating: GridItem(.flexible(), spacing: spacing), count: count)
+
+                    LazyVGrid(columns: columns, spacing: spacing) {
+                        ForEach(0..<count, id: \.self) { _ in
+                            PosterItem(
+                                item: type.mockMedia,
+                                instanceType: type,
+                                aspectRatio: type.aspectRatio,
+                                elevation: preferences.posterElevation,
+                                radius: preferences.posterRadius,
+                                posterImage: type.mockCover,
+                                showFooter: preferences.showFullDetails,
+                                additionalContent: {
+                                    if preferences.showOverlay {
+                                        VStack {
+                                            HStack {
+                                                Image(systemName: "bookmark.fill")
+                                                    .foregroundColor(.white)
+                                                    .padding(8)
+                                                Spacer()
+                                            }
+                                            Spacer()
+                                            ProgressView(value: 0.6)
+                                                .tint(.blue)
+                                                .padding(8)
+                                        }
+                                    }
                                 }
-                                Spacer()
-                                ProgressView(value: 0.6)
-                                    .tint(.blue)
-                                    .padding(8)
-                            }
+                            )
                         }
                     }
-                )
-                .frame(width: 150)
+                    .padding(spacing)
+                }
+                .frame(height: {
+                    // Approximate height calculation to prevent zero/infinite height
+                    let screenWidth = UIScreen.main.bounds.width - 32 // padding
+                    let minSize = CGFloat(truncating: preferences.gridDensity.minSize as NSNumber)
+                    let spacing = CGFloat(truncating: preferences.gridSpacing.spacing as NSNumber)
+                    let count = CGFloat(max(Int((screenWidth + spacing) / (minSize + spacing)), 3))
+
+                    let itemWidth = (screenWidth - (spacing * (count + 1))) / count
+                    let itemHeight = itemWidth / CGFloat(type.aspectRatio.ratio)
+                    let footerHeight: CGFloat = preferences.showFullDetails ? 60 : 0
+                    return itemHeight + footerHeight + (spacing * 2)
+                }())
             }
         }
     }

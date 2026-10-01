@@ -13,6 +13,9 @@ class MoreScreenViewModelS: ObservableObject {
     private let viewModel: MoreScreenViewModel
 
     @Published private(set) var instances: [Instance] = []
+    @Published private(set) var arrInstances: [Instance] = []
+    @Published private(set) var selectedCustomizationInstance: Instance? = nil
+    @Published private(set) var selectedCustomizationPreferences = InstancePreferences()
     @Published private(set) var downloadClients: [DownloadClient] = []
     @Published private(set) var customWebpages: [CustomWebpage] = []
     @Published private(set) var connectionStatuses: [KotlinLong:OperationStatus] = [:]
@@ -38,6 +41,11 @@ class MoreScreenViewModelS: ObservableObject {
         self.viewModel = KoinBridge.shared.getMoreScreenViewModel()
 
         viewModel.instances.observeAsync(on: self, to: \.instances)
+        viewModel.arrInstances.observeAsync(on: self, to: \.arrInstances)
+        viewModel.selectedCustomizationInstance.observeAsync(on: self) { owner, instance in
+            owner.selectedCustomizationInstance = instance
+        }
+        viewModel.selectedCustomizationPreferences.observeAsync(on: self, to: \.selectedCustomizationPreferences)
         viewModel.downloadClients.observeAsync(on: self, to: \.downloadClients)
         viewModel.customWebpages.observeAsync(on: self, to: \.customWebpages)
         viewModel.testingStatus.observeAsync(on: self, to: \.connectionStatuses)
@@ -134,4 +142,34 @@ class MoreScreenViewModelS: ObservableObject {
     func setSmartAddSeerrAction(action: SmartAddSeerrAction) {
         viewModel.setSmartAddSeerrAction(action: action)
     }
+
+    func setSelectedCustomizationInstance(_ instance: Instance) {
+        viewModel.setSelectedCustomizationInstanceId(id: instance.id)
+    }
+}
+
+extension MoreScreenViewModelS: ArrViewCustomizationViewModel {
+    var showInstancePicker: Bool { true }
+    var availableInstances: [Instance] { arrInstances }
+    var selectedInstance: Instance? { selectedCustomizationInstance }
+
+    func selectInstance(_ instance: Instance) {
+        setSelectedCustomizationInstance(instance)
+    }
+
+    var preferences: InstancePreferences {
+        selectedCustomizationPreferences
+    }
+
+    func updateViewType(_ viewType: ViewType) { viewModel.updateCustomizationViewType(viewType: viewType) }
+    func updateApplyGlobally(_ applyGlobally: Bool) { viewModel.updateCustomizationApplyGlobally(applyGlobally: applyGlobally) }
+    func updateShowBannerBackground(_ show: Bool) { viewModel.updateCustomizationShowBannerBackground(show: show) }
+    func updateIncludeOverview(_ show: Bool) { viewModel.updateCustomizationIncludeOverview(show: show) }
+    func updateBannerBlur(_ blur: Blur) { viewModel.updateCustomizationBannerBlur(blur: blur) }
+    func updateShowFullDetails(_ show: Bool) { viewModel.updateCustomizationShowFullDetails(show: show) }
+    func updateShowOverlay(_ show: Bool) { viewModel.updateCustomizationShowOverlay(show: show) }
+    func updateGridDensity(_ density: GridDensity) { viewModel.updateCustomizationGridDensity(density: density) }
+    func updateGridSpacing(_ spacing: GridSpacing) { viewModel.updateCustomizationGridSpacing(spacing: spacing) }
+    func updatePosterElevation(_ elevation: PosterElevation) { viewModel.updateCustomizationPosterElevation(elevation: elevation) }
+    func updatePosterRadius(_ radius: PosterRadius) { viewModel.updateCustomizationPosterRadius(radius: radius) }
 }

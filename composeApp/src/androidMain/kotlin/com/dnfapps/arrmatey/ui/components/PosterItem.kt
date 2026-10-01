@@ -25,8 +25,6 @@ import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -444,9 +442,12 @@ fun BasePosterItem(
     footerContent: @Composable ColumnScope.() -> Unit = {},
     footerVisible: Boolean = false,
 ) {
-    Card(
+    Surface(
         shape = RoundedCornerShape(radius.radius),
-        elevation = CardDefaults.cardElevation(elevation.elevation),
+        shadowElevation = elevation.elevation,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = if (isSelected) BorderStroke(4.dp, ArrLightPurple) else null,
         modifier =
         modifier.then(
             if (onClick != null || onLongClick != null) {
@@ -458,12 +459,6 @@ fun BasePosterItem(
             } else {
                 Modifier
             },
-        ),
-        border = if (isSelected) BorderStroke(4.dp, ArrLightPurple) else null,
-        colors =
-        CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
         val isFixedSize = posterHeight != null

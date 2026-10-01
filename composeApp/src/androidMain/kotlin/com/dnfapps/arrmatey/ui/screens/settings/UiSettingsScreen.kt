@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Splitscreen
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
 import com.dnfapps.arrmatey.model.IconSource
@@ -56,6 +58,7 @@ import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.icons.Hard_drive
 import com.dnfapps.arrmatey.ui.sheets.ActivityCardCustomizationSheet
+import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
 import com.dnfapps.arrmatey.ui.sheets.CalendarCardCustomizationSheet
 import com.dnfapps.arrmatey.ui.sheets.DiscoverSectionCustomizationSheet
 import com.dnfapps.arrmatey.ui.sheets.SearchResultCardCustomizationSheet
@@ -86,6 +89,7 @@ fun UiSettingsScreen(
     val unifiedLibrarySearchAllInstances by viewModel.unifiedLibrarySearchAllInstances.collectAsStateWithLifecycle()
     val discoverSectionPreferences by viewModel.discoverSectionPreferences.collectAsStateWithLifecycle()
 
+    var showLibraryCustomizationSheet by remember { mutableStateOf(false) }
     var showDiscoverCustomizationSheet by remember { mutableStateOf(false) }
     var showActivityCustomizationSheet by remember { mutableStateOf(false) }
     var showCalendarCustomizationSheet by remember { mutableStateOf(false) }
@@ -253,6 +257,12 @@ fun UiSettingsScreen(
                         onClick = { showDiscoverCustomizationSheet = true },
                     ),
                     SettingItem(
+                        icon = IconSource.Vector(Icons.Default.VideoLibrary),
+                        title = mokoString(MR.strings.library_view_customization),
+                        subtitle = mokoString(MR.strings.library_view_customization_description),
+                        onClick = { showLibraryCustomizationSheet = true },
+                    ),
+                    SettingItem(
                         icon = IconSource.Vector(Icons.Default.ColorLens),
                         title = mokoString(MR.strings.activity_cards),
                         subtitle = mokoString(MR.strings.activity_cards_description),
@@ -345,6 +355,33 @@ fun UiSettingsScreen(
             searchShowBanners = searchShowBanners,
             onToggleSearchShowBanners = { viewModel.toggleSearchShowBanners() },
             onDismissRequest = { showSearchResultCustomizationSheet = false },
+        )
+    }
+
+    if (showLibraryCustomizationSheet) {
+        val selectedInstance by viewModel.selectedCustomizationInstance.collectAsStateWithLifecycle()
+        val customizationPreferences by viewModel.selectedCustomizationPreferences.collectAsStateWithLifecycle()
+        val arrInstances by viewModel.arrInstances.collectAsStateWithLifecycle()
+
+        ArrViewCustomizationSheet(
+            onDismissRequest = { showLibraryCustomizationSheet = false },
+            type = selectedInstance?.type ?: InstanceType.Sonarr,
+            preferences = customizationPreferences,
+            showInstancePicker = true,
+            instances = arrInstances,
+            selectedInstance = selectedInstance,
+            onInstanceSelected = { viewModel.setSelectedCustomizationInstanceId(it.id) },
+            onViewTypeChanged = { viewModel.updateCustomizationViewType(it) },
+            onShowFullDetailsChanged = { viewModel.updateCustomizationShowFullDetails(it) },
+            onShowOverlayChanged = { viewModel.updateCustomizationShowOverlay(it) },
+            onShowBannerBackgroundChanged = { viewModel.updateCustomizationShowBannerBackground(it) },
+            onIncludeOverviewChanged = { viewModel.updateCustomizationIncludeOverview(it) },
+            onBannerBlurChanged = { viewModel.updateCustomizationBannerBlur(it) },
+            onGridDensityChanged = { viewModel.updateCustomizationGridDensity(it) },
+            onGridSpacingChanged = { viewModel.updateCustomizationGridSpacing(it) },
+            onPosterElevationChanged = { viewModel.updateCustomizationPosterElevation(it) },
+            onPosterRadiusChanged = { viewModel.updateCustomizationPosterRadius(it) },
+            onApplyGloballyChanged = { viewModel.updateCustomizationApplyGlobally(it) },
         )
     }
 }

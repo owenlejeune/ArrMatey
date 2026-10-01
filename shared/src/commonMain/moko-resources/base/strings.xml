@@ -783,6 +783,8 @@
     <!-- View Customization -->
     <string name="view_customization">View Customization</string>
     <string name="customization_options">Customization Options</string>
+    <string name="library_view_customization">Library Views</string>
+    <string name="library_view_customization_description">Density, poster style, and details</string>
     <string name="banner_blur">Banner Blur</string>
     <string name="show_banner_background">Show banner background</string>
     <string name="include_overview">Include overview</string>

@@ -4,25 +4,41 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
+import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
+import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientRepository
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
+import com.dnfapps.arrmatey.instances.usecase.UpdateAllPreferencesUseCase
+import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.SmartAddSeerrAction
+import com.dnfapps.arrmatey.ui.theme.ViewType
+import com.dnfapps.arrmatey.utils.Blur
+import com.dnfapps.arrmatey.utils.GridDensity
+import com.dnfapps.arrmatey.utils.GridSpacing
+import com.dnfapps.arrmatey.utils.PosterElevation
+import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MoreScreenViewModel(
     instanceRepository: InstanceRepository,
     downloadClientRepository: DownloadClientRepository,
@@ -30,6 +46,9 @@ class MoreScreenViewModel(
     private val testInstanceConnectionUseCase: TestInstanceConnectionUseCase,
     private val testDownloadClientConnectionUseCase: TestDownloadClientConnectionUseCase,
     private val preferencesStore: PreferencesStore,
+    private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository,
+    private val updateInstancePreferencesUseCase: UpdateInstancePreferencesUseCase,
+    private val updateAllPreferencesUseCase: UpdateAllPreferencesUseCase,
 ) : ViewModel() {
     val useServiceNavLogos =
         preferencesStore.useServiceNavLogos
@@ -389,5 +408,99 @@ class MoreScreenViewModel(
 
     fun resetDiscoverSectionPreferences() {
         preferencesStore.resetDiscoverSectionPreferences()
+    }
+
+    val arrInstances: StateFlow<List<Instance>> =
+        instances
+            .map { list -> list.filter { it.type in InstanceType.arrs() } }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
+
+    private val _selectedCustomizationInstanceId = MutableStateFlow<Long?>(null)
+    val selectedCustomizationInstanceId: StateFlow<Long?> = _selectedCustomizationInstanceId.asStateFlow()
+
+    val selectedCustomizationInstance: StateFlow<Instance?> =
+        combine(arrInstances, _selectedCustomizationInstanceId) { list, id ->
+            list.find { it.id == id } ?: list.firstOrNull()
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null,
+        )
+
+    val selectedCustomizationPreferences: StateFlow<InstancePreferences> =
+        selectedCustomizationInstance
+            .flatMapLatest { instance ->
+                if (instance == null) {
+                    flowOf(InstancePreferences())
+                } else {
+                    instancePreferenceStoreRepository.getInstancePreferences(instance.id).observePreferences()
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = InstancePreferences(),
+            )
+
+    fun setSelectedCustomizationInstanceId(id: Long) {
+        _selectedCustomizationInstanceId.value = id
+    }
+
+    fun updateCustomizationViewType(viewType: ViewType) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(viewType = viewType))
+    }
+
+    fun updateCustomizationApplyGlobally(applyGlobally: Boolean) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(applyGlobally = applyGlobally))
+    }
+
+    fun updateCustomizationShowFullDetails(show: Boolean) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(showFullDetails = show))
+    }
+
+    fun updateCustomizationShowOverlay(show: Boolean) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(showOverlay = show))
+    }
+
+    fun updateCustomizationShowBannerBackground(show: Boolean) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(showBannerBackground = show))
+    }
+
+    fun updateCustomizationIncludeOverview(show: Boolean) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(includeOverview = show))
+    }
+
+    fun updateCustomizationBannerBlur(blur: Blur) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(bannerBlur = blur))
+    }
+
+    fun updateCustomizationGridDensity(density: GridDensity) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(gridDensity = density))
+    }
+
+    fun updateCustomizationGridSpacing(spacing: GridSpacing) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(gridSpacing = spacing))
+    }
+
+    fun updateCustomizationPosterElevation(elevation: PosterElevation) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(posterElevation = elevation))
+    }
+
+    fun updateCustomizationPosterRadius(radius: PosterRadius) {
+        saveCustomizationPreferences(selectedCustomizationPreferences.value.copy(posterRadius = radius))
+    }
+
+    private fun saveCustomizationPreferences(prefs: InstancePreferences) {
+        val instanceId = selectedCustomizationInstance.value?.id ?: return
+        viewModelScope.launch {
+            if (prefs.applyGlobally) {
+                updateAllPreferencesUseCase(prefs)
+            } else {
+                updateInstancePreferencesUseCase(instanceId, prefs)
+            }
+        }
     }
 }

@@ -1,14 +1,21 @@
 package com.dnfapps.arrmatey.ui.sheets
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,14 +33,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.datastore.InstancePreferences
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.LargeLabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MediaItem
 import com.dnfapps.arrmatey.ui.components.PosterGridItemOverlay
 import com.dnfapps.arrmatey.ui.components.PosterItem
+import com.dnfapps.arrmatey.ui.helpers.MinColumnsAdaptiveGridCells
 import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.Blur
 import com.dnfapps.arrmatey.utils.GridDensity
@@ -49,6 +59,10 @@ fun ArrViewCustomizationSheet(
     onDismissRequest: () -> Unit,
     type: InstanceType,
     preferences: InstancePreferences,
+    showInstancePicker: Boolean = false,
+    instances: List<Instance> = emptyList(),
+    selectedInstance: Instance? = null,
+    onInstanceSelected: ((Instance) -> Unit)? = null,
     onViewTypeChanged: (ViewType) -> Unit,
     onShowFullDetailsChanged: (Boolean) -> Unit,
     onShowOverlayChanged: (Boolean) -> Unit,
@@ -74,7 +88,6 @@ fun ArrViewCustomizationSheet(
                     modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
                         .padding(bottom = 12.dp),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -92,24 +105,51 @@ fun ArrViewCustomizationSheet(
                                 blur = preferences.bannerBlur,
                                 posterRadius = preferences.posterRadius,
                                 posterElevation = preferences.posterElevation,
+                                modifier = Modifier.padding(horizontal = 24.dp),
                             )
                         }
 
                         ViewType.Grid -> {
-                            PosterItem(
-                                posterHeight = 180.dp,
-                                item = type.mockMedia,
-                                posterModel = model,
-                                aspectRatio = type.aspectRatio,
-                                showFooter = preferences.showFullDetails,
-                                radius = preferences.posterRadius,
-                                elevation = preferences.posterElevation,
-                                additionalContent = {
-                                    if (preferences.showOverlay) {
-                                        PosterGridItemOverlay()
+                            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                                val count = maxOf(((maxWidth + preferences.gridSpacing.spacing) / (preferences.gridDensity.minSize + preferences.gridSpacing.spacing)).toInt(), 3)
+                                LazyVerticalGrid(
+                                    columns = MinColumnsAdaptiveGridCells(minSize = preferences.gridDensity.minSize, minColumns = 3),
+                                    modifier = Modifier.fillMaxWidth().height(
+                                        // Approximate height of one row so it doesn't wrap to zero or infinite
+                                        ((maxWidth / count) / type.aspectRatio.ratio) + if (preferences.showFullDetails) 80.dp else 30.dp + (preferences.gridSpacing.spacing * 2),
+                                    ),
+                                    userScrollEnabled = false,
+                                    contentPadding =
+                                    PaddingValues(
+                                        start = preferences.gridSpacing.spacing,
+                                        top = preferences.gridSpacing.spacing,
+                                        end = preferences.gridSpacing.spacing,
+                                        bottom = preferences.gridSpacing.spacing,
+                                    ),
+                                    horizontalArrangement = Arrangement.spacedBy(
+                                        space = preferences.gridSpacing.spacing,
+                                        alignment = Alignment.CenterHorizontally,
+                                    ),
+                                ) {
+                                    repeat(count) {
+                                        item {
+                                            PosterItem(
+                                                item = type.mockMedia,
+                                                posterModel = model,
+                                                aspectRatio = type.aspectRatio,
+                                                showFooter = preferences.showFullDetails,
+                                                radius = preferences.posterRadius,
+                                                elevation = preferences.posterElevation,
+                                                additionalContent = {
+                                                    if (preferences.showOverlay) {
+                                                        PosterGridItemOverlay()
+                                                    }
+                                                },
+                                            )
+                                        }
                                     }
-                                },
-                            )
+                                }
+                            }
                         }
                     }
                 }
@@ -155,6 +195,21 @@ fun ArrViewCustomizationSheet(
                     checked = preferences.applyGlobally,
                     onCheckedChange = { onApplyGloballyChanged(it) },
                 )
+
+                AnimatedVisibility(
+                    visible = showInstancePicker && !preferences.applyGlobally && instances.size > 1,
+                    enter = expandVertically(),
+                    exit = shrinkVertically(),
+                ) {
+                    DropdownPicker(
+                        options = instances,
+                        selectedOption = selectedInstance,
+                        onOptionSelected = { onInstanceSelected?.invoke(it) },
+                        getOptionLabel = { it.label },
+                        label = { Text(mokoString(MR.strings.instances), style = MaterialTheme.typography.titleSmall) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
 
                 Text(
                     text = mokoString(MR.strings.customization_options),

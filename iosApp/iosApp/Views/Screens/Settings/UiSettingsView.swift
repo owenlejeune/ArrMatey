@@ -10,6 +10,7 @@ import Shared
 
 struct UiSettingsView: View {
     @StateObject private var viewModel = MoreScreenViewModelS()
+    @State private var showLibraryCustomizationSheet = false
     @State private var showDiscoverCustomizationSheet = false
     @State private var showActivityCustomizationSheet = false
     @State private var showCalendarCustomizationSheet = false
@@ -48,6 +49,24 @@ struct UiSettingsView: View {
             }
 
             Section {
+                Button {
+                    showLibraryCustomizationSheet = true
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(MR.strings().library_view_customization.localized())
+                                .foregroundColor(.primary)
+                            Text(MR.strings().library_view_customization_description.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
                 Button {
                     showDiscoverCustomizationSheet = true
                 } label: {
@@ -140,6 +159,12 @@ struct UiSettingsView: View {
             }
         }
         .navigationTitle(MR.strings().user_interface.localized())
+        .sheet(isPresented: $showLibraryCustomizationSheet) {
+            ArrViewCustomizationSheet(
+                type: (viewModel.selectedInstance?.type ?? .sonarr),
+                viewModel: viewModel
+            )
+        }
         .sheet(isPresented: $showDiscoverCustomizationSheet) {
             DiscoverSectionCustomizationSheet(
                 preferences: viewModel.discoverSectionPreferences,
