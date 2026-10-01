@@ -44,13 +44,10 @@ import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 
 open class ArrInstanceRepository(
     override val instance: Instance,

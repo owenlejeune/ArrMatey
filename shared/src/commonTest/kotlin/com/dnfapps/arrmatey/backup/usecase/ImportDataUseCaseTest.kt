@@ -232,8 +232,7 @@ class ImportDataUseCaseTest {
         var ensureFirstSelectedDownloadClientCalled = false
 
         val testInstanceDao = object : InstanceDao by dummyInstanceDao {
-            override suspend fun getInstancesOfType(type: InstanceType): List<Instance> =
-                insertedInstances.filter { it.type == type }
+            override suspend fun getInstancesOfType(type: InstanceType): List<Instance> = insertedInstances.filter { it.type == type }
 
             override suspend fun insert(instance: Instance): Long {
                 insertedInstances.add(instance)
