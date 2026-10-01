@@ -65,7 +65,7 @@ struct MovieCalendarItem: View {
                 }
 
                 HStack(spacing: 12) {
-                    PosterItem(item: movie, posterImage: posterImage ?? movie.associatedType?.mockCover)
+                    PosterItem(item: movie, posterImage: posterImage)
                         .frame(width: 50)
 
                     VStack(alignment: .leading, spacing: 6) {

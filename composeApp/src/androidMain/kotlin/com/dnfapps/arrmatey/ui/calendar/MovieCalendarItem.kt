@@ -39,7 +39,6 @@ import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.surfaceContainerLowDark
 import com.dnfapps.arrmatey.ui.theme.surfaceDark
 import com.dnfapps.arrmatey.utils.mokoString
-import dev.icerock.moko.resources.compose.painterResource
 import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
 
@@ -118,7 +117,7 @@ fun MovieCalendarItem(
                     PosterItem(
                         item = movie,
                         modifier = Modifier.width(50.dp),
-                        posterModel = posterModel ?: movie.associatedType?.mockCover?.let { painterResource(it) },
+                        posterModel = posterModel,
                     )
                     Column(
                         modifier = Modifier.weight(1f),
