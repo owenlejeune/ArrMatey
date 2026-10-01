@@ -69,6 +69,9 @@ struct CalendarTabContent: View {
         .onAppear {
             viewModel.load()
         }
+        .sheet(isPresented: $showCalendarCustomizationSheet) {
+            CalendarCardCustomizationSheet(viewModel: moreViewModel)
+        }
     }
 
     private func handleItemClick(_ item: CalendarItem, instanceId: Int64?) {
@@ -138,9 +141,6 @@ struct CalendarTabContent: View {
                 }
             )
             .menuIndicator(.hidden)
-        }
-        .sheet(isPresented: $showCalendarCustomizationSheet) {
-            CalendarCardCustomizationSheet(viewModel: moreViewModel)
         }
     }
 }
