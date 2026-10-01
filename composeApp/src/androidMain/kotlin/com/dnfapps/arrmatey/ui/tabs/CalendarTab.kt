@@ -27,8 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.dnfapps.arrmatey.datastore.PreferencesStore
-import com.dnfapps.arrmatey.ui.sheets.CalendarCardCustomizationSheet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -45,6 +43,7 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.navigation.CalendarScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
@@ -62,6 +61,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.menu.CalendarFilterMenu
+import com.dnfapps.arrmatey.ui.sheets.CalendarCardCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel

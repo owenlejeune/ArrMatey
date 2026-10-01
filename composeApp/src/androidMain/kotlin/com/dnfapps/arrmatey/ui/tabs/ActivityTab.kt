@@ -36,8 +36,8 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
-import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.sheets.ActivityCardCustomizationSheet
+import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
 import com.dnfapps.arrmatey.ui.tabs.activity.ActiveQueueTabContent
 import com.dnfapps.arrmatey.ui.tabs.activity.DownloadedTabContent
