@@ -274,6 +274,14 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.deleteEpisodeFile(episodeId: episodeId)
     }
 
+    func hasNavigatedToInitialEpisode(episodeId: Int64) -> Bool {
+        viewModel.hasNavigatedToInitialEpisode(episodeId: episodeId)
+    }
+
+    func markInitialEpisodeNavigated(episodeId: Int64) {
+        viewModel.markInitialEpisodeNavigated(episodeId: episodeId)
+    }
+
     func toggleSeasonMonitored(seasonNumber: Int32) {
         viewModel.toggleSeasonMonitored(seasonNumber: seasonNumber)
     }

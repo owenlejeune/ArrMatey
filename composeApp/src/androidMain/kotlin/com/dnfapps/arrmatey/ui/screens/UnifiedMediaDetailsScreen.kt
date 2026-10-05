@@ -151,7 +151,6 @@ fun UnifiedMediaDetailsScreen(
     val similarState by viewModel.similarState.collectAsStateWithLifecycle()
     val selectedInstanceId by viewModel.selectedInstanceId.collectAsStateWithLifecycle()
     var lastSuccessState by remember { mutableStateOf<UnifiedMediaDetailsUiState.Success?>(null) }
-    var hasNavigatedToInitialEpisode by remember(initialEpisodeId) { mutableStateOf(false) }
 
     val successState = (uiState as? UnifiedMediaDetailsUiState.Success) ?: lastSuccessState
 
@@ -161,15 +160,15 @@ fun UnifiedMediaDetailsScreen(
         }
     }
 
-    LaunchedEffect(successState, initialEpisodeId, hasNavigatedToInitialEpisode) {
-        if (initialEpisodeId != null && !hasNavigatedToInitialEpisode && successState != null) {
+    LaunchedEffect(successState, initialEpisodeId) {
+        if (initialEpisodeId != null && !viewModel.hasNavigatedToInitialEpisode(initialEpisodeId) && successState != null) {
             val series =
                 (successState.arrMedia as? ArrSeries)
                     ?: successState.episodes.firstNotNullOfOrNull { it.arrEpisode?.series }
             val episode = successState.episodes.mapNotNull { it.arrEpisode }.find { it.id == initialEpisodeId }
 
             if (series != null && episode != null) {
-                hasNavigatedToInitialEpisode = true
+                viewModel.markInitialEpisodeNavigated(initialEpisodeId)
                 val currentInstanceId = successState.selectedInstanceId ?: instanceId ?: selectedInstanceId
                 onNavigateToEpisodeDetails(series, episode, currentInstanceId)
             }

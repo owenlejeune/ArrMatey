@@ -31,7 +31,6 @@ struct UnifiedMediaDetailsScreen: View {
     @State private var selectedTracearrSession: TracearrStreamSession? = nil
 
     private let initialEpisodeId: Int64?
-    @State private var hasNavigatedToInitialEpisode = false
 
     @State private var toastMessage: String? = nil
     @State private var selectedTab: DetailsTab = .overview
@@ -143,12 +142,12 @@ struct UnifiedMediaDetailsScreen: View {
 // MARK: - State Rendering
 extension UnifiedMediaDetailsScreen {
     private func checkInitialEpisode() {
-        guard let episodeId = initialEpisodeId, !hasNavigatedToInitialEpisode else { return }
+        guard let episodeId = initialEpisodeId, !viewModel.hasNavigatedToInitialEpisode(episodeId: episodeId) else { return }
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess,
            let series = (success.arrMedia as? ArrSeries) ?? success.episodes.compactMap({ $0.arrEpisode?.series }).first {
             let episodes = success.episodes.compactMap { $0.arrEpisode }
             if let episode = episodes.first(where: { $0.id == episodeId }) {
-                hasNavigatedToInitialEpisode = true
+                viewModel.markInitialEpisodeNavigated(episodeId: episodeId)
                 navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson(), instanceId: success.selectedInstanceId?.int64Value), of: .sonarr)
             }
         }
