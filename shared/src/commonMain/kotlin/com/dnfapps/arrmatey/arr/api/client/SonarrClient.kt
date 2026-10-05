@@ -135,21 +135,16 @@ class SonarrClient(
         }
     }
 
-    suspend fun getSeriesHistory(
-        seriesId: Long,
-        page: Int = 1,
-        pageSize: Int = 100,
-    ): NetworkResult<List<SonarrHistoryItem>> = get<SonarrHistoryResponse>(
-        "history",
+    // Paged /history ignores seriesId (it only accepts seriesIds), so use the per-series endpoint.
+    suspend fun getSeriesHistory(seriesId: Long): NetworkResult<List<SonarrHistoryItem>> = get<List<SonarrHistoryItem>>(
+        "history/series",
         mapOf<String, Any>(
-            "page" to page,
-            "pageSize" to pageSize,
             "seriesId" to seriesId,
             "includeSeries" to true,
             "includeEpisode" to true,
         ),
-    ).map { response ->
-        response.records.map {
+    ).map { list ->
+        list.map {
             it.copy(
                 instanceId = instance.id,
                 instanceName = instance.label,

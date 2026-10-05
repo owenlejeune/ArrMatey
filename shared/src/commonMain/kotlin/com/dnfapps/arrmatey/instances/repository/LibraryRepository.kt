@@ -295,15 +295,11 @@ class LibraryRepository(
             }
     }
 
-    suspend fun getSeriesHistory(
-        seriesId: Long,
-        page: Int = 1,
-        pageSize: Int = 100,
-    ): NetworkResult<List<HistoryItem>> {
+    suspend fun getSeriesHistory(seriesId: Long): NetworkResult<List<HistoryItem>> {
         _historyStatus.value = OperationStatus.InProgress
 
         return (client as? SonarrClient)
-            ?.getSeriesHistory(seriesId, page, pageSize)
+            ?.getSeriesHistory(seriesId)
             ?.onSuccess { history ->
                 val currentCache = _historyCache.value.toMutableMap()
                 currentCache[seriesId] = history
