@@ -119,16 +119,21 @@ fun Navigator<*>.toArrDetailsOrPreview(
     item: ArrMedia,
     type: InstanceType? = null,
 ) {
-    if (item.id == null) {
+    val isAdded = item.id != null && item.id != 0L
+    if (!isAdded) {
         if (item is ArrMovie || item is ArrSeries) {
-            val tmdbId = (item as? ArrMovie)?.tmdbId ?: (item as? ArrSeries)?.tmdbId
-            val tvdbId = (item as? ArrSeries)?.tvdbId
-            toDetails(null, tmdbId, tvdbId, type = type)
+            val tmdbId = (item as? ArrMovie)?.tmdbId?.takeIf { it > 0 }
+                ?: (item as? ArrSeries)?.tmdbId?.takeIf { it > 0 }
+            val tvdbId = (item as? ArrSeries)?.tvdbId?.takeIf { it > 0 }
+            toDetails(id = null, tmdbId = tmdbId, tvdbId = tvdbId, type = type)
         } else {
             toPreview(item, type)
         }
     } else {
-        toDetails(id = item.id, type = type)
+        val tmdbId = (item as? ArrMovie)?.tmdbId?.takeIf { it > 0 }
+            ?: (item as? ArrSeries)?.tmdbId?.takeIf { it > 0 }
+        val tvdbId = (item as? ArrSeries)?.tvdbId?.takeIf { it > 0 }
+        toDetails(id = item.id, tmdbId = tmdbId, tvdbId = tvdbId, type = type)
     }
 }
 
@@ -140,7 +145,7 @@ fun Navigator<*>.toDetails(
     type: InstanceType? = null,
     instanceId: Long? = null,
     episodeId: Long? = null,
-) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type, instanceId, episodeId))
+) = nav().navigateTo(MediaScreen.Details(id?.takeIf { it > 0 }, tmdbId, tvdbId, requestType, type, instanceId, episodeId))
 
 fun Navigator<*>.toMediaDetails(
     media: ArrMedia,
@@ -155,7 +160,7 @@ fun Navigator<*>.toMediaDetails(
         }
     val tvdbId = (media as? ArrSeries)?.tvdbId?.takeIf { it > 0 }
     toDetails(
-        id = media.id,
+        id = media.id?.takeIf { it > 0 },
         tmdbId = tmdbId,
         tvdbId = tvdbId,
         type = type,

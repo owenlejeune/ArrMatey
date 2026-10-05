@@ -63,7 +63,7 @@ class GetUnifiedMediaDetailsUseCase(
     ): Flow<UnifiedMediaDetailsUiState> {
         val arrFlow: Flow<MediaDetailsUiState> =
             if (arrRepository != null) {
-                if (arrId != null) {
+                if (arrId != null && arrId > 0) {
                     getMediaDetailsUseCase(arrId, arrRepository.instance.id)
                 } else if (tmdbId != null || tvdbId != null) {
                     val query =

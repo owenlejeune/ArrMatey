@@ -396,16 +396,17 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func goToArrDetailsOrPreview(item: ArrMedia, type: InstanceType? = nil, instanceId: Int64? = nil) {
-        if item.id == nil {
+        let isAdded = item.id != nil && item.id?.int64Value != 0
+        let tmdbId = (item as? ArrMovie)?.tmdbId ?? (item as? ArrSeries)?.tmdbId?.int64Value
+        let tvdbId = (item as? ArrSeries)?.tvdbId
+        if !isAdded {
             if item is ArrMovie || item is ArrSeries {
-                let tmdbId = (item as? ArrMovie)?.tmdbId ?? (item as? ArrSeries)?.tmdbId?.int64Value
-                let tvdbId = (item as? ArrSeries)?.tvdbId
                 goToDetails(arrId: nil, tmdbId: tmdbId, tvdbId: tvdbId, instanceType: type, instanceId: instanceId)
             } else if let type = type {
                 goToPreview(item.toJson(), type: type)
             }
         } else {
-            goToDetails(arrId: item.id?.int64Value, instanceType: type, instanceId: instanceId)
+            goToDetails(arrId: item.id?.int64Value, tmdbId: tmdbId, tvdbId: tvdbId, instanceType: type, instanceId: instanceId)
         }
     }
 
@@ -463,10 +464,11 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func goToArrDetailsOrPreviewOnDashboard(item: ArrMedia, type: InstanceType? = nil, instanceId: Int64? = nil) {
-        if item.id == nil {
+        let isAdded = item.id != nil && item.id?.int64Value != 0
+        let tmdbId = (item as? ArrMovie)?.tmdbId ?? (item as? ArrSeries)?.tmdbId?.int64Value
+        let tvdbId = (item as? ArrSeries)?.tvdbId
+        if !isAdded {
             if item is ArrMovie || item is ArrSeries {
-                let tmdbId = (item as? ArrMovie)?.tmdbId ?? (item as? ArrSeries)?.tmdbId?.int64Value
-                let tvdbId = (item as? ArrSeries)?.tvdbId
                 goToDetailsOnDashboard(arrId: nil, tmdbId: tmdbId, tvdbId: tvdbId, instanceType: type, instanceId: instanceId)
             } else if let type = type {
                 let route = MediaRoute.preview(item.toJson(), type: type)
@@ -479,7 +481,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
                 }
             }
         } else {
-            goToDetailsOnDashboard(arrId: item.id?.int64Value, instanceType: type, instanceId: instanceId)
+            goToDetailsOnDashboard(arrId: item.id?.int64Value, tmdbId: tmdbId, tvdbId: tvdbId, instanceType: type, instanceId: instanceId)
         }
     }
 

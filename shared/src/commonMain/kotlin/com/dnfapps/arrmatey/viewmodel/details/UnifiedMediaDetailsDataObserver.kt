@@ -81,9 +81,9 @@ class UnifiedMediaDetailsDataObserver(
                         presencesMap = map,
                     )
                 val effectiveArrMedia =
-                    map[current.selectedInstanceId]
-                        ?: current.arrMedia
-                        ?: map.values.firstOrNull { it != null }
+                    map[current.selectedInstanceId]?.takeIf { it.id != null && it.id != 0L }
+                        ?: current.arrMedia?.takeIf { it.id != null && it.id != 0L }
+                        ?: map.values.firstOrNull { it != null && it.id != null && it.id != 0L }
                 uiStateFlow.value =
                     current.copy(
                         arrMedia = effectiveArrMedia,
@@ -255,10 +255,10 @@ class UnifiedMediaDetailsDataObserver(
                             )
 
                         val effectiveArrMedia =
-                            rawState.arrMedia
-                                ?: activeRepo?.instance?.id?.let { map[it] }
-                                ?: instanceHandler.selectedInstanceId.value?.let { map[it] }
-                                ?: map.values.firstOrNull { it != null }
+                            rawState.arrMedia?.takeIf { it.id != null && it.id != 0L }
+                                ?: activeRepo?.instance?.id?.let { map[it] }?.takeIf { it.id != null && it.id != 0L }
+                                ?: instanceHandler.selectedInstanceId.value?.let { map[it] }?.takeIf { it.id != null && it.id != 0L }
+                                ?: map.values.firstOrNull { it != null && it.id != null && it.id != 0L }
 
                         uiStateFlow.value =
                             rawState.copy(
@@ -284,10 +284,12 @@ class UnifiedMediaDetailsDataObserver(
         presences: Map<Long, ArrMedia?>,
     ): Long? {
         val cachedArrMedia = activeRepo?.let { presences[it.instance.id] }
+        val cachedId = cachedArrMedia?.id?.takeIf { it != 0L }
+        val initialArrId = arrId?.takeIf { it != 0L }
         return if (activeRepo?.instance?.id == instanceHandler.initialInstanceId) {
-            cachedArrMedia?.id ?: arrId
+            cachedId ?: initialArrId
         } else {
-            cachedArrMedia?.id
+            cachedId
         }
     }
 

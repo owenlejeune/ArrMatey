@@ -20,7 +20,8 @@ class GetInstancePresencesUseCase {
 
         val missingRepos =
             repositories.filter { repo ->
-                existingPresences[repo.instance.id] == null
+                val presence = existingPresences[repo.instance.id]
+                presence == null || presence.id == null || presence.id == 0L
             }
         if (missingRepos.isEmpty()) return existingPresences
 
@@ -30,6 +31,8 @@ class GetInstancePresencesUseCase {
             val list = (lookupRes as? NetworkResult.Success)?.data ?: emptyList()
             val match =
                 list.firstOrNull { media ->
+                    val hasValidId = media.id != null && media.id != 0L
+                    if (!hasValidId) return@firstOrNull false
                     when (media) {
                         is ArrSeries -> {
                             (resolvedTvdbLookupId != null && resolvedTvdbLookupId > 0 && media.tvdbId == resolvedTvdbLookupId) ||
@@ -40,7 +43,7 @@ class GetInstancePresencesUseCase {
                         }
                         else -> false
                     }
-                } ?: if (resolvedTvdbLookupId == null && resolvedLookupId == null) list.firstOrNull() else null
+                }
             updatedMap[repo.instance.id] = match
         }
         return updatedMap
