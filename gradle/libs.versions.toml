@@ -40,7 +40,7 @@ adaptive = "1.2.0"
 flexible-bottomsheet = "0.4.0"
 turbine = "1.2.1"
 robolectric = "4.17"
-spotless = "8.10.2"
+spotless = "8.10.3"
 ktlint = "1.5.0"
 vico = "3.3.1"
 
