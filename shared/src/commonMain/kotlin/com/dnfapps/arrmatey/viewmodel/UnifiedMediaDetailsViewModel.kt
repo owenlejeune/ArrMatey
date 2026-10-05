@@ -283,9 +283,7 @@ class UnifiedMediaDetailsViewModel(
 
     private val navigatedInitialEpisodeIds = mutableSetOf<Long>()
 
-    fun hasNavigatedToInitialEpisode(episodeId: Long): Boolean {
-        return navigatedInitialEpisodeIds.contains(episodeId)
-    }
+    fun hasNavigatedToInitialEpisode(episodeId: Long): Boolean = navigatedInitialEpisodeIds.contains(episodeId)
 
     fun markInitialEpisodeNavigated(episodeId: Long) {
         navigatedInitialEpisodeIds.add(episodeId)
