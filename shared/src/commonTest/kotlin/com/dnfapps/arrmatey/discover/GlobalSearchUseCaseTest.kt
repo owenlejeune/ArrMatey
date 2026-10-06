@@ -415,7 +415,7 @@ class GlobalSearchUseCaseTest {
         val instanceRepo = InstanceRepository(fakeDao)
 
         val requestStarted = CompletableDeferred<Unit>()
-        var cancelled = false
+        val requestCancelled = CompletableDeferred<Unit>()
         val mockFactory =
             MockHttpClientFactory(json) { _ ->
                 MockEngine { request ->
@@ -428,7 +428,7 @@ class GlobalSearchUseCaseTest {
                             delay(10.seconds)
                             respond("[]", HttpStatusCode.OK)
                         } catch (e: CancellationException) {
-                            cancelled = true
+                            requestCancelled.complete(Unit)
                             throw e
                         }
                     }
@@ -447,7 +447,8 @@ class GlobalSearchUseCaseTest {
         job.cancel()
         job.join()
 
-        assertTrue(cancelled)
+        // Ktor cancels the engine call asynchronously, so join() can return before the engine sees it.
+        withTimeout(5.seconds) { requestCancelled.await() }
         manager.cleanup()
     }
 }
