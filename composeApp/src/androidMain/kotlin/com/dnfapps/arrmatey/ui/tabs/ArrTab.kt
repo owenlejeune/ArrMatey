@@ -22,6 +22,7 @@ fun ArrTab(
     type: InstanceType,
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
+    types: List<InstanceType> = listOf(type),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<NavKey> = navigationManager.arr(type),
 ) {
@@ -31,12 +32,13 @@ fun ArrTab(
         navigation = navigation,
         isExpanded = isExpanded,
         wideRailIsVisible = wideRailIsVisible,
-        entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation),
+        entryProvider = arrEntryProvider(type, types, isExpanded, wideRailIsVisible, navigation),
     )
 }
 
 private fun arrEntryProvider(
     type: InstanceType,
+    types: List<InstanceType>,
     isExpanded: Boolean,
     wideRailIsVisible: Boolean,
     navigation: Navigator<*>,
@@ -44,6 +46,7 @@ private fun arrEntryProvider(
     entry<ArrScreen.Library> {
         ArrLibraryScreen(
             type = type,
+            types = types,
             isExpanded = isExpanded,
             wideRailIsVisible = wideRailIsVisible,
             onNavigateToSearch = { query, resolvedType, instanceId -> navigation.toSearch(query, resolvedType, instanceId) },

@@ -15,12 +15,24 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class InstancesViewModel(
-    private val type: InstanceType,
+    private val types: List<InstanceType>,
     private val observeAllInstancesByTypeUseCase: ObserveAllInstancesByTypeUseCase,
     private val observeSelectedInstanceUseCase: ObserveSelectedInstanceUseCase,
     private val setInstanceActiveUseCase: SetInstanceActiveUseCase,
 ) : ViewModel() {
-    private val _instancesState = MutableStateFlow(InstancesState(type))
+    constructor(
+        type: InstanceType,
+        observeAllInstancesByTypeUseCase: ObserveAllInstancesByTypeUseCase,
+        observeSelectedInstanceUseCase: ObserveSelectedInstanceUseCase,
+        setInstanceActiveUseCase: SetInstanceActiveUseCase,
+    ) : this(
+        types = listOf(type),
+        observeAllInstancesByTypeUseCase = observeAllInstancesByTypeUseCase,
+        observeSelectedInstanceUseCase = observeSelectedInstanceUseCase,
+        setInstanceActiveUseCase = setInstanceActiveUseCase,
+    )
+
+    private val _instancesState = MutableStateFlow(InstancesState(types))
     val instancesState: StateFlow<InstancesState> = _instancesState.asStateFlow()
 
     init {
@@ -30,7 +42,7 @@ class InstancesViewModel(
 
     private fun observeInstances() {
         viewModelScope.launch {
-            observeAllInstancesByTypeUseCase(type).collect { list ->
+            observeAllInstancesByTypeUseCase(types).collect { list ->
                 _instancesState.update { state -> state.copy(instances = list) }
             }
         }
@@ -38,7 +50,7 @@ class InstancesViewModel(
 
     private fun observeSelected() {
         viewModelScope.launch {
-            observeSelectedInstanceUseCase(type).collect { selected ->
+            observeSelectedInstanceUseCase(types).collect { selected ->
                 _instancesState.update { state -> state.copy(selectedInstance = selected) }
             }
         }
@@ -46,7 +58,7 @@ class InstancesViewModel(
 
     fun setInstanceActive(instance: Instance) {
         viewModelScope.launch {
-            setInstanceActiveUseCase(instance)
+            setInstanceActiveUseCase(instance, types)
         }
     }
 }

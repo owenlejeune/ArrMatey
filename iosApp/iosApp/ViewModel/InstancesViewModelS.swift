@@ -19,6 +19,12 @@ class InstancesViewModelS: ObservableObject {
         self.viewModel = KoinBridge.shared.getInstancesViewModel(type: type)
         startObserving()
     }
+
+    init(types: [InstanceType]) {
+        self.instancesState = InstancesState(types: types, instances: [], selectedInstance: nil)
+        self.viewModel = KoinBridge.shared.getInstancesViewModel(types: types)
+        startObserving()
+    }
     
     private func startObserving() {
         viewModel.instancesState.observeAsync(on: self, to: \.instancesState)

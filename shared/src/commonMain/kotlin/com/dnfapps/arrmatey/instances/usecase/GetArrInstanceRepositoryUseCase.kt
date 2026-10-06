@@ -11,4 +11,6 @@ class GetArrInstanceRepositoryUseCase(
     operator fun invoke(instanceId: Long): ArrInstanceRepository? = instanceManager.getArrRepository(instanceId)
 
     fun observeSelected(type: InstanceType): Flow<ArrInstanceRepository?> = instanceManager.getSelectedArrRepository(type)
+
+    fun observeSelected(types: List<InstanceType>): Flow<ArrInstanceRepository?> = instanceManager.getSelectedArrRepository(types)
 }

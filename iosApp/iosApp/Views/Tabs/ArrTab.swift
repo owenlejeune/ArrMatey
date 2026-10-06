@@ -35,10 +35,11 @@ struct ArrTab: View {
     }
     
     
-    init(type: InstanceType, viewModel: ArrMediaViewModelS) {
+    init(type: InstanceType, types: [InstanceType]? = nil, viewModel: ArrMediaViewModelS) {
         self.type = type
         self.arrMediaViewModel = viewModel
-        _instancesViewModel = StateObject(wrappedValue: InstancesViewModelS(type: type))
+        let resolvedTypes = types ?? [type]
+        _instancesViewModel = StateObject(wrappedValue: InstancesViewModelS(types: resolvedTypes))
     }
     
     var body: some View {
@@ -126,8 +127,9 @@ struct ArrTab: View {
                 ToolbarItem(placement: .topBarLeading) {
                     InstancePickerMenu(
                         instances: instanceState.instances,
+                        selectedInstanceId: instanceState.selectedInstance?.id,
                         onChangeInstance: { instancesViewModel.setInstanceActive($0) },
-                        onAddNewInstance: { navigation.goToNewInstance(of: type) }
+                        onAddNewInstance: { navigation.goToNewInstance(of: instanceState.selectedInstance?.type ?? type) }
                     )
                     .menuIndicator(.hidden)
                 }

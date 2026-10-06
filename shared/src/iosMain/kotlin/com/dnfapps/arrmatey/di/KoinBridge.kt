@@ -66,7 +66,11 @@ object KoinBridge : KoinComponent {
 
     fun getArrMediaViewModel(type: InstanceType): ArrMediaViewModel = getKoin().get { parametersOf(type) }
 
+    fun getArrMediaViewModel(types: List<InstanceType>): ArrMediaViewModel = getKoin().get { parametersOf(types) }
+
     fun getInstancesViewModel(type: InstanceType): InstancesViewModel = getKoin().get { parametersOf(type) }
+
+    fun getInstancesViewModel(types: List<InstanceType>): InstancesViewModel = getKoin().get { parametersOf(types) }
 
     fun getArrSearchViewModel(
         type: InstanceType,

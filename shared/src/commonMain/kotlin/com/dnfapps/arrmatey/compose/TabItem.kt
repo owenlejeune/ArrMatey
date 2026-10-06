@@ -27,7 +27,9 @@ sealed interface TabItem {
     val iosIcon: String
     val resource: StringResource
     val isDisabled: Boolean
+    val associatedTypes: List<InstanceType>
     val associatedType: InstanceType?
+        get() = associatedTypes.firstOrNull()
 
     val key: String
 
@@ -38,8 +40,8 @@ sealed interface TabItem {
             get() = MR.strings.settings
         override val isDisabled: Boolean
             get() = false
-        override val associatedType: InstanceType?
-            get() = null
+        override val associatedTypes: List<InstanceType>
+            get() = emptyList()
         override val key: String
             get() = "settings"
     }
@@ -48,23 +50,23 @@ sealed interface TabItem {
         override val iosIcon: String,
         override val resource: StringResource,
         override val isDisabled: Boolean = false,
-        override val associatedType: InstanceType? = null,
+        override val associatedTypes: List<InstanceType> = emptyList(),
     ) : TabItem {
         LIBRARY("books.vertical", MR.strings.library),
-        SHOWS("tv", MR.strings.series, associatedType = InstanceType.Sonarr),
-        MOVIES("movieclapper", MR.strings.movies, associatedType = InstanceType.Radarr),
-        MUSIC("music.quarternote.3", MR.strings.music, associatedType = InstanceType.Lidarr),
-        BOOKS("book", MR.strings.books, associatedType = InstanceType.Bookshelf),
-        AUDIOBOOKS("book.closed", MR.strings.audiobooks, associatedType = InstanceType.Listenarr),
+        SHOWS("tv", MR.strings.series, associatedTypes = listOf(InstanceType.Sonarr)),
+        MOVIES("movieclapper", MR.strings.movies, associatedTypes = listOf(InstanceType.Radarr)),
+        MUSIC("music.quarternote.3", MR.strings.music, associatedTypes = listOf(InstanceType.Lidarr)),
+        BOOKS("book", MR.strings.books, associatedTypes = listOf(InstanceType.Bookshelf, InstanceType.Chaptarr)),
+        AUDIOBOOKS("book.closed", MR.strings.audiobooks, associatedTypes = listOf(InstanceType.Listenarr, InstanceType.Chaptarr)),
         ACTIVITY("square.and.arrow.down", MR.strings.activity),
         DOWNLOADS("arrow.down.circle", MR.strings.downloads),
         CALENDAR("calendar", MR.strings.schedule),
         REQUESTS("tray.fill", MR.strings.requests),
         DISCOVER("sparkles", MR.strings.discover),
-        PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedType = InstanceType.Prowlarr),
-        BAZARR("captions.bubble", MR.strings.bazarr, associatedType = InstanceType.Bazarr),
+        PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedTypes = listOf(InstanceType.Prowlarr)),
+        BAZARR("captions.bubble", MR.strings.bazarr, associatedTypes = listOf(InstanceType.Bazarr)),
         DASHBOARD("rectangle.grid.3x1", MR.strings.dashboard),
-        TRACEARR("tv.badge.wifi", MR.strings.tracearr, associatedType = InstanceType.Tracearr),
+        TRACEARR("tv.badge.wifi", MR.strings.tracearr, associatedTypes = listOf(InstanceType.Tracearr)),
         ;
 
         override val key: String get() = "standard_$name"
@@ -79,7 +81,7 @@ sealed interface TabItem {
         override val iosIcon: String = "globe"
         override val resource: StringResource = MR.strings.custom_webpage // Will use name instead
         override val isDisabled: Boolean = false
-        override val associatedType: InstanceType? = null
+        override val associatedTypes: List<InstanceType> = emptyList()
         override val key: String = "webpage_$id"
     }
 

@@ -173,6 +173,25 @@ class InstanceManager(
 
     fun getSelectedArrRepository(type: InstanceType): Flow<ArrInstanceRepository?> = getSelectedArrRepositoryTyped<ArrInstanceRepository>(type)
 
+    fun getSelectedArrRepository(types: List<InstanceType>): Flow<ArrInstanceRepository?> = instanceRepository
+        .observeSelectedInstanceByTypes(types)
+        .flatMapLatest { instance ->
+            if (instance == null) {
+                _instanceRepositories.map { repos ->
+                    repos.values.filterIsInstance<ArrInstanceRepository>().firstOrNull { it.instance.type in types }
+                }
+            } else {
+                _instanceRepositories.map { repos ->
+                    val repo = repos[instance.id] as? ArrInstanceRepository
+                    if (repo != null && repo.instance.type in types) {
+                        repo
+                    } else {
+                        repos.values.filterIsInstance<ArrInstanceRepository>().firstOrNull { it.instance.type in types }
+                    }
+                }
+            }
+        }
+
     fun getSelectedSonarrRepository(): Flow<SonarrRepository?> = getSelectedArrRepositoryTyped<SonarrRepository>(InstanceType.Sonarr)
 
     fun getSelectedRadarrRepository(): Flow<RadarrRepository?> = getSelectedArrRepositoryTyped<RadarrRepository>(InstanceType.Radarr)

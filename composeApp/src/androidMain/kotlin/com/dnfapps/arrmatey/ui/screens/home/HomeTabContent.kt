@@ -48,11 +48,11 @@ fun StandardTabContent(
 ) {
     when (tab) {
         TabItem.Standard.LIBRARY -> UnifiedLibraryTab(windowSizeClass, wideRailIsVisible)
-        TabItem.Standard.SHOWS -> ArrTab(InstanceType.Sonarr, windowSizeClass, wideRailIsVisible)
-        TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr, windowSizeClass, wideRailIsVisible)
-        TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr, windowSizeClass, wideRailIsVisible)
-        TabItem.Standard.BOOKS -> ArrTab(InstanceType.Bookshelf, windowSizeClass, wideRailIsVisible)
-        TabItem.Standard.AUDIOBOOKS -> ArrTab(InstanceType.Listenarr, windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.SHOWS -> ArrTab(tab.associatedType ?: InstanceType.Sonarr, windowSizeClass, wideRailIsVisible, tab.associatedTypes)
+        TabItem.Standard.MOVIES -> ArrTab(tab.associatedType ?: InstanceType.Radarr, windowSizeClass, wideRailIsVisible, tab.associatedTypes)
+        TabItem.Standard.MUSIC -> ArrTab(tab.associatedType ?: InstanceType.Lidarr, windowSizeClass, wideRailIsVisible, tab.associatedTypes)
+        TabItem.Standard.BOOKS -> ArrTab(tab.associatedType ?: InstanceType.Bookshelf, windowSizeClass, wideRailIsVisible, tab.associatedTypes)
+        TabItem.Standard.AUDIOBOOKS -> ArrTab(tab.associatedType ?: InstanceType.Listenarr, windowSizeClass, wideRailIsVisible, tab.associatedTypes)
         TabItem.Standard.ACTIVITY -> ActivityTab(wideRailIsVisible)
         TabItem.Standard.DOWNLOADS -> DownloadsTab(wideRailIsVisible)
         TabItem.Standard.CALENDAR -> CalendarTab(windowSizeClass, wideRailIsVisible)

@@ -9,4 +9,6 @@ class ObserveSelectedInstanceUseCase(
     private val instanceRepository: InstanceRepository,
 ) {
     operator fun invoke(type: InstanceType): Flow<Instance?> = instanceRepository.observeSelectedInstance(type)
+
+    operator fun invoke(types: List<InstanceType>): Flow<Instance?> = instanceRepository.observeSelectedInstanceByTypes(types)
 }

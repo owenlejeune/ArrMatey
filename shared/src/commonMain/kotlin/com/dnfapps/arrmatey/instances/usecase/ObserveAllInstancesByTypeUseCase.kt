@@ -9,4 +9,6 @@ class ObserveAllInstancesByTypeUseCase(
     private val instanceRepository: InstanceRepository,
 ) {
     operator fun invoke(type: InstanceType): Flow<List<Instance>> = instanceRepository.observeInstancesByType(type)
+
+    operator fun invoke(types: List<InstanceType>): Flow<List<Instance>> = instanceRepository.observeInstancesByTypes(types)
 }

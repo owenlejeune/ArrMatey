@@ -21,11 +21,17 @@ class InstanceRepository(
 
     fun observeInstancesByType(type: InstanceType): Flow<List<Instance>> = instanceDao.observeInstancesByType(type)
 
+    fun observeInstancesByTypes(types: List<InstanceType>): Flow<List<Instance>> = instanceDao.observeInstancesByTypes(types)
+
     fun observeSelectedInstance(type: InstanceType): Flow<Instance?> = instanceDao.observeSelectedInstance(type)
+
+    fun observeSelectedInstanceByTypes(types: List<InstanceType>): Flow<Instance?> = instanceDao.observeSelectedInstanceByTypes(types)
 
     suspend fun getInstanceById(id: Long): Instance? = instanceDao.getInstanceById(id)
 
     suspend fun getInstancesByType(type: InstanceType): List<Instance> = instanceDao.getInstancesOfType(type)
+
+    suspend fun getInstancesByTypes(types: List<InstanceType>): List<Instance> = instanceDao.getInstancesOfTypes(types)
 
     val allInstancesFlow: StateFlow<List<Instance>> =
         instanceDao
@@ -96,15 +102,21 @@ class InstanceRepository(
         instanceDao.deleteAndUpdateSelected(instance)
     }
 
-    suspend fun setInstanceActive(instance: Instance) {
+    suspend fun setInstanceActive(instance: Instance, types: List<InstanceType> = listOf(instance.type)) {
         withContext(Dispatchers.IO) {
-            instanceDao.setInstanceAsSelected(instance.id, instance.type)
+            instanceDao.setInstanceAsSelected(instance.id, types)
         }
     }
 
     suspend fun ensureFirstSelectedIfNone(type: InstanceType) {
         withContext(Dispatchers.IO) {
             instanceDao.ensureFirstSelectedIfNone(type)
+        }
+    }
+
+    suspend fun ensureFirstSelectedIfNone(types: List<InstanceType>) {
+        withContext(Dispatchers.IO) {
+            instanceDao.ensureFirstSelectedIfNone(types)
         }
     }
 }

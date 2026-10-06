@@ -31,6 +31,9 @@ interface InstanceDao {
     @Query("SELECT * FROM instances WHERE type = :type")
     fun observeInstancesByType(type: InstanceType): Flow<List<Instance>>
 
+    @Query("SELECT * FROM instances WHERE type IN (:types)")
+    fun observeInstancesByTypes(types: List<InstanceType>): Flow<List<Instance>>
+
     @Query("SELECT * FROM instances")
     suspend fun getAllInstances(): List<Instance>
 
@@ -40,11 +43,20 @@ interface InstanceDao {
     @Query("SELECT * FROM instances WHERE type = :type AND selected = 1 LIMIT 1")
     fun observeSelectedInstance(type: InstanceType): Flow<Instance?>
 
+    @Query("SELECT * FROM instances WHERE type IN (:types) AND selected = 1 LIMIT 1")
+    fun observeSelectedInstanceByTypes(types: List<InstanceType>): Flow<Instance?>
+
     @Query("SELECT * FROM instances WHERE type = :type")
     suspend fun getInstancesOfType(type: InstanceType): List<Instance>
 
+    @Query("SELECT * FROM instances WHERE type IN (:types)")
+    suspend fun getInstancesOfTypes(types: List<InstanceType>): List<Instance>
+
     @Query("UPDATE instances SET selected = 0 WHERE type = :type")
     suspend fun unselectAllOf(type: InstanceType)
+
+    @Query("UPDATE instances SET selected = 0 WHERE type IN (:types)")
+    suspend fun unselectAllOfTypes(types: List<InstanceType>)
 
     @Query("UPDATE instances SET selected = 1 WHERE id = :id")
     suspend fun selectInstance(id: Long)
@@ -55,6 +67,15 @@ interface InstanceDao {
         type: InstanceType,
     ) {
         unselectAllOf(type)
+        selectInstance(id)
+    }
+
+    @Transaction
+    suspend fun setInstanceAsSelected(
+        id: Long,
+        types: List<InstanceType>,
+    ) {
+        unselectAllOfTypes(types)
         selectInstance(id)
     }
 
@@ -96,6 +117,27 @@ interface InstanceDao {
     """,
     )
     suspend fun ensureFirstSelectedIfNone(type: InstanceType)
+
+    @Query(
+        """
+        UPDATE instances
+        SET selected = 1
+        WHERE id = (
+            SELECT id
+            FROM instances AS i
+            WHERE i.type IN (:types)
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM instances AS j
+                    WHERE j.type IN (:types)
+                        AND j.selected = 1
+                )
+            ORDER BY i.id
+            LIMIT 1
+        )
+    """,
+    )
+    suspend fun ensureFirstSelectedIfNone(types: List<InstanceType>)
 
     @Transaction
     suspend fun deleteAndUpdateSelected(instance: Instance) {

@@ -41,6 +41,11 @@ class ArrMediaViewModelS: ObservableObject {
         self.viewModel = KoinBridge.shared.getArrMediaViewModel(type: type)
         startObserving()
     }
+
+    init(types: [InstanceType]) {
+        self.viewModel = KoinBridge.shared.getArrMediaViewModel(types: types)
+        startObserving()
+    }
     
     private func startObserving() {
         viewModel.uiState.observeAsync(on: self, to: \.uiState)

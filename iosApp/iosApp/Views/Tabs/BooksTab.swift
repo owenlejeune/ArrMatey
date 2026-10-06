@@ -9,10 +9,10 @@ import Shared
 import SwiftUI
 
 struct BooksTab: View {
-    @StateObject private var booksViewModel = ArrMediaViewModelS(type: .bookshelf)
+    @StateObject private var booksViewModel = ArrMediaViewModelS(types: TabItemStandard.books.associatedTypes)
 
     var body: some View {
-        ArrTab(type: .bookshelf, viewModel: booksViewModel)
+        ArrTab(type: .bookshelf, types: TabItemStandard.books.associatedTypes, viewModel: booksViewModel)
     }
 }
 
@@ -20,6 +20,6 @@ struct BooksTabContent: View {
     @StateObject var viewModel: ArrMediaViewModelS
 
     var body: some View {
-        ArrTab(type: .bookshelf, viewModel: viewModel)
+        ArrTab(type: .bookshelf, types: TabItemStandard.books.associatedTypes, viewModel: viewModel)
     }
 }

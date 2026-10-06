@@ -427,9 +427,15 @@ val viewModelModule =
     module {
         viewModelOf(::DiscoverViewModel)
         viewModelOf(::ActivityQueueViewModel)
-        viewModel { (type: InstanceType) ->
+        viewModel { params ->
+            val firstParam: Any = params[0]
+            val types: List<InstanceType> = when (firstParam) {
+                is List<*> -> firstParam.filterIsInstance<InstanceType>()
+                is InstanceType -> listOf(firstParam)
+                else -> emptyList()
+            }
             ArrMediaViewModel(
-                instanceType = type,
+                instanceTypes = types,
                 getArrInstanceRepositoryUseCase = get(),
                 getLibraryUseCase = get(),
                 updatePreferencesUseCase = get(),
@@ -488,8 +494,14 @@ val viewModelModule =
                 logger = get(),
             )
         }
-        viewModel { (type: InstanceType) ->
-            InstancesViewModel(type, get(), get(), get())
+        viewModel { params ->
+            val firstParam: Any = params[0]
+            val types: List<InstanceType> = when (firstParam) {
+                is List<*> -> firstParam.filterIsInstance<InstanceType>()
+                is InstanceType -> listOf(firstParam)
+                else -> emptyList()
+            }
+            InstancesViewModel(types, get(), get(), get())
         }
         viewModel { (type: InstanceType, instanceId: Long?) ->
             ArrSearchViewModel(type, instanceId, get(), get(), get(), get(), get())
