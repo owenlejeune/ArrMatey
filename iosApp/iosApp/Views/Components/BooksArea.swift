@@ -22,15 +22,59 @@ struct BooksArea: View {
     @EnvironmentObject private var navigation: NavigationManager
 
     @State private var selectedTab: Int = 0
+    @State private var selectedMediaTypeFilter: BookMediaFilterBy = .all
+
+    private var hasMixedMediaTypes: Bool {
+        books.contains(where: { $0.mediaType != nil }) || author.audiobookQualityProfileId != nil
+    }
+
+    private var ebookCount: Int {
+        books.filter { $0.mediaType == nil || $0.mediaType == .ebook }.count
+    }
+
+    private var audiobookCount: Int {
+        books.filter { $0.mediaType == .audiobook }.count
+    }
+
+    private var filteredBooks: [Book] {
+        guard hasMixedMediaTypes && selectedMediaTypeFilter != .all else { return books }
+        if selectedMediaTypeFilter == .audiobook {
+            return books.filter { $0.mediaType == .audiobook }
+        } else {
+            return books.filter { $0.mediaType == nil || $0.mediaType == .ebook }
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Picker("", selection: $selectedTab) {
-                Text(MR.strings().books_area_books_tab.formatted(args: [books.count])).tag(0)
+                Text(MR.strings().books_area_books_tab.formatted(args: [filteredBooks.count])).tag(0)
                 Text(MR.strings().books_area_series_tab.formatted(args: [series.count])).tag(1)
             }
             .pickerStyle(.segmented)
             .labelsHidden()
+
+            if hasMixedMediaTypes && selectedTab == 0 {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        mediaTypeFilterChip(
+                            title: "\(BookMediaFilterBy.all.resource.localized()) (\(books.count))",
+                            isSelected: selectedMediaTypeFilter == .all,
+                            action: { selectedMediaTypeFilter = .all }
+                        )
+                        mediaTypeFilterChip(
+                            title: "\(BookMediaFilterBy.ebook.resource.localized()) (\(ebookCount))",
+                            isSelected: selectedMediaTypeFilter == .ebook,
+                            action: { selectedMediaTypeFilter = .ebook }
+                        )
+                        mediaTypeFilterChip(
+                            title: "\(BookMediaFilterBy.audiobook.resource.localized()) (\(audiobookCount))",
+                            isSelected: selectedMediaTypeFilter == .audiobook,
+                            action: { selectedMediaTypeFilter = .audiobook }
+                        )
+                    }
+                }
+            }
 
             if selectedTab == 0 {
                 booksView
@@ -40,9 +84,26 @@ struct BooksArea: View {
         }
     }
 
+    private func mediaTypeFilterChip(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(isSelected ? Color.themePrimary.opacity(0.15) : Color(uiColor: .tertiarySystemFill))
+                .foregroundColor(isSelected ? .themePrimary : .primary)
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(isSelected ? Color.themePrimary.opacity(0.3) : Color.clear, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
     private var booksView: some View {
         VStack(spacing: 0) {
-            ForEach(books, id: \.id) { book in
+            ForEach(filteredBooks, id: \.id) { book in
                 BookRow(
                     book: book,
                     instanceId: instanceId,
@@ -67,7 +128,7 @@ struct BooksArea: View {
         VStack(spacing: 12) {
             ForEach(series, id: \.id) { bookSeries in
                 let seriesBooks = bookSeries.links.compactMap { link in
-                    books.first(where: { $0.id == link.bookId?.int64Value })
+                    filteredBooks.first(where: { $0.id == link.bookId?.int64Value })
                 }
 
                 SeriesSection(
@@ -100,7 +161,7 @@ struct BookRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 0) {
                     if let pos = seriesPosition {
                         Text("\(pos). ")
@@ -109,7 +170,25 @@ struct BookRow: View {
                     Text(book.title)
                 }
 
-                HStack {
+                if !book.narratorNames.isEmpty {
+                    Text(MR.strings().narrated_by.formatted(args: [book.narratorNames.joined(separator: ", ")]))
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .italic()
+                }
+
+                HStack(spacing: 4) {
+                    if let mediaType = book.mediaType {
+                        let isAudiobook = mediaType == .audiobook
+                        Text(mediaType.resource.localized())
+                            .font(.system(size: 11, weight: .semibold))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1)
+                            .background(isAudiobook ? Color.themePrimary.opacity(0.15) : Color.themeSecondary.opacity(0.15))
+                            .foregroundColor(isAudiobook ? .themePrimary : .themeSecondary)
+                            .cornerRadius(4)
+                    }
+
                     let status = getStatus()
                     Text(status.text)
                         .font(.system(size: 14))
@@ -160,7 +239,6 @@ struct BookRow: View {
         if let quality = bookFile?.fileQualityName {
             return (quality, .themeTertiary)
         }
-        // Simplified status check for now
         return (MR.strings().missing.localized(), .red)
     }
 }

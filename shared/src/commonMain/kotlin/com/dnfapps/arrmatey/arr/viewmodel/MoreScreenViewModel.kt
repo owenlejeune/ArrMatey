@@ -439,6 +439,7 @@ class MoreScreenViewModel(
                 if (instance == null) {
                     flowOf(InstancePreferences())
                 } else {
+                    updateAllPreferencesUseCase.syncGlobalPreferencesToInstance(instance.id)
                     instancePreferenceStoreRepository.getInstancePreferences(instance.id).observePreferences()
                 }
             }.stateIn(

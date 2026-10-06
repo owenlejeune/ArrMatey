@@ -179,6 +179,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
         BookDetailsScreen(
             book = params.book,
             author = params.author,
+            instanceId = effectiveInstanceId,
             isExpanded = isExpanded,
             wideRailIsVisible = wideRailIsVisible,
             onBack = { navigation.popBackStack() },

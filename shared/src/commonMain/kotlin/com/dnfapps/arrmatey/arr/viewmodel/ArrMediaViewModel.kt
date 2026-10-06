@@ -187,6 +187,7 @@ class ArrMediaViewModel(
         selectedRepository
             .filterNotNull()
             .flatMapLatest {
+                updateAllPreferencesUseCase.syncGlobalPreferencesToInstance(it.instance.id)
                 instancePreferenceStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
             }.stateIn(
                 scope = viewModelScope,

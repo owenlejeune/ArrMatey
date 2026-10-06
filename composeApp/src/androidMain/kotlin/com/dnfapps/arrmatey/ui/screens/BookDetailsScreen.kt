@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookFile
+import com.dnfapps.arrmatey.arr.api.model.BookMediaType
 import com.dnfapps.arrmatey.arr.state.HistoryState
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
 import com.dnfapps.arrmatey.compose.utils.breakable
@@ -70,13 +74,14 @@ import org.koin.core.parameter.parametersOf
 fun BookDetailsScreen(
     book: Book,
     author: Author,
+    instanceId: Long? = null,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit = {},
     onNavigateToBookRelease: (Long) -> Unit = {},
     viewModel: BookDetailsViewModel =
         koinViewModel(
-            key = "${author.id}_${book.id}",
+            key = "${author.id}_${book.id}_$instanceId",
             parameters = { parametersOf(author.id, book) },
         ),
 ) {
@@ -193,15 +198,43 @@ fun BookDetailsScreen(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
-                    Column {
-                        Text(
-                            text = currentBook.title.breakable(),
-                            style = MaterialTheme.typography.headlineMedium,
-                        )
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(
+                                text = currentBook.title.breakable(),
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier.weight(1f, fill = false),
+                            )
+                            if (currentBook.mediaType != null) {
+                                val isAudiobook = currentBook.mediaType == BookMediaType.Audiobook
+                                Surface(
+                                    shape = MaterialTheme.shapes.extraSmall,
+                                    color = if (isAudiobook) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer,
+                                ) {
+                                    Text(
+                                        text = mokoString(currentBook.mediaType!!.resource),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (isAudiobook) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onTertiaryContainer,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    )
+                                }
+                            }
+                        }
                         currentBook.author?.title?.let { title ->
                             Text(
                                 text = title,
                                 style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
+                        if (currentBook.narratorNames.isNotEmpty()) {
+                            Text(
+                                text = mokoString(MR.strings.narrated_by, currentBook.narratorNames.joinToString(", ")),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontStyle = FontStyle.Italic,
                             )
                         }
                         currentBook.pageCount?.let { pageCount ->

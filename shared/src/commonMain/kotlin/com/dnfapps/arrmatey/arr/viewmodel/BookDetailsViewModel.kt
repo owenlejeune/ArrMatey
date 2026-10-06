@@ -125,7 +125,7 @@ class BookDetailsViewModel(
             currentRepository?.let {
                 performAutomaticSearchUseCase(
                     mediaId = authorId,
-                    type = InstanceType.Bookshelf,
+                    type = it.instance.type,
                     repository = it,
                     bookId = _book.value.id,
                 )

@@ -439,7 +439,7 @@ fun UnifiedMediaDetailsScreen(
                                     showSeriesMonitoringSheet = true
                                 } else if (resolvedType == InstanceType.Lidarr) {
                                     showArtistMonitoringSheet = true
-                                } else if (resolvedType == InstanceType.Bookshelf) {
+                                } else if (resolvedType == InstanceType.Bookshelf || resolvedType == InstanceType.Chaptarr) {
                                     showBookMonitoringSheet = true
                                 }
                             },

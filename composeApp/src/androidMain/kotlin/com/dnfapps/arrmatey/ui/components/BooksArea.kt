@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -23,12 +26,15 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SecondaryTabRow
-import androidx.compose.material3.Tab
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -51,7 +57,9 @@ import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookFile
+import com.dnfapps.arrmatey.arr.api.model.BookMediaType
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
+import com.dnfapps.arrmatey.compose.utils.BookMediaFilterBy
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.extensions.isToday
 import com.dnfapps.arrmatey.extensions.isTodayOrAfter
@@ -77,30 +85,77 @@ fun BooksArea(
     modifier: Modifier = Modifier,
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var selectedMediaTypeFilter by rememberSaveable { mutableStateOf(BookMediaFilterBy.All) }
+
+    val hasMixedMediaTypes = remember(books, author) {
+        books.any { it.mediaType != null } || author.audiobookQualityProfileId != null
+    }
+
+    val ebookCount = remember(books) {
+        books.count { it.mediaType == null || it.mediaType == BookMediaType.EBook }
+    }
+    val audiobookCount = remember(books) {
+        books.count { it.mediaType == BookMediaType.Audiobook }
+    }
+
+    val filteredBooks = remember(books, selectedMediaTypeFilter, hasMixedMediaTypes) {
+        if (!hasMixedMediaTypes || selectedMediaTypeFilter == BookMediaFilterBy.All) {
+            books
+        } else if (selectedMediaTypeFilter == BookMediaFilterBy.Audiobook) {
+            books.filter { it.mediaType == BookMediaType.Audiobook }
+        } else {
+            books.filter { it.mediaType == null || it.mediaType == BookMediaType.EBook }
+        }
+    }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier,
     ) {
-        SecondaryTabRow(
-            selectedTabIndex = selectedTabIndex,
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            Tab(
+            SegmentedButton(
                 selected = selectedTabIndex == 0,
                 onClick = { selectedTabIndex = 0 },
-                text = { Text(mokoString(MR.strings.books_area_books_tab, books.size)) },
+                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                label = { Text(mokoString(MR.strings.books_area_books_tab, filteredBooks.size)) },
             )
-            Tab(
+            SegmentedButton(
                 selected = selectedTabIndex == 1,
                 onClick = { selectedTabIndex = 1 },
-                text = { Text(mokoString(MR.strings.books_area_series_tab, series.size)) },
+                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                label = { Text(mokoString(MR.strings.books_area_series_tab, series.size)) },
             )
+        }
+
+        if (hasMixedMediaTypes && selectedTabIndex == 0) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                FilterChip(
+                    selected = selectedMediaTypeFilter == BookMediaFilterBy.All,
+                    onClick = { selectedMediaTypeFilter = BookMediaFilterBy.All },
+                    label = { Text(mokoString(BookMediaFilterBy.All.resource) + " (${books.size})") },
+                )
+                FilterChip(
+                    selected = selectedMediaTypeFilter == BookMediaFilterBy.EBook,
+                    onClick = { selectedMediaTypeFilter = BookMediaFilterBy.EBook },
+                    label = { Text(mokoString(BookMediaFilterBy.EBook.resource) + " ($ebookCount)") },
+                )
+                FilterChip(
+                    selected = selectedMediaTypeFilter == BookMediaFilterBy.Audiobook,
+                    onClick = { selectedMediaTypeFilter = BookMediaFilterBy.Audiobook },
+                    label = { Text(mokoString(BookMediaFilterBy.Audiobook.resource) + " ($audiobookCount)") },
+                )
+            }
         }
 
         AnimatedContent(
             targetState = selectedTabIndex,
             transitionSpec = {
-                expandVertically()
-                    .togetherWith(shrinkVertically())
+                fadeIn().togetherWith(fadeOut())
             },
         ) { tabIndex ->
             when (tabIndex) {
@@ -108,7 +163,7 @@ fun BooksArea(
                     BooksView(
                         author = author,
                         files = files,
-                        books = books,
+                        books = filteredBooks,
                         searchIds = searchIds,
                         onToggleMonitor = onToggleMonitor,
                         onAutomaticSearch = onAutomaticSearch,
@@ -120,7 +175,7 @@ fun BooksArea(
                     SeriesView(
                         series = series,
                         files = files,
-                        books = books,
+                        books = filteredBooks,
                         searchIds = searchIds,
                         onToggleMonitor = onToggleMonitor,
                         onToggleSeriesMonitor = onToggleSeriesMonitor,
@@ -197,6 +252,15 @@ fun BookRow(
                 fontWeight = FontWeight.Medium,
             )
 
+            if (book.narratorNames.isNotEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.narrated_by, book.narratorNames.joinToString(", ")),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontStyle = FontStyle.Italic,
+                )
+            }
+
             val releaseDate = book.releaseDate?.takeIf { it.isTodayOrAfter() }
             val (statusText, statusColor) =
                 when {
@@ -206,7 +270,25 @@ fun BookRow(
                     else -> mokoString(MR.strings.missing) to MaterialTheme.colorScheme.error
                 }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (book.mediaType != null) {
+                    val isAudiobook = book.mediaType == BookMediaType.Audiobook
+                    Surface(
+                        shape = MaterialTheme.shapes.extraSmall,
+                        color = if (isAudiobook) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer,
+                    ) {
+                        Text(
+                            text = mokoString(book.mediaType!!.resource),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isAudiobook) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                        )
+                    }
+                }
+
                 Text(
                     text = statusText,
                     style = MaterialTheme.typography.bodySmall,

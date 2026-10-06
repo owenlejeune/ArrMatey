@@ -55,13 +55,34 @@ struct BookDetailsScreen: View {
 
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(book.title.breakable())
-                            .font(.title)
-                            .bold()
+                        HStack(alignment: .center, spacing: 8) {
+                            Text(book.title.breakable())
+                                .font(.title)
+                                .bold()
+
+                            if let mediaType = book.mediaType {
+                                let isAudiobook = mediaType == .audiobook
+                                Text(mediaType.resource.localized())
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(isAudiobook ? Color.themePrimary.opacity(0.15) : Color.themeSecondary.opacity(0.15))
+                                    .foregroundColor(isAudiobook ? .themePrimary : .themeSecondary)
+                                    .clipShape(Capsule())
+                            }
+                        }
 
                         if let authorTitle = author.title {
                             Text(authorTitle)
                                 .font(.body)
+                        }
+
+                        if !book.narratorNames.isEmpty {
+                            Text(MR.strings().narrated_by.formatted(args: [book.narratorNames.joined(separator: ", ")]))
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .italic()
                         }
 
                         if let pageCount = book.pageCount {

@@ -3,9 +3,29 @@ package com.dnfapps.arrmatey.arr.api.model
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.shared.*
+import com.dnfapps.arrmatey.shared.MR
+import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
+
+@Serializable
+enum class BookMediaType(
+    val resource: StringResource,
+) {
+    @SerialName("ebook")
+    EBook(MR.strings.ebook),
+
+    @SerialName("audiobook")
+    Audiobook(MR.strings.type_audiobook);
+
+    companion object {
+        fun fromString(value: String?): BookMediaType? =
+            entries.firstOrNull { it.name.equals(value, ignoreCase = true) || (it == EBook && value.equals("ebook", ignoreCase = true)) }
+    }
+}
 
 @Serializable
 data class Book(
@@ -33,7 +53,7 @@ data class Book(
     val author: Author? = null,
     override val instanceId: Long? = null,
     override val instanceIds: List<Long> = listOfNotNull(instanceId),
-    val mediaType: String? = null,
+    val mediaType: BookMediaType? = null,
     val audiobookMonitored: Boolean? = null,
     val ebookMonitored: Boolean? = null,
     val narratorNames: List<String> = emptyList(),

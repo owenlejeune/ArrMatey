@@ -211,7 +211,7 @@ private fun ArrPrimaryMenuGroup(
                 },
                 leadingIcon = { Icon(Icons.Default.Bookmark, null) },
             )
-        } else if (instanceType == InstanceType.Bookshelf && onChangeMonitoring != null) {
+        } else if ((instanceType == InstanceType.Bookshelf || instanceType == InstanceType.Chaptarr) && onChangeMonitoring != null) {
             DropdownMenuItem(
                 text = { Text(mokoString(MR.strings.book_monitoring)) },
                 onClick = {

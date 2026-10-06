@@ -61,7 +61,7 @@ data class Author(
     val audiobookMonitorFuture: Boolean? = null,
     val ebookMonitorExisting: Int? = null,
     val ebookMonitorFuture: Boolean? = null,
-    val lastSelectedMediaType: String? = null,
+    val lastSelectedMediaType: BookMediaType? = null,
 ) : ArrMedia,
     HasArrImages<Author>,
     InstanceTypeIdentifiable {

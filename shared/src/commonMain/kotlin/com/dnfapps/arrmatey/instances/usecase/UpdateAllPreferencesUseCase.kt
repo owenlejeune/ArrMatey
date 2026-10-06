@@ -32,4 +32,36 @@ class UpdateAllPreferencesUseCase(
             preferenceStore.savePreferences(updated)
         }
     }
+
+    suspend fun findGlobalPreferences(): InstancePreferences? {
+        val allInstances = instanceRepository.observeAllInstances().first()
+        return allInstances.firstNotNullOfOrNull { instance ->
+            val prefs = instancePreferenceStoreRepository.getInstancePreferences(instance.id).observePreferences().first()
+            if (prefs.applyGlobally) prefs else null
+        }
+    }
+
+    suspend fun syncGlobalPreferencesToInstance(targetInstanceId: Long) {
+        val global = findGlobalPreferences() ?: return
+        val targetStore = instancePreferenceStoreRepository.getInstancePreferences(targetInstanceId)
+        val current = targetStore.observePreferences().first()
+        if (!current.applyGlobally) {
+            val updated = current.copy(
+                viewType = global.viewType,
+                posterElevation = global.posterElevation,
+                posterRadius = global.posterRadius,
+                showFullDetails = global.showFullDetails,
+                showOverlay = global.showOverlay,
+                gridDensity = global.gridDensity,
+                gridSpacing = global.gridSpacing,
+                showBannerBackground = global.showBannerBackground,
+                includeOverview = global.includeOverview,
+                bannerBlur = global.bannerBlur,
+                applyGlobally = global.applyGlobally,
+                deleteDeleteFiles = global.deleteDeleteFiles,
+                deleteAddExclusion = global.deleteAddExclusion,
+            )
+            targetStore.savePreferences(updated)
+        }
+    }
 }

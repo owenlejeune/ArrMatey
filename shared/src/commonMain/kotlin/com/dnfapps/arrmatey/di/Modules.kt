@@ -315,7 +315,7 @@ val useCaseModule =
         factory { GetMovieFilesUseCase(get()) }
         factory { TestInstanceConnectionUseCase(get()) }
         factory { TestNewInstanceConnectionUseCase(get()) }
-        factory { CreateInstanceUseCase(get()) }
+        factory { CreateInstanceUseCase(get(), get()) }
         factory { UpdateInstanceUseCase(get()) }
         factory { DismissInfoCardUseCase(get()) }
         factory { GetInstanceByIdUseCase(get()) }
