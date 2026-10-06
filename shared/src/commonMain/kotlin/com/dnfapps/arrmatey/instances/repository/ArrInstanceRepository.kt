@@ -117,6 +117,7 @@ open class ArrInstanceRepository(
         InstanceType.Lidarr -> LidarrClient(instance, httpClient)
         InstanceType.Bookshelf -> BookshelfClient(instance, httpClient)
         InstanceType.Listenarr -> ListenarrClient(instance, httpClient)
+        InstanceType.Chaptarr -> BookshelfClient(instance, httpClient)
         else -> TODO()
     }
 

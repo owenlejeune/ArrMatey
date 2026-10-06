@@ -22,7 +22,7 @@ class PerformRefreshUseCase {
                 InstanceType.Sonarr -> RefreshSeries(listOf(mediaId))
                 InstanceType.Radarr -> RefreshMovie(listOf(mediaId))
                 InstanceType.Lidarr -> RefreshAlbum(listOf(mediaId))
-                InstanceType.Bookshelf -> RefreshAuthor(listOf(mediaId))
+                InstanceType.Bookshelf, InstanceType.Chaptarr -> RefreshAuthor(listOf(mediaId))
                 else -> throw UnsupportedOperationException("Cannot perform refresh on an instance of type $type")
             }
         return repository.executeCommand(payload)
@@ -38,7 +38,7 @@ class PerformRefreshUseCase {
                 InstanceType.Sonarr -> RefreshSeries(ids)
                 InstanceType.Radarr -> RefreshMovie(ids)
                 InstanceType.Lidarr -> RefreshAlbum(ids)
-                InstanceType.Bookshelf -> RefreshAuthor(ids)
+                InstanceType.Bookshelf, InstanceType.Chaptarr -> RefreshAuthor(ids)
                 else -> throw UnsupportedOperationException("Cannot perform refresh on an instance of type $type")
             }
         return repository.executeCommand(payload)

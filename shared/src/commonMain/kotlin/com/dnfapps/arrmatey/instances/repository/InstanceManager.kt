@@ -145,6 +145,8 @@ class InstanceManager(
         InstanceType.Bookshelf -> ReadarrRepository(instance, httpClient, logger)
 
         InstanceType.Listenarr -> ListenarrRepository(instance, httpClient, logger)
+
+        InstanceType.Chaptarr -> ReadarrRepository(instance, httpClient, logger)
     }
 
     fun getArrRepository(instanceId: Long): ArrInstanceRepository? = _instanceRepositories.value[instanceId] as? ArrInstanceRepository?
@@ -180,6 +182,8 @@ class InstanceManager(
     fun getSelectedReadarrRepository(): Flow<ReadarrRepository?> = getSelectedArrRepositoryTyped<ReadarrRepository>(InstanceType.Bookshelf)
 
     fun getSelectedListenarrRepository(): Flow<ListenarrRepository?> = getSelectedArrRepositoryTyped<ListenarrRepository>(InstanceType.Listenarr)
+
+    fun getSelectedChaptarrRepository(): Flow<ReadarrRepository?> = getSelectedArrRepositoryTyped<ReadarrRepository>(InstanceType.Chaptarr)
 
     private inline fun <reified T : ArrInstanceRepository> getSelectedArrRepositoryTyped(type: InstanceType): Flow<T?> = instanceRepository
         .observeSelectedInstance(type)
@@ -292,6 +296,7 @@ class InstanceManager(
                             InstanceType.Lidarr,
                             InstanceType.Bookshelf,
                             InstanceType.Listenarr,
+                            InstanceType.Chaptarr,
                         )
                 }.map { it.id }
                 .toSet()

@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrServerType
 val ArrGreen = Color(0xFF00853d)
 val ArrGrey = Color(0xFF888888)
 val ArrRed = Color(0xFFF05050)
+val ChaptarrRed = Color(0xFF810120)
 val ArrOrange = Color(0xFFFFA505)
 val ArrYellow = Color(0xFFFFC653)
 val ArrPurple = Color(0xFF7A43b6)

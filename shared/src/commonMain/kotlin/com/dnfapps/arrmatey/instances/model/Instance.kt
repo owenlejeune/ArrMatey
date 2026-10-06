@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.ArrRed
+import com.dnfapps.arrmatey.ui.theme.ChaptarrRed
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.getNetworkUtils
@@ -155,7 +156,24 @@ enum class InstanceType(
         mockMedia = MockMedia.Lidarr,
         associatedColor = ArrGreen,
     ),
-
+    Chaptarr(
+        resource = MR.strings.chaptarr_description,
+        github = "https://github.com/Chaptarr/chaptarr",
+        website = "https://wiki.chaptarr.com/",
+        icon = MR.images.chaptarr,
+        tabIcon = MR.images.chaptarr_tab,
+        defaultPort = 8789,
+        supportsActivityQueue = true,
+        apiBase = "api/v1",
+        testEndpoint = "system/status",
+        getApiKeyEndpoint = "settings/general",
+        includeTopLevelAutomaticSearchOption = true,
+        aspectRatio = AspectRatio.Cover,
+        supportsNotifications = true,
+        mockCover = MR.images.readarr_mock_cover,
+        mockMedia = MockMedia.Chaptarr,
+        associatedColor = ChaptarrRed,
+    ),
     @OptIn(ExperimentalSerializationApi::class)
     @JsonNames("Booksehlf", "Booksehelf", "Bookshelf")
     Bookshelf(
@@ -261,6 +279,6 @@ enum class InstanceType(
     ;
 
     companion object {
-        fun arrs() = listOf(Sonarr, Radarr, Lidarr, Bookshelf, Listenarr)
+        fun arrs() = listOf(Sonarr, Radarr, Lidarr, Bookshelf, Listenarr, Chaptarr)
     }
 }

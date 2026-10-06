@@ -58,7 +58,7 @@ class GetMediaDetailsUseCase(
                                 loadLidarrDetails(repository, mediaId, data)
                                     .collect { send(it) }
                             }
-                            InstanceType.Bookshelf -> {
+                            InstanceType.Bookshelf, InstanceType.Chaptarr -> {
                                 loadReadarrDetails(repository, mediaId, data)
                                     .collect { send(it) }
                             }

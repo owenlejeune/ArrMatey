@@ -14,6 +14,7 @@ internal object PreferenceKeys {
     val PROWLARR_INFO_CARD = booleanPreferencesKey("prowlarrInfoCard")
     val SEERR_INFO_CARD = booleanPreferencesKey("seerrInfoCard")
     val LISTENARR_INFO_CARD = booleanPreferencesKey("listenarrIndoCard")
+    val CHAPTARR_INFO_CARD = booleanPreferencesKey("chaptarrInfoCard")
     val BAZARR_INFO_CARD = booleanPreferencesKey("bazarrInfoCard")
     val TRACEARR_INFO_CARD = booleanPreferencesKey("tracearrInfoCard")
 
@@ -72,6 +73,7 @@ internal object PreferenceKeys {
         InstanceType.Bookshelf -> BOOKSHELF_INFO_CARD
         InstanceType.Prowlarr -> PROWLARR_INFO_CARD
         InstanceType.Listenarr -> LISTENARR_INFO_CARD
+        InstanceType.Chaptarr -> CHAPTARR_INFO_CARD
         InstanceType.Bazarr -> BAZARR_INFO_CARD
         InstanceType.Tracearr -> TRACEARR_INFO_CARD
     }

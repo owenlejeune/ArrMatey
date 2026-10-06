@@ -43,7 +43,7 @@ private fun mediaCoverApiUrl(
                     subFolder.equals("Albums", ignoreCase = true) -> "album/"
                     else -> return null
                 }
-            InstanceType.Bookshelf ->
+            InstanceType.Bookshelf, InstanceType.Chaptarr ->
                 when {
                     subFolder.isEmpty() -> "author/"
                     subFolder.equals("Books", ignoreCase = true) -> "book/"

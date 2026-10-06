@@ -228,7 +228,7 @@ class CalendarService(
         InstanceType.Radarr -> item is ArrMovie
         InstanceType.Sonarr -> item is Episode || item is EpisodeGroup
         InstanceType.Lidarr -> item is ArrAlbum
-        InstanceType.Bookshelf -> item is Book
+        InstanceType.Bookshelf, InstanceType.Chaptarr -> item is Book
         InstanceType.Listenarr -> item is Audiobook
         else -> false
     }

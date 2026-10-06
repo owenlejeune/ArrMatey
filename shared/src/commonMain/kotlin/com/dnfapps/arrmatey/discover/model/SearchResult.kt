@@ -45,6 +45,8 @@ sealed interface SearchResult {
                         is Author,
                         is MockMedia.Readarr,
                         -> InstanceType.Bookshelf
+                        is MockMedia.Chaptarr,
+                        -> InstanceType.Chaptarr
                         is Audiobook,
                         is SearchAudiobook,
                         is MockMedia.Listenarr,

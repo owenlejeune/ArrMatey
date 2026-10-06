@@ -39,6 +39,7 @@ enum class FilterBy(
             InstanceType.Lidarr -> listOf(All, Monitored, Unmonitored, Missing)
             InstanceType.Bookshelf -> listOf(All, Monitored, Unmonitored, Missing)
             InstanceType.Listenarr -> listOf(All, Monitored, Unmonitored, Missing)
+            InstanceType.Chaptarr -> listOf(All, Monitored, Unmonitored, Missing)
             else -> emptyList()
         }
     }

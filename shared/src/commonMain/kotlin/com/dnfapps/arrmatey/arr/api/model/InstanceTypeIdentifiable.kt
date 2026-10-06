@@ -23,6 +23,8 @@ sealed interface InstanceTypeIdentifiable {
                 is Book,
                 is MockMedia.Readarr,
                 -> InstanceType.Bookshelf
+                is MockMedia.Chaptarr,
+                -> InstanceType.Chaptarr
                 is Audiobook,
                 is SearchAudiobook,
                 is MockMedia.Listenarr,
