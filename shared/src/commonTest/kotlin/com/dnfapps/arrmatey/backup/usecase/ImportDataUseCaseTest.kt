@@ -50,15 +50,27 @@ class ImportDataUseCaseTest {
 
             override fun observeInstancesByType(type: InstanceType): Flow<List<Instance>> = emptyFlow()
 
+            override fun observeInstancesByTypes(types: List<InstanceType>): Flow<List<Instance>> = emptyFlow()
+
             override suspend fun getAllInstances(): List<Instance> = emptyList()
 
             override suspend fun getInstanceById(id: Long): Instance? = null
 
             override fun observeSelectedInstance(type: InstanceType): Flow<Instance?> = emptyFlow()
 
+            override fun observeSelectedInstanceByTypes(types: List<InstanceType>): Flow<Instance?> = emptyFlow()
+
             override suspend fun getInstancesOfType(type: InstanceType): List<Instance> = emptyList()
 
+            override suspend fun getInstancesOfTypes(types: List<InstanceType>): List<Instance> = emptyList()
+
             override suspend fun unselectAllOf(type: InstanceType) {}
+
+            override suspend fun unselectAllOfTypes(types: List<InstanceType>) {}
+
+            override suspend fun ensureFirstSelectedIfNone(type: InstanceType) {}
+
+            override suspend fun ensureFirstSelectedIfNone(types: List<InstanceType>) {}
 
             override suspend fun selectInstance(id: Long) {}
 
@@ -75,8 +87,6 @@ class ImportDataUseCaseTest {
                 label: String,
                 currentId: Long,
             ): Long? = null
-
-            override suspend fun ensureFirstSelectedIfNone(type: InstanceType) {}
         }
 
     private val dummyDownloadClientDao =

@@ -67,15 +67,23 @@ class GlobalSearchUseCaseTest {
 
         override fun observeInstancesByType(type: InstanceType): Flow<List<Instance>> = MutableStateFlow(instances.value.filter { it.type == type })
 
+        override fun observeInstancesByTypes(types: List<InstanceType>): Flow<List<Instance>> = MutableStateFlow(instances.value.filter { it.type in types })
+
         override suspend fun getAllInstances(): List<Instance> = instances.value
 
         override suspend fun getInstanceById(id: Long): Instance? = instances.value.find { it.id == id }
 
         override fun observeSelectedInstance(type: InstanceType): Flow<Instance?> = MutableStateFlow(instances.value.find { it.type == type && it.selected })
 
+        override fun observeSelectedInstanceByTypes(types: List<InstanceType>): Flow<Instance?> = MutableStateFlow(instances.value.find { it.type in types && it.selected })
+
         override suspend fun getInstancesOfType(type: InstanceType): List<Instance> = instances.value.filter { it.type == type }
 
+        override suspend fun getInstancesOfTypes(types: List<InstanceType>): List<Instance> = instances.value.filter { it.type in types }
+
         override suspend fun unselectAllOf(type: InstanceType) {}
+
+        override suspend fun unselectAllOfTypes(types: List<InstanceType>) {}
 
         override suspend fun selectInstance(id: Long) {}
 
@@ -94,6 +102,8 @@ class GlobalSearchUseCaseTest {
         ): Long? = null
 
         override suspend fun ensureFirstSelectedIfNone(type: InstanceType) {}
+
+        override suspend fun ensureFirstSelectedIfNone(types: List<InstanceType>) {}
     }
 
     private class FakeDownloadClientDao : DownloadClientDao {

@@ -35,7 +35,7 @@ class UnifiedMediaDetailsViewModelTest {
                 smartAddMediaUseCase = mockk(),
                 getArrInstanceRepositoryUseCase =
                 mockk(relaxed = true) {
-                    every { observeSelected(any()) } returns flowOf(null)
+                    every { observeSelected(any<InstanceType>()) } returns flowOf(null)
                 },
                 getSeerrInstanceRepositoryUseCase =
                 mockk(relaxed = true) {
@@ -95,7 +95,7 @@ class UnifiedMediaDetailsViewModelTest {
         every { observeInstancePreferencesUseCase(any<Long>()) } returns flowOf(InstancePreferences())
 
         val observeScopedReposByTypeUseCase = mockk<ObserveScopedReposByTypeUseCase>()
-        every { observeScopedReposByTypeUseCase(any()) } returns flowOf(emptyList())
+        every { observeScopedReposByTypeUseCase(any<InstanceType>()) } returns flowOf(emptyList())
 
         val viewModel =
             UnifiedMediaDetailsViewModel(
@@ -106,7 +106,7 @@ class UnifiedMediaDetailsViewModelTest {
                 requestType = RequestType.Tv,
                 getUnifiedMediaDetailsUseCase = mockk(relaxed = true),
                 smartAddMediaUseCase = mockk(),
-                getArrInstanceRepositoryUseCase = mockk(relaxed = true) { every { observeSelected(any()) } returns flowOf(null) },
+                getArrInstanceRepositoryUseCase = mockk(relaxed = true) { every { observeSelected(any<InstanceType>()) } returns flowOf(null) },
                 getSeerrInstanceRepositoryUseCase = mockk(relaxed = true) { every { observeSelected() } returns flowOf(null) },
                 getBazarrInstanceRepositoryUseCase = mockk(relaxed = true) { every { observeSelected() } returns flowOf(null) },
                 getTracearrInstanceRepositoryUseCase = mockk(relaxed = true) { every { observeSelected() } returns flowOf(null) },

@@ -44,6 +44,12 @@ class InstanceRepositoryTest {
                 },
             )
 
+            override fun observeInstancesByTypes(types: List<InstanceType>): Flow<List<Instance>> = MutableStateFlow(
+                instances.value.filter {
+                    it.type in types
+                },
+            )
+
             override suspend fun getAllInstances(): List<Instance> = instances.value
 
             override suspend fun getInstanceById(id: Long): Instance? = instances.value.find { it.id == id }
@@ -55,10 +61,23 @@ class InstanceRepositoryTest {
                 },
             )
 
+            override fun observeSelectedInstanceByTypes(types: List<InstanceType>): Flow<Instance?> = MutableStateFlow(
+                instances.value.find {
+                    it.type in types &&
+                        it.selected
+                },
+            )
+
             override suspend fun getInstancesOfType(type: InstanceType): List<Instance> = instances.value.filter { it.type == type }
+
+            override suspend fun getInstancesOfTypes(types: List<InstanceType>): List<Instance> = instances.value.filter { it.type in types }
 
             override suspend fun unselectAllOf(type: InstanceType) {
                 instances.value = instances.value.map { if (it.type == type) it.copy(selected = false) else it }
+            }
+
+            override suspend fun unselectAllOfTypes(types: List<InstanceType>) {
+                instances.value = instances.value.map { if (it.type in types) it.copy(selected = false) else it }
             }
 
             override suspend fun selectInstance(id: Long) {
@@ -90,6 +109,15 @@ class InstanceRepositoryTest {
             override suspend fun ensureFirstSelectedIfNone(type: InstanceType) {
                 if (instances.value.none { it.type == type && it.selected }) {
                     val first = instances.value.firstOrNull { it.type == type }
+                    if (first != null) {
+                        selectInstance(first.id)
+                    }
+                }
+            }
+
+            override suspend fun ensureFirstSelectedIfNone(types: List<InstanceType>) {
+                if (instances.value.none { it.type in types && it.selected }) {
+                    val first = instances.value.firstOrNull { it.type in types }
                     if (first != null) {
                         selectInstance(first.id)
                     }

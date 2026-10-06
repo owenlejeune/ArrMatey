@@ -63,4 +63,40 @@ class ReadarrRepositoryTest {
                 ?.title,
         )
     }
+
+    @Test
+    fun testChaptarrInstanceRepository() = runTest {
+        val fakeChaptarrInstance =
+            Instance(
+                id = 5,
+                label = "Test Chaptarr",
+                url = "http://localhost:8789",
+                apiKey = EncryptedString("test-chaptarr-api-key"),
+                type = InstanceType.Chaptarr,
+                enabled = true,
+            )
+
+        val mockEngine =
+            MockEngine { _ ->
+                respond(
+                    content = """[{"id": 1, "title": "The Way of Kings", "authorId": 42, "mediaType": "audiobook"}]""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                        },
+                    )
+                }
+            }
+        val repository = ReadarrRepository(fakeChaptarrInstance, httpClient, fakeLogger)
+
+        assertEquals(InstanceType.Chaptarr, repository.instance.type)
+        assertEquals("http://localhost:8789", repository.instance.url)
+    }
 }
