@@ -48,6 +48,8 @@ struct UnifiedMediaDetailsScreen: View {
             return MR.strings().seasons_header.localized()
         case .lidarr:
             return MR.strings().albums_header.localized()
+        case .bookshelf, .chaptarr:
+            return MR.strings().books.localized()
         default:
             return MR.strings().files.localized()
         }
@@ -403,7 +405,7 @@ extension UnifiedMediaDetailsScreen {
                             showSeriesMonitoringSheet = true
                         } else if viewModel.resolvedInstanceType == .lidarr {
                             showArtistMonitoringSheet = true
-                        } else if viewModel.resolvedInstanceType == .bookshelf {
+                        } else if viewModel.resolvedInstanceType == .bookshelf || viewModel.resolvedInstanceType == .chaptarr {
                             showBookMonitoringSheet = true
                         }
                     }

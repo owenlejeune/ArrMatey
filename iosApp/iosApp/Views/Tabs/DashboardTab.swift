@@ -816,7 +816,7 @@ struct DashboardRecentlyAddedSection: View {
                         ForEach(state.recentlyAdded, id: \.id) { item in
                             let identifiable = item as? InstanceTypeIdentifiable
                             let type = identifiable?.instanceType
-                            let isWide = (type == .lidarr || type == .bookshelf || type == .listenarr)
+                            let isWide = (type == .lidarr || type == .bookshelf || type == .listenarr || type == .chaptarr)
                             let ratio: Shared.AspectRatio = isWide ? .cover : .poster
                             let width: CGFloat = isWide ? 150 : 100
 

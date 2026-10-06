@@ -139,9 +139,10 @@ struct ArrTab: View {
     
     @ToolbarContentBuilder
     private var toolbarViewOptions: some ToolbarContent {
+        let currentType = instanceState.selectedInstance?.type ?? type
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button(action: {
-                navigation.go(to: .search(query: "", type: type, instanceId: instanceState.selectedInstance?.id), of: type)
+                navigation.go(to: .search(query: "", type: currentType, instanceId: instanceState.selectedInstance?.id), of: currentType)
             }) {
                 Image(systemName: "plus")
                     .imageScale(.medium)
@@ -155,7 +156,7 @@ struct ArrTab: View {
                 }
 
                 FilterByPickerMenu(
-                    type: type,
+                    type: currentType,
                     filterBy: preferences.filterBy,
                     customFilters: arrMediaViewModel.instanceData?.customFilters ?? [],
                     selectedCustomFilterId: preferences.customFilterId?.int64Value,
@@ -168,7 +169,7 @@ struct ArrTab: View {
                     .menuIndicator(.hidden)
                 
                 SortByPickerMenu(
-                    type: type,
+                    type: currentType,
                     sortBy: preferences.sortBy,
                     sortOrder: preferences.sortOrder,
                     changeSortBy: { newValue in

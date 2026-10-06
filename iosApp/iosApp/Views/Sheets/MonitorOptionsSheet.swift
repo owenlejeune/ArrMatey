@@ -20,7 +20,7 @@ struct MonitorOptionsSheet: View {
     var body: some View {
         NavigationStack {
             Group {
-                if type == .bookshelf {
+                if type == .bookshelf || type == .chaptarr {
                     bookshelfOptions
                 } else {
                     genericOptions
@@ -35,7 +35,7 @@ struct MonitorOptionsSheet: View {
                     }
                 }
 
-                if type == .bookshelf {
+                if type == .bookshelf || type == .chaptarr {
                     ToolbarItem(placement: .confirmationAction) {
                         Button(MR.strings().save.localized()) {
                             let options = AuthorMonitorOptions(

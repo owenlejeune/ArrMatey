@@ -613,6 +613,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .lidarr: return TabItemStandard.music as TabItem
         case .bookshelf: return TabItemStandard.books as TabItem
         case .listenarr: return TabItemStandard.audiobooks as TabItem
+        case .chaptarr: return TabItemStandard.books as TabItem
         case .seerr: return TabItemStandard.requests as TabItem
         case .prowlarr: return TabItemStandard.prowlarr as TabItem
         case .bazarr: return TabItemStandard.bazarr as TabItem

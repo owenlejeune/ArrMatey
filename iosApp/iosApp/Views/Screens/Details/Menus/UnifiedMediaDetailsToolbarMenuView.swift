@@ -47,7 +47,7 @@ struct UnifiedMediaDetailsToolbarMenuView: View {
                             Button(action: onShowMonitoring) {
                                 Label(MR.strings().artist_monitoring.localized(), systemImage: "bookmark")
                             }
-                        } else if viewModel.resolvedInstanceType == .bookshelf, let onShowMonitoring = onShowMonitoring {
+                        } else if (viewModel.resolvedInstanceType == .bookshelf || viewModel.resolvedInstanceType == .chaptarr), let onShowMonitoring = onShowMonitoring {
                             Button(action: onShowMonitoring) {
                                 Label(MR.strings().book_monitoring.localized(), systemImage: "bookmark")
                             }
