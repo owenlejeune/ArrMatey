@@ -201,6 +201,15 @@ class GlobalSearchUseCaseTest {
         enabled = true,
     )
 
+    private fun chaptarrInstance(id: Long) = Instance(
+        id = id,
+        label = "Chaptarr $id",
+        url = "http://localhost:8787",
+        apiKey = EncryptedString("key"),
+        type = InstanceType.Chaptarr,
+        enabled = true,
+    )
+
     private suspend fun InstanceManager.awaitRepos(count: Int) {
         withTimeout(5000.milliseconds) {
             instanceRepositories.first { it.size == count }
@@ -458,6 +467,57 @@ class GlobalSearchUseCaseTest {
         job.join()
 
         assertTrue(cancelled)
+        manager.cleanup()
+    }
+
+    @Test
+    fun testChaptarrSearchResultsIncludedInUniversalSearch() = runBlocking {
+        val fakeDao = FakeInstanceDao(listOf(chaptarrInstance(10)))
+        val instanceRepo = InstanceRepository(fakeDao)
+
+        val chaptarrLookupJson =
+            """
+                [
+                    {
+                        "authorName": "Brandon Sanderson",
+                        "foreignAuthorId": "38550",
+                        "monitored": true,
+                        "ratings": {
+                            "votes": 500,
+                            "value": 4.8
+                        }
+                    }
+                ]
+            """.trimIndent()
+
+        val mockFactory =
+            MockHttpClientFactory(json) { instance ->
+                MockEngine { request ->
+                    val path = request.url.encodedPath
+                    val content =
+                        when {
+                            instance.type == InstanceType.Chaptarr && path.contains("author/lookup") -> chaptarrLookupJson
+                            else -> "[]"
+                        }
+                    respond(content, HttpStatusCode.OK, headersOf("Content-Type", "application/json"))
+                }
+            }
+
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger)
+        manager.awaitRepos(1)
+
+        val useCase = GlobalSearchUseCase(manager)
+        val emissions = useCase("Sanderson").toList()
+
+        assertTrue(emissions.isNotEmpty())
+        val finalResult = emissions.last()
+
+        val chaptarrResult = finalResult.firstOrNull { it.title == "Brandon Sanderson" }
+        assertTrue(chaptarrResult != null, "Brandon Sanderson result should be present")
+        assertEquals(InstanceType.Chaptarr, chaptarrResult.instanceType)
+        assertTrue(chaptarrResult is SearchResult.ArrMediaResult)
+        assertEquals(10L, chaptarrResult.instanceId)
+
         manager.cleanup()
     }
 }

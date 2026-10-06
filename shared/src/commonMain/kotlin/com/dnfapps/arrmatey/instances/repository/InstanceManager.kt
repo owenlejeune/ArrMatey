@@ -362,6 +362,24 @@ class InstanceManager(
         }
     }
 
+    fun observeArrLibrariesByInstanceId(): Flow<Map<Long, List<ArrMedia>>> {
+        return _instanceRepositories.flatMapLatest { repos ->
+            val arrRepos = repos.values.filterIsInstance<ArrInstanceRepository>()
+            if (arrRepos.isEmpty()) return@flatMapLatest flowOf(emptyMap())
+            arrRepos.forEach { repo ->
+                if (repo.library.value == null) {
+                    scope.launch { repo.refreshLibrary() }
+                }
+            }
+            val libraries = arrRepos.map { it.library }
+            combine(libraries) { results ->
+                arrRepos.indices.associate { index ->
+                    arrRepos[index].instance.id to (results[index]?.asSuccess()?.data ?: emptyList())
+                }
+            }
+        }
+    }
+
     fun getRepositoriesByType(type: InstanceType): List<InstanceScopedRepository> = _instanceRepositories.value.values
         .filter { it.instance.type == type }
 

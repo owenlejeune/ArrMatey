@@ -42,22 +42,28 @@ class UnifiedSearchViewModel(
     private val _searchState = MutableStateFlow<List<SearchResult>>(emptyList())
     private var searchJob: Job? = null
 
-    private val allLibraries: StateFlow<List<ArrMedia>> =
+    private val librariesByInstance: StateFlow<Map<Long, List<ArrMedia>>> =
         instanceManager
-            .observeAllArrLibraries()
+            .observeArrLibrariesByInstanceId()
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList(),
+                initialValue = emptyMap(),
             )
 
     val searchState: StateFlow<List<SearchResult>> =
-        combine(_searchState, allLibraries) { results, libraries ->
+        combine(_searchState, librariesByInstance) { results, libraryMap ->
+            val allLibraries = libraryMap.values.flatten()
             results.map { result ->
                 when (result) {
                     is SearchResult.ArrMediaResult -> {
-                        val merged = listOf(result.media).mergeWithLibrary(libraries).first()
-                        result.copy(media = merged)
+                        val instanceLib = result.instanceId?.let { libraryMap[it] } ?: emptyList()
+                        if (instanceLib.isNotEmpty()) {
+                            val merged = listOf(result.media).mergeWithLibrary(instanceLib).first()
+                            result.copy(media = merged)
+                        } else {
+                            result
+                        }
                     }
 
                     is SearchResult.SeerrMediaResult -> {
@@ -65,14 +71,14 @@ class UnifiedSearchViewModel(
                         val cleanTitle = (result.result.title ?: result.result.name)?.replace(Regex("[^a-zA-Z0-9]"), "")?.lowercase()
                         val match =
                             if (result.result.mediaType == RequestType.Movie) {
-                                libraries
+                                allLibraries
                                     .filterIsInstance<ArrMovie>()
                                     .firstOrNull {
                                         (it.tmdbId != 0L && it.tmdbId == tmdbId) ||
                                             (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
                                     }
                             } else if (result.result.mediaType == RequestType.Tv) {
-                                libraries.filterIsInstance<ArrSeries>().firstOrNull {
+                                allLibraries.filterIsInstance<ArrSeries>().firstOrNull {
                                     (it.tmdbId != null && it.tmdbId != 0L && it.tmdbId == tmdbId) ||
                                         (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
                                 }
@@ -84,19 +90,14 @@ class UnifiedSearchViewModel(
                             val instanceId =
                                 (match as? ArrMovie)?.instanceId
                                     ?: (match as? CalendarItem)?.instanceId
-                                    ?: instanceManager
-                                        .getAllArrRepositories()
-                                        .firstOrNull { repo ->
-                                            repo.library.value
-                                                ?.asSuccess()
-                                                ?.data
-                                                ?.any { it.id == match.id } == true
-                                        }?.instance
-                                        ?.id
+                                    ?: libraryMap.entries.firstOrNull { (_, items) ->
+                                        items.any { it.id == match.id }
+                                    }?.key
                             SearchResult.ArrMediaResult(
                                 media = match,
                                 instanceId = instanceId,
                                 originalRank = result.originalRank,
+                                instanceTypeOverride = if (result.result.mediaType == RequestType.Movie) InstanceType.Radarr else InstanceType.Sonarr,
                             )
                         } else {
                             result

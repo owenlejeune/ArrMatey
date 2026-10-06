@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.model
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
 import com.dnfapps.arrmatey.instances.model.Instance

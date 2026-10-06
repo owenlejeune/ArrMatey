@@ -30,7 +30,7 @@ class GlobalSearchUseCase(
             return@channelFlow
         }
 
-        val arrRepos = instanceManager.getAllArrRepositories().sortedBy { it.instance.id }
+        val arrRepos = (if (instanceManager.getAllArrRepositories().isEmpty()) instanceManager.awaitAllArrRepositories() else instanceManager.getAllArrRepositories()).sortedBy { it.instance.id }
         val seerrRepos = instanceManager.getAllSeerrRepositories().sortedBy { it.instance.id }
 
         if (arrRepos.isEmpty() && seerrRepos.isEmpty()) {
@@ -52,7 +52,12 @@ class GlobalSearchUseCase(
                     ?.asSuccess()
                     ?.data ?: emptyList()
             items.forEach { media ->
-                val res = SearchResult.ArrMediaResult(media, instanceId = repo.instance.id, originalRank = 0)
+                val res = SearchResult.ArrMediaResult(
+                    media = media,
+                    instanceId = repo.instance.id,
+                    originalRank = 0,
+                    instanceTypeOverride = repo.instance.type,
+                )
                 when (media) {
                     is ArrMovie -> {
                         if (media.tmdbId != 0L) libraryByTmdbId.getOrPut(media.tmdbId) { mutableListOf() }.add(res)
@@ -85,9 +90,43 @@ class GlobalSearchUseCase(
                 launch {
                     val result = repo.directLookup(query)
                     val data = if (result is NetworkResult.Success) result.data else emptyList()
+                    val enrichedData = if (repo.instance.type == InstanceType.Chaptarr || repo.instance.type == InstanceType.Bookshelf) {
+                        data.map { media ->
+                            if (media is Author && media.images.isEmpty() && !media.foreignAuthorId.isNullOrBlank()) {
+                                val foreignId = media.foreignAuthorId
+                                val queries = listOf(
+                                    "author:$foreignId",
+                                    if (foreignId.startsWith("gr:")) "author:${foreignId.removePrefix("gr:")}" else "author:gr:$foreignId",
+                                    foreignId,
+                                ).distinct()
+                                var enriched: Author = media
+                                for (q in queries) {
+                                    val detailRes = repo.directLookup(q)
+                                    if (detailRes is NetworkResult.Success && detailRes.data.isNotEmpty()) {
+                                        val full = detailRes.data.filterIsInstance<Author>().firstOrNull { it.images.isNotEmpty() || !it.overview.isNullOrBlank() }
+                                            ?: detailRes.data.filterIsInstance<Author>().firstOrNull()
+                                        if (full != null) {
+                                            enriched = full
+                                            break
+                                        }
+                                    }
+                                }
+                                enriched
+                            } else {
+                                media
+                            }
+                        }
+                    } else {
+                        data
+                    }
                     val mapped =
-                        data.mapIndexed { index, media ->
-                            SearchResult.ArrMediaResult(media, instanceId = repo.instance.id, originalRank = index)
+                        enrichedData.mapIndexed { index, media ->
+                            SearchResult.ArrMediaResult(
+                                media = media,
+                                instanceId = repo.instance.id,
+                                originalRank = index,
+                                instanceTypeOverride = repo.instance.type,
+                            )
                         }
                     if (mapped.isNotEmpty()) {
                         val woven =
@@ -157,6 +196,7 @@ class GlobalSearchUseCase(
         val resultsByTmdbId = mutableMapOf<Long, MutableList<SearchResult>>()
         val resultsByTvdbId = mutableMapOf<Long, MutableList<SearchResult>>()
         val resultsByAsin = mutableMapOf<String, MutableList<SearchResult>>()
+        val resultsByAuthorId = mutableMapOf<String, MutableList<SearchResult>>()
         val resultsByMbId = mutableMapOf<String, MutableList<SearchResult>>()
         val others = mutableListOf<SearchResult>()
 
@@ -201,7 +241,8 @@ class GlobalSearchUseCase(
                             } ?: others.add(result)
                         is Author ->
                             item.foreignAuthorId?.let {
-                                resultsByAsin.getOrPut(it) { mutableListOf() }.add(result)
+                                val key = "${result.instanceType}_$it"
+                                resultsByAuthorId.getOrPut(key) { mutableListOf() }.add(result)
                             } ?: others.add(result)
                         else -> others.add(result)
                     }
@@ -227,6 +268,7 @@ class GlobalSearchUseCase(
         val processedTmdbIds = mutableSetOf<Long>()
         val processedTvdbIds = mutableSetOf<Long>()
         val processedAsins = mutableSetOf<String>()
+        val processedAuthorIds = mutableSetOf<String>()
         val processedMbIds = mutableSetOf<String>()
 
         // Process by TMDB ID
@@ -263,6 +305,17 @@ class GlobalSearchUseCase(
                     combined.add(bestItem)
                 }
                 processedAsins.add(asin)
+            }
+        }
+
+        // Process by Author ID
+        resultsByAuthorId.forEach { (authorKey, items) ->
+            if (authorKey !in processedAuthorIds) {
+                val bestItem = selectBestItem(items)
+                if (bestItem !in combined) {
+                    combined.add(bestItem)
+                }
+                processedAuthorIds.add(authorKey)
             }
         }
 

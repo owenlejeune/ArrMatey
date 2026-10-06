@@ -97,7 +97,8 @@ fun List<ArrMedia>.mergeWithLibrary(library: List<ArrMedia>): List<ArrMedia> = t
                 }
             is Author ->
                 library.filterIsInstance<Author>().firstOrNull {
-                    !it.title.isNullOrBlank() && !item.title.isNullOrBlank() && it.title == item.title
+                    (!it.foreignAuthorId.isNullOrBlank() && !item.foreignAuthorId.isNullOrBlank() && it.foreignAuthorId == item.foreignAuthorId) ||
+                        (!it.title.isNullOrBlank() && !item.title.isNullOrBlank() && it.title == item.title)
                 }
             else -> null
         }

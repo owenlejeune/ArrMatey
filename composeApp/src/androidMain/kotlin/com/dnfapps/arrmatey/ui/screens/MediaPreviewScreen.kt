@@ -66,13 +66,14 @@ fun MediaPreviewScreen(
     onItemAdded: (Long) -> Unit,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
-    viewModel: MediaPreviewViewModel = koinViewModel(key = "${item.id}_$type", parameters = { parametersOf(item, type) }),
+    viewModel: MediaPreviewViewModel = koinViewModel(key = "${item.guid}_$type", parameters = { parametersOf(item, type) }),
 ) {
     val context = LocalContext.current
     var showBottomSheet by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val currentMedia = uiState.media ?: item
 
     val successMessage = mokoString(MR.strings.success)
 
@@ -138,7 +139,7 @@ fun MediaPreviewScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 DetailsHeader(
-                    item = item,
+                    item = currentMedia,
                     type = type,
                     topPadding = paddingValues.calculateTopPadding(),
                     isExpanded = isExpanded,
@@ -153,7 +154,7 @@ fun MediaPreviewScreen(
                         .padding(top = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
-                    item.overview?.let { overview ->
+                    currentMedia.overview?.let { overview ->
                         ItemDescriptionCard(overview)
                     }
                 }
@@ -161,7 +162,7 @@ fun MediaPreviewScreen(
 
             if (showBottomSheet) {
                 AddMediaSheet(
-                    item = item,
+                    item = currentMedia,
                     uiState = uiState,
                     onAddItem = { newItem, searchOnAdd ->
                         viewModel.addItem(newItem, searchOnAdd)

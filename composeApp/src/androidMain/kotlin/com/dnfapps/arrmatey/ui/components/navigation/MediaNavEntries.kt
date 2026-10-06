@@ -222,7 +222,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onItemClick = { result ->
                 when (result) {
                     is SearchResult.ArrMediaResult -> {
-                        navigation.toArrDetailsOrPreview(result.media, result.instanceType)
+                        navigation.toArrDetailsOrPreview(result.media, result.instanceType, result.instanceId)
                     }
                     is SearchResult.SeerrMediaResult -> {
                         navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)

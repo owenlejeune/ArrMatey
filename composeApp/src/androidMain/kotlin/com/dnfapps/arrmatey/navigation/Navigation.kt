@@ -118,6 +118,7 @@ fun Navigator<*>.toDiscover() = nav().navigateTo(DiscoverScreen.Home)
 fun Navigator<*>.toArrDetailsOrPreview(
     item: ArrMedia,
     type: InstanceType? = null,
+    instanceId: Long? = null,
 ) {
     val isAdded = item.id != null && item.id != 0L
     if (!isAdded) {
@@ -125,7 +126,7 @@ fun Navigator<*>.toArrDetailsOrPreview(
             val tmdbId = (item as? ArrMovie)?.tmdbId?.takeIf { it > 0 }
                 ?: (item as? ArrSeries)?.tmdbId?.takeIf { it > 0 }
             val tvdbId = (item as? ArrSeries)?.tvdbId?.takeIf { it > 0 }
-            toDetails(id = null, tmdbId = tmdbId, tvdbId = tvdbId, type = type)
+            toDetails(id = null, tmdbId = tmdbId, tvdbId = tvdbId, type = type, instanceId = instanceId)
         } else {
             toPreview(item, type)
         }
@@ -133,7 +134,7 @@ fun Navigator<*>.toArrDetailsOrPreview(
         val tmdbId = (item as? ArrMovie)?.tmdbId?.takeIf { it > 0 }
             ?: (item as? ArrSeries)?.tmdbId?.takeIf { it > 0 }
         val tvdbId = (item as? ArrSeries)?.tvdbId?.takeIf { it > 0 }
-        toDetails(id = item.id, tmdbId = tmdbId, tvdbId = tvdbId, type = type)
+        toDetails(id = item.id, tmdbId = tmdbId, tvdbId = tvdbId, type = type, instanceId = instanceId)
     }
 }
 

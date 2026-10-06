@@ -46,20 +46,24 @@ struct MediaPreviewScreen: View {
         viewModel.uiState.tags
     }
     
+    private var currentMedia: ArrMedia {
+        viewModel.uiState.media ?? media
+    }
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                MediaDetailsHeader(item: media, type: type)
+                MediaDetailsHeader(item: currentMedia, type: type)
                     .frame(height: 400)
 
                 VStack(alignment: .leading, spacing: 12) {
-                    if let airingString = makeAiringString(for: media) {
+                    if let airingString = makeAiringString(for: currentMedia) {
                         Text(airingString)
                             .font(.system(size: 20, weight: .medium))
                             .foregroundColor(.themePrimary)
                     }
 
-                    ItemDescriptionCard(overview: media.overview)
+                    ItemDescriptionCard(overview: currentMedia.overview)
                 }
                 .padding(.horizontal, 24)
             }
@@ -86,7 +90,7 @@ struct MediaPreviewScreen: View {
     
     @ViewBuilder
     private func addMediaSheet() -> some View {
-        switch media {
+        switch currentMedia {
         case let series as ArrSeries:
             AddSeriesForm(
                 series: series,

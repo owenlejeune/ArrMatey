@@ -28,43 +28,15 @@ sealed interface SearchResult {
     var originalRank: Int
 
     val instanceType: InstanceType
-        get() =
-            when (this) {
-                is ArrMediaResult -> {
-                    when (media) {
-                        is ArrSeries,
-                        is MockMedia.Sonarr,
-                        is MockMedia.Default,
-                        -> InstanceType.Sonarr
-                        is ArrMovie,
-                        is MockMedia.Radarr,
-                        -> InstanceType.Radarr
-                        is Arrtist,
-                        is MockMedia.Lidarr,
-                        -> InstanceType.Lidarr
-                        is Author,
-                        is MockMedia.Readarr,
-                        -> InstanceType.Bookshelf
-                        is MockMedia.Chaptarr,
-                        -> InstanceType.Chaptarr
-                        is Audiobook,
-                        is SearchAudiobook,
-                        is MockMedia.Listenarr,
-                        -> InstanceType.Listenarr
-                    }
-                }
-                is SeerrMediaResult,
-                is SeerrPersonResult,
-                -> InstanceType.Seerr
-            }
 
     @Serializable
     data class ArrMediaResult(
         val media: ArrMedia,
         val instanceId: Long? = null,
         override var originalRank: Int = 0,
+        val instanceTypeOverride: InstanceType? = null,
     ) : SearchResult {
-        override val id: String = "arr_${media.guid}"
+        override val id: String = "arr_${instanceId ?: 0}_${media.guid}"
         override val title: String = media.title.orEmpty()
         override val cleanTitle: String = media.cleanTitle ?: media.title.orEmpty()
         override val year: Int? = media.year
@@ -80,6 +52,28 @@ sealed interface SearchResult {
             when (media) {
                 is ArrMovie -> media.popularity
                 else -> 0.0
+            }
+        override val instanceType: InstanceType
+            get() = instanceTypeOverride ?: when (media) {
+                is ArrSeries,
+                is MockMedia.Sonarr,
+                is MockMedia.Default,
+                -> InstanceType.Sonarr
+                is ArrMovie,
+                is MockMedia.Radarr,
+                -> InstanceType.Radarr
+                is Arrtist,
+                is MockMedia.Lidarr,
+                -> InstanceType.Lidarr
+                is Author,
+                is MockMedia.Readarr,
+                -> InstanceType.Bookshelf
+                is MockMedia.Chaptarr,
+                -> InstanceType.Chaptarr
+                is Audiobook,
+                is SearchAudiobook,
+                is MockMedia.Listenarr,
+                -> InstanceType.Listenarr
             }
         val aspectRatio: AspectRatio =
             when (media) {
@@ -100,6 +94,7 @@ sealed interface SearchResult {
         override val voteCount: Int = result.voteCount
         override val voteAverage: Double = result.voteAverage
         override val popularity: Double = result.popularity
+        override val instanceType: InstanceType = InstanceType.Seerr
     }
 
     @Serializable
@@ -114,5 +109,6 @@ sealed interface SearchResult {
         override val voteCount: Int = 0
         override val voteAverage: Double = 0.0
         override val popularity: Double = result.popularity
+        override val instanceType: InstanceType = InstanceType.Seerr
     }
 }
