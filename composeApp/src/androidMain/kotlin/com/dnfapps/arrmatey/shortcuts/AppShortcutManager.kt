@@ -177,7 +177,8 @@ class AppShortcutManager(
             preferenceStore.saveShortcutsOrder(currentOrderIds)
         }
 
-        val shortcutsToDisplay = orderedShortcuts.filter { it.id !in disabled }
+        val maxShortcuts = ShortcutManagerCompat.getMaxShortcutCountPerActivity(context)
+        val shortcutsToDisplay = orderedShortcuts.filter { it.id !in disabled }.take(maxShortcuts)
 
         val shortcutInfos =
             shortcutsToDisplay.map { item ->
@@ -190,7 +191,11 @@ class AppShortcutManager(
                 )
             }
 
-        ShortcutManagerCompat.setDynamicShortcuts(context, shortcutInfos)
+        try {
+            ShortcutManagerCompat.setDynamicShortcuts(context, shortcutInfos)
+        } catch (e: Exception) {
+            // Handle OS-level shortcut limits or exceptions gracefully
+        }
     }
 
     fun pushShortcut(shortcutId: String) {

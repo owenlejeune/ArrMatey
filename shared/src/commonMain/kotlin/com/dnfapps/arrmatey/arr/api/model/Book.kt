@@ -33,6 +33,13 @@ data class Book(
     val author: Author? = null,
     override val instanceId: Long? = null,
     override val instanceIds: List<Long> = listOfNotNull(instanceId),
+    val mediaType: String? = null,
+    val audiobookMonitored: Boolean? = null,
+    val ebookMonitored: Boolean? = null,
+    val narratorNames: List<String> = emptyList(),
+    val availableNarrators: List<String> = emptyList(),
+    val hasFiles: Boolean = false,
+    val isOmnibus: Boolean = false,
 ) : CalendarItem,
     InstanceTypeIdentifiable,
     HasArrImages<Book> {

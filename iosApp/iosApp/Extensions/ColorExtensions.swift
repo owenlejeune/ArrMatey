@@ -137,6 +137,7 @@ extension InstanceType {
         case .lidarr: return .arrGreen
         case .bookshelf: return .arrRed
         case .listenarr: return .arrLightPurple
+        case .chaptarr: return Color(hex: 0x810120)
         case .seerr: return .arrPurple
         case .prowlarr: return .arrOrange
         case .bazarr: return Color(hex: 0x0FA3B1)
