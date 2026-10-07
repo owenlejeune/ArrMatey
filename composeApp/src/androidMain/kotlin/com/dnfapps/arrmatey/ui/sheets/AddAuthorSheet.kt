@@ -26,6 +26,8 @@ import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.api.model.defaultForAudiobook
+import com.dnfapps.arrmatey.arr.api.model.defaultForEbook
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -61,12 +63,12 @@ fun AddAuthorSheet(
     var chaptarrMediaType by remember(preferences.addChaptarrMediaType, selectedInstance?.id) {
         mutableStateOf(preferences.addChaptarrMediaType)
     }
-    var audiobookRootFolder by remember(rootFolders, preferences.addChaptarrAudiobookRootFolderPath, selectedInstance?.id) {
-        mutableStateOf(
-            rootFolders.firstOrNull { it.path == preferences.addChaptarrAudiobookRootFolderPath }
-                ?: rootFolders.firstOrNull { it.path.contains("audio", ignoreCase = true) }
-                ?: rootFolders.firstOrNull(),
-        )
+    var audiobookRootFolder by remember(
+        rootFolders,
+        preferences.addChaptarrAudiobookRootFolderPath,
+        selectedInstance?.id,
+    ) {
+        mutableStateOf(rootFolders.defaultForAudiobook(preferences.addChaptarrAudiobookRootFolderPath))
     }
     var audiobookMonitor by remember(preferences.addChaptarrAudiobookMonitorExisting, selectedInstance?.id) {
         mutableStateOf(preferences.addChaptarrAudiobookMonitorExisting)
@@ -74,27 +76,23 @@ fun AddAuthorSheet(
     var audiobookMonitorNew by remember(preferences.addChaptarrAudiobookMonitorFuture, selectedInstance?.id) {
         mutableStateOf(preferences.addChaptarrAudiobookMonitorFuture)
     }
-    var audiobookQualityProfile by remember(qualityProfiles, preferences.addChaptarrAudiobookQualityProfileId, selectedInstance?.id) {
-        mutableStateOf(
-            qualityProfiles.firstOrNull { it.id == preferences.addChaptarrAudiobookQualityProfileId }
-                ?: qualityProfiles.firstOrNull { it.name?.contains("audio", ignoreCase = true) == true }
-                ?: qualityProfiles.firstOrNull(),
-        )
+    var audiobookQualityProfile by remember(
+        qualityProfiles,
+        preferences.addChaptarrAudiobookQualityProfileId,
+        selectedInstance?.id,
+    ) {
+        mutableStateOf(qualityProfiles.defaultForAudiobook(preferences.addChaptarrAudiobookQualityProfileId))
     }
-    var audiobookMetadataProfile by remember(metadataProfiles, preferences.addChaptarrAudiobookMetadataProfileId, selectedInstance?.id) {
-        mutableStateOf(
-            metadataProfiles.firstOrNull { it.id == preferences.addChaptarrAudiobookMetadataProfileId }
-                ?: metadataProfiles.firstOrNull { it.name?.contains("audio", ignoreCase = true) == true }
-                ?: metadataProfiles.firstOrNull(),
-        )
+    var audiobookMetadataProfile by remember(
+        metadataProfiles,
+        preferences.addChaptarrAudiobookMetadataProfileId,
+        selectedInstance?.id,
+    ) {
+        mutableStateOf(metadataProfiles.defaultForAudiobook(preferences.addChaptarrAudiobookMetadataProfileId))
     }
 
     var ebookRootFolder by remember(rootFolders, preferences.addChaptarrEbookRootFolderPath, selectedInstance?.id) {
-        mutableStateOf(
-            rootFolders.firstOrNull { it.path == preferences.addChaptarrEbookRootFolderPath }
-                ?: rootFolders.firstOrNull { !it.path.contains("audio", ignoreCase = true) }
-                ?: rootFolders.firstOrNull(),
-        )
+        mutableStateOf(rootFolders.defaultForEbook(preferences.addChaptarrEbookRootFolderPath))
     }
     var ebookMonitor by remember(preferences.addChaptarrEbookMonitorExisting, selectedInstance?.id) {
         mutableStateOf(preferences.addChaptarrEbookMonitorExisting)
@@ -102,26 +100,30 @@ fun AddAuthorSheet(
     var ebookMonitorNew by remember(preferences.addChaptarrEbookMonitorFuture, selectedInstance?.id) {
         mutableStateOf(preferences.addChaptarrEbookMonitorFuture)
     }
-    var ebookQualityProfile by remember(qualityProfiles, preferences.addChaptarrEbookQualityProfileId, selectedInstance?.id) {
-        mutableStateOf(
-            qualityProfiles.firstOrNull { it.id == preferences.addChaptarrEbookQualityProfileId }
-                ?: qualityProfiles.firstOrNull { it.name?.contains("ebook", ignoreCase = true) == true }
-                ?: qualityProfiles.firstOrNull { it.name?.contains("audio", ignoreCase = true) != true }
-                ?: qualityProfiles.firstOrNull(),
-        )
+    var ebookQualityProfile by remember(
+        qualityProfiles,
+        preferences.addChaptarrEbookQualityProfileId,
+        selectedInstance?.id,
+    ) {
+        mutableStateOf(qualityProfiles.defaultForEbook(preferences.addChaptarrEbookQualityProfileId))
     }
-    var ebookMetadataProfile by remember(metadataProfiles, preferences.addChaptarrEbookMetadataProfileId, selectedInstance?.id) {
-        mutableStateOf(
-            metadataProfiles.firstOrNull { it.id == preferences.addChaptarrEbookMetadataProfileId }
-                ?: metadataProfiles.firstOrNull { it.name?.contains("ebook", ignoreCase = true) == true }
-                ?: metadataProfiles.firstOrNull { it.name?.contains("audio", ignoreCase = true) != true }
-                ?: metadataProfiles.firstOrNull(),
-        )
+    var ebookMetadataProfile by remember(
+        metadataProfiles,
+        preferences.addChaptarrEbookMetadataProfileId,
+        selectedInstance?.id,
+    ) {
+        mutableStateOf(metadataProfiles.defaultForEbook(preferences.addChaptarrEbookMetadataProfileId))
     }
 
     // Standard Readarr state
-    var monitor by remember(preferences.addAuthorMonitor, selectedInstance?.id) { mutableStateOf(preferences.addAuthorMonitor) }
-    var monitorNewBooks by remember(preferences.addAuthorMonitorNew, selectedInstance?.id) { mutableStateOf(preferences.addAuthorMonitorNew) }
+    var monitor by remember(
+        preferences.addAuthorMonitor,
+        selectedInstance?.id,
+    ) { mutableStateOf(preferences.addAuthorMonitor) }
+    var monitorNewBooks by remember(
+        preferences.addAuthorMonitorNew,
+        selectedInstance?.id,
+    ) { mutableStateOf(preferences.addAuthorMonitorNew) }
     var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId, selectedInstance?.id) {
         mutableStateOf(
             qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
@@ -135,19 +137,12 @@ fun AddAuthorSheet(
         )
     }
     val selectedTags = remember(selectedInstance?.id) { mutableStateListOf<Int>() }
-    var searchOnAdd by remember(preferences.addSearchOnAdd, selectedInstance?.id) { mutableStateOf(preferences.addSearchOnAdd) }
+    var searchOnAdd by remember(
+        preferences.addSearchOnAdd,
+        selectedInstance?.id,
+    ) { mutableStateOf(preferences.addSearchOnAdd) }
 
-    val chaptarrMonitorOptions = remember {
-        listOf(
-            AuthorMonitorType.None,
-            AuthorMonitorType.All,
-            AuthorMonitorType.Future,
-            AuthorMonitorType.Missing,
-            AuthorMonitorType.Existing,
-            AuthorMonitorType.FirstBook,
-            AuthorMonitorType.LatestBook,
-        )
-    }
+    val chaptarrMonitorOptions = AuthorMonitorType.chaptarrOptions
 
     ModalBottomSheet(
         onDismissRequest = {
@@ -291,7 +286,8 @@ fun AddAuthorSheet(
                             audiobookQualityProfileId = audiobookQualityProfile?.id,
                             audiobookMetadataProfileId = audiobookMetadataProfile?.id,
                             audiobookRootFolderPath = audiobookRootFolder?.path,
-                            audiobookMonitorExisting = chaptarrMonitorOptions.indexOf(audiobookMonitor).takeIf { it >= 0 },
+                            audiobookMonitorExisting = chaptarrMonitorOptions.indexOf(audiobookMonitor)
+                                .takeIf { it >= 0 },
                             audiobookMonitorFuture = audiobookMonitorNew,
                             audiobookTags = selectedTags.toList(),
                             ebookQualityProfileId = ebookQualityProfile?.id,

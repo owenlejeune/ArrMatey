@@ -229,16 +229,13 @@ struct OverviewTabContentView: View {
         let unknown = MR.strings().unknown.localized()
         let tagsLabel = author.formatTags(availableTags: tags) ?? MR.strings().none.localized()
         let monitorLabel = author.monitorNewItems == .all ? MR.strings().monitored.localized() : MR.strings().unmonitored.localized()
-        let isChaptarr = author.audiobookQualityProfileId != nil || author.ebookQualityProfileId != nil ||
-            author.audiobookRootFolderPath != nil || author.ebookRootFolderPath != nil ||
-            author.lastSelectedMediaType != nil
 
         var items: [InfoItem] = [
             InfoItem(label: MR.strings().status.localized(), value: author.status.resource.localized()),
             InfoItem(label: MR.strings().size_on_disk.localized(), value: author.fileSize?.int64Value.bytesAsFileSizeString() ?? unknown)
         ]
 
-        if isChaptarr {
+        if author.isChaptarr {
             if let ebookRoot = author.ebookRootFolderPath, !ebookRoot.isEmpty {
                 items.append(InfoItem(label: MR.strings().ebook_root_folder.localized(), value: ebookRoot, onClick: onEditPathClick))
             }
@@ -257,16 +254,14 @@ struct OverviewTabContentView: View {
         items.append(InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown, onClick: onEditPathClick))
         items.append(InfoItem(label: MR.strings().new_books.localized(), value: monitorLabel))
 
-        if isChaptarr {
+        if author.isChaptarr {
             var hasQuality = false
-            if let ebookQId = author.ebookQualityProfileId?.int32Value, ebookQId != 0 {
-                let qualityLabel = qualityProfiles.first(where: { $0.id == ebookQId })?.name ?? unknown
-                items.append(InfoItem(label: MR.strings().ebook_quality_profile.localized(), value: qualityLabel))
+            if let ebookQuality = author.getEbookQualityProfile(qualityProfiles: qualityProfiles)?.name {
+                items.append(InfoItem(label: MR.strings().ebook_quality_profile.localized(), value: ebookQuality))
                 hasQuality = true
             }
-            if let abQId = author.audiobookQualityProfileId?.int32Value, abQId != 0 {
-                let qualityLabel = qualityProfiles.first(where: { $0.id == abQId })?.name ?? unknown
-                items.append(InfoItem(label: MR.strings().audiobook_quality_profile.localized(), value: qualityLabel))
+            if let audiobookQuality = author.getAudiobookQualityProfile(qualityProfiles: qualityProfiles)?.name {
+                items.append(InfoItem(label: MR.strings().audiobook_quality_profile.localized(), value: audiobookQuality))
                 hasQuality = true
             }
             if !hasQuality {

@@ -40,8 +40,7 @@ class BookshelfClient(
 
     override suspend fun getDetail(id: Long): NetworkResult<Author> = get("author/$id")
 
-    override suspend fun update(item: ArrMedia): NetworkResult<Author> =
-        put<ArrMedia, Author>("author/${item.id}", item)
+    override suspend fun update(item: ArrMedia): NetworkResult<Author> = put<ArrMedia, Author>("author/${item.id}", item)
 
     override suspend fun edit(
         item: ArrMedia,
@@ -74,10 +73,10 @@ class BookshelfClient(
     ): NetworkResult<Unit> = delete(
         endpoint = "author/$id",
         params =
-            mapOf(
-                "deleteFiles" to deleteFiles,
-                "addImportExclusion" to addImportExclusion,
-            ),
+        mapOf(
+            "deleteFiles" to deleteFiles,
+            "addImportExclusion" to addImportExclusion,
+        ),
     )
 
     override suspend fun setMonitorStatus(
@@ -91,14 +90,11 @@ class BookshelfClient(
         ),
     )
 
-    override suspend fun lookup(params: LookupParams): NetworkResult<List<Author>> =
-        get("author/lookup", mapOf("term" to params.query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<Author>> = get("author/lookup", mapOf("term" to params.query))
 
-    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Author> =
-        post<ArrMedia, Author>("author", item)
+    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Author> = post<ArrMedia, Author>("author", item)
 
-    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =
-        post("command", CommandPayload.Author(id))
+    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> = post("command", CommandPayload.Author(id))
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<BookshelfRelease>> {
         if (params !is ReleaseParams.Book) {
@@ -143,7 +139,7 @@ class BookshelfClient(
             it.copy(
                 instanceId = instance.id,
                 instanceName = instance.label,
-                instanceType = instance.type
+                instanceType = instance.type,
             )
         }
     }
@@ -154,22 +150,18 @@ class BookshelfClient(
 
     suspend fun getBookFiles(bookId: Long): NetworkResult<List<BookFile>> = get("bookFile", mapOf("bookId" to bookId))
 
-    suspend fun getBooks(authorId: Long? = null): NetworkResult<List<Book>> =
-        get("book", buildMap { authorId?.let { put("authorId", it) } })
+    suspend fun getBooks(authorId: Long? = null): NetworkResult<List<Book>> = get("book", buildMap { authorId?.let { put("authorId", it) } })
 
     suspend fun updateBook(book: Book): NetworkResult<Book> = put("book/${book.id}", book)
 
     suspend fun setBookMonitorStatus(
         bookIds: List<Long>,
         monitored: Boolean,
-    ): NetworkResult<List<MonitoredResponse>> =
-        put<BookMonitorBody, List<MonitoredResponse>>("book/monitor", BookMonitorBody(bookIds, monitored))
+    ): NetworkResult<List<MonitoredResponse>> = put<BookMonitorBody, List<MonitoredResponse>>("book/monitor", BookMonitorBody(bookIds, monitored))
 
-    suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> =
-        get("edition", mapOf("bookId" to bookId))
+    suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> = get("edition", mapOf("bookId" to bookId))
 
-    suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
-        delete("bookFiles/bulk", body = BookFileBulkDeleteBody(bookFilesIds))
+    suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> = delete("bookFiles/bulk", body = BookFileBulkDeleteBody(bookFilesIds))
 
     override suspend fun getCalendar(
         start: LocalDate,
@@ -193,10 +185,10 @@ class BookshelfClient(
             post(
                 endpoint = "bookshelf",
                 body =
-                    AuthorMonitoringBody(
-                        authors = ids.map { IdWrapper(it) },
-                        monitoringOptions = AuthorMonitoringOption(monitor),
-                    ),
+                AuthorMonitoringBody(
+                    authors = ids.map { IdWrapper(it) },
+                    monitoringOptions = AuthorMonitoringOption(monitor),
+                ),
             )
         }
 

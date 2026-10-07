@@ -113,11 +113,11 @@ open class ArrInstanceRepository(
                 ?: MutableStateFlow(emptyMap())
     open val booksLibrary: StateFlow<List<Book>>
         get() = (this as? ReadarrRepository)?.booksLibrary ?: MutableStateFlow(
-            emptyList()
+            emptyList(),
         )
     open val authorBooks: Flow<Map<Long, List<Book>>>
         get() = (this as? ReadarrRepository)?.authorBooks ?: flowOf(
-            emptyMap()
+            emptyMap(),
         )
     open val audiobookFiles: StateFlow<Map<Long, List<AudiobookFile>>>
         get() =
@@ -214,8 +214,7 @@ open class ArrInstanceRepository(
         libraryRepository.getReleases(params)
     }
 
-    open suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> =
-        libraryRepository.downloadRelease(payload)
+    open suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> = libraryRepository.downloadRelease(payload)
 
     open fun resetDownloadStatus() {
         libraryRepository.resetDownloadStatus()
@@ -230,22 +229,19 @@ open class ArrInstanceRepository(
         removeFromClient: Boolean,
         addToBlocklist: Boolean,
         skipRedownload: Boolean,
-    ): NetworkResult<Unit> =
-        libraryRepository.deleteActivityTask(releaseId, removeFromClient, addToBlocklist, skipRedownload)
+    ): NetworkResult<Unit> = libraryRepository.deleteActivityTask(releaseId, removeFromClient, addToBlocklist, skipRedownload)
 
     open suspend fun executeAutomaticSearch(itemId: Long) {
         libraryRepository.executeAutomaticSearch(itemId)
     }
 
-    open suspend fun executeCommand(payload: CommandPayload): NetworkResult<Any> =
-        libraryRepository.executeCommand(payload)
+    open suspend fun executeCommand(payload: CommandPayload): NetworkResult<Any> = libraryRepository.executeCommand(payload)
 
     open suspend fun getManualImportFiles(
         downloadId: String?,
         folder: String? = null,
         filterExistingFiles: Boolean = true,
-    ): NetworkResult<List<ManualImportFile>> =
-        libraryRepository.getManualImportFiles(downloadId, folder, filterExistingFiles)
+    ): NetworkResult<List<ManualImportFile>> = libraryRepository.getManualImportFiles(downloadId, folder, filterExistingFiles)
 
     open suspend fun executeManualImport(
         files: List<ManualImportFile>,
@@ -259,8 +255,7 @@ open class ArrInstanceRepository(
         pageSize: Int = 100,
     ): NetworkResult<List<HistoryItem>> = libraryRepository.getItemHistory(itemId, altIt, page, pageSize)
 
-    open suspend fun getSeriesHistory(seriesId: Long): NetworkResult<List<HistoryItem>> =
-        libraryRepository.getSeriesHistory(seriesId)
+    open suspend fun getSeriesHistory(seriesId: Long): NetworkResult<List<HistoryItem>> = libraryRepository.getSeriesHistory(seriesId)
 
     open suspend fun refreshHistory(
         page: Int = 1,
@@ -317,9 +312,8 @@ open class ArrInstanceRepository(
     ): NetworkResult<ArrMedia> = (this as? SonarrRepository)?.toggleSeasonMonitor(id, seasonNumber)
         ?: NetworkResult.Error(message = "Not a Sonarr instance")
 
-    open suspend fun toggleEpisodeMonitor(episode: Episode): NetworkResult<Episode> =
-        (this as? SonarrRepository)?.toggleEpisodeMonitor(episode)
-            ?: NetworkResult.Error(message = "Not a Sonarr instance")
+    open suspend fun toggleEpisodeMonitor(episode: Episode): NetworkResult<Episode> = (this as? SonarrRepository)?.toggleEpisodeMonitor(episode)
+        ?: NetworkResult.Error(message = "Not a Sonarr instance")
 
     open suspend fun deleteSeasonFiles(
         seriesId: Long,
@@ -331,79 +325,64 @@ open class ArrInstanceRepository(
         seriesId: Long,
         episodes: List<Episode>,
     ): NetworkResult<Unit> = (this as? SonarrRepository)?.deleteEpisodes(seriesId, episodes) ?: NetworkResult.Error(
-        message = "Not a Sonarr instance"
+        message = "Not a Sonarr instance",
     )
 
     open suspend fun deleteEpisodeFile(
         seriesId: Long,
         fileId: Long,
     ): NetworkResult<Unit> = (this as? SonarrRepository)?.deleteEpisodeFile(seriesId, fileId) ?: NetworkResult.Error(
-        message = "Not a Sonarr instance"
+        message = "Not a Sonarr instance",
     )
 
     // Radarr forwarded methods
-    open suspend fun getMovieExtraFiles(movieId: Long): NetworkResult<List<ExtraFile>> =
-        (this as? RadarrRepository)?.getMovieExtraFiles(movieId)
-            ?: NetworkResult.Error(message = "Not a Radarr instance")
+    open suspend fun getMovieExtraFiles(movieId: Long): NetworkResult<List<ExtraFile>> = (this as? RadarrRepository)?.getMovieExtraFiles(movieId)
+        ?: NetworkResult.Error(message = "Not a Radarr instance")
 
-    open suspend fun deleteMovieFile(movieFileId: Long): NetworkResult<Unit> =
-        (this as? RadarrRepository)?.deleteMovieFile(movieFileId)
-            ?: NetworkResult.Error(message = "Not a Radarr instance")
+    open suspend fun deleteMovieFile(movieFileId: Long): NetworkResult<Unit> = (this as? RadarrRepository)?.deleteMovieFile(movieFileId)
+        ?: NetworkResult.Error(message = "Not a Radarr instance")
 
     // Lidarr forwarded methods
-    open suspend fun getArtistAlbums(artistId: Long): NetworkResult<List<ArrAlbum>> =
-        (this as? LidarrRepository)?.getArtistAlbums(artistId) ?: NetworkResult.Error(message = "Not a Lidarr instance")
+    open suspend fun getArtistAlbums(artistId: Long): NetworkResult<List<ArrAlbum>> = (this as? LidarrRepository)?.getArtistAlbums(artistId) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    open suspend fun getArtistTracks(artistId: Long): NetworkResult<List<LidarrTrack>> =
-        (this as? LidarrRepository)?.getArtistTracks(artistId) ?: NetworkResult.Error(message = "Not a Lidarr instance")
+    open suspend fun getArtistTracks(artistId: Long): NetworkResult<List<LidarrTrack>> = (this as? LidarrRepository)?.getArtistTracks(artistId) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    open suspend fun getArtistTrackFiles(artistId: Long): NetworkResult<List<LidarrTrackFile>> =
-        (this as? LidarrRepository)?.getArtistTrackFiles(artistId)
-            ?: NetworkResult.Error(message = "Not a Lidarr instance")
+    open suspend fun getArtistTrackFiles(artistId: Long): NetworkResult<List<LidarrTrackFile>> = (this as? LidarrRepository)?.getArtistTrackFiles(artistId)
+        ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
     open suspend fun deleteAlbumFiles(
         artistId: Long,
         albumId: Long,
     ): NetworkResult<Unit> = (this as? LidarrRepository)?.deleteAlbumFiles(artistId, albumId) ?: NetworkResult.Error(
-        message = "Not a Lidarr instance"
+        message = "Not a Lidarr instance",
     )
 
-    open suspend fun deleteTrackFiles(tracks: List<LidarrTrackFile>): NetworkResult<Unit> =
-        (this as? LidarrRepository)?.deleteTrackFiles(tracks) ?: NetworkResult.Error(message = "Not a Lidarr instance")
+    open suspend fun deleteTrackFiles(tracks: List<LidarrTrackFile>): NetworkResult<Unit> = (this as? LidarrRepository)?.deleteTrackFiles(tracks) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    open suspend fun toggleAlbumMonitor(album: ArrAlbum): NetworkResult<ArrAlbum> =
-        (this as? LidarrRepository)?.toggleAlbumMonitor(album) ?: NetworkResult.Error(message = "Not a Lidarr instance")
+    open suspend fun toggleAlbumMonitor(album: ArrAlbum): NetworkResult<ArrAlbum> = (this as? LidarrRepository)?.toggleAlbumMonitor(album) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
-    open suspend fun updateAlbum(album: ArrAlbum): NetworkResult<ArrAlbum> =
-        (this as? LidarrRepository)?.updateAlbum(album) ?: NetworkResult.Error(message = "Not a Lidarr instance")
+    open suspend fun updateAlbum(album: ArrAlbum): NetworkResult<ArrAlbum> = (this as? LidarrRepository)?.updateAlbum(album) ?: NetworkResult.Error(message = "Not a Lidarr instance")
 
     // Readarr forwarded methods
-    open suspend fun getAuthorBooks(authorId: Long): NetworkResult<List<Book>> =
-        (this as? ReadarrRepository)?.getAuthorBooks(authorId)
-            ?: NetworkResult.Error(message = "Not a Readarr instance")
+    open suspend fun getAuthorBooks(authorId: Long): NetworkResult<List<Book>> = (this as? ReadarrRepository)?.getAuthorBooks(authorId)
+        ?: NetworkResult.Error(message = "Not a Readarr instance")
 
-    open suspend fun getAuthorSeries(authorId: Long): NetworkResult<List<BookSeries>> =
-        (this as? ReadarrRepository)?.getAuthorSeries(authorId)
-            ?: NetworkResult.Error(message = "Not a Readarr instance")
+    open suspend fun getAuthorSeries(authorId: Long): NetworkResult<List<BookSeries>> = (this as? ReadarrRepository)?.getAuthorSeries(authorId)
+        ?: NetworkResult.Error(message = "Not a Readarr instance")
 
-    open suspend fun getAuthorBookFiles(authorId: Long): NetworkResult<List<BookFile>> =
-        (this as? ReadarrRepository)?.getAuthorBookFiles(authorId)
-            ?: NetworkResult.Error(message = "Not a Readarr instance")
+    open suspend fun getAuthorBookFiles(authorId: Long): NetworkResult<List<BookFile>> = (this as? ReadarrRepository)?.getAuthorBookFiles(authorId)
+        ?: NetworkResult.Error(message = "Not a Readarr instance")
 
-    open suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
-        (this as? ReadarrRepository)?.deleteBookFiles(bookFilesIds)
-            ?: NetworkResult.Error(message = "Not a Readarr instance")
+    open suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> = (this as? ReadarrRepository)?.deleteBookFiles(bookFilesIds)
+        ?: NetworkResult.Error(message = "Not a Readarr instance")
 
-    open suspend fun toggleBookMonitor(book: Book): NetworkResult<Book> =
-        (this as? ReadarrRepository)?.toggleBookMonitor(book) ?: NetworkResult.Error(message = "Not a Readarr instance")
+    open suspend fun toggleBookMonitor(book: Book): NetworkResult<Book> = (this as? ReadarrRepository)?.toggleBookMonitor(book) ?: NetworkResult.Error(message = "Not a Readarr instance")
 
-    open suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> =
-        (this as? ReadarrRepository)?.getBookEditions(bookId) ?: NetworkResult.Error(message = "Not a Readarr instance")
+    open suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> = (this as? ReadarrRepository)?.getBookEditions(bookId) ?: NetworkResult.Error(message = "Not a Readarr instance")
 
     // Listenarr forwarded methods
-    open suspend fun getAudiobookFiles(audiobookId: Long): NetworkResult<List<AudiobookFile>> =
-        (this as? ListenarrRepository)?.getAudiobookFiles(audiobookId)
-            ?: NetworkResult.Error(message = "Not a Listenarr instance")
+    open suspend fun getAudiobookFiles(audiobookId: Long): NetworkResult<List<AudiobookFile>> = (this as? ListenarrRepository)?.getAudiobookFiles(audiobookId)
+        ?: NetworkResult.Error(message = "Not a Listenarr instance")
 
     open suspend fun getMetadata(
         asin: String,
@@ -432,9 +411,8 @@ open class ArrInstanceRepository(
     ): NetworkResult<Unit> = (this as? ListenarrRepository)?.moveAudiobookFiles(id, sourcePath, destinationPath)
         ?: NetworkResult.Error(message = "Not a Listenarr instance")
 
-    open suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> =
-        (this as? ListenarrRepository)?.toggleAudiobookMonitor(audiobook)
-            ?: NetworkResult.Error(message = "Not a Listenarr instance")
+    open suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> = (this as? ListenarrRepository)?.toggleAudiobookMonitor(audiobook)
+        ?: NetworkResult.Error(message = "Not a Listenarr instance")
 
     open suspend fun deleteAudiobookFile(
         audiobookId: Long,

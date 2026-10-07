@@ -44,6 +44,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,8 +58,11 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.BookMediaType
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
+import com.dnfapps.arrmatey.arr.api.model.getChangedRootFolderPath
+import com.dnfapps.arrmatey.compose.utils.BookMediaFilterBy
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.entensions.openLink
@@ -199,9 +203,11 @@ fun UnifiedMediaDetailsScreen(
     var confirmClearData by remember { mutableStateOf(false) }
     var selectedTracearrStreamSession by remember { mutableStateOf<TracearrStreamSession?>(null) }
     var selectedTab by remember { mutableStateOf(UnifiedMediaDetailsTab.Overview) }
+    var selectedBookMediaFilter by rememberSaveable { mutableStateOf(BookMediaFilterBy.All) }
     var previousHasSeasonsOrFiles by remember { mutableStateOf<Boolean?>(null) }
 
     val qualityProfiles by viewModel.qualityProfiles.collectAsStateWithLifecycle()
+    val metadataProfiles by viewModel.metadataProfiles.collectAsStateWithLifecycle()
     val rootFolders by viewModel.rootFolders.collectAsStateWithLifecycle()
     val tags by viewModel.tags.collectAsStateWithLifecycle()
     val addItemStatus by viewModel.addItemStatus.collectAsStateWithLifecycle()
@@ -563,7 +569,7 @@ fun UnifiedMediaDetailsScreen(
                                             selectedTabIndex = availableTabs.indexOf(selectedTab).coerceAtLeast(0),
                                             modifier = Modifier.fillMaxWidth(),
                                             edgePadding = 0.dp,
-                                            minTabWidth = 45.dp
+                                            minTabWidth = 45.dp,
                                         ) {
                                             availableTabs.forEach { tab ->
                                                 Tab(
@@ -645,6 +651,9 @@ fun UnifiedMediaDetailsScreen(
                                             onNavigateToAudiobookRelease = { id, query ->
                                                 onNavigateToAudiobookRelease(id, query, currentInstanceId)
                                             },
+                                            selectedBookMediaFilter = selectedBookMediaFilter,
+                                            onBookMediaTypeFilterChanged = { selectedBookMediaFilter = it },
+                                            onEditAuthor = { showEditSheet = true },
                                         )
                                     }
 
@@ -827,6 +836,7 @@ fun UnifiedMediaDetailsScreen(
                     editAlbum = editAlbum,
                     arrMedia = state.arrMedia,
                     qualityProfiles = qualityProfiles,
+                    metadataProfiles = metadataProfiles,
                     rootFolders = rootFolders,
                     tags = tags,
                     editStatus = editStatus,
@@ -839,11 +849,16 @@ fun UnifiedMediaDetailsScreen(
                     onDismissEditPath = { showEditPathSheet = false },
                     onDismissEditMedia = { showEditSheet = false },
                     onDismissEditAlbum = { editAlbum = null },
+                    initialMediaType = when (selectedBookMediaFilter) {
+                        BookMediaFilterBy.Audiobook -> BookMediaType.Audiobook
+                        BookMediaFilterBy.EBook -> BookMediaType.EBook
+                        else -> null
+                    },
                 )
 
                 moveFilesItem?.let { item ->
                     ConfirmMoveFilesDialog(
-                        rootFolderPath = item.rootFolderPath,
+                        rootFolderPath = successState?.arrMedia?.getChangedRootFolderPath(item) ?: item.rootFolderPath,
                         onConfirmMove = {
                             viewModel.editItem(item, moveFiles = true)
                             moveFilesItem = null

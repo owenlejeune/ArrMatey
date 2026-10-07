@@ -12,6 +12,9 @@ struct ArrLibraryFilesAreaView: View {
     let onConfirmDeleteMovie: () -> Void
     let onEditAlbum: (ArrAlbum) -> Void
     let onConfirmDeleteAlbumId: (Int64) -> Void
+    var selectedBookMediaFilter: BookMediaFilterBy = .all
+    var onSelectBookMediaTypeFilter: ((BookMediaFilterBy) -> Void)? = nil
+    var onEditAuthor: (() -> Void)? = nil
 
     var body: some View {
         let currentInstanceId = success.selectedInstanceId?.int64Value
@@ -60,7 +63,10 @@ struct ArrLibraryFilesAreaView: View {
                 onToggleMonitor: { viewModel.toggleBookMonitored(book: $0) },
                 onToggleSeriesMonitor: { viewModel.toggleBookSeriesMonitored(books: $0) },
                 onAutomaticSearch: { viewModel.performBookAutomaticLookup(bookId: $0) },
-                queueItems: success.queueItems
+                queueItems: success.queueItems,
+                selectedMediaTypeFilter: selectedBookMediaFilter,
+                onSelectMediaTypeFilter: onSelectBookMediaTypeFilter,
+                onEditAuthor: onEditAuthor
             )
         } else if let audiobook = success.arrMedia as? Audiobook {
             AudiobooksArea(

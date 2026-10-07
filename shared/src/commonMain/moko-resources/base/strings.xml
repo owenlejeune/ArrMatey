@@ -1114,4 +1114,14 @@
     <string name="no_ebook_root_folder_configured">No eBook root folder configured for this author. Please edit the author and add a root folder to see eBook books.</string>
     <string name="no_audiobook_root_folder_selected">No audiobook root folder selected for this author.</string>
     <string name="no_ebook_root_folder_selected">No eBook root folder selected for this author.</string>
+    <string name="audiobooks_not_configured">Audiobooks are not configured</string>
+    <string name="ebooks_not_configured">E-Books are not configured</string>
+    <string name="audiobooks_not_configured_desc">Audiobooks are not currently configured for this author. Enable audiobooks to assign a root folder and quality profile.</string>
+    <string name="ebooks_not_configured_desc">E-Books are not currently configured for this author. Enable e-books to assign a root folder and quality profile.</string>
+    <string name="configure_audiobooks">Configure Audiobooks</string>
+    <string name="configure_ebooks">Configure E-Books</string>
+    <string name="remove_audiobooks">Remove Audiobooks</string>
+    <string name="remove_ebooks">Remove E-Books</string>
+    <string name="saving_will_add_audiobook_support">Saving will add an audiobook root folder and configure audiobooks for this author.</string>
+    <string name="saving_will_add_ebook_support">Saving will add an e-book root folder and configure e-books for this author.</string>
 </resources>

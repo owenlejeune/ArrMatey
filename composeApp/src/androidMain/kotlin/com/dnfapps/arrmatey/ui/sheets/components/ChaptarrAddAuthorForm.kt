@@ -13,6 +13,8 @@ import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.api.model.filterForAudiobook
+import com.dnfapps.arrmatey.arr.api.model.filterForEbook
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
@@ -77,11 +79,11 @@ fun ChaptarrAddAuthorForm(
                 monitorNew = audiobookMonitorNew,
                 onMonitorNewChanged = onAudiobookMonitorNewChanged,
                 monitorNewLabel = mokoString(MR.strings.monitor_new_audiobooks),
-                qualityProfiles = qualityProfiles,
+                qualityProfiles = qualityProfiles.filterForAudiobook(),
                 selectedQualityProfile = audiobookQualityProfile,
                 onQualityProfileSelected = onAudiobookQualityProfileSelected,
                 qualityProfileLabel = mokoString(MR.strings.audiobook_quality_profile),
-                metadataProfiles = metadataProfiles,
+                metadataProfiles = metadataProfiles.filterForAudiobook(),
                 selectedMetadataProfile = audiobookMetadataProfile,
                 onMetadataProfileSelected = onAudiobookMetadataProfileSelected,
                 metadataProfileLabel = mokoString(MR.strings.audiobook_metadata_profile),
@@ -109,11 +111,11 @@ fun ChaptarrAddAuthorForm(
                 monitorNew = ebookMonitorNew,
                 onMonitorNewChanged = onEbookMonitorNewChanged,
                 monitorNewLabel = mokoString(MR.strings.monitor_new_ebooks),
-                qualityProfiles = qualityProfiles,
+                qualityProfiles = qualityProfiles.filterForEbook(),
                 selectedQualityProfile = ebookQualityProfile,
                 onQualityProfileSelected = onEbookQualityProfileSelected,
                 qualityProfileLabel = mokoString(MR.strings.ebook_quality_profile),
-                metadataProfiles = metadataProfiles,
+                metadataProfiles = metadataProfiles.filterForEbook(),
                 selectedMetadataProfile = ebookMetadataProfile,
                 onMetadataProfileSelected = onEbookMetadataProfileSelected,
                 metadataProfileLabel = mokoString(MR.strings.ebook_metadata_profile),

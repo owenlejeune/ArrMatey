@@ -19,29 +19,30 @@ struct BooksArea: View {
     let onToggleSeriesMonitor: ([Book]) -> Void
     let onAutomaticSearch: (Int64) -> Void
     var queueItems: [QueueItem] = []
+    var selectedMediaTypeFilter: BookMediaFilterBy = .all
+    var onSelectMediaTypeFilter: ((BookMediaFilterBy) -> Void)? = nil
+    var onEditAuthor: (() -> Void)? = nil
 
     @EnvironmentObject private var navigation: NavigationManager
 
     @State private var selectedTab: Int = 0
-    @State private var selectedMediaTypeFilter: BookMediaFilterBy = .all
 
     private var isChaptarr: Bool {
-        author.audiobookQualityProfileId != nil || author.ebookQualityProfileId != nil ||
-            author.audiobookRootFolderPath != nil || author.ebookRootFolderPath != nil ||
-            author.lastSelectedMediaType != nil || books.contains(where: { $0.mediaType != nil })
+        author.isChaptarr || books.contains(where: { $0.mediaType != nil })
     }
 
     private var hasMixedMediaTypes: Bool {
-        isChaptarr || books.contains(where: { $0.mediaType != nil }) || author.audiobookQualityProfileId != nil
+        author.hasMixedMediaTypes(books: books)
     }
 
     private var hasAudiobooksConfigured: Bool {
-        (author.audiobookQualityProfileId != nil && author.audiobookQualityProfileId?.int32Value != 0) || !(author.audiobookRootFolderPath?.isEmpty ?? true)
+        author.hasAudiobookConfigured
     }
 
     private var hasEbooksConfigured: Bool {
-        (author.ebookQualityProfileId != nil && author.ebookQualityProfileId?.int32Value != 0) || !(author.ebookRootFolderPath?.isEmpty ?? true) || (author.qualityProfileId != 0 && !(author.rootFolderPath?.isEmpty ?? true))
+        author.hasEbookConfigured
     }
+
 
     private var ebookCount: Int {
         books.filter { $0.mediaType == nil || $0.mediaType == .ebook }.count
@@ -75,17 +76,17 @@ struct BooksArea: View {
                         mediaTypeFilterChip(
                             title: "\(BookMediaFilterBy.all.resource.localized()) (\(books.count))",
                             isSelected: selectedMediaTypeFilter == .all,
-                            action: { selectedMediaTypeFilter = .all }
+                            action: { onSelectMediaTypeFilter?(.all) }
                         )
                         mediaTypeFilterChip(
                             title: "\(BookMediaFilterBy.ebook.resource.localized()) (\(ebookCount))",
                             isSelected: selectedMediaTypeFilter == .ebook,
-                            action: { selectedMediaTypeFilter = .ebook }
+                            action: { onSelectMediaTypeFilter?(.ebook) }
                         )
                         mediaTypeFilterChip(
                             title: "\(BookMediaFilterBy.audiobook.resource.localized()) (\(audiobookCount))",
                             isSelected: selectedMediaTypeFilter == .audiobook,
-                            action: { selectedMediaTypeFilter = .audiobook }
+                            action: { onSelectMediaTypeFilter?(.audiobook) }
                         )
                     }
                 }
@@ -104,17 +105,24 @@ struct BooksArea: View {
     }
 
     private func unconfiguredTypeNotice(message: String) -> some View {
-        HStack(alignment: .center, spacing: 12) {
-            Image(systemName: "info.circle")
-                .foregroundColor(.secondary)
-            Text(message)
-                .font(.system(size: 14))
-                .foregroundColor(.secondary)
-            Spacer()
+        Button(action: onEditAuthor ?? {}) {
+            HStack(alignment: .center, spacing: 12) {
+                Image(systemName: "info.circle")
+                    .foregroundColor(.themePrimary)
+                Text(message)
+                    .font(.system(size: 14))
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.secondary)
+            }
+            .padding(12)
+            .background(Color(uiColor: .secondarySystemBackground))
+            .cornerRadius(12)
         }
-        .padding(12)
-        .background(Color(uiColor: .secondarySystemBackground))
-        .cornerRadius(12)
+        .buttonStyle(.plain)
     }
 
     private func mediaTypeFilterChip(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {

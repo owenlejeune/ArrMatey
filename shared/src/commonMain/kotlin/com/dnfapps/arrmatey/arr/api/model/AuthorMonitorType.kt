@@ -43,4 +43,21 @@ enum class AuthorMonitorType(
 
     @SerialName("none")
     None(MR.strings.none),
+    ;
+
+    companion object {
+        val chaptarrOptions: List<AuthorMonitorType> = listOf(
+            None,
+            All,
+            Future,
+            Missing,
+            Existing,
+            FirstBook,
+            LatestBook,
+        )
+
+        fun fromChaptarrIndex(index: Int?): AuthorMonitorType = index?.let { chaptarrOptions.getOrNull(it) } ?: None
+
+        fun toChaptarrIndex(type: AuthorMonitorType): Int = chaptarrOptions.indexOf(type).takeIf { it >= 0 } ?: 0
+    }
 }

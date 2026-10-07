@@ -20,6 +20,7 @@ struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
     @Binding var editAlbum: ArrAlbum?
     @Binding var selectedQueueItem: QueueItem?
     @Binding var selectedTracearrSession: TracearrStreamSession?
+    var initialBookMediaType: BookMediaType? = nil
 
     func body(content: Content) -> some View {
         let requestSheetBinding = SwiftUI.Binding<Bool>(
@@ -49,7 +50,8 @@ struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
                         showEditSheet: true,
                         onDismissEditPath: { showEditPathSheet = false },
                         onDismissEditMedia: { showEditSheet = false },
-                        onRequestMoveFiles: { moveFilesItem = $0 }
+                        onRequestMoveFiles: { moveFilesItem = $0 },
+                        initialMediaType: initialBookMediaType
                     )
                 }
             }

@@ -1,15 +1,14 @@
 package com.dnfapps.arrmatey.arr.api.model
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.arr.api.client.HasArrImages
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.shared.*
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrRed
-import com.dnfapps.arrmatey.shared.*
-import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
@@ -109,8 +108,11 @@ data class Author(
         get() = statistics?.percentOfBooks?.div(100f) ?: 0f
 
     val isChaptarr: Boolean
-        get() = audiobookQualityProfileId != null || ebookQualityProfileId != null ||
-            audiobookRootFolderPath != null || ebookRootFolderPath != null
+        get() = audiobookQualityProfileId != null ||
+            ebookQualityProfileId != null ||
+            audiobookRootFolderPath != null ||
+            ebookRootFolderPath != null ||
+            lastSelectedMediaType != null
 
     val hasAudiobookConfigured: Boolean
         get() = (audiobookQualityProfileId != null && audiobookQualityProfileId != 0) ||
@@ -120,6 +122,22 @@ data class Author(
         get() = (ebookQualityProfileId != null && ebookQualityProfileId != 0) ||
             !ebookRootFolderPath.isNullOrEmpty() ||
             (qualityProfileId != 0 && !rootFolderPath.isNullOrEmpty() && !hasAudiobookConfigured)
+
+    val audiobookMonitorType: AuthorMonitorType
+        get() = AuthorMonitorType.fromChaptarrIndex(audiobookMonitorExisting)
+
+    val ebookMonitorType: AuthorMonitorType
+        get() = AuthorMonitorType.fromChaptarrIndex(ebookMonitorExisting)
+
+    fun hasMixedMediaTypes(books: List<Book> = emptyList()): Boolean = isChaptarr || books.any { it.mediaType != null } || audiobookQualityProfileId != null
+
+    fun getAudiobookQualityProfile(qualityProfiles: List<QualityProfile>): QualityProfile? = audiobookQualityProfileId?.let { id -> qualityProfiles.firstOrNull { it.id == id } }
+
+    fun getEbookQualityProfile(qualityProfiles: List<QualityProfile>): QualityProfile? = ebookQualityProfileId?.let { id -> qualityProfiles.firstOrNull { it.id == id } }
+
+    fun getAudiobookMetadataProfile(metadataProfiles: List<MetadataProfile>): MetadataProfile? = audiobookMetadataProfileId?.let { id -> metadataProfiles.firstOrNull { it.id == id } }
+
+    fun getEbookMetadataProfile(metadataProfiles: List<MetadataProfile>): MetadataProfile? = ebookMetadataProfileId?.let { id -> metadataProfiles.firstOrNull { it.id == id } }
 
     fun singleMediaTypeLabel(isChaptarrInstance: Boolean = false): StringResource? {
         val inChaptarr = isChaptarrInstance || isChaptarr
@@ -237,31 +255,31 @@ data class Author(
         ebookMonitorFuture: Boolean?,
         ebookTags: List<Int> = emptyList(),
         tags: List<Int> = emptyList(),
-    ): Author {
-        return copy(
-            audiobookQualityProfileId = audiobookQualityProfileId,
-            audiobookMetadataProfileId = audiobookMetadataProfileId,
-            audiobookRootFolderPath = audiobookRootFolderPath,
-            audiobookFolder = audiobookFolder ?: folder,
-            audiobookTags = audiobookTags,
-            audiobookMonitorExisting = audiobookMonitorExisting,
-            audiobookMonitorFuture = audiobookMonitorFuture,
-            ebookQualityProfileId = ebookQualityProfileId,
-            ebookMetadataProfileId = ebookMetadataProfileId,
-            ebookRootFolderPath = ebookRootFolderPath,
-            ebookFolder = ebookFolder ?: folder,
-            ebookTags = ebookTags,
-            ebookMonitorExisting = ebookMonitorExisting,
-            ebookMonitorFuture = ebookMonitorFuture,
-            tags = tags,
-            qualityProfileId = audiobookQualityProfileId ?: ebookQualityProfileId ?: qualityProfileId,
-            metadataProfileId = audiobookMetadataProfileId ?: ebookMetadataProfileId ?: metadataProfileId,
-            rootFolderPath = audiobookRootFolderPath ?: ebookRootFolderPath ?: rootFolderPath,
-            path = (audiobookRootFolderPath ?: ebookRootFolderPath ?: rootFolderPath)?.let { "$it/${folder ?: title}" } ?: path,
-            monitored = (audiobookMonitorExisting != null && audiobookMonitorExisting != 0) || audiobookMonitorFuture == true ||
-                (ebookMonitorExisting != null && ebookMonitorExisting != 0) || ebookMonitorFuture == true,
-        )
-    }
+    ): Author = copy(
+        audiobookQualityProfileId = audiobookQualityProfileId,
+        audiobookMetadataProfileId = audiobookMetadataProfileId,
+        audiobookRootFolderPath = audiobookRootFolderPath,
+        audiobookFolder = audiobookFolder ?: folder,
+        audiobookTags = audiobookTags,
+        audiobookMonitorExisting = audiobookMonitorExisting,
+        audiobookMonitorFuture = audiobookMonitorFuture,
+        ebookQualityProfileId = ebookQualityProfileId,
+        ebookMetadataProfileId = ebookMetadataProfileId,
+        ebookRootFolderPath = ebookRootFolderPath,
+        ebookFolder = ebookFolder ?: folder,
+        ebookTags = ebookTags,
+        ebookMonitorExisting = ebookMonitorExisting,
+        ebookMonitorFuture = ebookMonitorFuture,
+        tags = tags,
+        qualityProfileId = audiobookQualityProfileId ?: ebookQualityProfileId ?: qualityProfileId,
+        metadataProfileId = audiobookMetadataProfileId ?: ebookMetadataProfileId ?: metadataProfileId,
+        rootFolderPath = audiobookRootFolderPath ?: ebookRootFolderPath ?: rootFolderPath,
+        path = (audiobookRootFolderPath ?: ebookRootFolderPath ?: rootFolderPath)?.let { "$it/${folder ?: title}" } ?: path,
+        monitored = (audiobookMonitorExisting != null && audiobookMonitorExisting != 0) ||
+            audiobookMonitorFuture == true ||
+            (ebookMonitorExisting != null && ebookMonitorExisting != 0) ||
+            ebookMonitorFuture == true,
+    )
 
     fun copyForEdit(
         monitored: Boolean,

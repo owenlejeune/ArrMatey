@@ -174,6 +174,7 @@ enum class InstanceType(
         mockMedia = MockMedia.Chaptarr,
         associatedColor = ChaptarrRed,
     ),
+
     @OptIn(ExperimentalSerializationApi::class)
     @JsonNames("Booksehlf", "Booksehelf", "Bookshelf")
     Bookshelf(
@@ -281,4 +282,10 @@ enum class InstanceType(
     companion object {
         fun arrs() = listOf(Sonarr, Radarr, Lidarr, Chaptarr, Bookshelf, Listenarr)
     }
+
+    val isBookshelfOrChaptarr: Boolean
+        get() = this == Bookshelf || this == Chaptarr
+
+    val isReadarrFamily: Boolean
+        get() = this == Bookshelf || this == Listenarr || this == Chaptarr
 }

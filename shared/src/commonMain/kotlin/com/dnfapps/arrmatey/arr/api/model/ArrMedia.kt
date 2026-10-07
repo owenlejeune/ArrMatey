@@ -117,6 +117,41 @@ sealed interface ArrMedia {
         get() = status == MediaStatus.Continuing
 }
 
+fun ArrMedia.hasRootFolderChanged(newItem: ArrMedia): Boolean {
+    if (this is Author && (this.isChaptarr || (newItem is Author && newItem.isChaptarr))) {
+        val newAuthor = newItem as? Author ?: return false
+        val audiobookChanged = this.audiobookRootFolderPath != null &&
+            newAuthor.audiobookRootFolderPath != null &&
+            this.audiobookRootFolderPath != newAuthor.audiobookRootFolderPath
+        val ebookChanged = this.ebookRootFolderPath != null &&
+            newAuthor.ebookRootFolderPath != null &&
+            this.ebookRootFolderPath != newAuthor.ebookRootFolderPath
+        return audiobookChanged || ebookChanged
+    }
+    return this.rootFolderPath != null &&
+        newItem.rootFolderPath != null &&
+        this.rootFolderPath != newItem.rootFolderPath
+}
+
+fun ArrMedia.getChangedRootFolderPath(newItem: ArrMedia): String? {
+    if (this is Author && (this.isChaptarr || (newItem is Author && newItem.isChaptarr))) {
+        val newAuthor = newItem as? Author ?: return null
+        if (this.audiobookRootFolderPath != null &&
+            newAuthor.audiobookRootFolderPath != null &&
+            this.audiobookRootFolderPath != newAuthor.audiobookRootFolderPath
+        ) {
+            return newAuthor.audiobookRootFolderPath
+        }
+        if (this.ebookRootFolderPath != null &&
+            newAuthor.ebookRootFolderPath != null &&
+            this.ebookRootFolderPath != newAuthor.ebookRootFolderPath
+        ) {
+            return newAuthor.ebookRootFolderPath
+        }
+    }
+    return newItem.rootFolderPath
+}
+
 fun ArrMedia.toJson(): String {
     val element: JsonElement =
         when (this) {

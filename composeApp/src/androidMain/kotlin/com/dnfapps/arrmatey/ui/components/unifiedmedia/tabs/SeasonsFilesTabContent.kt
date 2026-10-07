@@ -22,6 +22,7 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
+import com.dnfapps.arrmatey.compose.utils.BookMediaFilterBy
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
@@ -59,6 +60,9 @@ fun SeasonsFilesTabContent(
     onNavigateToBookDetails: (Author, Book) -> Unit,
     onNavigateToBookRelease: (Long) -> Unit,
     onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
+    selectedBookMediaFilter: BookMediaFilterBy = BookMediaFilterBy.All,
+    onBookMediaTypeFilterChanged: (BookMediaFilterBy) -> Unit = {},
+    onEditAuthor: (() -> Unit)? = null,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -143,6 +147,9 @@ fun SeasonsFilesTabContent(
                         onNavigateToBookDetails = onNavigateToBookDetails,
                         onNavigateToBookRelease = onNavigateToBookRelease,
                         queueItems = state.queueItems,
+                        selectedMediaTypeFilter = selectedBookMediaFilter,
+                        onSelectMediaTypeFilter = onBookMediaTypeFilterChanged,
+                        onEditAuthor = onEditAuthor,
                     )
 
                 is Audiobook ->

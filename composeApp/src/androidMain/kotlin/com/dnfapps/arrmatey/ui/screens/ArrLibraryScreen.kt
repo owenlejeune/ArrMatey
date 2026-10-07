@@ -93,6 +93,8 @@ import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.api.model.getChangedRootFolderPath
+import com.dnfapps.arrmatey.arr.api.model.hasRootFolderChanged
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
@@ -495,7 +497,7 @@ fun ArrLibraryScreen(
                 tags = data.tags,
                 editInProgress = editStatus is OperationStatus.InProgress,
                 onEditItem = {
-                    if (item.rootFolderPath != it.rootFolderPath) {
+                    if (item.hasRootFolderChanged(it)) {
                         moveFilesItem = it
                     } else {
                         arrMediaViewModel.editItem(it)
@@ -505,16 +507,17 @@ fun ArrLibraryScreen(
             )
         }
 
-        moveFilesItem?.let { item ->
+        moveFilesItem?.let { editedItem ->
+            val changedPath = showEditSheet?.getChangedRootFolderPath(editedItem) ?: editedItem.rootFolderPath ?: ""
             AlertDialog(
                 onDismissRequest = { moveFilesItem = null },
                 title = {
-                    Text(mokoString(MR.strings.move_files_confirm, item.rootFolderPath ?: ""))
+                    Text(mokoString(MR.strings.move_files_confirm, changedPath))
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            arrMediaViewModel.editItem(item, moveFiles = true)
+                            arrMediaViewModel.editItem(editedItem, moveFiles = true)
                             moveFilesItem = null
                         },
                     ) {
@@ -524,7 +527,7 @@ fun ArrLibraryScreen(
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            arrMediaViewModel.editItem(item)
+                            arrMediaViewModel.editItem(editedItem)
                             moveFilesItem = null
                         },
                     ) {

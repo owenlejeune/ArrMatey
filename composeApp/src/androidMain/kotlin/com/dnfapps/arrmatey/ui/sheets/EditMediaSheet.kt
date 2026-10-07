@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.BookMediaType
 import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
@@ -24,6 +25,7 @@ fun EditMediaSheet(
     editInProgress: Boolean,
     onEditItem: (ArrMedia) -> Unit,
     onDismiss: () -> Unit,
+    initialMediaType: BookMediaType? = null,
 ) {
     when (item) {
         is ArrMovie ->
@@ -69,6 +71,7 @@ fun EditMediaSheet(
                 editInProgress = editInProgress,
                 onEditItem = onEditItem,
                 onDismiss = onDismiss,
+                initialMediaType = initialMediaType,
             )
 
         is Audiobook ->

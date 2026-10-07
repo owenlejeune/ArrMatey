@@ -303,9 +303,12 @@ class GetUnifiedMediaDetailsUseCase(
                 activityTasks
                     .filter { task ->
                         (targetInstanceId == null || task.instanceId == null || task.instanceId == targetInstanceId) &&
-                            (targetType == null || task.type == targetType ||
-                                (targetType == InstanceType.Chaptarr && task.type == InstanceType.Bookshelf) ||
-                                (targetType == InstanceType.Bookshelf && task.type == InstanceType.Chaptarr)) &&
+                            (
+                                targetType == null ||
+                                    task.type == targetType ||
+                                    (targetType == InstanceType.Chaptarr && task.type == InstanceType.Bookshelf) ||
+                                    (targetType == InstanceType.Bookshelf && task.type == InstanceType.Chaptarr)
+                                ) &&
                             (
                                 task.mediaId == targetId ||
                                     (task as? SonarrQueueItem)?.calcSeriesId == targetId ||

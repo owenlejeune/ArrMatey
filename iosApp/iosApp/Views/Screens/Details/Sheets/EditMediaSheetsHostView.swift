@@ -14,6 +14,7 @@ struct EditMediaSheetsHostView: View {
     let onDismissEditPath: () -> Void
     let onDismissEditMedia: () -> Void
     let onRequestMoveFiles: (ArrMedia) -> Void
+    var initialMediaType: BookMediaType? = nil
 
     var body: some View {
         if let arrMedia = success.arrMedia {
@@ -35,7 +36,7 @@ struct EditMediaSheetsHostView: View {
                         tags: viewModel.tags,
                         editInProgress: viewModel.editStatus is OperationStatusInProgress,
                         onEditItem: { updatedItem, moveFiles in
-                            if movie.rootFolderPath != updatedItem.rootFolderPath {
+                            if ArrMediaKt.hasRootFolderChanged(movie, newItem: updatedItem) {
                                 onRequestMoveFiles(updatedItem)
                             } else {
                                 viewModel.editItem(item: updatedItem, moveFiles: moveFiles)
@@ -51,7 +52,7 @@ struct EditMediaSheetsHostView: View {
                         tags: viewModel.tags,
                         editInProgress: viewModel.editStatus is OperationStatusInProgress,
                         onEditItem: { updatedItem, moveFiles in
-                            if series.rootFolderPath != updatedItem.rootFolderPath {
+                            if ArrMediaKt.hasRootFolderChanged(series, newItem: updatedItem) {
                                 onRequestMoveFiles(updatedItem)
                             } else {
                                 viewModel.editItem(item: updatedItem, moveFiles: moveFiles)
@@ -67,7 +68,7 @@ struct EditMediaSheetsHostView: View {
                         tags: viewModel.tags,
                         editInProgress: viewModel.editStatus is OperationStatusInProgress,
                         onEditItem: { updatedItem, moveFiles in
-                            if artist.rootFolderPath != updatedItem.rootFolderPath {
+                            if ArrMediaKt.hasRootFolderChanged(artist, newItem: updatedItem) {
                                 onRequestMoveFiles(updatedItem)
                             } else {
                                 viewModel.editItem(item: updatedItem, moveFiles: moveFiles)
@@ -83,8 +84,9 @@ struct EditMediaSheetsHostView: View {
                         rootFolders: viewModel.rootFolders,
                         tags: viewModel.tags,
                         editInProgress: viewModel.editStatus is OperationStatusInProgress,
+                        initialMediaType: initialMediaType,
                         onEditItem: { updatedItem, moveFiles in
-                            if author.rootFolderPath != updatedItem.rootFolderPath {
+                            if ArrMediaKt.hasRootFolderChanged(author, newItem: updatedItem) {
                                 onRequestMoveFiles(updatedItem)
                             } else {
                                 viewModel.editItem(item: updatedItem, moveFiles: moveFiles)

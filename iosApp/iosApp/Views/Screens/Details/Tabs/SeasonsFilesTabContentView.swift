@@ -17,6 +17,9 @@ struct SeasonsFilesTabContentView: View {
     let onConfirmDeleteAlbumId: (Int64) -> Void
     let onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Void
     let onNavigateToSeriesRelease: (Int64?, Int32?, Int64?) -> Void
+    var selectedBookMediaFilter: BookMediaFilterBy = .all
+    var onSelectBookMediaTypeFilter: ((BookMediaFilterBy) -> Void)? = nil
+    var onEditAuthor: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -50,7 +53,10 @@ struct SeasonsFilesTabContentView: View {
                     viewModel: viewModel,
                     onConfirmDeleteMovie: onConfirmDeleteMovie,
                     onEditAlbum: onEditAlbum,
-                    onConfirmDeleteAlbumId: onConfirmDeleteAlbumId
+                    onConfirmDeleteAlbumId: onConfirmDeleteAlbumId,
+                    selectedBookMediaFilter: selectedBookMediaFilter,
+                    onSelectBookMediaTypeFilter: onSelectBookMediaTypeFilter,
+                    onEditAuthor: onEditAuthor
                 )
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }

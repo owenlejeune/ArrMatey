@@ -123,10 +123,10 @@ fun MediaPreviewScreen(
                         onClick = { showBottomSheet = true },
                         enabled = !isAdding,
                         colors =
-                            IconButtonDefaults.headerBarColors(
-                                disabledContainerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                                disabledContentColor = MaterialTheme.colorScheme.onBackground,
-                            ),
+                        IconButtonDefaults.headerBarColors(
+                            disabledContainerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                            disabledContentColor = MaterialTheme.colorScheme.onBackground,
+                        ),
                     ) {
                         if (isAdding) {
                             CircularProgressIndicator(

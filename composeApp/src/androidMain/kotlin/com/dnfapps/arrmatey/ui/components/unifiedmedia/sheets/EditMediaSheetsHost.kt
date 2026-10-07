@@ -3,9 +3,12 @@ package com.dnfapps.arrmatey.ui.components.unifiedmedia.sheets
 import androidx.compose.runtime.Composable
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.BookMediaType
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.api.model.hasRootFolderChanged
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.ui.sheets.EditAlbumSheet
 import com.dnfapps.arrmatey.ui.sheets.EditMediaSheet
@@ -18,6 +21,7 @@ fun EditMediaSheetsHost(
     editAlbum: ArrAlbum?,
     arrMedia: ArrMedia?,
     qualityProfiles: List<QualityProfile>,
+    metadataProfiles: List<MetadataProfile> = emptyList(),
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     editStatus: OperationStatus,
@@ -28,6 +32,7 @@ fun EditMediaSheetsHost(
     onDismissEditPath: () -> Unit,
     onDismissEditMedia: () -> Unit,
     onDismissEditAlbum: () -> Unit,
+    initialMediaType: BookMediaType? = null,
 ) {
     if (showEditPathSheet && arrMedia != null) {
         EditPathSheet(
@@ -46,17 +51,19 @@ fun EditMediaSheetsHost(
         EditMediaSheet(
             item = arrMedia,
             qualityProfiles = qualityProfiles,
+            metadataProfiles = metadataProfiles,
             rootFolders = rootFolders,
             tags = tags,
             editInProgress = editStatus is OperationStatus.InProgress,
             onEditItem = {
-                if (arrMedia.rootFolderPath != it.rootFolderPath) {
+                if (arrMedia.hasRootFolderChanged(it)) {
                     onRequestMoveFiles(it)
                 } else {
                     onEditMedia(it)
                 }
             },
             onDismiss = onDismissEditMedia,
+            initialMediaType = initialMediaType,
         )
     }
 

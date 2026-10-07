@@ -22,11 +22,11 @@ enum class BookMediaType(
     Audiobook(MR.strings.type_audiobook),
 
     @SerialName("both")
-    Both(MR.strings.both);
+    Both(MR.strings.both),
+    ;
 
     companion object {
-        fun fromString(value: String?): BookMediaType? =
-            entries.firstOrNull { it.name.equals(value, ignoreCase = true) || (it == EBook && value.equals("ebook", ignoreCase = true)) }
+        fun fromString(value: String?): BookMediaType? = entries.firstOrNull { it.name.equals(value, ignoreCase = true) || (it == EBook && value.equals("ebook", ignoreCase = true)) }
     }
 }
 

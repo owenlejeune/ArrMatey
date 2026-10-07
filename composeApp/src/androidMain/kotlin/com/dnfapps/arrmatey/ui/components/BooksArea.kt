@@ -87,26 +87,22 @@ fun BooksArea(
     onNavigateToBookRelease: (Long) -> Unit,
     modifier: Modifier = Modifier,
     queueItems: List<QueueItem> = emptyList(),
+    selectedMediaTypeFilter: BookMediaFilterBy = BookMediaFilterBy.All,
+    onSelectMediaTypeFilter: (BookMediaFilterBy) -> Unit = {},
+    onEditAuthor: (() -> Unit)? = null,
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    var selectedMediaTypeFilter by rememberSaveable { mutableStateOf(BookMediaFilterBy.All) }
 
     val isChaptarr = remember(author, books) {
-        author.audiobookQualityProfileId != null || author.ebookQualityProfileId != null ||
-            author.audiobookRootFolderPath != null || author.ebookRootFolderPath != null ||
-            author.lastSelectedMediaType != null || books.any { it.mediaType != null }
+        author.isChaptarr || books.any { it.mediaType != null }
     }
 
     val hasMixedMediaTypes = remember(books, author, isChaptarr) {
-        isChaptarr || books.any { it.mediaType != null } || author.audiobookQualityProfileId != null
+        author.hasMixedMediaTypes(books)
     }
 
-    val hasAudiobooksConfigured = remember(author) {
-        (author.audiobookQualityProfileId != null && author.audiobookQualityProfileId != 0) || !author.audiobookRootFolderPath.isNullOrEmpty()
-    }
-    val hasEbooksConfigured = remember(author) {
-        (author.ebookQualityProfileId != null && author.ebookQualityProfileId != 0) || !author.ebookRootFolderPath.isNullOrEmpty() || (author.qualityProfileId != 0 && !author.rootFolderPath.isNullOrEmpty())
-    }
+    val hasAudiobooksConfigured = remember(author) { author.hasAudiobookConfigured }
+    val hasEbooksConfigured = remember(author) { author.hasEbookConfigured }
 
     val ebookCount = remember(books) {
         books.count { it.mediaType == null || it.mediaType == BookMediaType.EBook }
@@ -156,17 +152,17 @@ fun BooksArea(
             ) {
                 FilterChip(
                     selected = selectedMediaTypeFilter == BookMediaFilterBy.All,
-                    onClick = { selectedMediaTypeFilter = BookMediaFilterBy.All },
+                    onClick = { onSelectMediaTypeFilter(BookMediaFilterBy.All) },
                     label = { Text(mokoString(BookMediaFilterBy.All.resource) + " (${books.size})") },
                 )
                 FilterChip(
                     selected = selectedMediaTypeFilter == BookMediaFilterBy.EBook,
-                    onClick = { selectedMediaTypeFilter = BookMediaFilterBy.EBook },
+                    onClick = { onSelectMediaTypeFilter(BookMediaFilterBy.EBook) },
                     label = { Text(mokoString(BookMediaFilterBy.EBook.resource) + " ($ebookCount)") },
                 )
                 FilterChip(
                     selected = selectedMediaTypeFilter == BookMediaFilterBy.Audiobook,
-                    onClick = { selectedMediaTypeFilter = BookMediaFilterBy.Audiobook },
+                    onClick = { onSelectMediaTypeFilter(BookMediaFilterBy.Audiobook) },
                     label = { Text(mokoString(BookMediaFilterBy.Audiobook.resource) + " ($audiobookCount)") },
                 )
             }
@@ -183,14 +179,18 @@ fun BooksArea(
                     UnconfiguredTypeNotice(
                         message = mokoString(MR.strings.no_audiobook_root_folder_configured),
                         modifier = Modifier.padding(vertical = 8.dp),
+                        onClick = onEditAuthor,
                     )
                 }
+
                 isUnconfiguredEbook -> {
                     UnconfiguredTypeNotice(
                         message = mokoString(MR.strings.no_ebook_root_folder_configured),
                         modifier = Modifier.padding(vertical = 8.dp),
+                        onClick = onEditAuthor,
                     )
                 }
+
                 tabIndex == 0 -> {
                     BooksView(
                         author = author,
@@ -204,6 +204,7 @@ fun BooksArea(
                         queueItems = queueItems,
                     )
                 }
+
                 else -> {
                     SeriesView(
                         series = series,
@@ -226,11 +227,13 @@ fun BooksArea(
 private fun UnconfiguredTypeNotice(
     message: String,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
 ) {
     ContainerCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         shape = MaterialTheme.shapes.large,
         modifier = modifier.fillMaxWidth(),
+        onClick = onClick ?: {},
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -265,7 +268,8 @@ private fun BooksView(
 ) {
     Column {
         books.forEach { book ->
-            val activeQueueItem = queueItems.filterIsInstance<ReadarrQueueItem>().firstOrNull { it.bookId == book.id || it.book?.id == book.id }
+            val activeQueueItem = queueItems.filterIsInstance<ReadarrQueueItem>()
+                .firstOrNull { it.bookId == book.id || it.book?.id == book.id }
             BookRow(
                 book = book,
                 bookFile = files.firstOrNull { it.bookId == book.id },
@@ -523,7 +527,8 @@ private fun SeriesView(
                     Column {
                         bookSeries.links.sortedBy { it.position }.forEach { link ->
                             seriesBooks.firstOrNull { it.id == link.bookId }?.let { book ->
-                                val activeQueueItem = queueItems.filterIsInstance<ReadarrQueueItem>().firstOrNull { it.bookId == book.id || it.book?.id == book.id }
+                                val activeQueueItem = queueItems.filterIsInstance<ReadarrQueueItem>()
+                                    .firstOrNull { it.bookId == book.id || it.book?.id == book.id }
                                 BookRow(
                                     book = book,
                                     bookFile = files.firstOrNull { it.bookId == link.bookId },

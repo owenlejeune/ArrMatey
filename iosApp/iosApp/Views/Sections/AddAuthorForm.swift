@@ -80,36 +80,22 @@ struct AddAuthorForm: View {
         self._ebookMonitor = State(initialValue: preferences.addChaptarrEbookMonitorExisting)
         self._ebookMonitorNew = State(initialValue: preferences.addChaptarrEbookMonitorFuture)
         
-        let abRf = rootFolders.first(where: { $0.path == preferences.addChaptarrAudiobookRootFolderPath })
-            ?? rootFolders.first(where: { $0.path.lowercased().contains("audio") })
-            ?? rootFolders.first
+        let abRf = RootFolderKt.defaultForAudiobook(rootFolders, preferredPath: preferences.addChaptarrAudiobookRootFolderPath)
         self._selectedAudiobookRootFolderId = State(initialValue: abRf?.id)
         
-        let abQp = qualityProfiles.first(where: { $0.id == preferences.addChaptarrAudiobookQualityProfileId?.int32Value })
-            ?? qualityProfiles.first(where: { ($0.name ?? "").lowercased().contains("audio") })
-            ?? qualityProfiles.first
+        let abQp = QualityProfileKt.defaultForAudiobook(qualityProfiles, preferredId: preferences.addChaptarrAudiobookQualityProfileId)
         self._selectedAudiobookQualityProfileId = State(initialValue: abQp?.id)
         
-        let abMp = metadataProfiles.first(where: { $0.id == preferences.addChaptarrAudiobookMetadataProfileId?.int32Value })
-            ?? metadataProfiles.first(where: { ($0.name ?? "").lowercased().contains("audio") })
-            ?? metadataProfiles.first
+        let abMp = MetadataProfileKt.defaultForAudiobook(metadataProfiles, preferredId: preferences.addChaptarrAudiobookMetadataProfileId)
         self._selectedAudiobookMetadataProfileId = State(initialValue: abMp?.id)
         
-        let ebRf = rootFolders.first(where: { $0.path == preferences.addChaptarrEbookRootFolderPath })
-            ?? rootFolders.first(where: { !$0.path.lowercased().contains("audio") })
-            ?? rootFolders.first
+        let ebRf = RootFolderKt.defaultForEbook(rootFolders, preferredPath: preferences.addChaptarrEbookRootFolderPath)
         self._selectedEbookRootFolderId = State(initialValue: ebRf?.id)
         
-        let ebQp = qualityProfiles.first(where: { $0.id == preferences.addChaptarrEbookQualityProfileId?.int32Value })
-            ?? qualityProfiles.first(where: { ($0.name ?? "").lowercased().contains("ebook") })
-            ?? qualityProfiles.first(where: { !($0.name ?? "").lowercased().contains("audio") })
-            ?? qualityProfiles.first
+        let ebQp = QualityProfileKt.defaultForEbook(qualityProfiles, preferredId: preferences.addChaptarrEbookQualityProfileId)
         self._selectedEbookQualityProfileId = State(initialValue: ebQp?.id)
         
-        let ebMp = metadataProfiles.first(where: { $0.id == preferences.addChaptarrEbookMetadataProfileId?.int32Value })
-            ?? metadataProfiles.first(where: { ($0.name ?? "").lowercased().contains("ebook") })
-            ?? metadataProfiles.first(where: { !($0.name ?? "").lowercased().contains("audio") })
-            ?? metadataProfiles.first
+        let ebMp = MetadataProfileKt.defaultForEbook(metadataProfiles, preferredId: preferences.addChaptarrEbookMetadataProfileId)
         self._selectedEbookMetadataProfileId = State(initialValue: ebMp?.id)
         
         self._monitor = State(initialValue: preferences.addAuthorMonitor)
@@ -127,9 +113,8 @@ struct AddAuthorForm: View {
         (selectedInstance?.type ?? author.instanceType) == .chaptarr
     }
     
-    private let chaptarrMonitorOptions: [AuthorMonitorType] = [
-        .none, .all, .future, .missing, .existing, .firstBook, .latestBook
-    ]
+    private let chaptarrMonitorOptions: [AuthorMonitorType] = AuthorMonitorType.companion.chaptarrOptions
+
     
     private let selectedStatuses: [AuthorMonitorType] = [.all, .none, .future]
     
@@ -260,8 +245,9 @@ struct AddAuthorForm: View {
                     Toggle(MR.strings().monitor_new_audiobooks.localized(), isOn: $audiobookMonitorNew)
                     
                     if selectedAudiobookQualityProfileId != nil {
+                        let filteredProfiles = QualityProfileKt.filterForAudiobook(qualityProfiles)
                         Picker(MR.strings().audiobook_quality_profile.localized(), selection: $selectedAudiobookQualityProfileId) {
-                            ForEach(qualityProfiles, id: \.self) { qualityProfile in
+                            ForEach(filteredProfiles, id: \.self) { qualityProfile in
                                 if let name = qualityProfile.name {
                                     Text(name).tag(qualityProfile.id as Int32?)
                                 }
@@ -270,8 +256,9 @@ struct AddAuthorForm: View {
                     }
                     
                     if !metadataProfiles.isEmpty {
+                        let filteredProfiles = MetadataProfileKt.filterForAudiobook(metadataProfiles)
                         Picker(MR.strings().audiobook_metadata_profile.localized(), selection: $selectedAudiobookMetadataProfileId) {
-                            ForEach(metadataProfiles, id: \.self) { metadataProfile in
+                            ForEach(filteredProfiles, id: \.self) { metadataProfile in
                                 if let name = metadataProfile.name {
                                     Text(name).tag(metadataProfile.id as Int32?)
                                 }
@@ -314,8 +301,9 @@ struct AddAuthorForm: View {
                     Toggle(MR.strings().monitor_new_ebooks.localized(), isOn: $ebookMonitorNew)
                     
                     if selectedEbookQualityProfileId != nil {
+                        let filteredProfiles = QualityProfileKt.filterForEbook(qualityProfiles)
                         Picker(MR.strings().ebook_quality_profile.localized(), selection: $selectedEbookQualityProfileId) {
-                            ForEach(qualityProfiles, id: \.self) { qualityProfile in
+                            ForEach(filteredProfiles, id: \.self) { qualityProfile in
                                 if let name = qualityProfile.name {
                                     Text(name).tag(qualityProfile.id as Int32?)
                                 }
@@ -324,8 +312,9 @@ struct AddAuthorForm: View {
                     }
                     
                     if !metadataProfiles.isEmpty {
+                        let filteredProfiles = MetadataProfileKt.filterForEbook(metadataProfiles)
                         Picker(MR.strings().ebook_metadata_profile.localized(), selection: $selectedEbookMetadataProfileId) {
-                            ForEach(metadataProfiles, id: \.self) { metadataProfile in
+                            ForEach(filteredProfiles, id: \.self) { metadataProfile in
                                 if let name = metadataProfile.name {
                                     Text(name).tag(metadataProfile.id as Int32?)
                                 }
@@ -333,6 +322,7 @@ struct AddAuthorForm: View {
                         }
                     }
                 }
+
             }
             
             Section {
@@ -426,8 +416,8 @@ struct AddAuthorForm: View {
                             )
                         )
                         
-                        let abMonitorIdx = chaptarrMonitorOptions.firstIndex(of: audiobookMonitor) ?? 0
-                        let ebMonitorIdx = chaptarrMonitorOptions.firstIndex(of: ebookMonitor) ?? 0
+                        let abMonitorIdx = AuthorMonitorType.companion.toChaptarrIndex(type: audiobookMonitor)
+                        let ebMonitorIdx = AuthorMonitorType.companion.toChaptarrIndex(type: ebookMonitor)
                         
                         let newAuthor = author.doCopyForChaptarrCreation(
                             selectedMediaType: chaptarrMediaType,
@@ -447,6 +437,7 @@ struct AddAuthorForm: View {
                             searchForMissingBooks: searchOnAdd
                         )
                         onAddItem(newAuthor, searchOnAdd)
+
                     } else {
                         if let profileId = selectedQualityProfileId, let path = selectedRootFolderPath {
                             onUpdatePreferences(

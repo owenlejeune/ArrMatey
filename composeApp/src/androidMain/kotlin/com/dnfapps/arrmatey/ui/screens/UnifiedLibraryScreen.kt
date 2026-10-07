@@ -57,6 +57,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.getChangedRootFolderPath
+import com.dnfapps.arrmatey.arr.api.model.hasRootFolderChanged
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
@@ -523,7 +525,7 @@ fun UnifiedLibraryScreen(
                     tags = data.tags,
                     editInProgress = editStatus is OperationStatus.InProgress,
                     onEditItem = {
-                        if (item.rootFolderPath != it.rootFolderPath) {
+                        if (item.hasRootFolderChanged(it)) {
                             moveFilesItem = it
                         } else {
                             unifiedLibraryViewModel.editItem(it)
@@ -533,16 +535,17 @@ fun UnifiedLibraryScreen(
                 )
             }
 
-            moveFilesItem?.let { item ->
+            moveFilesItem?.let { editedItem ->
+                val changedPath = showEditSheet?.getChangedRootFolderPath(editedItem) ?: editedItem.rootFolderPath ?: ""
                 AlertDialog(
                     onDismissRequest = { moveFilesItem = null },
                     title = {
-                        Text(mokoString(MR.strings.move_files_confirm, item.rootFolderPath ?: ""))
+                        Text(mokoString(MR.strings.move_files_confirm, changedPath))
                     },
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                unifiedLibraryViewModel.editItem(item, moveFiles = true)
+                                unifiedLibraryViewModel.editItem(editedItem, moveFiles = true)
                                 moveFilesItem = null
                             },
                         ) {
@@ -552,7 +555,7 @@ fun UnifiedLibraryScreen(
                     dismissButton = {
                         TextButton(
                             onClick = {
-                                unifiedLibraryViewModel.editItem(item)
+                                unifiedLibraryViewModel.editItem(editedItem)
                                 moveFilesItem = null
                             },
                         ) {

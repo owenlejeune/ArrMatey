@@ -207,15 +207,11 @@ fun authorInfo(
 
     val diskSize = author.fileSize?.bytesAsFileSizeString() ?: unknown
 
-    val isChaptarr = author.audiobookQualityProfileId != null || author.ebookQualityProfileId != null ||
-        author.audiobookRootFolderPath != null || author.ebookRootFolderPath != null ||
-        author.lastSelectedMediaType != null
-
     return buildList {
         add(InfoItem(mokoString(MR.strings.status), mokoString(author.status.resource)))
         add(InfoItem(mokoString(MR.strings.size_on_disk), diskSize))
 
-        if (isChaptarr) {
+        if (author.isChaptarr) {
             val ebookRoot = author.ebookRootFolderPath
             val audiobookRoot = author.audiobookRootFolderPath
 
@@ -237,15 +233,15 @@ fun authorInfo(
         add(InfoItem(mokoString(MR.strings.path), (author.path ?: unknown), onClick = onEditPath))
         add(InfoItem(mokoString(MR.strings.new_books), monitorLabel))
 
-        if (isChaptarr) {
+        if (author.isChaptarr) {
             var hasQuality = false
-            if (author.ebookQualityProfileId != null && author.ebookQualityProfileId != 0) {
-                val ebookQuality = qualityProfiles.firstOrNull { it.id == author.ebookQualityProfileId }?.name ?: unknown
+            val ebookQuality = author.getEbookQualityProfile(qualityProfiles)?.name
+            if (!ebookQuality.isNullOrBlank()) {
                 add(InfoItem(mokoString(MR.strings.ebook_quality_profile), ebookQuality))
                 hasQuality = true
             }
-            if (author.audiobookQualityProfileId != null && author.audiobookQualityProfileId != 0) {
-                val audiobookQuality = qualityProfiles.firstOrNull { it.id == author.audiobookQualityProfileId }?.name ?: unknown
+            val audiobookQuality = author.getAudiobookQualityProfile(qualityProfiles)?.name
+            if (!audiobookQuality.isNullOrBlank()) {
                 add(InfoItem(mokoString(MR.strings.audiobook_quality_profile), audiobookQuality))
                 hasQuality = true
             }

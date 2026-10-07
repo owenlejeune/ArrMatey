@@ -52,7 +52,9 @@ struct UnifiedMediaDetailsArrAlertsModifier: ViewModifier {
                 }
             } message: {
                 if let item = moveFilesItem {
-                    Text(MR.strings().move_files_confirm.formatted(args: [item.rootFolderPath ?? ""]))
+                    let currentMedia = (viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess)?.arrMedia
+                    let changedPath = (currentMedia.flatMap { ArrMediaKt.getChangedRootFolderPath($0, newItem: item) } ?? item.rootFolderPath) ?? ""
+                    Text(MR.strings().move_files_confirm.formatted(args: [changedPath]))
                 }
             }
             .alert(MR.strings().confirm_delete.localized(), isPresented: $confirmDeleteMovie) {
