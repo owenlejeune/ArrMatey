@@ -165,4 +165,12 @@ class SonarrRepository(
         }
 
     override suspend fun getSeriesHistory(seriesId: Long): NetworkResult<List<HistoryItem>> = libraryRepository.getSeriesHistory(seriesId)
+
+    // Sonarr item history is per episode; caching it would collide with series ids in the shared history cache.
+    override suspend fun getItemHistory(
+        itemId: Long,
+        altIt: Long?,
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<List<HistoryItem>> = sonarrClient.getItemHistory(itemId, page, pageSize, altIt)
 }
