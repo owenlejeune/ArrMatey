@@ -98,6 +98,12 @@ enum class SortBy(
         fun lookupEntries() = listOf(Relevance, Year, Rating)
 
         fun downloadClientEntries() = listOf(Title, Added, Size, Progress, DownloadSpeed, UploadSpeed, Eta)
+
+        fun defaultFor(type: InstanceType?): SortBy = when (type) {
+            InstanceType.Bookshelf, InstanceType.Chaptarr -> TitleLastFirst
+            InstanceType.Prowlarr -> Name
+            else -> Title
+        }
     }
 }
 

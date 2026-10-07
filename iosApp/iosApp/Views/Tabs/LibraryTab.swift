@@ -525,6 +525,7 @@ struct LibraryTabContent: View {
     @ViewBuilder
     private func editSheet(for item: ArrMedia) -> some View {
         let profiles = libraryViewModel.instanceData?.qualityProfiles ?? []
+        let metadataProfiles = libraryViewModel.instanceData?.metadataProfiles ?? []
         let folders = libraryViewModel.instanceData?.rootFolders ?? []
         let tags = libraryViewModel.instanceData?.tags ?? []
         let isInProgress = libraryViewModel.editItemStatus is OperationStatusInProgress
@@ -542,7 +543,7 @@ struct LibraryTabContent: View {
                 libraryViewModel.editItem(newItem, moveFiles: moveFiles)
             }
         } else if let author = item as? Author {
-            EditAuthorSheet(item: author, qualityProfiles: profiles, rootFolders: folders, tags: tags, editInProgress: isInProgress) { newItem, moveFiles in
+            EditAuthorSheet(item: author, qualityProfiles: profiles, metadataProfiles: metadataProfiles, rootFolders: folders, tags: tags, editInProgress: isInProgress) { newItem, moveFiles in
                 libraryViewModel.editItem(newItem, moveFiles: moveFiles)
             }
         } else if let audiobook = item as? Audiobook {

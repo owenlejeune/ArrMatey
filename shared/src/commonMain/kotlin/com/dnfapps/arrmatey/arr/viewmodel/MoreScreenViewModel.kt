@@ -440,7 +440,7 @@ class MoreScreenViewModel(
                     flowOf(InstancePreferences())
                 } else {
                     updateAllPreferencesUseCase.syncGlobalPreferencesToInstance(instance.id)
-                    instancePreferenceStoreRepository.getInstancePreferences(instance.id).observePreferences()
+                    instancePreferenceStoreRepository.getInstancePreferences(instance.id, com.dnfapps.arrmatey.compose.utils.SortBy.defaultFor(instance.type)).observePreferences()
                 }
             }.stateIn(
                 scope = viewModelScope,

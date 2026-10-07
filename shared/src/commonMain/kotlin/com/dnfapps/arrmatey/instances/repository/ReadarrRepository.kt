@@ -53,6 +53,15 @@ class ReadarrRepository(
         )
     }
 
+    override suspend fun getAuthorBooks(authorId: Long): NetworkResult<List<Book>> = bookshelfClient
+        .getBooks(authorId)
+        .onSuccess { authorBooks ->
+            _booksLibrary.update { current ->
+                val otherBooks = current.filter { it.authorId != authorId }
+                otherBooks + authorBooks
+            }
+        }
+
     override suspend fun getAuthorSeries(authorId: Long): NetworkResult<List<BookSeries>> = bookshelfClient
         .getAuthorSeries(authorId)
         .onSuccess { result ->

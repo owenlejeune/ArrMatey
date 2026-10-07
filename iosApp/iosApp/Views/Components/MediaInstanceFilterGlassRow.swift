@@ -101,17 +101,15 @@ struct MediaInstanceFilterGlassRow: View {
                 .font(.subheadline.weight(isSelected ? .semibold : .medium))
                 .foregroundColor(isSelected ? Color.primary : Color.secondary)
 
-            if count > 0 {
-                Text("\(count)")
-                    .font(.caption2.weight(.bold))
-                    .foregroundColor(isSelected ? Color.primary : Color.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(isSelected ? accentColor.opacity(0.35) : Color.primary.opacity(0.06))
-                    )
-            }
+            Text("\(count)")
+                .font(.caption2.weight(.bold))
+                .foregroundColor(isSelected ? Color.primary : Color.secondary)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(
+                    Capsule()
+                        .fill(isSelected ? accentColor.opacity(0.35) : Color.primary.opacity(0.06))
+                )
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 7)

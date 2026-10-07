@@ -195,10 +195,9 @@ fun authorInfo(
     tags: List<Tag>,
     onEditPath: () -> Unit,
 ): List<InfoItem> {
-    val qualityProfile = qualityProfiles.firstOrNull { it.id == author.qualityProfileId }
+    val unknown = mokoString(MR.strings.unknown)
     val tagsLabel = author.formatTags(tags) ?: mokoString(MR.strings.none)
 
-    val unknown = mokoString(MR.strings.unknown)
     val monitorLabel =
         if (author.monitorNewItems == AuthorMonitorType.All) {
             mokoString(MR.strings.monitored)
@@ -206,19 +205,59 @@ fun authorInfo(
             mokoString(MR.strings.unmonitored)
         }
 
-    val rootFolderPathValue =
-        author.rootFolderPath?.takeUnless { it.isBlank() }
-            ?: mokoString(MR.strings.unknown)
+    val diskSize = author.fileSize?.bytesAsFileSizeString() ?: unknown
 
-    val diskSize = author.fileSize?.bytesAsFileSizeString() ?: mokoString(MR.strings.unknown)
+    val isChaptarr = author.audiobookQualityProfileId != null || author.ebookQualityProfileId != null ||
+        author.audiobookRootFolderPath != null || author.ebookRootFolderPath != null ||
+        author.lastSelectedMediaType != null
 
     return buildList {
         add(InfoItem(mokoString(MR.strings.status), mokoString(author.status.resource)))
         add(InfoItem(mokoString(MR.strings.size_on_disk), diskSize))
-        add(InfoItem(mokoString(MR.strings.root_folder), rootFolderPathValue, onClick = onEditPath))
+
+        if (isChaptarr) {
+            val ebookRoot = author.ebookRootFolderPath
+            val audiobookRoot = author.audiobookRootFolderPath
+
+            if (!ebookRoot.isNullOrEmpty()) {
+                add(InfoItem(mokoString(MR.strings.ebook_root_folder), ebookRoot, onClick = onEditPath))
+            }
+            if (!audiobookRoot.isNullOrEmpty()) {
+                add(InfoItem(mokoString(MR.strings.audiobook_root_folder), audiobookRoot, onClick = onEditPath))
+            }
+            if (ebookRoot.isNullOrEmpty() && audiobookRoot.isNullOrEmpty()) {
+                val rootFolderPathValue = author.rootFolderPath?.takeUnless { it.isBlank() } ?: unknown
+                add(InfoItem(mokoString(MR.strings.root_folder), rootFolderPathValue, onClick = onEditPath))
+            }
+        } else {
+            val rootFolderPathValue = author.rootFolderPath?.takeUnless { it.isBlank() } ?: unknown
+            add(InfoItem(mokoString(MR.strings.root_folder), rootFolderPathValue, onClick = onEditPath))
+        }
+
         add(InfoItem(mokoString(MR.strings.path), (author.path ?: unknown), onClick = onEditPath))
         add(InfoItem(mokoString(MR.strings.new_books), monitorLabel))
-        add(InfoItem(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown)))
+
+        if (isChaptarr) {
+            var hasQuality = false
+            if (author.ebookQualityProfileId != null && author.ebookQualityProfileId != 0) {
+                val ebookQuality = qualityProfiles.firstOrNull { it.id == author.ebookQualityProfileId }?.name ?: unknown
+                add(InfoItem(mokoString(MR.strings.ebook_quality_profile), ebookQuality))
+                hasQuality = true
+            }
+            if (author.audiobookQualityProfileId != null && author.audiobookQualityProfileId != 0) {
+                val audiobookQuality = qualityProfiles.firstOrNull { it.id == author.audiobookQualityProfileId }?.name ?: unknown
+                add(InfoItem(mokoString(MR.strings.audiobook_quality_profile), audiobookQuality))
+                hasQuality = true
+            }
+            if (!hasQuality) {
+                val qualityProfile = qualityProfiles.firstOrNull { it.id == author.qualityProfileId }
+                add(InfoItem(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown)))
+            }
+        } else {
+            val qualityProfile = qualityProfiles.firstOrNull { it.id == author.qualityProfileId }
+            add(InfoItem(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown)))
+        }
+
         add(InfoItem(mokoString(MR.strings.tags), tagsLabel))
     }
 }

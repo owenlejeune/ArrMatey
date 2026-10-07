@@ -156,37 +156,11 @@ struct AddAudiobookForm: View {
                 Task {
                     if let path = selectedRootFolderPath {
                         onUpdatePreferences(
-                            preferences.doCopy(
-                                sortBy: preferences.sortBy,
-                                sortOrder: preferences.sortOrder,
-                                filterBy: preferences.filterBy,
-                                customFilterId: preferences.customFilterId,
-                                viewType: preferences.viewType,
-                                posterElevation: preferences.posterElevation,
-                                posterRadius: preferences.posterRadius,
-                                showFullDetails: preferences.showFullDetails,
-                                showOverlay: preferences.showOverlay,
-                                gridDensity: preferences.gridDensity,
-                                gridSpacing: preferences.gridSpacing,
-                                showBannerBackground: preferences.showBannerBackground,
-                                includeOverview: preferences.includeOverview,
-                                bannerBlur: preferences.bannerBlur,
-                                applyGlobally: preferences.applyGlobally,
-                                addQualityProfileId: selectedQualityProfileId.asKotlinInt,
-                                addRootFolderPath: path,
-                                addSearchOnAdd: searchOnAdd,
-                                addSeriesMonitor: preferences.addSeriesMonitor,
-                                addSeriesType: preferences.addSeriesType,
-                                addSeriesSeasonFolder: preferences.addSeriesSeasonFolder,
-                                addMovieMonitored: preferences.addMovieMonitored,
-                                addMovieMinimumAvailability: preferences.addMovieMinimumAvailability,
-                                addArtistMonitor: preferences.addArtistMonitor,
-                                addArtistMonitorNew: preferences.addArtistMonitorNew,
-                                addAuthorMonitor: preferences.addAuthorMonitor,
-                                addAuthorMonitorNew: preferences.addAuthorMonitorNew,
-                                addAudiobookMonitored: monitored,
-                                deleteDeleteFiles: preferences.deleteDeleteFiles,
-                                deleteAddExclusion: preferences.deleteAddExclusion
+                            preferences.doCopyWithAudiobookAddDefaults(
+                                monitored: monitored,
+                                qualityProfileId: selectedQualityProfileId.asKotlinInt,
+                                rootFolderPath: path,
+                                searchOnAdd: searchOnAdd
                             )
                         )
                         let newAudiobook = audiobook.doCopyForCreation(

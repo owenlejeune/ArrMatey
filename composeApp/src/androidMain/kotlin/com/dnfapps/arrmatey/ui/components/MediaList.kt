@@ -381,7 +381,7 @@ fun <T : ArrMedia> MediaItem(
                     ) {
                         val titleColor = if (hasBanner) Color.White else MaterialTheme.colorScheme.onSurface
                         Text(
-                            text = item.title ?: mokoString(MR.strings.unknown),
+                            text = (item as? Author)?.authorNameLastFirst ?: item.title ?: mokoString(MR.strings.unknown),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
                             color = titleColor,
@@ -769,20 +769,22 @@ private fun AuthorDetails(
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
 
-    val bookLabel = mokoPlural(MR.plurals.books_count, item.bookCount)
+    val count = item.totalBookCount.takeIf { it > 0 } ?: item.bookCount.takeIf { it > 0 }
+    val bookLabel = count?.let { mokoPlural(MR.plurals.books_count, it) }
     val firstLine = listOfNotNull(bookLabel).joinToString(BULLET)
-    Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    if (firstLine.isNotEmpty()) {
+        Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    }
 
     val nextRelease = item.nextBook?.releaseDate?.format()
     val statusStr =
         when (item.status) {
-            MediaStatus.Continuing ->
-                nextRelease
-                    ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
-
+            MediaStatus.Continuing -> nextRelease
             else -> listOfNotNull(mokoString(item.status.resource), nextRelease).joinToString(BULLET)
         }
-    Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    if (!statusStr.isNullOrEmpty()) {
+        Text(statusStr, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    }
 
     val qualityProfile = qualityProfiles.firstOrNull { it.id == item.qualityProfileId }?.name
     val tagsLabel = item.formatTags(tags)

@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
+import com.dnfapps.arrmatey.arr.api.model.ChaptarrReleaseResponse
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
@@ -25,6 +26,7 @@ import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.networking.NetworkResult
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
@@ -38,7 +40,8 @@ class BookshelfClient(
 
     override suspend fun getDetail(id: Long): NetworkResult<Author> = get("author/$id")
 
-    override suspend fun update(item: ArrMedia): NetworkResult<Author> = put<ArrMedia, Author>("author/${item.id}", item)
+    override suspend fun update(item: ArrMedia): NetworkResult<Author> =
+        put<ArrMedia, Author>("author/${item.id}", item)
 
     override suspend fun edit(
         item: ArrMedia,
@@ -71,10 +74,10 @@ class BookshelfClient(
     ): NetworkResult<Unit> = delete(
         endpoint = "author/$id",
         params =
-        mapOf(
-            "deleteFiles" to deleteFiles,
-            "addImportExclusion" to addImportExclusion,
-        ),
+            mapOf(
+                "deleteFiles" to deleteFiles,
+                "addImportExclusion" to addImportExclusion,
+            ),
     )
 
     override suspend fun setMonitorStatus(
@@ -88,18 +91,27 @@ class BookshelfClient(
         ),
     )
 
-    override suspend fun lookup(params: LookupParams): NetworkResult<List<Author>> = get("author/lookup", mapOf("term" to params.query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<Author>> =
+        get("author/lookup", mapOf("term" to params.query))
 
-    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Author> = post<ArrMedia, Author>("author", item)
+    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Author> =
+        post<ArrMedia, Author>("author", item)
 
-    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> = post("command", CommandPayload.Author(id))
+    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> =
+        post("command", CommandPayload.Author(id))
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<BookshelfRelease>> {
         if (params !is ReleaseParams.Book) {
             return NetworkResult.Error(message = "Non-bookshelf params type: $params")
         }
-        val params = mapOf("bookId" to params.mediaId)
-        return get("release", params)
+        val queryParams = mapOf("bookId" to params.mediaId)
+        return if (instance.type == InstanceType.Chaptarr) {
+            get<ChaptarrReleaseResponse>("release", queryParams).map { response ->
+                response.releases
+            }
+        } else {
+            get("release", queryParams)
+        }
     }
 
     override suspend fun getItemHistory(
@@ -127,7 +139,13 @@ class BookshelfClient(
             "pageSize" to pageSize,
         ),
     ).map { response ->
-        response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+        response.records.map {
+            it.copy(
+                instanceId = instance.id,
+                instanceName = instance.label,
+                instanceType = instance.type
+            )
+        }
     }
 
     suspend fun getAuthorSeries(id: Long): NetworkResult<List<BookSeries>> = get("series", mapOf("authorId" to id))
@@ -136,18 +154,22 @@ class BookshelfClient(
 
     suspend fun getBookFiles(bookId: Long): NetworkResult<List<BookFile>> = get("bookFile", mapOf("bookId" to bookId))
 
-    suspend fun getBooks(): NetworkResult<List<Book>> = get("book")
+    suspend fun getBooks(authorId: Long? = null): NetworkResult<List<Book>> =
+        get("book", buildMap { authorId?.let { put("authorId", it) } })
 
     suspend fun updateBook(book: Book): NetworkResult<Book> = put("book/${book.id}", book)
 
     suspend fun setBookMonitorStatus(
         bookIds: List<Long>,
         monitored: Boolean,
-    ): NetworkResult<List<MonitoredResponse>> = put<BookMonitorBody, List<MonitoredResponse>>("book/monitor", BookMonitorBody(bookIds, monitored))
+    ): NetworkResult<List<MonitoredResponse>> =
+        put<BookMonitorBody, List<MonitoredResponse>>("book/monitor", BookMonitorBody(bookIds, monitored))
 
-    suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> = get("edition", mapOf("bookId" to bookId))
+    suspend fun getBookEditions(bookId: Long): NetworkResult<List<BookEdition>> =
+        get("edition", mapOf("bookId" to bookId))
 
-    suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> = delete("bookFiles/bulk", body = BookFileBulkDeleteBody(bookFilesIds))
+    suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
+        delete("bookFiles/bulk", body = BookFileBulkDeleteBody(bookFilesIds))
 
     override suspend fun getCalendar(
         start: LocalDate,
@@ -171,12 +193,13 @@ class BookshelfClient(
             post(
                 endpoint = "bookshelf",
                 body =
-                AuthorMonitoringBody(
-                    authors = ids.map { IdWrapper(it) },
-                    monitoringOptions = AuthorMonitoringOption(monitor),
-                ),
+                    AuthorMonitoringBody(
+                        authors = ids.map { IdWrapper(it) },
+                        monitoringOptions = AuthorMonitoringOption(monitor),
+                    ),
             )
         }
+
         is AuthorMonitorOptions -> {
             val body =
                 AuthorBulkEditBody(
@@ -186,6 +209,7 @@ class BookshelfClient(
                 )
             put("author/editor", body)
         }
+
         else -> NetworkResult.Error(message = "Invalid monitor options")
     }
 }

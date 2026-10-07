@@ -625,37 +625,13 @@ private struct MediaRequestOrAddSheetContent: View {
             let prefs = viewModel.preferences
             if let series = arrMedia as? ArrSeries, let qp = selectedSeriesQualityProfileId, let path = selectedSeriesRootFolderPath {
                 viewModel.updatePreferences(
-                    preferences: prefs.doCopy(
-                        sortBy: prefs.sortBy,
-                        sortOrder: prefs.sortOrder,
-                        filterBy: prefs.filterBy,
-                        customFilterId: prefs.customFilterId,
-                        viewType: prefs.viewType,
-                        posterElevation: prefs.posterElevation,
-                        posterRadius: prefs.posterRadius,
-                        showFullDetails: prefs.showFullDetails,
-                        showOverlay: prefs.showOverlay,
-                        gridDensity: prefs.gridDensity,
-                        gridSpacing: prefs.gridSpacing,
-                        showBannerBackground: prefs.showBannerBackground,
-                        includeOverview: prefs.includeOverview,
-                        bannerBlur: prefs.bannerBlur,
-                        applyGlobally: prefs.applyGlobally,
-                        addQualityProfileId: qp.asKotlinInt,
-                        addRootFolderPath: path,
-                        addSearchOnAdd: searchSeriesOnAdd,
-                        addSeriesMonitor: seriesMonitorType,
-                        addSeriesType: selectedSeriesType,
-                        addSeriesSeasonFolder: useSeasonFolders,
-                        addMovieMonitored: prefs.addMovieMonitored,
-                        addMovieMinimumAvailability: prefs.addMovieMinimumAvailability,
-                        addArtistMonitor: prefs.addArtistMonitor,
-                        addArtistMonitorNew: prefs.addArtistMonitorNew,
-                        addAuthorMonitor: prefs.addAuthorMonitor,
-                        addAuthorMonitorNew: prefs.addAuthorMonitorNew,
-                        addAudiobookMonitored: prefs.addAudiobookMonitored,
-                        deleteDeleteFiles: prefs.deleteDeleteFiles,
-                        deleteAddExclusion: prefs.deleteAddExclusion
+                    preferences: prefs.doCopyWithSeriesAddDefaults(
+                        monitor: seriesMonitorType,
+                        type: selectedSeriesType,
+                        seasonFolder: useSeasonFolders,
+                        qualityProfileId: qp.asKotlinInt,
+                        rootFolderPath: path,
+                        searchOnAdd: searchSeriesOnAdd
                     )
                 )
                 let newSeries = series.doCopyForCreation(
@@ -669,37 +645,12 @@ private struct MediaRequestOrAddSheetContent: View {
                 viewModel.smartAdd(item: newSeries, searchOnAdd: searchSeriesOnAdd, targetInstanceId: viewModel.addSheetUiState.targetInstance?.id)
             } else if let movie = arrMedia as? ArrMovie, let qp = selectedMovieQualityProfileId, let path = selectedMovieRootFolderPath {
                 viewModel.updatePreferences(
-                    preferences: prefs.doCopy(
-                        sortBy: prefs.sortBy,
-                        sortOrder: prefs.sortOrder,
-                        filterBy: prefs.filterBy,
-                        customFilterId: prefs.customFilterId,
-                        viewType: prefs.viewType,
-                        posterElevation: prefs.posterElevation,
-                        posterRadius: prefs.posterRadius,
-                        showFullDetails: prefs.showFullDetails,
-                        showOverlay: prefs.showOverlay,
-                        gridDensity: prefs.gridDensity,
-                        gridSpacing: prefs.gridSpacing,
-                        showBannerBackground: prefs.showBannerBackground,
-                        includeOverview: prefs.includeOverview,
-                        bannerBlur: prefs.bannerBlur,
-                        applyGlobally: prefs.applyGlobally,
-                        addQualityProfileId: qp.asKotlinInt,
-                        addRootFolderPath: path,
-                        addSearchOnAdd: searchMovieOnAdd,
-                        addSeriesMonitor: prefs.addSeriesMonitor,
-                        addSeriesType: prefs.addSeriesType,
-                        addSeriesSeasonFolder: prefs.addSeriesSeasonFolder,
-                        addMovieMonitored: isMovieMonitored,
-                        addMovieMinimumAvailability: selectedMovieMinimumAvailability,
-                        addArtistMonitor: prefs.addArtistMonitor,
-                        addArtistMonitorNew: prefs.addArtistMonitorNew,
-                        addAuthorMonitor: prefs.addAuthorMonitor,
-                        addAuthorMonitorNew: prefs.addAuthorMonitorNew,
-                        addAudiobookMonitored: prefs.addAudiobookMonitored,
-                        deleteDeleteFiles: prefs.deleteDeleteFiles,
-                        deleteAddExclusion: prefs.deleteAddExclusion
+                    preferences: prefs.doCopyWithMovieAddDefaults(
+                        monitored: isMovieMonitored,
+                        minAvailability: selectedMovieMinimumAvailability,
+                        qualityProfileId: qp.asKotlinInt,
+                        rootFolderPath: path,
+                        searchOnAdd: searchMovieOnAdd
                     )
                 )
                 let newMovie = movie.doCopyForCreation(

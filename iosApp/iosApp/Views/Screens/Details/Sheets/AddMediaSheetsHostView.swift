@@ -72,6 +72,7 @@ struct AddMediaSheetsHostView: View {
                     author: author,
                     addItemStatus: viewModel.addItemStatus,
                     qualityProfiles: viewModel.addSheetUiState.qualityProfiles.isEmpty ? viewModel.qualityProfiles : viewModel.addSheetUiState.qualityProfiles,
+                    metadataProfiles: viewModel.addSheetUiState.metadataProfiles,
                     rootFolders: viewModel.addSheetUiState.rootFolders.isEmpty ? viewModel.rootFolders : viewModel.addSheetUiState.rootFolders,
                     tags: viewModel.addSheetUiState.tags.isEmpty ? viewModel.tags : viewModel.addSheetUiState.tags,
                     preferences: viewModel.preferences,

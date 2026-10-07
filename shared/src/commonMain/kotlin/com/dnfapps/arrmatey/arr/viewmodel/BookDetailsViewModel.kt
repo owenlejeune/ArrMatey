@@ -82,6 +82,10 @@ class BookDetailsViewModel(
 
     private fun observeData(repository: ArrInstanceRepository) {
         viewModelScope.launch {
+            repository.getAuthorBooks(authorId)
+            repository.getAuthorBookFiles(authorId)
+        }
+        viewModelScope.launch {
             repository.authorBooks
                 .map { booksMap ->
                     booksMap[authorId]?.firstOrNull { it.id == _book.value.id }

@@ -303,7 +303,9 @@ class GetUnifiedMediaDetailsUseCase(
                 activityTasks
                     .filter { task ->
                         (targetInstanceId == null || task.instanceId == null || task.instanceId == targetInstanceId) &&
-                            (targetType == null || task.type == targetType) &&
+                            (targetType == null || task.type == targetType ||
+                                (targetType == InstanceType.Chaptarr && task.type == InstanceType.Bookshelf) ||
+                                (targetType == InstanceType.Bookshelf && task.type == InstanceType.Chaptarr)) &&
                             (
                                 task.mediaId == targetId ||
                                     (task as? SonarrQueueItem)?.calcSeriesId == targetId ||
@@ -312,6 +314,8 @@ class GetUnifiedMediaDetailsUseCase(
                                     (task as? LidarrQueueItem)?.albumId == targetId ||
                                     (task as? ReadarrQueueItem)?.authorId == targetId ||
                                     (task as? ReadarrQueueItem)?.bookId == targetId ||
+                                    (task as? ReadarrQueueItem)?.book?.authorId == targetId ||
+                                    (task as? ReadarrQueueItem)?.author?.id == targetId ||
                                     (task as? ListenarrQueueItem)?.audiobookId == targetId
                                 )
                     }.groupByTask()

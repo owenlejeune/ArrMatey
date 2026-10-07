@@ -10,6 +10,7 @@ data class LidarrQueueItem(
     override val id: Int,
     override var instanceId: Long? = null,
     override var instanceName: String? = null,
+    override var instanceType: InstanceType? = null,
     override val downloadId: String? = null,
     override val downloadClient: String? = null,
     override val title: String? = null,
@@ -37,7 +38,8 @@ data class LidarrQueueItem(
     val artistId: Long? = null,
     val artist: Arrtist? = null,
 ) : QueueItem {
-    override val type = InstanceType.Lidarr
+    override val type: InstanceType
+        get() = instanceType ?: InstanceType.Lidarr
 
     override val taskGroup: String
         get() = super.taskGroup + id

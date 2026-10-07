@@ -352,9 +352,27 @@
     <string name="comments">Comments</string>
     <string name="description">Description</string>
     <string name="publisher">Publisher</string>
+    <string name="audiobook">Audiobook</string>
     <string name="audiobooks">Audiobooks</string>
     <string name="ebook">eBook</string>
     <string name="ebooks">eBooks</string>
+    <string name="both">Both</string>
+    <string name="set_as_default">Set as default</string>
+    <string name="audiobook_root_folder">Audiobook Root Folder</string>
+    <string name="ebook_root_folder">Ebook Root Folder</string>
+    <string name="monitor_authors_audiobooks">Monitor Author\'s Audiobooks?</string>
+    <string name="monitor_authors_ebooks">Monitor Author\'s eBooks?</string>
+    <string name="monitor_new_audiobooks">Monitor new audiobooks from this author</string>
+    <string name="monitor_new_ebooks">Monitor new eBooks from this author</string>
+    <string name="audiobook_quality_profile">Audiobook Quality Profile</string>
+    <string name="ebook_quality_profile">Ebook Quality Profile</string>
+    <string name="audiobook_metadata_profile">Audiobook Metadata Profile</string>
+    <string name="ebook_metadata_profile">Ebook Metadata Profile</string>
+    <string name="add_audiobooks">Add Audiobooks</string>
+    <string name="add_ebooks">Add eBooks</string>
+    <string name="add_audiobooks_ebooks">Add Audiobooks + eBooks</string>
+    <string name="metadata_profile">Metadata Profile</string>
+    <string name="start_search_for_missing_books">Start search for missing books</string>
     <string name="narrated_by">Narrated by: %1$s</string>
     <string name="search_on_add_label">Search for files immediately</string>
     <string name="no_api_key">This service doesn't require an API key</string>
@@ -1092,4 +1110,8 @@
     <string name="calendar_cards_description">Customize calendar card appearance</string>
     <string name="search_result_cards">Search Result Cards</string>
     <string name="search_result_cards_description">Customize search result card appearance</string>
+    <string name="no_audiobook_root_folder_configured">No audiobook root folder configured for this author. Please edit the author and add a root folder to see audiobook books.</string>
+    <string name="no_ebook_root_folder_configured">No eBook root folder configured for this author. Please edit the author and add a root folder to see eBook books.</string>
+    <string name="no_audiobook_root_folder_selected">No audiobook root folder selected for this author.</string>
+    <string name="no_ebook_root_folder_selected">No eBook root folder selected for this author.</string>
 </resources>

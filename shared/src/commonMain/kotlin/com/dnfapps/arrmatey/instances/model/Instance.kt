@@ -279,6 +279,6 @@ enum class InstanceType(
     ;
 
     companion object {
-        fun arrs() = listOf(Sonarr, Radarr, Lidarr, Bookshelf, Listenarr, Chaptarr)
+        fun arrs() = listOf(Sonarr, Radarr, Lidarr, Chaptarr, Bookshelf, Listenarr)
     }
 }

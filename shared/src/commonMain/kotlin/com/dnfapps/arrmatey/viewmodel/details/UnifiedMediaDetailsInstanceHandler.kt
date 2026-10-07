@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.viewmodel.details
 
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
@@ -79,6 +80,13 @@ class UnifiedMediaDetailsInstanceHandler(
 
     fun updateQualityProfiles(profiles: List<QualityProfile>) {
         _qualityProfiles.value = profiles
+    }
+
+    private val _metadataProfiles = MutableStateFlow<List<MetadataProfile>>(emptyList())
+    val metadataProfiles: StateFlow<List<MetadataProfile>> = _metadataProfiles.asStateFlow()
+
+    fun updateMetadataProfiles(profiles: List<MetadataProfile>) {
+        _metadataProfiles.value = profiles
     }
 
     private val _rootFolders = MutableStateFlow<List<RootFolder>>(emptyList())
@@ -260,6 +268,7 @@ class UnifiedMediaDetailsInstanceHandler(
                 _addSheetUiState.update {
                     it.copy(
                         qualityProfiles = repo.qualityProfiles.value,
+                        metadataProfiles = repo.metadataProfiles.value,
                         rootFolders = repo.rootFolders.value,
                         tags = repo.tags.value,
                     )
@@ -270,6 +279,7 @@ class UnifiedMediaDetailsInstanceHandler(
                     _addSheetUiState.update {
                         it.copy(
                             qualityProfiles = repo.qualityProfiles.value,
+                            metadataProfiles = repo.metadataProfiles.value,
                             rootFolders = repo.rootFolders.value,
                             tags = repo.tags.value,
                         )

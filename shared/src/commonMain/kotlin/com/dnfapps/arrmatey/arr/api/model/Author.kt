@@ -8,6 +8,9 @@ import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrRed
+import com.dnfapps.arrmatey.shared.*
+import com.dnfapps.arrmatey.shared.MR
+import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,6 +20,7 @@ import kotlin.time.Instant
 data class Author(
     override val id: Long? = null,
     @SerialName("authorName") override val title: String? = null,
+    val authorNameLastFirst: String? = null,
     @SerialName("sortName") override val sortTitle: String? = null,
     @SerialName("cleanName") override val cleanTitle: String? = null,
     override val originalLanguage: Language? = null,
@@ -104,6 +108,32 @@ data class Author(
     override val statusProgress: Float
         get() = statistics?.percentOfBooks?.div(100f) ?: 0f
 
+    val isChaptarr: Boolean
+        get() = audiobookQualityProfileId != null || ebookQualityProfileId != null ||
+            audiobookRootFolderPath != null || ebookRootFolderPath != null
+
+    val hasAudiobookConfigured: Boolean
+        get() = (audiobookQualityProfileId != null && audiobookQualityProfileId != 0) ||
+            !audiobookRootFolderPath.isNullOrEmpty()
+
+    val hasEbookConfigured: Boolean
+        get() = (ebookQualityProfileId != null && ebookQualityProfileId != 0) ||
+            !ebookRootFolderPath.isNullOrEmpty() ||
+            (qualityProfileId != 0 && !rootFolderPath.isNullOrEmpty() && !hasAudiobookConfigured)
+
+    fun singleMediaTypeLabel(isChaptarrInstance: Boolean = false): StringResource? {
+        val inChaptarr = isChaptarrInstance || isChaptarr
+        if (!inChaptarr) return null
+        return when {
+            hasAudiobookConfigured && !hasEbookConfigured -> MR.strings.audiobook
+            hasEbookConfigured && !hasAudiobookConfigured -> MR.strings.ebook
+            else -> null
+        }
+    }
+
+    val singleMediaTypeLabel: StringResource?
+        get() = singleMediaTypeLabel(isChaptarrInstance = false)
+
     override fun withLocalImages(instance: Instance): Author = copy(images = images.map { it.rebuildWithLocalUrls(instance) })
 
     fun copyForCreation(
@@ -123,6 +153,115 @@ data class Author(
         metadataProfileId = 1,
         tags = tags,
     )
+
+    fun copyForChaptarrCreation(
+        selectedMediaType: BookMediaType,
+        audiobookQualityProfileId: Int?,
+        audiobookMetadataProfileId: Int?,
+        audiobookRootFolderPath: String?,
+        audiobookMonitorExisting: Int?,
+        audiobookMonitorFuture: Boolean?,
+        audiobookTags: List<Int> = emptyList(),
+        ebookQualityProfileId: Int?,
+        ebookMetadataProfileId: Int?,
+        ebookRootFolderPath: String?,
+        ebookMonitorExisting: Int?,
+        ebookMonitorFuture: Boolean?,
+        ebookTags: List<Int> = emptyList(),
+        tags: List<Int> = emptyList(),
+        searchForMissingBooks: Boolean = false,
+    ): Author {
+        val includeAudiobook = selectedMediaType == BookMediaType.Audiobook || selectedMediaType == BookMediaType.Both
+        val includeEbook = selectedMediaType == BookMediaType.EBook || selectedMediaType == BookMediaType.Both
+
+        return copy(
+            lastSelectedMediaType = selectedMediaType,
+            audiobookQualityProfileId = if (includeAudiobook) audiobookQualityProfileId else null,
+            audiobookMetadataProfileId = if (includeAudiobook) audiobookMetadataProfileId else null,
+            audiobookRootFolderPath = if (includeAudiobook) audiobookRootFolderPath else null,
+            audiobookFolder = if (includeAudiobook) folder else null,
+            audiobookTags = if (includeAudiobook) audiobookTags else emptyList(),
+            audiobookMonitorExisting = if (includeAudiobook) audiobookMonitorExisting else null,
+            audiobookMonitorFuture = if (includeAudiobook) audiobookMonitorFuture else null,
+            ebookQualityProfileId = if (includeEbook) ebookQualityProfileId else null,
+            ebookMetadataProfileId = if (includeEbook) ebookMetadataProfileId else null,
+            ebookRootFolderPath = if (includeEbook) ebookRootFolderPath else null,
+            ebookFolder = if (includeEbook) folder else null,
+            ebookTags = if (includeEbook) ebookTags else emptyList(),
+            ebookMonitorExisting = if (includeEbook) ebookMonitorExisting else null,
+            ebookMonitorFuture = if (includeEbook) ebookMonitorFuture else null,
+            tags = tags,
+            qualityProfileId = when (selectedMediaType) {
+                BookMediaType.Audiobook -> audiobookQualityProfileId ?: 0
+                BookMediaType.EBook -> ebookQualityProfileId ?: 0
+                BookMediaType.Both -> audiobookQualityProfileId ?: ebookQualityProfileId ?: 0
+            },
+            metadataProfileId = when (selectedMediaType) {
+                BookMediaType.Audiobook -> audiobookMetadataProfileId ?: 1
+                BookMediaType.EBook -> ebookMetadataProfileId ?: 1
+                BookMediaType.Both -> audiobookMetadataProfileId ?: ebookMetadataProfileId ?: 1
+            },
+            rootFolderPath = when (selectedMediaType) {
+                BookMediaType.Audiobook -> audiobookRootFolderPath
+                BookMediaType.EBook -> ebookRootFolderPath
+                BookMediaType.Both -> audiobookRootFolderPath ?: ebookRootFolderPath
+            },
+            path = when (selectedMediaType) {
+                BookMediaType.Audiobook -> audiobookRootFolderPath?.let { "$it/$folder" }
+                BookMediaType.EBook -> ebookRootFolderPath?.let { "$it/$folder" }
+                BookMediaType.Both -> (audiobookRootFolderPath ?: ebookRootFolderPath)?.let { "$it/$folder" }
+            },
+            monitored = when (selectedMediaType) {
+                BookMediaType.Audiobook -> (audiobookMonitorExisting != null && audiobookMonitorExisting != 0) || audiobookMonitorFuture == true
+                BookMediaType.EBook -> (ebookMonitorExisting != null && ebookMonitorExisting != 0) || ebookMonitorFuture == true
+                BookMediaType.Both -> (audiobookMonitorExisting != null && audiobookMonitorExisting != 0) || audiobookMonitorFuture == true || (ebookMonitorExisting != null && ebookMonitorExisting != 0) || ebookMonitorFuture == true
+            },
+            addOptions = AuthorAddOptions(
+                monitor = AuthorMonitorType.All,
+                searchForMissingBooks = searchForMissingBooks,
+            ),
+        )
+    }
+
+    fun copyForChaptarrEdit(
+        audiobookQualityProfileId: Int?,
+        audiobookMetadataProfileId: Int?,
+        audiobookRootFolderPath: String?,
+        audiobookMonitorExisting: Int?,
+        audiobookMonitorFuture: Boolean?,
+        audiobookTags: List<Int> = emptyList(),
+        ebookQualityProfileId: Int?,
+        ebookMetadataProfileId: Int?,
+        ebookRootFolderPath: String?,
+        ebookMonitorExisting: Int?,
+        ebookMonitorFuture: Boolean?,
+        ebookTags: List<Int> = emptyList(),
+        tags: List<Int> = emptyList(),
+    ): Author {
+        return copy(
+            audiobookQualityProfileId = audiobookQualityProfileId,
+            audiobookMetadataProfileId = audiobookMetadataProfileId,
+            audiobookRootFolderPath = audiobookRootFolderPath,
+            audiobookFolder = audiobookFolder ?: folder,
+            audiobookTags = audiobookTags,
+            audiobookMonitorExisting = audiobookMonitorExisting,
+            audiobookMonitorFuture = audiobookMonitorFuture,
+            ebookQualityProfileId = ebookQualityProfileId,
+            ebookMetadataProfileId = ebookMetadataProfileId,
+            ebookRootFolderPath = ebookRootFolderPath,
+            ebookFolder = ebookFolder ?: folder,
+            ebookTags = ebookTags,
+            ebookMonitorExisting = ebookMonitorExisting,
+            ebookMonitorFuture = ebookMonitorFuture,
+            tags = tags,
+            qualityProfileId = audiobookQualityProfileId ?: ebookQualityProfileId ?: qualityProfileId,
+            metadataProfileId = audiobookMetadataProfileId ?: ebookMetadataProfileId ?: metadataProfileId,
+            rootFolderPath = audiobookRootFolderPath ?: ebookRootFolderPath ?: rootFolderPath,
+            path = (audiobookRootFolderPath ?: ebookRootFolderPath ?: rootFolderPath)?.let { "$it/${folder ?: title}" } ?: path,
+            monitored = (audiobookMonitorExisting != null && audiobookMonitorExisting != 0) || audiobookMonitorFuture == true ||
+                (ebookMonitorExisting != null && ebookMonitorExisting != 0) || ebookMonitorFuture == true,
+        )
+    }
 
     fun copyForEdit(
         monitored: Boolean,

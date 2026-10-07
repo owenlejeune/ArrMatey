@@ -106,7 +106,7 @@ class UnifiedLibraryViewModel(
             .map { all ->
                 all
                     .filter { it.type in arrOrder }
-                    .sortedWith(compareBy<Instance> { arrOrder.indexOf(it.type) }.thenBy { it.label })
+                    .sortedWith(compareBy<Instance> { it.type }.thenBy { it.label })
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Eagerly,
@@ -189,7 +189,7 @@ class UnifiedLibraryViewModel(
         _selectedInstance
             .filterNotNull()
             .flatMapLatest { instance ->
-                instancePreferenceStoreRepository.getInstancePreferences(instance.id).observePreferences()
+                instancePreferenceStoreRepository.getInstancePreferences(instance.id, SortBy.defaultFor(instance.type)).observePreferences()
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Eagerly,
@@ -204,12 +204,14 @@ class UnifiedLibraryViewModel(
                 } else {
                     combine(
                         repo.qualityProfiles,
+                        repo.metadataProfiles,
                         repo.rootFolders,
                         repo.tags,
                         repo.customFilters,
-                    ) { qp, rf, tags, filters ->
+                    ) { qp, mp, rf, tags, filters ->
                         InstanceData(
                             qualityProfiles = qp,
+                            metadataProfiles = mp,
                             rootFolders = rf,
                             tags = tags,
                             customFilters = filters,

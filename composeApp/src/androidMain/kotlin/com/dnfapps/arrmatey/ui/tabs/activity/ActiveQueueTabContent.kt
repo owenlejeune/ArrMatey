@@ -74,9 +74,6 @@ fun ActiveQueueTabContent(
                             onSelectItem(item)
                         }
                     }
-                    item {
-                        Spacer(Modifier.height(LocalFloatingBarBottomPadding.current + 16.dp))
-                    }
                 }
             }
         }

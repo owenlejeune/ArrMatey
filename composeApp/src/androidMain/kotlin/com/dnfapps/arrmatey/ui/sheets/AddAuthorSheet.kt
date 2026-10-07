@@ -2,22 +2,11 @@ package com.dnfapps.arrmatey.ui.sheets
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -28,32 +17,33 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.BookMediaType
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
-import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
-import com.dnfapps.arrmatey.ui.components.LabelledSwitch
-import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
-import com.dnfapps.arrmatey.utils.mokoPlural
+import com.dnfapps.arrmatey.ui.sheets.components.AddMediaActionButton
+import com.dnfapps.arrmatey.ui.sheets.components.AddMediaSheetHeader
+import com.dnfapps.arrmatey.ui.sheets.components.ChaptarrAddAuthorForm
+import com.dnfapps.arrmatey.ui.sheets.components.ReadarrAddAuthorForm
 import com.dnfapps.arrmatey.utils.mokoString
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAuthorSheet(
     item: Author,
     qualityProfiles: List<QualityProfile>,
+    metadataProfiles: List<MetadataProfile> = emptyList(),
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     addInProgress: Boolean,
@@ -65,11 +55,73 @@ fun AddAuthorSheet(
     selectedInstance: Instance? = null,
     onInstanceSelected: (Instance) -> Unit = {},
 ) {
+    val isChaptarr = (selectedInstance?.type ?: item.instanceType) == InstanceType.Chaptarr
+
+    // Chaptarr state
+    var chaptarrMediaType by remember(preferences.addChaptarrMediaType, selectedInstance?.id) {
+        mutableStateOf(preferences.addChaptarrMediaType)
+    }
+    var audiobookRootFolder by remember(rootFolders, preferences.addChaptarrAudiobookRootFolderPath, selectedInstance?.id) {
+        mutableStateOf(
+            rootFolders.firstOrNull { it.path == preferences.addChaptarrAudiobookRootFolderPath }
+                ?: rootFolders.firstOrNull { it.path.contains("audio", ignoreCase = true) }
+                ?: rootFolders.firstOrNull(),
+        )
+    }
+    var audiobookMonitor by remember(preferences.addChaptarrAudiobookMonitorExisting, selectedInstance?.id) {
+        mutableStateOf(preferences.addChaptarrAudiobookMonitorExisting)
+    }
+    var audiobookMonitorNew by remember(preferences.addChaptarrAudiobookMonitorFuture, selectedInstance?.id) {
+        mutableStateOf(preferences.addChaptarrAudiobookMonitorFuture)
+    }
+    var audiobookQualityProfile by remember(qualityProfiles, preferences.addChaptarrAudiobookQualityProfileId, selectedInstance?.id) {
+        mutableStateOf(
+            qualityProfiles.firstOrNull { it.id == preferences.addChaptarrAudiobookQualityProfileId }
+                ?: qualityProfiles.firstOrNull { it.name?.contains("audio", ignoreCase = true) == true }
+                ?: qualityProfiles.firstOrNull(),
+        )
+    }
+    var audiobookMetadataProfile by remember(metadataProfiles, preferences.addChaptarrAudiobookMetadataProfileId, selectedInstance?.id) {
+        mutableStateOf(
+            metadataProfiles.firstOrNull { it.id == preferences.addChaptarrAudiobookMetadataProfileId }
+                ?: metadataProfiles.firstOrNull { it.name?.contains("audio", ignoreCase = true) == true }
+                ?: metadataProfiles.firstOrNull(),
+        )
+    }
+
+    var ebookRootFolder by remember(rootFolders, preferences.addChaptarrEbookRootFolderPath, selectedInstance?.id) {
+        mutableStateOf(
+            rootFolders.firstOrNull { it.path == preferences.addChaptarrEbookRootFolderPath }
+                ?: rootFolders.firstOrNull { !it.path.contains("audio", ignoreCase = true) }
+                ?: rootFolders.firstOrNull(),
+        )
+    }
+    var ebookMonitor by remember(preferences.addChaptarrEbookMonitorExisting, selectedInstance?.id) {
+        mutableStateOf(preferences.addChaptarrEbookMonitorExisting)
+    }
+    var ebookMonitorNew by remember(preferences.addChaptarrEbookMonitorFuture, selectedInstance?.id) {
+        mutableStateOf(preferences.addChaptarrEbookMonitorFuture)
+    }
+    var ebookQualityProfile by remember(qualityProfiles, preferences.addChaptarrEbookQualityProfileId, selectedInstance?.id) {
+        mutableStateOf(
+            qualityProfiles.firstOrNull { it.id == preferences.addChaptarrEbookQualityProfileId }
+                ?: qualityProfiles.firstOrNull { it.name?.contains("ebook", ignoreCase = true) == true }
+                ?: qualityProfiles.firstOrNull { it.name?.contains("audio", ignoreCase = true) != true }
+                ?: qualityProfiles.firstOrNull(),
+        )
+    }
+    var ebookMetadataProfile by remember(metadataProfiles, preferences.addChaptarrEbookMetadataProfileId, selectedInstance?.id) {
+        mutableStateOf(
+            metadataProfiles.firstOrNull { it.id == preferences.addChaptarrEbookMetadataProfileId }
+                ?: metadataProfiles.firstOrNull { it.name?.contains("ebook", ignoreCase = true) == true }
+                ?: metadataProfiles.firstOrNull { it.name?.contains("audio", ignoreCase = true) != true }
+                ?: metadataProfiles.firstOrNull(),
+        )
+    }
+
+    // Standard Readarr state
     var monitor by remember(preferences.addAuthorMonitor, selectedInstance?.id) { mutableStateOf(preferences.addAuthorMonitor) }
-    var monitorNewBooks by remember(
-        preferences.addAuthorMonitorNew,
-        selectedInstance?.id,
-    ) { mutableStateOf(preferences.addAuthorMonitorNew) }
+    var monitorNewBooks by remember(preferences.addAuthorMonitorNew, selectedInstance?.id) { mutableStateOf(preferences.addAuthorMonitorNew) }
     var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId, selectedInstance?.id) {
         mutableStateOf(
             qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
@@ -85,48 +137,47 @@ fun AddAuthorSheet(
     val selectedTags = remember(selectedInstance?.id) { mutableStateListOf<Int>() }
     var searchOnAdd by remember(preferences.addSearchOnAdd, selectedInstance?.id) { mutableStateOf(preferences.addSearchOnAdd) }
 
+    val chaptarrMonitorOptions = remember {
+        listOf(
+            AuthorMonitorType.None,
+            AuthorMonitorType.All,
+            AuthorMonitorType.Future,
+            AuthorMonitorType.Missing,
+            AuthorMonitorType.Existing,
+            AuthorMonitorType.FirstBook,
+            AuthorMonitorType.LatestBook,
+        )
+    }
+
     ModalBottomSheet(
         onDismissRequest = {
             if (!addInProgress) {
                 onDismiss()
             }
         },
-        sheetState =
-        rememberModalBottomSheetState(
+        sheetState = rememberModalBottomSheetState(
             skipPartiallyExpanded = true,
             confirmValueChange = { !addInProgress },
         ),
     ) {
         Column(
-            modifier =
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(
-                modifier =
-                Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f, fill = false)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Column {
-                    Text(
-                        text = mokoString(MR.strings.type_author).uppercase(),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = item.title ?: "",
-                        style = MaterialTheme.typography.headlineMediumEmphasized,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                AddMediaSheetHeader(
+                    type = mokoString(MR.strings.type_author),
+                    title = item.title ?: "",
+                )
 
                 if (instances.size > 1 && selectedInstance != null) {
                     DropdownPicker(
@@ -140,140 +191,146 @@ fun AddAuthorSheet(
                     )
                 }
 
-                ContainerCard(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    DropdownPicker(
-                        options = AuthorMonitorType.entries.toList(),
-                        modifier = Modifier.fillMaxWidth(),
-                        selectedOption = monitor,
-                        onOptionSelected = { monitor = it },
-                        getOptionLabel = { mokoString(it.resource) },
-                        label = { Text(mokoString(MR.strings.monitor)) },
+                if (isChaptarr) {
+                    ChaptarrAddAuthorForm(
+                        mediaType = chaptarrMediaType,
+                        onMediaTypeSelected = { chaptarrMediaType = it },
+                        onSetAsDefault = {
+                            onUpdatePreferences(preferences.copyWithChaptarrMediaType(mediaType = chaptarrMediaType))
+                        },
+                        rootFolders = rootFolders,
+                        qualityProfiles = qualityProfiles,
+                        metadataProfiles = metadataProfiles,
+                        tags = tags,
+                        selectedTags = selectedTags,
+                        audiobookRootFolder = audiobookRootFolder,
+                        onAudiobookRootFolderSelected = { audiobookRootFolder = it },
+                        audiobookMonitor = audiobookMonitor,
+                        onAudiobookMonitorSelected = { audiobookMonitor = it },
+                        audiobookMonitorNew = audiobookMonitorNew,
+                        onAudiobookMonitorNewChanged = { audiobookMonitorNew = it },
+                        audiobookQualityProfile = audiobookQualityProfile,
+                        onAudiobookQualityProfileSelected = { audiobookQualityProfile = it },
+                        audiobookMetadataProfile = audiobookMetadataProfile,
+                        onAudiobookMetadataProfileSelected = { audiobookMetadataProfile = it },
+                        ebookRootFolder = ebookRootFolder,
+                        onEbookRootFolderSelected = { ebookRootFolder = it },
+                        ebookMonitor = ebookMonitor,
+                        onEbookMonitorSelected = { ebookMonitor = it },
+                        ebookMonitorNew = ebookMonitorNew,
+                        onEbookMonitorNewChanged = { ebookMonitorNew = it },
+                        ebookQualityProfile = ebookQualityProfile,
+                        onEbookQualityProfileSelected = { ebookQualityProfile = it },
+                        ebookMetadataProfile = ebookMetadataProfile,
+                        onEbookMetadataProfileSelected = { ebookMetadataProfile = it },
+                        searchOnAdd = searchOnAdd,
+                        onSearchOnAddChanged = { searchOnAdd = it },
+                        monitorOptions = chaptarrMonitorOptions,
                         enabled = !addInProgress,
                     )
-
-                    DropdownPicker(
-                        options =
-                        listOf(
-                            AuthorMonitorType.All,
-                            AuthorMonitorType.None,
-                            AuthorMonitorType.Future,
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        selectedOption = monitorNewBooks,
-                        onOptionSelected = { monitorNewBooks = it },
-                        getOptionLabel = { mokoString(it.resource) },
-                        label = { Text(mokoString(MR.strings.monitor_new_books)) },
-                        enabled = !addInProgress,
-                    )
-
-                    DropdownPicker(
-                        options = qualityProfiles,
-                        modifier = Modifier.fillMaxWidth(),
-                        selectedOption = qualityProfile,
-                        onOptionSelected = { qualityProfile = it },
-                        getOptionLabel = { it.name ?: "" },
-                        label = { Text(mokoString(MR.strings.quality_profile)) },
-                        enabled = !addInProgress,
-                    )
-
-                    if (tags.isNotEmpty()) {
-                        MultiSelectDropdownPicker(
-                            options = tags.map { it.id },
-                            selectedOptions = selectedTags,
-                            valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
-                            onOptionSelected = { tag, isSelected ->
-                                if (isSelected) {
-                                    selectedTags.add(tag)
-                                } else {
-                                    selectedTags.remove(tag)
-                                }
-                            },
-                            getOptionLabel = { tag ->
-                                tags.firstOrNull { tag == it.id }?.label
-                                    ?: mokoString(MR.strings.unknown)
-                            },
-                            label = { Text(mokoString(MR.strings.tags)) },
-                            enabled = !addInProgress,
-                        )
-                    }
-                }
-
-                if (rootFolders.size > 1) {
-                    ContainerCard(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-                        shape = MaterialTheme.shapes.large,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        DropdownPicker(
-                            options = rootFolders,
-                            modifier = Modifier.fillMaxWidth(),
-                            selectedOption = rootFolder,
-                            onOptionSelected = { rootFolder = it },
-                            label = { Text(mokoString(MR.strings.root_folder)) },
-                            getOptionLabel = { "${it.path} (${it.freeSpace.bytesAsFileSizeString()})" },
-                            enabled = !addInProgress,
-                        )
-                    }
-                }
-
-                ContainerCard(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    LabelledSwitch(
-                        label = mokoString(MR.strings.search_on_add_label),
-                        checked = searchOnAdd,
-                        onCheckedChange = { searchOnAdd = it },
+                } else {
+                    ReadarrAddAuthorForm(
+                        monitor = monitor,
+                        onMonitorSelected = { monitor = it },
+                        monitorNewBooks = monitorNewBooks,
+                        onMonitorNewBooksSelected = { monitorNewBooks = it },
+                        qualityProfiles = qualityProfiles,
+                        selectedQualityProfile = qualityProfile,
+                        onQualityProfileSelected = { qualityProfile = it },
+                        rootFolders = rootFolders,
+                        selectedRootFolder = rootFolder,
+                        onRootFolderSelected = { rootFolder = it },
+                        tags = tags,
+                        selectedTags = selectedTags,
+                        searchOnAdd = searchOnAdd,
+                        onSearchOnAddChanged = { searchOnAdd = it },
                         enabled = !addInProgress,
                     )
                 }
             }
 
-            Button(
+            val buttonLabel = if (isChaptarr) {
+                when (chaptarrMediaType) {
+                    BookMediaType.Audiobook -> mokoString(MR.strings.add_audiobooks)
+                    BookMediaType.EBook -> mokoString(MR.strings.add_ebooks)
+                    BookMediaType.Both -> mokoString(MR.strings.add_audiobooks_ebooks)
+                }
+            } else {
+                mokoString(MR.strings.save)
+            }
+
+            val isChaptarrValid = when (chaptarrMediaType) {
+                BookMediaType.Audiobook -> audiobookRootFolder != null && audiobookQualityProfile != null
+                BookMediaType.EBook -> ebookRootFolder != null && ebookQualityProfile != null
+                BookMediaType.Both -> audiobookRootFolder != null && audiobookQualityProfile != null && ebookRootFolder != null && ebookQualityProfile != null
+            }
+            val isStandardValid = qualityProfile != null && rootFolder != null
+
+            AddMediaActionButton(
+                text = buttonLabel,
                 onClick = {
-                    val qp = qualityProfile
-                    val rf = rootFolder
-                    if (qp != null && rf != null) {
+                    if (isChaptarr) {
                         onUpdatePreferences(
-                            preferences.copy(
-                                addAuthorMonitor = monitor,
-                                addAuthorMonitorNew = monitorNewBooks,
-                                addQualityProfileId = qp.id,
-                                addRootFolderPath = rf.path,
-                                addSearchOnAdd = searchOnAdd,
+                            preferences.copyWithChaptarrAddDefaults(
+                                mediaType = chaptarrMediaType,
+                                audiobookQualityProfileId = audiobookQualityProfile?.id,
+                                audiobookMetadataProfileId = audiobookMetadataProfile?.id,
+                                audiobookRootFolderPath = audiobookRootFolder?.path,
+                                audiobookMonitorExisting = audiobookMonitor,
+                                audiobookMonitorFuture = audiobookMonitorNew,
+                                ebookQualityProfileId = ebookQualityProfile?.id,
+                                ebookMetadataProfileId = ebookMetadataProfile?.id,
+                                ebookRootFolderPath = ebookRootFolder?.path,
+                                ebookMonitorExisting = ebookMonitor,
+                                ebookMonitorFuture = ebookMonitorNew,
+                                searchOnAdd = searchOnAdd,
                             ),
                         )
-                        val newItem =
-                            item.copyForCreation(
+                        val newItem = item.copyForChaptarrCreation(
+                            selectedMediaType = chaptarrMediaType,
+                            audiobookQualityProfileId = audiobookQualityProfile?.id,
+                            audiobookMetadataProfileId = audiobookMetadataProfile?.id,
+                            audiobookRootFolderPath = audiobookRootFolder?.path,
+                            audiobookMonitorExisting = chaptarrMonitorOptions.indexOf(audiobookMonitor).takeIf { it >= 0 },
+                            audiobookMonitorFuture = audiobookMonitorNew,
+                            audiobookTags = selectedTags.toList(),
+                            ebookQualityProfileId = ebookQualityProfile?.id,
+                            ebookMetadataProfileId = ebookMetadataProfile?.id,
+                            ebookRootFolderPath = ebookRootFolder?.path,
+                            ebookMonitorExisting = chaptarrMonitorOptions.indexOf(ebookMonitor).takeIf { it >= 0 },
+                            ebookMonitorFuture = ebookMonitorNew,
+                            ebookTags = selectedTags.toList(),
+                            tags = selectedTags.toList(),
+                            searchForMissingBooks = searchOnAdd,
+                        )
+                        onAddItem(newItem, searchOnAdd)
+                    } else {
+                        val qp = qualityProfile
+                        val rf = rootFolder
+                        if (qp != null && rf != null) {
+                            onUpdatePreferences(
+                                preferences.copyWithAuthorAddDefaults(
+                                    monitor = monitor,
+                                    monitorNew = monitorNewBooks,
+                                    qualityProfileId = qp.id,
+                                    rootFolderPath = rf.path,
+                                    searchOnAdd = searchOnAdd,
+                                ),
+                            )
+                            val newItem = item.copyForCreation(
                                 monitor = monitor,
                                 monitorNew = monitorNewBooks,
                                 qualityProfileId = qp.id,
                                 rootFolderPath = rf.path,
                                 tags = selectedTags,
                             )
-                        onAddItem(newItem, searchOnAdd)
+                            onAddItem(newItem, searchOnAdd)
+                        }
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !addInProgress && qualityProfile != null && rootFolder != null,
-            ) {
-                if (addInProgress) {
-                    CircularProgressIndicator(Modifier.size(24.dp))
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(mokoString(MR.strings.save))
-                }
-            }
+                isLoading = addInProgress,
+                enabled = if (isChaptarr) isChaptarrValid else isStandardValid,
+            )
         }
     }
 }

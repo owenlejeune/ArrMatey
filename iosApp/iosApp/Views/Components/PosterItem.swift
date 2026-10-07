@@ -76,7 +76,7 @@ struct PosterItem<Content: View>: View {
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 48, height: 48)
                             .foregroundColor(.red)
-                        Text(item.title ?? MR.strings().unknown.localized())
+                        Text((item as? Author)?.authorNameLastFirst ?? item.title ?? MR.strings().unknown.localized())
                             .font(.system(size: 14, weight: .semibold))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 8)
@@ -87,14 +87,29 @@ struct PosterItem<Content: View>: View {
             additionalContent: additionalContent,
             footerContent: {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(item.title ?? MR.strings().unknown.localized())
+                    Text((item as? Author)?.authorNameLastFirst ?? item.title ?? MR.strings().unknown.localized())
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.primary)
                         .lineLimit(2, reservesSpace: true)
                         .multilineTextAlignment(.leading)
                     
-                    if let year = item.year {
-                        Text(String(describing: year))
+                    let subtitle: String? = {
+                        if let author = item as? Author, let label = author.singleMediaTypeLabel(isChaptarrInstance: instanceType == .chaptarr) {
+                            return label.localized()
+                        }
+                        if let year = item.year {
+                            return String(describing: year)
+                        }
+                        return nil
+                    }()
+
+                    if instanceType == .chaptarr {
+                        Text(subtitle ?? " ")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1, reservesSpace: true)
+                    } else if let subtitle {
+                        Text(subtitle)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)

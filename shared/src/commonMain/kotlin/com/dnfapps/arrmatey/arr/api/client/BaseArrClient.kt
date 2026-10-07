@@ -38,6 +38,8 @@ abstract class BaseArrClient(
 
     override suspend fun getQualityProfiles(): NetworkResult<List<QualityProfile>> = get("qualityprofile")
 
+    override suspend fun getMetadataProfiles(): NetworkResult<List<com.dnfapps.arrmatey.arr.api.model.MetadataProfile>> = get("metadataprofile")
+
     override suspend fun getRootFolders(): NetworkResult<List<RootFolder>> = get("rootfolder")
 
     override suspend fun getTags(): NetworkResult<List<Tag>> = get("tag")
@@ -63,7 +65,7 @@ abstract class BaseArrClient(
             "includeBook" to true,
             "includeAuthor" to true,
         ),
-    ).map { it.setInstance(instance.id, instance.label) }
+    ).map { it.setInstance(instance.id, instance.label, instance.type) }
 
     override suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> = post("release", payload)
 

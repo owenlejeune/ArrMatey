@@ -165,7 +165,7 @@ class ListenarrClient(
     ): NetworkResult<QueuePage> = get<ListenarrQueueResponse>("download/queue")
         .map {
             QueuePage(page, pageSize, it.items.size, it.items)
-                .setInstance(instance.id, instance.label)
+                .setInstance(instance.id, instance.label, instance.type)
         }
 
     override suspend fun getHealth(): NetworkResult<List<ArrHealth>> = get<ListenarrHealth>("system/health").map {

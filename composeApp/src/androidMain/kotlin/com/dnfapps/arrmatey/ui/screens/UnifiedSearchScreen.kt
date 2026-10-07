@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -98,89 +99,92 @@ fun UnifiedSearchScreen(
         },
         contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
-        Box(
+        Column(
             modifier =
             Modifier
                 .padding(paddingValues)
                 .fillMaxSize(),
         ) {
-            if (isSearching && searchState.isEmpty()) {
-                LoadingIndicator(
-                    modifier =
-                    Modifier
-                        .size(96.dp)
-                        .align(Alignment.Center),
-                )
-            } else if (searchState.isEmpty() && textFieldState.text.isNotEmpty()) {
-                Column(
-                    modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Box(
+            MediaInstanceFilterRow(
+                selectedFilter = selectedTypeFilter,
+                onFilterSelected = { viewModel.selectTypeFilter(it) },
+                availableFilters = availableTypeFilters,
+                itemCounts = itemCounts,
+                totalCount = searchState.size,
+            )
+
+            Box(
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            ) {
+                if (isSearching && searchState.isEmpty()) {
+                    LoadingIndicator(
                         modifier =
                         Modifier
-                            .size(72.dp)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
-                        contentAlignment = Alignment.Center,
+                            .size(96.dp)
+                            .align(Alignment.Center),
+                    )
+                } else if (searchState.isEmpty() && textFieldState.text.isNotEmpty()) {
+                    Column(
+                        modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                            modifier = Modifier.size(36.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = mokoString(MR.strings.empty_library),
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            } else if (searchState.isNotEmpty()) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    MediaInstanceFilterRow(
-                        selectedFilter = selectedTypeFilter,
-                        onFilterSelected = { viewModel.selectTypeFilter(it) },
-                        availableFilters = availableTypeFilters,
-                        itemCounts = itemCounts,
-                        totalCount = searchState.size,
-                    )
-
-                    if (filteredSearchState.isEmpty() && selectedTypeFilter != null) {
-                        Column(
+                        Box(
                             modifier =
                             Modifier
-                                .fillMaxSize()
-                                .padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
+                                .size(72.dp)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            Text(
-                                text = "No ${selectedTypeFilter?.name} results found",
-                                style = MaterialTheme.typography.titleMedium,
-                                textAlign = TextAlign.Center,
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                                modifier = Modifier.size(36.dp),
+                                tint = MaterialTheme.colorScheme.primary,
                             )
-                            Spacer(Modifier.height(12.dp))
-                            Button(
-                                onClick = { viewModel.selectTypeFilter(null) },
-                            ) {
-                                Text(mokoString(MR.strings.all))
-                            }
                         }
-                    } else {
-                        SearchResultList(
-                            items = filteredSearchState,
-                            onItemClick = onItemClick,
-                            includeOverview = true,
-                            showBanners = showBanners,
-                            modifier = Modifier.fillMaxSize(),
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = mokoString(MR.strings.empty_library),
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
                         )
                     }
+                } else if (filteredSearchState.isEmpty() && selectedTypeFilter != null) {
+                    Column(
+                        modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text(
+                            text = "No ${selectedTypeFilter?.name} results found",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Button(
+                            onClick = { viewModel.selectTypeFilter(null) },
+                        ) {
+                            Text(mokoString(MR.strings.all))
+                        }
+                    }
+                } else if (searchState.isNotEmpty()) {
+                    SearchResultList(
+                        items = filteredSearchState,
+                        onItemClick = onItemClick,
+                        includeOverview = true,
+                        showBanners = showBanners,
+                        modifier = Modifier.fillMaxSize(),
+                    )
                 }
             }
         }

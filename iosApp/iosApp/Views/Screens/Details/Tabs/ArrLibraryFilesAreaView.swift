@@ -59,7 +59,8 @@ struct ArrLibraryFilesAreaView: View {
                 searchIds: viewModel.automaticSearchIds,
                 onToggleMonitor: { viewModel.toggleBookMonitored(book: $0) },
                 onToggleSeriesMonitor: { viewModel.toggleBookSeriesMonitored(books: $0) },
-                onAutomaticSearch: { viewModel.performBookAutomaticLookup(bookId: $0) }
+                onAutomaticSearch: { viewModel.performBookAutomaticLookup(bookId: $0) },
+                queueItems: success.queueItems
             )
         } else if let audiobook = success.arrMedia as? Audiobook {
             AudiobooksArea(

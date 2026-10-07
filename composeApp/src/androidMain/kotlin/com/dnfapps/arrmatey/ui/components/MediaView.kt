@@ -78,6 +78,7 @@ fun MediaView(
                     items = items,
                     onItemClick = onItemClick,
                     itemIsActive = itemIsActive,
+                    instanceType = type,
                     lazyGridState = gridState,
                     showFullDetails = preferences.showFullDetails,
                     showOverlay = preferences.showOverlay,

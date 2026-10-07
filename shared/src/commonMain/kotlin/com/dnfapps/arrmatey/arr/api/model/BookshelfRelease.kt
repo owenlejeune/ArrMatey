@@ -47,3 +47,9 @@ data class BookshelfRelease(
     val bookTitle: String? = null,
     val discography: Boolean = false,
 ) : ArrRelease
+
+@Serializable
+data class ChaptarrReleaseResponse(
+    val releases: List<BookshelfRelease> = emptyList(),
+    val hiddenReleases: List<BookshelfRelease> = emptyList(),
+)

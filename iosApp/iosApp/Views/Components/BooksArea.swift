@@ -18,14 +18,29 @@ struct BooksArea: View {
     let onToggleMonitor: (Book) -> Void
     let onToggleSeriesMonitor: ([Book]) -> Void
     let onAutomaticSearch: (Int64) -> Void
+    var queueItems: [QueueItem] = []
 
     @EnvironmentObject private var navigation: NavigationManager
 
     @State private var selectedTab: Int = 0
     @State private var selectedMediaTypeFilter: BookMediaFilterBy = .all
 
+    private var isChaptarr: Bool {
+        author.audiobookQualityProfileId != nil || author.ebookQualityProfileId != nil ||
+            author.audiobookRootFolderPath != nil || author.ebookRootFolderPath != nil ||
+            author.lastSelectedMediaType != nil || books.contains(where: { $0.mediaType != nil })
+    }
+
     private var hasMixedMediaTypes: Bool {
-        books.contains(where: { $0.mediaType != nil }) || author.audiobookQualityProfileId != nil
+        isChaptarr || books.contains(where: { $0.mediaType != nil }) || author.audiobookQualityProfileId != nil
+    }
+
+    private var hasAudiobooksConfigured: Bool {
+        (author.audiobookQualityProfileId != nil && author.audiobookQualityProfileId?.int32Value != 0) || !(author.audiobookRootFolderPath?.isEmpty ?? true)
+    }
+
+    private var hasEbooksConfigured: Bool {
+        (author.ebookQualityProfileId != nil && author.ebookQualityProfileId?.int32Value != 0) || !(author.ebookRootFolderPath?.isEmpty ?? true) || (author.qualityProfileId != 0 && !(author.rootFolderPath?.isEmpty ?? true))
     }
 
     private var ebookCount: Int {
@@ -76,12 +91,30 @@ struct BooksArea: View {
                 }
             }
 
-            if selectedTab == 0 {
+            if selectedMediaTypeFilter == .audiobook && !hasAudiobooksConfigured {
+                unconfiguredTypeNotice(message: MR.strings().no_audiobook_root_folder_configured.localized())
+            } else if selectedMediaTypeFilter == .ebook && !hasEbooksConfigured {
+                unconfiguredTypeNotice(message: MR.strings().no_ebook_root_folder_configured.localized())
+            } else if selectedTab == 0 {
                 booksView
             } else {
                 seriesView
             }
         }
+    }
+
+    private func unconfiguredTypeNotice(message: String) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: "info.circle")
+                .foregroundColor(.secondary)
+            Text(message)
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+            Spacer()
+        }
+        .padding(12)
+        .background(Color(uiColor: .secondarySystemBackground))
+        .cornerRadius(12)
     }
 
     private func mediaTypeFilterChip(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
@@ -104,10 +137,12 @@ struct BooksArea: View {
     private var booksView: some View {
         VStack(spacing: 0) {
             ForEach(filteredBooks, id: \.id) { book in
+                let activeQueueItem = queueItems.compactMap { $0 as? ReadarrQueueItem }.first(where: { $0.bookId?.int64Value == book.id || $0.book?.id == book.id })
                 BookRow(
                     book: book,
                     instanceId: instanceId,
                     bookFile: files.first(where: { $0.bookId?.int64Value == book.id }),
+                    activeQueueItem: activeQueueItem,
                     onAutomaticSearch: onAutomaticSearch,
                     onToggleMonitor: onToggleMonitor,
                     searchInProgress: searchIds.contains(book.id),
@@ -140,7 +175,8 @@ struct BooksArea: View {
                     onToggleMonitor: onToggleMonitor,
                     onToggleSeriesMonitor: onToggleSeriesMonitor,
                     onAutomaticSearch: onAutomaticSearch,
-                    searchIds: searchIds
+                    searchIds: searchIds,
+                    queueItems: queueItems
                 )
             }
         }
@@ -151,6 +187,7 @@ struct BookRow: View {
     let book: Book
     var instanceId: Int64? = nil
     let bookFile: BookFile?
+    var activeQueueItem: QueueItem? = nil
     let onAutomaticSearch: (Int64) -> Void
     let onToggleMonitor: (Book) -> Void
     let searchInProgress: Bool
@@ -236,6 +273,9 @@ struct BookRow: View {
     }
 
     private func getStatus() -> (text: String, color: Color) {
+        if let progress = activeQueueItem?.progressLabel {
+            return (progress, .purple)
+        }
         if let quality = bookFile?.fileQualityName {
             return (quality, .themeTertiary)
         }
@@ -253,6 +293,7 @@ struct SeriesSection: View {
     let onToggleSeriesMonitor: ([Book]) -> Void
     let onAutomaticSearch: (Int64) -> Void
     let searchIds: Set<Int64>
+    var queueItems: [QueueItem] = []
 
     @State private var expanded: Bool = true
     @EnvironmentObject private var navigation: NavigationManager
@@ -287,10 +328,12 @@ struct SeriesSection: View {
                 VStack(spacing: 0) {
                     ForEach(bookSeries.links.sorted(by: { ($0.position ?? "") < ($1.position ?? "") }), id: \.bookId) { (link: BookSeriesLink) in
                         if let book = seriesBooks.first(where: { $0.id == link.bookId?.int64Value }) {
+                            let activeQueueItem = queueItems.compactMap { $0 as? ReadarrQueueItem }.first(where: { $0.bookId?.int64Value == book.id || $0.book?.id == book.id })
                             BookRow(
                                 book: book,
                                 instanceId: instanceId,
                                 bookFile: files.first(where: { $0.bookId?.int64Value == book.id }),
+                                activeQueueItem: activeQueueItem,
                                 onAutomaticSearch: onAutomaticSearch,
                                 onToggleMonitor: onToggleMonitor,
                                 searchInProgress: searchIds.contains(book.id),

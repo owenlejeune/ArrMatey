@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.instances.usecase
 
+import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -18,8 +19,11 @@ class ObserveInstancePreferencesUseCase(
         .getSelectedArrRepository(type)
         .filterNotNull()
         .flatMapLatest {
-            preferencesStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
+            preferencesStoreRepository.getInstancePreferences(it.instance.id, SortBy.defaultFor(it.instance.type)).observePreferences()
         }
 
-    operator fun invoke(instanceId: Long): Flow<InstancePreferences> = preferencesStoreRepository.getInstancePreferences(instanceId).observePreferences()
+    operator fun invoke(instanceId: Long): Flow<InstancePreferences> {
+        val type = instanceManager.getArrRepository(instanceId)?.instance?.type
+        return preferencesStoreRepository.getInstancePreferences(instanceId, SortBy.defaultFor(type)).observePreferences()
+    }
 }

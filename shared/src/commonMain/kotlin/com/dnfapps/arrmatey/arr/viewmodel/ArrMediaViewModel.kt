@@ -188,7 +188,7 @@ class ArrMediaViewModel(
             .filterNotNull()
             .flatMapLatest {
                 updateAllPreferencesUseCase.syncGlobalPreferencesToInstance(it.instance.id)
-                instancePreferenceStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
+                instancePreferenceStoreRepository.getInstancePreferences(it.instance.id, SortBy.defaultFor(it.instance.type)).observePreferences()
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
@@ -252,12 +252,14 @@ class ArrMediaViewModel(
             }.flatMapLatest { repository ->
                 combine(
                     repository.qualityProfiles,
+                    repository.metadataProfiles,
                     repository.rootFolders,
                     repository.tags,
                     repository.customFilters,
-                ) { profiles, folders, tags, filters ->
+                ) { profiles, metadataProfiles, folders, tags, filters ->
                     InstanceData(
                         qualityProfiles = profiles,
+                        metadataProfiles = metadataProfiles,
                         rootFolders = folders,
                         tags = tags,
                         customFilters = filters,

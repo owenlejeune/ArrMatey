@@ -10,6 +10,7 @@ data class RadarrQueueItem(
     override val id: Int,
     override var instanceId: Long? = null,
     override var instanceName: String? = null,
+    override var instanceType: InstanceType? = null,
     override val downloadId: String? = null,
     override val downloadClient: String? = null,
     override val title: String? = null,
@@ -35,7 +36,8 @@ data class RadarrQueueItem(
     val movieId: Long? = null,
     val movie: ArrMovie? = null,
 ) : QueueItem {
-    override val type = InstanceType.Radarr
+    override val type: InstanceType
+        get() = instanceType ?: InstanceType.Radarr
 
     override val taskGroup: String
         get() = super.taskGroup + id

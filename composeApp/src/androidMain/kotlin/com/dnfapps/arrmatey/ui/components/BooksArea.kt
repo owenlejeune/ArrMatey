@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ExpandCircleDown
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CardDefaults
@@ -59,6 +60,8 @@ import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookMediaType
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
+import com.dnfapps.arrmatey.arr.api.model.ReadarrQueueItem
 import com.dnfapps.arrmatey.compose.utils.BookMediaFilterBy
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.extensions.isToday
@@ -83,12 +86,26 @@ fun BooksArea(
     onNavigateToBookDetails: (Author, Book) -> Unit,
     onNavigateToBookRelease: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    queueItems: List<QueueItem> = emptyList(),
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedMediaTypeFilter by rememberSaveable { mutableStateOf(BookMediaFilterBy.All) }
 
-    val hasMixedMediaTypes = remember(books, author) {
-        books.any { it.mediaType != null } || author.audiobookQualityProfileId != null
+    val isChaptarr = remember(author, books) {
+        author.audiobookQualityProfileId != null || author.ebookQualityProfileId != null ||
+            author.audiobookRootFolderPath != null || author.ebookRootFolderPath != null ||
+            author.lastSelectedMediaType != null || books.any { it.mediaType != null }
+    }
+
+    val hasMixedMediaTypes = remember(books, author, isChaptarr) {
+        isChaptarr || books.any { it.mediaType != null } || author.audiobookQualityProfileId != null
+    }
+
+    val hasAudiobooksConfigured = remember(author) {
+        (author.audiobookQualityProfileId != null && author.audiobookQualityProfileId != 0) || !author.audiobookRootFolderPath.isNullOrEmpty()
+    }
+    val hasEbooksConfigured = remember(author) {
+        (author.ebookQualityProfileId != null && author.ebookQualityProfileId != 0) || !author.ebookRootFolderPath.isNullOrEmpty() || (author.qualityProfileId != 0 && !author.rootFolderPath.isNullOrEmpty())
     }
 
     val ebookCount = remember(books) {
@@ -107,6 +124,9 @@ fun BooksArea(
             books.filter { it.mediaType == null || it.mediaType == BookMediaType.EBook }
         }
     }
+
+    val isUnconfiguredAudiobook = selectedMediaTypeFilter == BookMediaFilterBy.Audiobook && !hasAudiobooksConfigured
+    val isUnconfiguredEbook = selectedMediaTypeFilter == BookMediaFilterBy.EBook && !hasEbooksConfigured
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -158,8 +178,20 @@ fun BooksArea(
                 fadeIn().togetherWith(fadeOut())
             },
         ) { tabIndex ->
-            when (tabIndex) {
-                0 ->
+            when {
+                isUnconfiguredAudiobook -> {
+                    UnconfiguredTypeNotice(
+                        message = mokoString(MR.strings.no_audiobook_root_folder_configured),
+                        modifier = Modifier.padding(vertical = 8.dp),
+                    )
+                }
+                isUnconfiguredEbook -> {
+                    UnconfiguredTypeNotice(
+                        message = mokoString(MR.strings.no_ebook_root_folder_configured),
+                        modifier = Modifier.padding(vertical = 8.dp),
+                    )
+                }
+                tabIndex == 0 -> {
                     BooksView(
                         author = author,
                         files = files,
@@ -169,9 +201,10 @@ fun BooksArea(
                         onAutomaticSearch = onAutomaticSearch,
                         onNavigateToBookDetails = onNavigateToBookDetails,
                         onNavigateToBookRelease = onNavigateToBookRelease,
+                        queueItems = queueItems,
                     )
-
-                1 ->
+                }
+                else -> {
                     SeriesView(
                         series = series,
                         files = files,
@@ -181,8 +214,39 @@ fun BooksArea(
                         onToggleSeriesMonitor = onToggleSeriesMonitor,
                         onAutomaticSearch = onAutomaticSearch,
                         onNavigateToBookRelease = onNavigateToBookRelease,
+                        queueItems = queueItems,
                     )
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun UnconfiguredTypeNotice(
+    message: String,
+    modifier: Modifier = Modifier,
+) {
+    ContainerCard(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = MaterialTheme.shapes.large,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(12.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -197,13 +261,16 @@ private fun BooksView(
     onAutomaticSearch: (Long) -> Unit,
     onNavigateToBookDetails: (Author, Book) -> Unit,
     onNavigateToBookRelease: (Long) -> Unit,
+    queueItems: List<QueueItem> = emptyList(),
 ) {
     Column {
         books.forEach { book ->
+            val activeQueueItem = queueItems.filterIsInstance<ReadarrQueueItem>().firstOrNull { it.bookId == book.id || it.book?.id == book.id }
             BookRow(
                 book = book,
                 bookFile = files.firstOrNull { it.bookId == book.id },
-                isActive = false,
+                isActive = activeQueueItem != null,
+                progressLabel = activeQueueItem?.progressLabel,
                 onAutomaticSearch = onAutomaticSearch,
                 onToggleMonitor = onToggleMonitor,
                 searchInProgress = { searchIds.contains(it) },
@@ -372,6 +439,7 @@ private fun SeriesView(
     onToggleSeriesMonitor: (List<Book>) -> Unit,
     onAutomaticSearch: (Long) -> Unit,
     onNavigateToBookRelease: (Long) -> Unit,
+    queueItems: List<QueueItem> = emptyList(),
 ) {
     Column {
         series.forEach { bookSeries ->
@@ -455,10 +523,12 @@ private fun SeriesView(
                     Column {
                         bookSeries.links.sortedBy { it.position }.forEach { link ->
                             seriesBooks.firstOrNull { it.id == link.bookId }?.let { book ->
+                                val activeQueueItem = queueItems.filterIsInstance<ReadarrQueueItem>().firstOrNull { it.bookId == book.id || it.book?.id == book.id }
                                 BookRow(
                                     book = book,
                                     bookFile = files.firstOrNull { it.bookId == link.bookId },
-                                    isActive = false,
+                                    isActive = activeQueueItem != null,
+                                    progressLabel = activeQueueItem?.progressLabel,
                                     onAutomaticSearch = onAutomaticSearch,
                                     onToggleMonitor = onToggleMonitor,
                                     searchInProgress = { searchIds.contains(it) },

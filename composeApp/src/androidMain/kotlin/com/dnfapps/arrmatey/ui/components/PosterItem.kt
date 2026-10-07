@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
@@ -65,6 +67,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun PosterItem(
     item: ArrMedia,
     modifier: Modifier = Modifier,
+    instanceType: InstanceType? = null,
     showFooter: Boolean = false,
     onItemClick: ((ArrMedia) -> Unit)? = null,
     enabled: Boolean = true,
@@ -145,7 +148,7 @@ fun PosterItem(
                         modifier = Modifier.size(48.dp),
                     )
                     Text(
-                        text = item.title ?: mokoString(MR.strings.unknown),
+                        text = (item as? Author)?.authorNameLastFirst ?: item.title ?: mokoString(MR.strings.unknown),
                         style = MaterialTheme.typography.titleSmall,
                         textAlign = TextAlign.Center,
                     )
@@ -155,17 +158,29 @@ fun PosterItem(
         footerVisible = showFooter,
         footerContent = {
             Text(
-                text = item.title ?: mokoString(MR.strings.unknown),
+                text = (item as? Author)?.authorNameLastFirst ?: item.title ?: mokoString(MR.strings.unknown),
                 style = MaterialTheme.typography.labelLarge,
                 minLines = 2,
                 maxLines = 2,
             )
-            item.year?.let { year ->
+            val isChaptarrInstance = instanceType == InstanceType.Chaptarr
+            val subtitle = (item as? Author)?.singleMediaTypeLabel(isChaptarrInstance)?.let { mokoString(it) }
+                ?: item.year?.toString()
+            if (isChaptarrInstance) {
                 Text(
-                    text = year.toString(),
+                    text = subtitle.orEmpty(),
                     style = MaterialTheme.typography.labelSmall,
+                    minLines = 1,
                     maxLines = 1,
                 )
+            } else {
+                subtitle?.let { text ->
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                    )
+                }
             }
         },
     )

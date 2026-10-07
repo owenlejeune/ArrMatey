@@ -10,6 +10,7 @@ data class SonarrQueueItem(
     override val id: Int,
     override var instanceId: Long? = null,
     override var instanceName: String? = null,
+    override var instanceType: InstanceType? = null,
     override val downloadId: String? = null,
     override val downloadClient: String? = null,
     override val title: String? = null,
@@ -39,7 +40,8 @@ data class SonarrQueueItem(
     val episodeHasFile: Boolean? = null,
     val seasonNumber: Int? = null,
 ) : QueueItem {
-    override val type = InstanceType.Sonarr
+    override val type: InstanceType
+        get() = instanceType ?: InstanceType.Sonarr
     val calcSeriesId: Long?
         get() = seriesId ?: series?.id
 

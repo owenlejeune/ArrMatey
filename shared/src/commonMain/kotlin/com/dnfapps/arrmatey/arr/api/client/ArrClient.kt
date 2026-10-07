@@ -55,6 +55,8 @@ interface ArrClient {
 
     suspend fun getQualityProfiles(): NetworkResult<List<QualityProfile>>
 
+    suspend fun getMetadataProfiles(): NetworkResult<List<com.dnfapps.arrmatey.arr.api.model.MetadataProfile>>
+
     suspend fun getRootFolders(): NetworkResult<List<RootFolder>>
 
     suspend fun getTags(): NetworkResult<List<Tag>>

@@ -42,10 +42,12 @@ class UnifiedMediaDetailsInstanceHandlerTest {
     fun testSetAddSheetTargetInstance() = runTest(UnconfinedTestDispatcher()) {
         val mockRepo = mockk<ArrInstanceRepository>(relaxed = true)
         val mockProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
+        val mockMetadataProfiles = MutableStateFlow<List<com.dnfapps.arrmatey.arr.api.model.MetadataProfile>>(emptyList())
         val mockFolders = MutableStateFlow<List<RootFolder>>(emptyList())
         val mockTags = MutableStateFlow<List<Tag>>(emptyList())
 
         every { mockRepo.qualityProfiles } returns mockProfiles
+        every { mockRepo.metadataProfiles } returns mockMetadataProfiles
         every { mockRepo.rootFolders } returns mockFolders
         every { mockRepo.tags } returns mockTags
         every { getArrInstanceRepositoryUseCase(10L) } returns mockRepo
@@ -87,13 +89,16 @@ class UnifiedMediaDetailsInstanceHandlerTest {
         val mockRepoA = mockk<ArrInstanceRepository>(relaxed = true)
         val mockRepoB = mockk<ArrInstanceRepository>(relaxed = true)
         val mockProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
+        val mockMetadataProfiles = MutableStateFlow<List<com.dnfapps.arrmatey.arr.api.model.MetadataProfile>>(emptyList())
         val mockFolders = MutableStateFlow<List<RootFolder>>(emptyList())
         val mockTags = MutableStateFlow<List<Tag>>(emptyList())
 
         every { mockRepoA.qualityProfiles } returns mockProfiles
+        every { mockRepoA.metadataProfiles } returns mockMetadataProfiles
         every { mockRepoA.rootFolders } returns mockFolders
         every { mockRepoA.tags } returns mockTags
         every { mockRepoB.qualityProfiles } returns mockProfiles
+        every { mockRepoB.metadataProfiles } returns mockMetadataProfiles
         every { mockRepoB.rootFolders } returns mockFolders
         every { mockRepoB.tags } returns mockTags
 

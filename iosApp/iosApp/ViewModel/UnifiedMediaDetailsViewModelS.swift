@@ -41,6 +41,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var serviceDetails: ServiceDetails? = nil
 
     @Published private(set) var qualityProfiles: [QualityProfile] = []
+    @Published private(set) var metadataProfiles: [MetadataProfile] = []
     @Published private(set) var rootFolders: [RootFolder] = []
     @Published private(set) var tags: [Tag] = []
     @Published private(set) var preferences: InstancePreferences = InstancePreferences()
@@ -134,6 +135,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.serviceDetails.observeAsync(on: self, to: \.serviceDetails)
 
         viewModel.qualityProfiles.observeAsync(on: self, to: \.qualityProfiles)
+        viewModel.metadataProfiles.observeAsync(on: self, to: \.metadataProfiles)
         viewModel.rootFolders.observeAsync(on: self, to: \.rootFolders)
         viewModel.tags.observeAsync(on: self, to: \.tags)
         viewModel.preferences.observeAsync(on: self, to: \.preferences)

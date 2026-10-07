@@ -146,6 +146,9 @@ class UnifiedMediaDetailsDataObserver(
                         activeRepo.qualityProfiles.collect { instanceHandler.updateQualityProfiles(it) }
                     }
                     launch {
+                        activeRepo.metadataProfiles.collect { instanceHandler.updateMetadataProfiles(it) }
+                    }
+                    launch {
                         activeRepo.rootFolders.collect { instanceHandler.updateRootFolders(it) }
                     }
                     launch {

@@ -14,6 +14,7 @@ class AddSheetUiStateTest {
         val state = AddSheetUiState()
         assertNull(state.targetInstance)
         assertTrue(state.qualityProfiles.isEmpty())
+        assertTrue(state.metadataProfiles.isEmpty())
         assertTrue(state.rootFolders.isEmpty())
         assertTrue(state.tags.isEmpty())
         assertTrue(state.availableInstances.isEmpty())

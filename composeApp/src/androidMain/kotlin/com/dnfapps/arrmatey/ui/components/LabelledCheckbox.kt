@@ -22,12 +22,14 @@ fun LabelledCheckbox(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     sublabel: String? = null,
+    enabled: Boolean = true,
 ) {
     Row(
         modifier
             .fillMaxWidth()
             .selectable(
                 selected = checked,
+                enabled = enabled,
                 onClick = { onCheckedChange(!checked) },
                 role = Role.Checkbox,
             ),
@@ -36,6 +38,7 @@ fun LabelledCheckbox(
         Checkbox(
             checked = checked,
             onCheckedChange = null,
+            enabled = enabled,
         )
 
         Column(

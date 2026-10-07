@@ -183,37 +183,13 @@ struct AddSeriesForm: View {
                 Task {
                     if let profileId = selectedQualityProfileId, let path = selectedRootFolderPath {
                         onUpdatePreferences(
-                            preferences.doCopy(
-                                sortBy: preferences.sortBy,
-                                sortOrder: preferences.sortOrder,
-                                filterBy: preferences.filterBy,
-                                customFilterId: preferences.customFilterId,
-                                viewType: preferences.viewType,
-                                posterElevation: preferences.posterElevation,
-                                posterRadius: preferences.posterRadius,
-                                showFullDetails: preferences.showFullDetails,
-                                showOverlay: preferences.showOverlay,
-                                gridDensity: preferences.gridDensity,
-                                gridSpacing: preferences.gridSpacing,
-                                showBannerBackground: preferences.showBannerBackground,
-                                includeOverview: preferences.includeOverview,
-                                bannerBlur: preferences.bannerBlur,
-                                applyGlobally: preferences.applyGlobally,
-                                addQualityProfileId: Int32(profileId).asKotlinInt,
-                                addRootFolderPath: path,
-                                addSearchOnAdd: searchOnAdd,
-                                addSeriesMonitor: monitorType,
-                                addSeriesType: selectedSeriesType,
-                                addSeriesSeasonFolder: useSeasonFolders,
-                                addMovieMonitored: preferences.addMovieMonitored,
-                                addMovieMinimumAvailability: preferences.addMovieMinimumAvailability,
-                                addArtistMonitor: preferences.addArtistMonitor,
-                                addArtistMonitorNew: preferences.addArtistMonitorNew,
-                                addAuthorMonitor: preferences.addAuthorMonitor,
-                                addAuthorMonitorNew: preferences.addAuthorMonitorNew,
-                                addAudiobookMonitored: preferences.addAudiobookMonitored,
-                                deleteDeleteFiles: preferences.deleteDeleteFiles,
-                                deleteAddExclusion: preferences.deleteAddExclusion
+                            preferences.doCopyWithSeriesAddDefaults(
+                                monitor: monitorType,
+                                type: selectedSeriesType,
+                                seasonFolder: useSeasonFolders,
+                                qualityProfileId: Int32(profileId).asKotlinInt,
+                                rootFolderPath: path,
+                                searchOnAdd: searchOnAdd
                             )
                         )
                         let newSeries = series.doCopyForCreation(

@@ -43,6 +43,16 @@ class FastScrollUtilsTest {
     }
 
     @Test
+    fun testSortByDefault() {
+        assertEquals(SortBy.TitleLastFirst, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Bookshelf))
+        assertEquals(SortBy.TitleLastFirst, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Chaptarr))
+        assertEquals(SortBy.Title, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Sonarr))
+        assertEquals(SortBy.Title, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Radarr))
+        assertEquals(SortBy.Title, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Lidarr))
+        assertEquals(SortBy.Name, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Prowlarr))
+    }
+
+    @Test
     fun testAlphabet() {
         val ascAlphabet = SortOrder.Asc.alphabet
         assertEquals("#", ascAlphabet.first())

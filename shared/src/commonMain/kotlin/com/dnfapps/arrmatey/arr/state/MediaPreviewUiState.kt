@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.arr.state
 
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
@@ -11,6 +12,7 @@ import com.dnfapps.arrmatey.model.OperationStatus
 data class MediaPreviewUiState(
     val media: ArrMedia? = null,
     val qualityProfiles: List<QualityProfile> = emptyList(),
+    val metadataProfiles: List<MetadataProfile> = emptyList(),
     val rootFolders: List<RootFolder> = emptyList(),
     val tags: List<Tag> = emptyList(),
     val addItemStatus: OperationStatus = OperationStatus.Idle,

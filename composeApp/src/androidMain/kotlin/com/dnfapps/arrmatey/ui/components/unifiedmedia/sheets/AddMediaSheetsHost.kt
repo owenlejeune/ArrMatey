@@ -114,6 +114,7 @@ fun AddMediaSheetsHost(
             AddAuthorSheet(
                 item = arrMedia,
                 qualityProfiles = effectiveQualityProfiles,
+                metadataProfiles = addSheetUiState.metadataProfiles,
                 rootFolders = effectiveRootFolders,
                 tags = effectiveTags,
                 addInProgress = isAddInProgress,

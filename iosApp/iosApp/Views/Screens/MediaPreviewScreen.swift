@@ -72,15 +72,26 @@ struct MediaPreviewScreen: View {
         .ignoresSafeArea(edges: .top)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(MR.strings().add.localized(), systemImage: "plus") {
+                let isAdding = addItemStatus is OperationStatusInProgress
+                Button {
                     sheetPresented = true
+                } label: {
+                    if isAdding {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                    } else {
+                        Image(systemName: "plus")
+                    }
                 }
+                .disabled(isAdding)
             }
         }
         .onChange(of: lastAddedItemId) { _, newValue in
             if let id = newValue {
                 sheetPresented = false
-                navigation.replaceCurrent(with: .details(id: id, type: type), for: type)
+                let targetType = viewModel.uiState.selectedInstance?.type ?? type
+                let targetInstId = viewModel.uiState.selectedInstance?.id
+                navigation.replaceCurrent(with: .details(arrId: id, instanceType: targetType, instanceId: targetInstId), for: targetType)
             }
         }
         .sheet(isPresented: $sheetPresented) {
@@ -153,6 +164,7 @@ struct MediaPreviewScreen: View {
                 author: author,
                 addItemStatus: addItemStatus,
                 qualityProfiles: qualityProfiles,
+                metadataProfiles: viewModel.uiState.metadataProfiles,
                 rootFolders: rootFolders,
                 tags: tags,
                 preferences: viewModel.uiState.preferences,

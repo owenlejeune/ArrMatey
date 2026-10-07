@@ -142,6 +142,7 @@ fun SeasonsFilesTabContent(
                         onAutomaticSearch = onBookAutomaticSearch,
                         onNavigateToBookDetails = onNavigateToBookDetails,
                         onNavigateToBookRelease = onNavigateToBookRelease,
+                        queueItems = state.queueItems,
                     )
 
                 is Audiobook ->

@@ -52,7 +52,7 @@ struct MediaItemView<T: ArrMedia>: View {
     }
     
     private var itemTitle: String {
-        item.title ?? MR.strings().unknown.localized()
+        (item as? Author)?.authorNameLastFirst ?? item.title ?? MR.strings().unknown.localized()
     }
     
     private var textColor: Color {

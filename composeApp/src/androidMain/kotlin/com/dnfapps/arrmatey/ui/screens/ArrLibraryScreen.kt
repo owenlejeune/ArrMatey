@@ -86,6 +86,7 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorOptions
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
@@ -489,6 +490,7 @@ fun ArrLibraryScreen(
             EditMediaSheet(
                 item = item,
                 qualityProfiles = data.qualityProfiles,
+                metadataProfiles = data.metadataProfiles,
                 rootFolders = data.rootFolders,
                 tags = data.tags,
                 editInProgress = editStatus is OperationStatus.InProgress,
@@ -759,6 +761,7 @@ internal fun ConfirmDeleteAlert(
 internal fun EditMediaSheet(
     item: ArrMedia,
     qualityProfiles: List<QualityProfile>,
+    metadataProfiles: List<MetadataProfile> = emptyList(),
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     editInProgress: Boolean,
@@ -800,6 +803,7 @@ internal fun EditMediaSheet(
             EditAuthorSheet(
                 item = item,
                 qualityProfiles = qualityProfiles,
+                metadataProfiles = metadataProfiles,
                 rootFolders = rootFolders,
                 tags = tags,
                 editInProgress = editInProgress,

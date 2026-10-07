@@ -227,19 +227,60 @@ struct OverviewTabContentView: View {
 
     private func authorInfoItems(_ author: Author, qualityProfiles: [QualityProfile], tags: [Tag]) -> [InfoItem] {
         let unknown = MR.strings().unknown.localized()
-        let qualityLabel = qualityProfiles.first(where: { $0.id == author.qualityProfileId })?.name ?? unknown
         let tagsLabel = author.formatTags(availableTags: tags) ?? MR.strings().none.localized()
         let monitorLabel = author.monitorNewItems == .all ? MR.strings().monitored.localized() : MR.strings().unmonitored.localized()
-        let rootFolderValue = (author.rootFolderPath?.isEmpty == false) ? author.rootFolderPath! : unknown
-        return [
+        let isChaptarr = author.audiobookQualityProfileId != nil || author.ebookQualityProfileId != nil ||
+            author.audiobookRootFolderPath != nil || author.ebookRootFolderPath != nil ||
+            author.lastSelectedMediaType != nil
+
+        var items: [InfoItem] = [
             InfoItem(label: MR.strings().status.localized(), value: author.status.resource.localized()),
-            InfoItem(label: MR.strings().size_on_disk.localized(), value: author.fileSize?.int64Value.bytesAsFileSizeString() ?? unknown),
-            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue, onClick: onEditPathClick),
-            InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown, onClick: onEditPathClick),
-            InfoItem(label: MR.strings().new_books.localized(), value: monitorLabel),
-            InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
-            InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
+            InfoItem(label: MR.strings().size_on_disk.localized(), value: author.fileSize?.int64Value.bytesAsFileSizeString() ?? unknown)
         ]
+
+        if isChaptarr {
+            if let ebookRoot = author.ebookRootFolderPath, !ebookRoot.isEmpty {
+                items.append(InfoItem(label: MR.strings().ebook_root_folder.localized(), value: ebookRoot, onClick: onEditPathClick))
+            }
+            if let audiobookRoot = author.audiobookRootFolderPath, !audiobookRoot.isEmpty {
+                items.append(InfoItem(label: MR.strings().audiobook_root_folder.localized(), value: audiobookRoot, onClick: onEditPathClick))
+            }
+            if (author.ebookRootFolderPath?.isEmpty ?? true) && (author.audiobookRootFolderPath?.isEmpty ?? true) {
+                let rootFolderValue = (author.rootFolderPath?.isEmpty == false) ? author.rootFolderPath! : unknown
+                items.append(InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue, onClick: onEditPathClick))
+            }
+        } else {
+            let rootFolderValue = (author.rootFolderPath?.isEmpty == false) ? author.rootFolderPath! : unknown
+            items.append(InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue, onClick: onEditPathClick))
+        }
+
+        items.append(InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown, onClick: onEditPathClick))
+        items.append(InfoItem(label: MR.strings().new_books.localized(), value: monitorLabel))
+
+        if isChaptarr {
+            var hasQuality = false
+            if let ebookQId = author.ebookQualityProfileId?.int32Value, ebookQId != 0 {
+                let qualityLabel = qualityProfiles.first(where: { $0.id == ebookQId })?.name ?? unknown
+                items.append(InfoItem(label: MR.strings().ebook_quality_profile.localized(), value: qualityLabel))
+                hasQuality = true
+            }
+            if let abQId = author.audiobookQualityProfileId?.int32Value, abQId != 0 {
+                let qualityLabel = qualityProfiles.first(where: { $0.id == abQId })?.name ?? unknown
+                items.append(InfoItem(label: MR.strings().audiobook_quality_profile.localized(), value: qualityLabel))
+                hasQuality = true
+            }
+            if !hasQuality {
+                let qualityLabel = qualityProfiles.first(where: { $0.id == author.qualityProfileId })?.name ?? unknown
+                items.append(InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel))
+            }
+        } else {
+            let qualityLabel = qualityProfiles.first(where: { $0.id == author.qualityProfileId })?.name ?? unknown
+            items.append(InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel))
+        }
+
+        items.append(InfoItem(label: MR.strings().tags.localized(), value: tagsLabel))
+
+        return items
     }
 
     private func audiobookInfoItems(_ audiobook: Audiobook) -> [InfoItem] {

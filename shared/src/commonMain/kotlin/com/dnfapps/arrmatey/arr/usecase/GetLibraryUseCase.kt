@@ -59,7 +59,7 @@ class GetLibraryUseCase(
             emit(ArrLibrary.Error("Instance not found", HttpErrorType.Unexpected))
             return@flow
         }
-        val preferencesRepository = preferencesStoreRepository.getInstancePreferences(instanceId)
+        val preferencesRepository = preferencesStoreRepository.getInstancePreferences(instanceId, SortBy.defaultFor(repository.instance.type))
 
         if (repository.library.value == null) {
             emit(ArrLibrary.Loading)

@@ -117,8 +117,16 @@ class UnifiedSearchViewModel(
     val selectedTypeFilter: StateFlow<InstanceType?> = _selectedTypeFilter.asStateFlow()
 
     val availableTypeFilters: StateFlow<List<InstanceType>> =
-        searchState
-            .map { results -> results.map { it.instanceType }.distinct() }
+        instanceManager
+            .observeAllInstances()
+            .map { instances ->
+                val searchableTypes = InstanceType.arrs() + InstanceType.Seerr
+                instances
+                    .map { it.type }
+                    .distinct()
+                    .filter { it in searchableTypes }
+                    .sorted()
+            }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),

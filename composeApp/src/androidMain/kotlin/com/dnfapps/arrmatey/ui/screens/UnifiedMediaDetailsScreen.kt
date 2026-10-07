@@ -563,6 +563,7 @@ fun UnifiedMediaDetailsScreen(
                                             selectedTabIndex = availableTabs.indexOf(selectedTab).coerceAtLeast(0),
                                             modifier = Modifier.fillMaxWidth(),
                                             edgePadding = 0.dp,
+                                            minTabWidth = 45.dp
                                         ) {
                                             availableTabs.forEach { tab ->
                                                 Tab(

@@ -46,6 +46,10 @@ import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
+import com.dnfapps.arrmatey.ui.sheets.components.AddMediaActionButton
+import com.dnfapps.arrmatey.ui.sheets.components.AddMediaSheetHeader
+import com.dnfapps.arrmatey.ui.sheets.components.SearchOnAddCard
+import com.dnfapps.arrmatey.ui.sheets.components.TagsSelectionCard
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -110,20 +114,10 @@ fun AddArtistSheet(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Column {
-                    Text(
-                        text = mokoString(MR.strings.type_artist).uppercase(),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = item.title ?: "",
-                        style = MaterialTheme.typography.headlineMediumEmphasized,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                AddMediaSheetHeader(
+                    type = mokoString(MR.strings.type_artist),
+                    title = item.title ?: "",
+                )
 
                 if (instances.size > 1 && selectedInstance != null) {
                     DropdownPicker(
@@ -178,26 +172,11 @@ fun AddArtistSheet(
                         enabled = !addInProgress,
                     )
 
-                    if (tags.isNotEmpty()) {
-                        MultiSelectDropdownPicker(
-                            options = tags.map { it.id },
-                            selectedOptions = selectedTags,
-                            valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
-                            onOptionSelected = { tag, isSelected ->
-                                if (isSelected) {
-                                    selectedTags.add(tag)
-                                } else {
-                                    selectedTags.remove(tag)
-                                }
-                            },
-                            getOptionLabel = { tag ->
-                                tags.firstOrNull { tag == it.id }?.label
-                                    ?: mokoString(MR.strings.unknown)
-                            },
-                            label = { Text(mokoString(MR.strings.tags)) },
-                            enabled = !addInProgress,
-                        )
-                    }
+                    TagsSelectionCard(
+                        tags = tags,
+                        selectedTags = selectedTags,
+                        enabled = !addInProgress,
+                    )
                 }
 
                 if (rootFolders.size > 1) {
@@ -218,32 +197,26 @@ fun AddArtistSheet(
                     }
                 }
 
-                ContainerCard(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    LabelledSwitch(
-                        label = mokoString(MR.strings.search_on_add_label),
-                        checked = searchOnAdd,
-                        onCheckedChange = { searchOnAdd = it },
-                        enabled = !addInProgress,
-                    )
-                }
+                SearchOnAddCard(
+                    checked = searchOnAdd,
+                    onCheckedChange = { searchOnAdd = it },
+                    enabled = !addInProgress,
+                )
             }
 
-            Button(
+            AddMediaActionButton(
+                text = mokoString(MR.strings.save),
                 onClick = {
                     val qp = qualityProfile
                     val rf = rootFolder
                     if (qp != null && rf != null) {
                         onUpdatePreferences(
-                            preferences.copy(
-                                addArtistMonitor = monitor,
-                                addArtistMonitorNew = monitorNew,
-                                addQualityProfileId = qp.id,
-                                addRootFolderPath = rf.path,
-                                addSearchOnAdd = searchOnAdd,
+                            preferences.copyWithArtistAddDefaults(
+                                monitor = monitor,
+                                monitorNew = monitorNew,
+                                qualityProfileId = qp.id,
+                                rootFolderPath = rf.path,
+                                searchOnAdd = searchOnAdd,
                             ),
                         )
                         val newItem =
@@ -257,20 +230,9 @@ fun AddArtistSheet(
                         onAddItem(newItem, searchOnAdd)
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !addInProgress && qualityProfile != null && rootFolder != null,
-            ) {
-                if (addInProgress) {
-                    CircularProgressIndicator(Modifier.size(24.dp))
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(text = mokoString(MR.strings.save))
-                }
-            }
+                isLoading = addInProgress,
+                enabled = qualityProfile != null && rootFolder != null,
+            )
         }
     }
 }

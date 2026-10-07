@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
@@ -49,6 +50,7 @@ fun PosterGrid(
     onItemClick: (ArrMedia) -> Unit,
     itemIsActive: (ArrMedia) -> Boolean,
     modifier: Modifier = Modifier,
+    instanceType: InstanceType? = null,
     lazyGridState: LazyGridState = rememberLazyGridState(),
     userScrollEnabled: Boolean = true,
     showFullDetails: Boolean = false,
@@ -83,6 +85,7 @@ fun PosterGrid(
                 radius = posterRadius,
                 elevation = posterElevation,
                 item = item,
+                instanceType = instanceType,
                 onItemClick = onItemClick,
                 additionalContent = {
                     if (showOverlay && item.id != null) {

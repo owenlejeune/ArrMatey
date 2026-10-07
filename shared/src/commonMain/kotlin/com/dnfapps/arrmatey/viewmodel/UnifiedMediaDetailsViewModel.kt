@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
@@ -30,6 +31,7 @@ import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.instances.repository.ReadarrRepository
 import com.dnfapps.arrmatey.instances.repository.SonarrRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
@@ -233,6 +235,7 @@ class UnifiedMediaDetailsViewModel(
     val currentUser: StateFlow<SeerrUser?> = seerrServiceHandler.currentUser
     val pendingSeerrRequest: StateFlow<MediaRequest?> = arrActionsHandler.pendingSeerrRequest
     val qualityProfiles: StateFlow<List<QualityProfile>> = instanceHandler.qualityProfiles
+    val metadataProfiles: StateFlow<List<MetadataProfile>> = instanceHandler.metadataProfiles
     val rootFolders: StateFlow<List<RootFolder>> = instanceHandler.rootFolders
     val tags: StateFlow<List<Tag>> = instanceHandler.tags
 
@@ -332,10 +335,16 @@ class UnifiedMediaDetailsViewModel(
             coroutineScope {
                 if (repository != null) {
                     launch { repository.refreshQualityProfiles() }
+                    launch { repository.refreshMetadataProfiles() }
                     launch { repository.refreshRootFolders() }
                     launch { repository.refreshTags() }
                     if (effectiveId != null && effectiveId != 0L) {
                         launch { repository.getMediaDetails(effectiveId) }
+                        if (repository is ReadarrRepository) {
+                            launch { repository.getAuthorBooks(effectiveId) }
+                            launch { repository.getAuthorBookFiles(effectiveId) }
+                            launch { repository.getAuthorSeries(effectiveId) }
+                        }
                         launch {
                             if (repository is SonarrRepository) {
                                 repository.getSeriesHistory(effectiveId)

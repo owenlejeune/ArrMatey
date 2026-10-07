@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.map
 class InstancePreferenceStore(
     instanceId: Long,
     dataStoreFactory: DataStoreFactory,
+    private val defaultSortBy: SortBy = SortBy.Title,
 ) {
     private val dataStore: DataStore<Preferences> =
         dataStoreFactory.provideInstanceDataStore(instanceId)
@@ -73,7 +74,7 @@ class InstancePreferenceStore(
     private val sortByFlow: Flow<SortBy> =
         dataStore.data
             .map { preferences ->
-                preferences[sortByKey]?.let { SortBy.valueOf(it) } ?: SortBy.Title
+                preferences[sortByKey]?.let { SortBy.valueOf(it) } ?: defaultSortBy
             }
 
     private val sortOrderFlow: Flow<SortOrder> =

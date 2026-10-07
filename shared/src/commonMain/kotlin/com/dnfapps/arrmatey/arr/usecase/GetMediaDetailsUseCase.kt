@@ -158,6 +158,7 @@ class GetMediaDetailsUseCase(
         author: ArrMedia,
     ): Flow<MediaDetailsUiState> = flow {
         coroutineScope {
+            launch { repository.getAuthorBooks(authorId) }
             launch { repository.getAuthorBookFiles(authorId) }
             launch { repository.getAuthorSeries(authorId) }
         }

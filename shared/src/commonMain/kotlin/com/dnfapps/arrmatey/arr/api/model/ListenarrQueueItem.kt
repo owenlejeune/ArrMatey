@@ -43,8 +43,10 @@ data class ListenarrQueueItem(
     val localPath: String? = null,
     override var instanceId: Long? = null,
     override var instanceName: String? = null,
+    override var instanceType: InstanceType? = null,
 ) : QueueItem {
-    override val type = InstanceType.Listenarr
+    override val type: InstanceType
+        get() = instanceType ?: InstanceType.Listenarr
 
     override val id: Int
         get() = idStr.hashCode()

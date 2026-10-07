@@ -383,6 +383,8 @@ class InstanceManager(
     fun getRepositoriesByType(type: InstanceType): List<InstanceScopedRepository> = _instanceRepositories.value.values
         .filter { it.instance.type == type }
 
+    fun observeAllInstances(): Flow<List<Instance>> = instanceRepository.observeAllInstances()
+
     fun cleanup() {
         scope.cancel()
     }

@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
@@ -26,6 +27,9 @@ class MetadataRepository(
 ) {
     private val _qualityProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
     val qualityProfiles: StateFlow<List<QualityProfile>> = _qualityProfiles.asStateFlow()
+
+    private val _metadataProfiles = MutableStateFlow<List<MetadataProfile>>(emptyList())
+    val metadataProfiles: StateFlow<List<MetadataProfile>> = _metadataProfiles.asStateFlow()
 
     private val _rootFolders = MutableStateFlow<List<RootFolder>>(emptyList())
     val rootFolders: StateFlow<List<RootFolder>> = _rootFolders.asStateFlow()
@@ -49,6 +53,13 @@ class MetadataRepository(
         client
             .getQualityProfiles()
             .onSuccess { _qualityProfiles.value = it }
+    }
+
+    suspend fun refreshMetadataProfiles() {
+        client
+            .getMetadataProfiles()
+            .onSuccess { _metadataProfiles.value = it }
+            .onError { _, _, _ -> _metadataProfiles.value = emptyList() }
     }
 
     suspend fun refreshRootFolders() {
@@ -109,6 +120,7 @@ class MetadataRepository(
             lastMetadataRefreshTime = now
             coroutineScope {
                 launch { refreshQualityProfiles() }
+                launch { refreshMetadataProfiles() }
                 launch { refreshRootFolders() }
                 launch { refreshTags() }
                 launch { refreshCustomFilters() }

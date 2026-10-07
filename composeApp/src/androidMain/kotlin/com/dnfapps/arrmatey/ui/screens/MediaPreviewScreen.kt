@@ -6,16 +6,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,7 +66,7 @@ fun MediaPreviewScreen(
     item: ArrMedia,
     type: InstanceType,
     onBack: () -> Unit,
-    onItemAdded: (Long) -> Unit,
+    onItemAdded: (Long, InstanceType, Long?) -> Unit,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     viewModel: MediaPreviewViewModel = koinViewModel(key = "${item.guid}_$type", parameters = { parametersOf(item, type) }),
@@ -95,7 +98,7 @@ fun MediaPreviewScreen(
     LaunchedEffect(uiState.lastAddedItemId) {
         uiState.lastAddedItemId?.let { id ->
             showBottomSheet = false
-            onItemAdded(id)
+            onItemAdded(id, uiState.selectedInstance?.type ?: type, uiState.selectedInstance?.id)
         }
     }
 
@@ -115,14 +118,28 @@ fun MediaPreviewScreen(
                     }
                 },
                 actions = {
+                    val isAdding = uiState.addItemStatus is OperationStatus.InProgress
                     IconButton(
                         onClick = { showBottomSheet = true },
-                        colors = IconButtonDefaults.headerBarColors(),
+                        enabled = !isAdding,
+                        colors =
+                            IconButtonDefaults.headerBarColors(
+                                disabledContainerColor = MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                                disabledContentColor = MaterialTheme.colorScheme.onBackground,
+                            ),
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.AddCircle,
-                            contentDescription = null,
-                        )
+                        if (isAdding) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = MaterialTheme.colorScheme.onBackground,
+                                strokeWidth = 2.5.dp,
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AddCircle,
+                                contentDescription = null,
+                            )
+                        }
                     }
                 },
             )
@@ -236,6 +253,7 @@ private fun AddMediaSheet(
             AddAuthorSheet(
                 item,
                 uiState.qualityProfiles,
+                uiState.metadataProfiles,
                 uiState.rootFolders,
                 uiState.tags,
                 uiState.addItemStatus == OperationStatus.InProgress,

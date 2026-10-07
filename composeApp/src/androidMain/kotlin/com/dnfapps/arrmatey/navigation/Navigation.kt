@@ -148,6 +148,16 @@ fun Navigator<*>.toDetails(
     episodeId: Long? = null,
 ) = nav().navigateTo(MediaScreen.Details(id?.takeIf { it > 0 }, tmdbId, tvdbId, requestType, type, instanceId, episodeId))
 
+fun Navigator<*>.replaceDetails(
+    id: Long? = null,
+    tmdbId: Long? = null,
+    tvdbId: Long? = null,
+    requestType: RequestType? = null,
+    type: InstanceType? = null,
+    instanceId: Long? = null,
+    episodeId: Long? = null,
+) = nav().replaceCurrent(MediaScreen.Details(id?.takeIf { it > 0 }, tmdbId, tvdbId, requestType, type, instanceId, episodeId))
+
 fun Navigator<*>.toMediaDetails(
     media: ArrMedia,
     type: InstanceType? = null,

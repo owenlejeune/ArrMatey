@@ -205,25 +205,23 @@ private fun FilterChipLabel(
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
         )
 
-        if (count > 0) {
-            Box(
-                modifier =
-                Modifier
-                    .clip(CircleShape)
-                    .background(countContainerColor)
-                    .padding(horizontal = 6.dp, vertical = 1.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = count.toString(),
-                    style =
-                    MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    color = countContentColor,
-                )
-            }
+        Box(
+            modifier =
+            Modifier
+                .clip(CircleShape)
+                .background(countContainerColor)
+                .padding(horizontal = 6.dp, vertical = 1.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = count.toString(),
+                style =
+                MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = countContentColor,
+            )
         }
     }
 }

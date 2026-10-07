@@ -19,7 +19,10 @@ enum class BookMediaType(
     EBook(MR.strings.ebook),
 
     @SerialName("audiobook")
-    Audiobook(MR.strings.type_audiobook);
+    Audiobook(MR.strings.type_audiobook),
+
+    @SerialName("both")
+    Both(MR.strings.both);
 
     companion object {
         fun fromString(value: String?): BookMediaType? =

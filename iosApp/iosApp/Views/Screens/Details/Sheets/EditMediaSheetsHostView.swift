@@ -79,6 +79,7 @@ struct EditMediaSheetsHostView: View {
                     EditAuthorSheet(
                         item: author,
                         qualityProfiles: viewModel.qualityProfiles,
+                        metadataProfiles: viewModel.metadataProfiles,
                         rootFolders: viewModel.rootFolders,
                         tags: viewModel.tags,
                         editInProgress: viewModel.editStatus is OperationStatusInProgress,

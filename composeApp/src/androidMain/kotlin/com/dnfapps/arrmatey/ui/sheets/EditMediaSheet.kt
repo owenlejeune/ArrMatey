@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
@@ -17,6 +18,7 @@ import com.dnfapps.arrmatey.arr.api.model.Tag
 fun EditMediaSheet(
     item: ArrMedia,
     qualityProfiles: List<QualityProfile>,
+    metadataProfiles: List<MetadataProfile> = emptyList(),
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     editInProgress: Boolean,
@@ -61,6 +63,7 @@ fun EditMediaSheet(
             EditAuthorSheet(
                 item = item,
                 qualityProfiles = qualityProfiles,
+                metadataProfiles = metadataProfiles,
                 rootFolders = rootFolders,
                 tags = tags,
                 editInProgress = editInProgress,

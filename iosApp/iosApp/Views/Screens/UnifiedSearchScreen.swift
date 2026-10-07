@@ -25,22 +25,22 @@ struct UnifiedSearchScreen: View {
     }
     
     var body: some View {
-        Group {
-            if viewModel.isSearching && viewModel.searchState.isEmpty {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if !viewModel.searchState.isEmpty {
-                VStack(spacing: 0) {
-                    MediaInstanceFilterGlassRow(
-                        selectedFilter: viewModel.selectedTypeFilter,
-                        availableFilters: viewModel.availableTypeFilters,
-                        itemCounts: itemCounts,
-                        totalCount: viewModel.searchState.count,
-                        onFilterSelected: { filter in
-                            viewModel.selectTypeFilter(filter)
-                        }
-                    )
-                    
+        VStack(spacing: 0) {
+            MediaInstanceFilterGlassRow(
+                selectedFilter: viewModel.selectedTypeFilter,
+                availableFilters: viewModel.availableTypeFilters,
+                itemCounts: itemCounts,
+                totalCount: viewModel.searchState.count,
+                onFilterSelected: { filter in
+                    viewModel.selectTypeFilter(filter)
+                }
+            )
+
+            Group {
+                if viewModel.isSearching && viewModel.searchState.isEmpty {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if !viewModel.searchState.isEmpty {
                     if viewModel.filteredSearchState.isEmpty && viewModel.selectedTypeFilter != nil {
                         ContentUnavailableView {
                             Label("No \(viewModel.selectedTypeFilter?.name ?? "") Results", systemImage: "line.3.horizontal.decrease.circle")
@@ -69,15 +69,16 @@ struct UnifiedSearchScreen: View {
                         }
                         .listStyle(.plain)
                     }
+                } else if !searchQuery.isEmpty && !viewModel.isSearching {
+                    ContentUnavailableView.search(text: searchQuery)
+                } else {
+                    ContentUnavailableView(
+                        MR.strings().search.localized(),
+                        systemImage: "magnifyingglass"
+                    )
                 }
-            } else if !searchQuery.isEmpty && !viewModel.isSearching {
-                ContentUnavailableView.search(text: searchQuery)
-            } else {
-                ContentUnavailableView(
-                    MR.strings().search.localized(),
-                    systemImage: "magnifyingglass"
-                )
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationTitle(MR.strings().search.localized())
         .navigationBarTitleDisplayMode(.inline)

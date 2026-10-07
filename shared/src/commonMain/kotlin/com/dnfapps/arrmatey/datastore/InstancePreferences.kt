@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.datastore
 
 import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.BookMediaType
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.api.model.SeriesType
@@ -52,6 +53,18 @@ data class InstancePreferences(
     // Readarr
     val addAuthorMonitor: AuthorMonitorType = AuthorMonitorType.All,
     val addAuthorMonitorNew: AuthorMonitorType = AuthorMonitorType.All,
+    // Chaptarr
+    val addChaptarrMediaType: BookMediaType = BookMediaType.Audiobook,
+    val addChaptarrAudiobookQualityProfileId: Int? = null,
+    val addChaptarrAudiobookMetadataProfileId: Int? = null,
+    val addChaptarrAudiobookRootFolderPath: String? = null,
+    val addChaptarrAudiobookMonitorExisting: AuthorMonitorType = AuthorMonitorType.None,
+    val addChaptarrAudiobookMonitorFuture: Boolean = true,
+    val addChaptarrEbookQualityProfileId: Int? = null,
+    val addChaptarrEbookMetadataProfileId: Int? = null,
+    val addChaptarrEbookRootFolderPath: String? = null,
+    val addChaptarrEbookMonitorExisting: AuthorMonitorType = AuthorMonitorType.None,
+    val addChaptarrEbookMonitorFuture: Boolean = true,
     // Audiobookshelf
     val addAudiobookMonitored: Boolean = true,
     // Delete Media defaults
@@ -59,4 +72,108 @@ data class InstancePreferences(
     val deleteAddExclusion: Boolean = false,
 ) {
     constructor() : this(SortBy.Title)
+
+    fun copyWithSeriesAddDefaults(
+        monitor: SeriesMonitorType,
+        type: SeriesType,
+        seasonFolder: Boolean,
+        qualityProfileId: Int?,
+        rootFolderPath: String?,
+        searchOnAdd: Boolean,
+    ): InstancePreferences = copy(
+        addSeriesMonitor = monitor,
+        addSeriesType = type,
+        addSeriesSeasonFolder = seasonFolder,
+        addQualityProfileId = qualityProfileId,
+        addRootFolderPath = rootFolderPath,
+        addSearchOnAdd = searchOnAdd,
+    )
+
+    fun copyWithMovieAddDefaults(
+        monitored: Boolean,
+        minAvailability: MediaStatus,
+        qualityProfileId: Int?,
+        rootFolderPath: String?,
+        searchOnAdd: Boolean,
+    ): InstancePreferences = copy(
+        addMovieMonitored = monitored,
+        addMovieMinimumAvailability = minAvailability,
+        addQualityProfileId = qualityProfileId,
+        addRootFolderPath = rootFolderPath,
+        addSearchOnAdd = searchOnAdd,
+    )
+
+    fun copyWithArtistAddDefaults(
+        monitor: ArtistMonitorType,
+        monitorNew: ArtistMonitorType,
+        qualityProfileId: Int?,
+        rootFolderPath: String?,
+        searchOnAdd: Boolean,
+    ): InstancePreferences = copy(
+        addArtistMonitor = monitor,
+        addArtistMonitorNew = monitorNew,
+        addQualityProfileId = qualityProfileId,
+        addRootFolderPath = rootFolderPath,
+        addSearchOnAdd = searchOnAdd,
+    )
+
+    fun copyWithAuthorAddDefaults(
+        monitor: AuthorMonitorType,
+        monitorNew: AuthorMonitorType,
+        qualityProfileId: Int?,
+        rootFolderPath: String?,
+        searchOnAdd: Boolean,
+    ): InstancePreferences = copy(
+        addAuthorMonitor = monitor,
+        addAuthorMonitorNew = monitorNew,
+        addQualityProfileId = qualityProfileId,
+        addRootFolderPath = rootFolderPath,
+        addSearchOnAdd = searchOnAdd,
+    )
+
+    fun copyWithAudiobookAddDefaults(
+        monitored: Boolean,
+        qualityProfileId: Int?,
+        rootFolderPath: String?,
+        searchOnAdd: Boolean,
+    ): InstancePreferences = copy(
+        addAudiobookMonitored = monitored,
+        addQualityProfileId = qualityProfileId,
+        addRootFolderPath = rootFolderPath,
+        addSearchOnAdd = searchOnAdd,
+    )
+
+    fun copyWithChaptarrAddDefaults(
+        mediaType: BookMediaType,
+        audiobookQualityProfileId: Int?,
+        audiobookMetadataProfileId: Int?,
+        audiobookRootFolderPath: String?,
+        audiobookMonitorExisting: AuthorMonitorType,
+        audiobookMonitorFuture: Boolean,
+        ebookQualityProfileId: Int?,
+        ebookMetadataProfileId: Int?,
+        ebookRootFolderPath: String?,
+        ebookMonitorExisting: AuthorMonitorType,
+        ebookMonitorFuture: Boolean,
+        searchOnAdd: Boolean,
+    ): InstancePreferences = copy(
+        addChaptarrMediaType = mediaType,
+        addChaptarrAudiobookQualityProfileId = audiobookQualityProfileId,
+        addChaptarrAudiobookMetadataProfileId = audiobookMetadataProfileId,
+        addChaptarrAudiobookRootFolderPath = audiobookRootFolderPath,
+        addChaptarrAudiobookMonitorExisting = audiobookMonitorExisting,
+        addChaptarrAudiobookMonitorFuture = audiobookMonitorFuture,
+        addChaptarrEbookQualityProfileId = ebookQualityProfileId,
+        addChaptarrEbookMetadataProfileId = ebookMetadataProfileId,
+        addChaptarrEbookRootFolderPath = ebookRootFolderPath,
+        addChaptarrEbookMonitorExisting = ebookMonitorExisting,
+        addChaptarrEbookMonitorFuture = ebookMonitorFuture,
+        addSearchOnAdd = searchOnAdd,
+    )
+
+    fun copyWithChaptarrMediaType(
+        mediaType: BookMediaType,
+    ): InstancePreferences = copy(
+        addChaptarrMediaType = mediaType,
+    )
 }
