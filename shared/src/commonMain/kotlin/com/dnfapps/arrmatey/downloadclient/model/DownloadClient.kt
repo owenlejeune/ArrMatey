@@ -28,6 +28,7 @@ data class DownloadClient(
     val localNetworkEnabled: Boolean = false,
     val localNetworkSsids: List<String> = emptyList(),
     val localNetworkEndpoint: String? = null,
+    val showExternalIpAddress: Boolean = false,
 ) {
     fun getEffectiveBaseUrl(): String {
         if (!localNetworkEnabled ||

@@ -72,6 +72,10 @@ class DownloadClientSettingsViewModelS: ObservableObject {
         viewModel.updateLocalNetworkSsid(ssids: ssids)
     }
 
+    func updateShowExternalIpAddress(_ enabled: Bool) {
+        viewModel.updateShowExternalIpAddress(enabled: enabled)
+    }
+
     func testConnection() {
         viewModel.testConnection()
     }

@@ -60,6 +60,9 @@ struct AddEditDownloadClientScreen: View {
         Form {
             typeSection
             authSection
+            if viewModel.uiState.selectedType == .qbittorrent {
+                qbittorrentSection
+            }
             localNetworkSection
             headersSection
         }
@@ -200,6 +203,16 @@ struct AddEditDownloadClientScreen: View {
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var qbittorrentSection: some View {
+        Section {
+            Toggle(MR.strings().show_external_ip_address.localized(), isOn: Binding(
+                get: { viewModel.uiState.showExternalIpAddress },
+                set: { viewModel.updateShowExternalIpAddress($0) }
+            ))
         }
     }
     

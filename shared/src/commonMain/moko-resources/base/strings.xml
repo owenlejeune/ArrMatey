@@ -654,6 +654,7 @@
     <string name="client_password">Password</string>
     <string name="client_api_key">API Key</string>
     <string name="client_enabled">Enabled</string>
+    <string name="show_external_ip_address">Show external IP address</string>
     <string name="field_conflict">%1$s conflict</string>
     <string name="conflict_on_fields">Conflict on fields</string>
     <string name="failed_to_delete">Failed to delete</string>

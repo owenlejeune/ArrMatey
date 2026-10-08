@@ -310,14 +310,18 @@ class DownloadQueueViewModel(
     }
 
     fun toggleClientIdFilter(id: Long) {
-        _filterState.update { state ->
-            val current = state.clientIds.toMutableList()
-            if (current.contains(id)) {
-                current.remove(id)
-            } else {
-                current.add(id)
+        viewModelScope.launch {
+            val clients = downloadQueueRepository.getAllDownloadClients()
+            if (clients.size <= 1) return@launch
+            _filterState.update { state ->
+                val current = state.clientIds.toMutableList()
+                if (current.contains(id)) {
+                    current.remove(id)
+                } else {
+                    current.add(id)
+                }
+                state.copy(clientIds = current)
             }
-            state.copy(clientIds = current)
         }
     }
 

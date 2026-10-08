@@ -23,6 +23,7 @@ class QBittorrentClientTest {
         username: String = "",
         password: String = "",
         apiKey: String = "",
+        showExternalIpAddress: Boolean = false,
     ) = DownloadClient(
         id = 1,
         type = DownloadClientType.QBittorrent,
@@ -31,6 +32,7 @@ class QBittorrentClientTest {
         username = EncryptedString(username),
         password = EncryptedString(password),
         apiKey = EncryptedString(apiKey),
+        showExternalIpAddress = showExternalIpAddress,
     )
 
     private fun httpClient(mockEngine: MockEngine) = HttpClient(mockEngine) {
@@ -179,5 +181,120 @@ class QBittorrentClientTest {
 
         assertTrue(result is NetworkResult.Error)
         assertEquals(HttpStatusCode.Forbidden.value, result.code)
+    }
+
+    @Test
+    fun testGetSyncMetadataParsesCorrectly() = runTest {
+        val syncJson = """
+            {
+              "server_state": {
+                "alltime_dl": 16275554954391,
+                "alltime_ul": 4770773283060,
+                "average_time_queue": 133,
+                "connection_status": "connected",
+                "dht_nodes": 363,
+                "dl_info_data": 60064984472,
+                "dl_info_speed": 102400,
+                "dl_rate_limit": 0,
+                "free_space_on_disk": 1349884481536,
+                "global_ratio": "0.29",
+                "last_external_address_v4": "158.173.3.101",
+                "last_external_address_v6": "",
+                "queued_io_jobs": 0,
+                "queueing": true,
+                "read_cache_hits": "0",
+                "read_cache_overload": "0",
+                "refresh_interval": 1500,
+                "total_buffers_size": 0,
+                "total_peer_connections": 4,
+                "total_queued_size": 0,
+                "total_wasted_session": 141539866,
+                "up_info_data": 4887036680,
+                "up_info_speed": 51200,
+                "up_rate_limit": 0,
+                "use_alt_speed_limits": false,
+                "write_cache_overload": "0"
+              }
+            }
+        """.trimIndent()
+
+        val mockEngine =
+            MockEngine { request ->
+                assertEquals("/api/v2/sync/metadata", request.url.encodedPath)
+                respond(
+                    content = syncJson,
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+            }
+
+        val qb = QBittorrentClient(client(apiKey = "key"), httpClient(mockEngine))
+        val result = qb.getSyncMetadata()
+
+        assertTrue(result is NetworkResult.Success)
+        val serverState = result.data.serverState
+        assertEquals("158.173.3.101", serverState?.lastExternalAddressV4)
+        assertEquals(102400L, serverState?.downloadSpeed)
+        assertEquals(51200L, serverState?.uploadSpeed)
+        assertEquals("connected", serverState?.connectionStatus)
+        assertEquals(363L, serverState?.dhtNodes)
+    }
+
+    @Test
+    fun testGetTransferInfoWithShowExternalIpEnabled() = runTest {
+        val syncJson = """
+            {
+              "server_state": {
+                "dl_info_speed": 204800,
+                "up_info_speed": 102400,
+                "last_external_address_v4": "158.173.3.101"
+              }
+            }
+        """.trimIndent()
+
+        val mockEngine =
+            MockEngine { request ->
+                respond(
+                    content = syncJson,
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+            }
+
+        val qb = QBittorrentClient(client(apiKey = "key", showExternalIpAddress = true), httpClient(mockEngine))
+        val result = qb.getTransferInfo()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(204800L, result.data.downloadSpeed)
+        assertEquals(102400L, result.data.uploadSpeed)
+        assertEquals("158.173.3.101", result.data.externalIp)
+    }
+
+    @Test
+    fun testGetTransferInfoWithShowExternalIpDisabled() = runTest {
+        val transferInfoJson = """
+            {
+              "dl_info_speed": 204800,
+              "up_info_speed": 102400
+            }
+        """.trimIndent()
+
+        val mockEngine =
+            MockEngine { request ->
+                assertEquals("/api/v2/transfer/info", request.url.encodedPath)
+                respond(
+                    content = transferInfoJson,
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+            }
+
+        val qb = QBittorrentClient(client(apiKey = "key", showExternalIpAddress = false), httpClient(mockEngine))
+        val result = qb.getTransferInfo()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(204800L, result.data.downloadSpeed)
+        assertEquals(102400L, result.data.uploadSpeed)
+        assertEquals(null, result.data.externalIp)
     }
 }

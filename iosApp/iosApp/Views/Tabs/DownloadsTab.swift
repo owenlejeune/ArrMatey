@@ -344,7 +344,16 @@ struct ClientFilterRow: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(clients, id: \.id) { client in
-                    ClientFilterChip(client: client, info: transferInfos.first(where: { $0.client.id == client.id }), isSelected: selectedIds.contains(client.id), onClick: { onToggle(client.id) })
+                    ClientFilterChip(
+                        client: client,
+                        info: transferInfos.first(where: { $0.client.id == client.id }),
+                        isSelected: clients.count > 1 && selectedIds.contains(client.id),
+                        onClick: {
+                            if clients.count > 1 {
+                                onToggle(client.id)
+                            }
+                        }
+                    )
                 }
             }
             .padding(.horizontal, 16)
@@ -366,8 +375,16 @@ struct ClientFilterChip: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 16, height: 16)
                 
-                Text("↓ \((info?.downloadSpeed ?? 0).bytesAsFileSizeString())/s ↑ \((info?.uploadSpeed ?? 0).bytesAsFileSizeString())/s")
-                    .font(.subheadline)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("↓ \((info?.downloadSpeed ?? 0).bytesAsFileSizeString())/s ↑ \((info?.uploadSpeed ?? 0).bytesAsFileSizeString())/s")
+                        .font(.subheadline)
+                    
+                    if client.type == .qbittorrent && client.showExternalIpAddress, let externalIp = info?.externalIp, !externalIp.isEmpty {
+                        Text(externalIp)
+                            .font(.caption)
+                            .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
+                    }
+                }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)

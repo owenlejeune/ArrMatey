@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
+import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentSyncMetadataResponse
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTorrent
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTransferInfoResponse
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
@@ -64,16 +65,58 @@ class QBittorrentClient(
         }
     }
 
-    override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> = authenticatedCall {
-        httpClient
-            .safeGet<QBittorrentTransferInfoResponse>("api/v2/transfer/info")
-            .map { info ->
-                DownloadTransferInfo(
-                    client = downloadClient,
-                    downloadSpeed = info.downloadSpeed,
-                    uploadSpeed = info.uploadSpeed,
-                )
+    suspend fun getSyncMetadata(): NetworkResult<QBittorrentSyncMetadataResponse> = authenticatedCall {
+        val result = httpClient.safeGet<QBittorrentSyncMetadataResponse>("api/v2/sync/metadata")
+        if (result is NetworkResult.Error && result.code == 404) {
+            val maindata = httpClient.safeGet<QBittorrentSyncMetadataResponse>("api/v2/sync/maindata")
+            if (maindata is NetworkResult.Error && maindata.code == 404) {
+                httpClient.safeGet<QBittorrentSyncMetadataResponse>("sync/metadata")
+            } else {
+                maindata
             }
+        } else {
+            result
+        }
+    }
+
+    override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> = authenticatedCall {
+        if (downloadClient.showExternalIpAddress) {
+            when (val syncResult = getSyncMetadata()) {
+                is NetworkResult.Success -> {
+                    val serverState = syncResult.data.serverState
+                    NetworkResult.Success(
+                        DownloadTransferInfo(
+                            client = downloadClient,
+                            downloadSpeed = serverState?.downloadSpeed ?: 0L,
+                            uploadSpeed = serverState?.uploadSpeed ?: 0L,
+                            externalIp = serverState?.lastExternalAddressV4?.takeIf { it.isNotBlank() },
+                        ),
+                    )
+                }
+                is NetworkResult.Error -> {
+                    httpClient
+                        .safeGet<QBittorrentTransferInfoResponse>("api/v2/transfer/info")
+                        .map { info ->
+                            DownloadTransferInfo(
+                                client = downloadClient,
+                                downloadSpeed = info.downloadSpeed,
+                                uploadSpeed = info.uploadSpeed,
+                            )
+                        }
+                }
+                is NetworkResult.Loading -> NetworkResult.Loading
+            }
+        } else {
+            httpClient
+                .safeGet<QBittorrentTransferInfoResponse>("api/v2/transfer/info")
+                .map { info ->
+                    DownloadTransferInfo(
+                        client = downloadClient,
+                        downloadSpeed = info.downloadSpeed,
+                        uploadSpeed = info.uploadSpeed,
+                    )
+                }
+        }
     }
 
     // Re-login and retry once on 401/403 so an expired session cookie recovers automatically.

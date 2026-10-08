@@ -54,6 +54,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledCheckbox
+import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.screens.CustomHeaderSection
 import com.dnfapps.arrmatey.ui.screens.LocalNetworkArea
 import com.dnfapps.arrmatey.ui.screens.TestConnectionSection
@@ -339,6 +340,28 @@ fun AddDownloadClientSheet(
                             placeholder = mokoString(MR.strings.api_key_placeholder),
                             enabled = !uiState.noApiKeyRequired,
                         )
+                    }
+                }
+
+                AnimatedVisibility(visible = uiState.selectedType == DownloadClientType.QBittorrent) {
+                    Card(
+                        shape = MaterialTheme.shapes.large,
+                        colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            LabelledSwitch(
+                                label = mokoString(MR.strings.show_external_ip_address),
+                                checked = uiState.showExternalIpAddress,
+                                onCheckedChange = { viewModel.updateShowExternalIpAddress(it) },
+                            )
+                        }
                     }
                 }
 

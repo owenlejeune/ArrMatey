@@ -87,6 +87,7 @@ class ExportDataUseCase(
                     localNetworkEnabled = client.localNetworkEnabled,
                     localNetworkSsids = client.localNetworkSsids,
                     localNetworkEndpoint = client.localNetworkEndpoint,
+                    showExternalIpAddress = client.showExternalIpAddress,
                 )
             }
 

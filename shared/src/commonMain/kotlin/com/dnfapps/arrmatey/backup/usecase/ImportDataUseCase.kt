@@ -132,6 +132,7 @@ class ImportDataUseCase(
                         localNetworkEnabled = export.localNetworkEnabled,
                         localNetworkSsids = export.localNetworkSsids,
                         localNetworkEndpoint = export.localNetworkEndpoint,
+                        showExternalIpAddress = export.showExternalIpAddress,
                     )
 
                 if (client.id != 0L) {

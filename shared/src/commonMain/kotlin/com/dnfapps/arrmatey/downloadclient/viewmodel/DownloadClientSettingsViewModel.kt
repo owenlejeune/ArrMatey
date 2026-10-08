@@ -64,7 +64,8 @@ class DownloadClientSettingsViewModel(
                             localNetworkEnabled = client.localNetworkEnabled,
                             localNetworkSsids = client.localNetworkSsids,
                             localNetworkEndpoint = client.localNetworkEndpoint ?: "",
-                        )
+                            showExternalIpAddress = client.showExternalIpAddress,
+                        ).validate()
                     }
                 }
             }
@@ -72,71 +73,29 @@ class DownloadClientSettingsViewModel(
     }
 
     fun updateLabel(label: String) {
-        _uiState.update { it.copy(label = label) }
+        _uiState.update { it.copy(label = label).validate() }
     }
 
     fun updateSelectedType(type: DownloadClientType) {
-        _uiState.update { it.copy(selectedType = type) }
+        _uiState.update { it.copy(selectedType = type).validate() }
     }
 
     fun updateUrl(url: String) {
-        _uiState.update {
-            it.copy(
-                url = url,
-                saveButtonEnabled =
-                url.isNotEmpty() &&
-                    (
-                        it.noApiKeyRequired ||
-                            it.apiKey.isNotEmpty() ||
-                            (it.username.isNotEmpty() && it.password.isNotEmpty())
-                        ),
-            )
-        }
+        _uiState.update { it.copy(url = url).validate() }
     }
 
     fun updateUsername(username: String) {
-        _uiState.update {
-            it.copy(
-                username = username,
-                saveButtonEnabled =
-                it.url.isNotEmpty() &&
-                    (
-                        it.noApiKeyRequired ||
-                            it.apiKey.isNotEmpty() ||
-                            (username.isNotEmpty() && it.password.isNotEmpty())
-                        ),
-            )
-        }
+        _uiState.update { it.copy(username = username).validate() }
     }
 
     fun updatePassword(password: String) {
-        _uiState.update {
-            it.copy(
-                password = password,
-                saveButtonEnabled =
-                it.url.isNotEmpty() &&
-                    (
-                        it.noApiKeyRequired ||
-                            it.apiKey.isNotEmpty() ||
-                            (it.username.isNotEmpty() && password.isNotEmpty())
-                        ),
-            )
-        }
+        _uiState.update { it.copy(password = password).validate() }
     }
 
     fun updateApiKey(apiKey: String) {
         _uiState.update {
             val newApiKey = if (it.noApiKeyRequired) "" else apiKey
-            it.copy(
-                apiKey = newApiKey,
-                saveButtonEnabled =
-                it.url.isNotEmpty() &&
-                    (
-                        it.noApiKeyRequired ||
-                            newApiKey.isNotEmpty() ||
-                            (!it.username.isNotEmpty() && !it.password.isNotEmpty())
-                        ),
-            )
+            it.copy(apiKey = newApiKey).validate()
         }
     }
 
@@ -150,31 +109,39 @@ class DownloadClientSettingsViewModel(
                 apiKey = newApiKey,
                 username = newUsername,
                 password = newPassword,
-                saveButtonEnabled =
-                it.url.isNotEmpty() &&
-                    (
-                        enabled ||
-                            newApiKey.isNotEmpty() ||
-                            (!newUsername.isNotEmpty() && !newPassword.isNotEmpty())
-                        ),
-            )
+            ).validate()
         }
     }
 
     fun updateHeaders(headers: List<InstanceHeader>) {
-        _uiState.update { it.copy(headers = headers) }
+        _uiState.update { it.copy(headers = headers).validate() }
     }
 
     fun updateLocalNetworkEnabled(enabled: Boolean) {
-        _uiState.update { it.copy(localNetworkEnabled = enabled) }
+        _uiState.update { it.copy(localNetworkEnabled = enabled).validate() }
     }
 
     fun updateLocalNetworkUrl(url: String) {
-        _uiState.update { it.copy(localNetworkEndpoint = url, localNetworkEndpointError = false) }
+        _uiState.update { it.copy(localNetworkEndpoint = url, localNetworkEndpointError = false).validate() }
     }
 
     fun updateLocalNetworkSsid(ssids: List<String>) {
-        _uiState.update { it.copy(localNetworkSsids = ssids) }
+        _uiState.update { it.copy(localNetworkSsids = ssids).validate() }
+    }
+
+    fun updateShowExternalIpAddress(enabled: Boolean) {
+        _uiState.update { it.copy(showExternalIpAddress = enabled).validate() }
+    }
+
+    private fun DownloadClientConfigurationUiState.validate(): DownloadClientConfigurationUiState {
+        val isValid =
+            url.isNotEmpty() &&
+                (
+                    noApiKeyRequired ||
+                        apiKey.isNotEmpty() ||
+                        (username.isNotEmpty() && password.isNotEmpty())
+                    )
+        return copy(saveButtonEnabled = isValid)
     }
 
     fun testConnection() {
@@ -237,6 +204,7 @@ class DownloadClientSettingsViewModel(
         localNetworkEnabled = uiState.value.localNetworkEnabled,
         localNetworkSsids = uiState.value.localNetworkSsids,
         localNetworkEndpoint = uiState.value.localNetworkEndpoint,
+        showExternalIpAddress = uiState.value.showExternalIpAddress,
     )
 
     fun deleteClient() {

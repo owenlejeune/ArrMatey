@@ -4,4 +4,5 @@ data class DownloadTransferInfo(
     val client: DownloadClient,
     val downloadSpeed: Long,
     val uploadSpeed: Long,
+    val externalIp: String? = null,
 )

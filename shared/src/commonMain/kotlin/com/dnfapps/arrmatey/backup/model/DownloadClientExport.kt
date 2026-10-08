@@ -17,4 +17,5 @@ data class DownloadClientExport(
     val localNetworkEnabled: Boolean = false,
     val localNetworkSsids: List<String> = emptyList(),
     val localNetworkEndpoint: String? = null,
+    val showExternalIpAddress: Boolean = false,
 )

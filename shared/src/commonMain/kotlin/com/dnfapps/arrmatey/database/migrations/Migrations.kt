@@ -154,6 +154,13 @@ private val MIGRATION_12_13 =
         }
     }
 
+private val MIGRATION_13_14 =
+    object : Migration(13, 14) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("ALTER TABLE download_clients ADD COLUMN showExternalIpAddress INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+
 val migrations =
     arrayOf(
         MIGRATION_1_2,
@@ -168,4 +175,5 @@ val migrations =
         MIGRATION_10_11,
         MIGRATION_11_12,
         MIGRATION_12_13,
+        MIGRATION_13_14,
     )

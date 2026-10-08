@@ -26,6 +26,7 @@ data class DownloadClientConfigurationUiState(
     val localTesting: Boolean = false,
     val localTestResult: Boolean? = null,
     val testResult: Boolean? = null,
+    val showExternalIpAddress: Boolean = false,
 ) {
     val localNetworkConfigured: Boolean
         get() = localNetworkEnabled && localNetworkSsids.isNotEmpty() && localNetworkEndpoint.isNotBlank()

@@ -378,6 +378,28 @@ fun AddEditDownloadClientScreen(
                     }
                 }
 
+                AnimatedVisibility(visible = uiState.selectedType == DownloadClientType.QBittorrent) {
+                    Card(
+                        shape = MaterialTheme.shapes.large,
+                        colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            LabelledSwitch(
+                                label = mokoString(MR.strings.show_external_ip_address),
+                                checked = uiState.showExternalIpAddress,
+                                onCheckedChange = { viewModel.updateShowExternalIpAddress(it) },
+                            )
+                        }
+                    }
+                }
+
                 CustomHeaderSection(
                     localNetworkSsids = uiState.localNetworkSsids,
                     localNetworkConfigured = uiState.localNetworkConfigured,
