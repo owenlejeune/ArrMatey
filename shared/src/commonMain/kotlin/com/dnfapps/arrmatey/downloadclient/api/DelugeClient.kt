@@ -120,6 +120,18 @@ class DelugeClient(
         is NetworkResult.Loading -> NetworkResult.Loading
     }
 
+    suspend fun getExternalIp(): NetworkResult<String> = when (val authResult = ensureAuthenticated()) {
+        is NetworkResult.Success -> {
+            when (val result = callDeluge<String>(method = "core.get_external_ip", params = emptyList())) {
+                is NetworkResult.Success -> result.data.resultOrError()
+                is NetworkResult.Error -> result
+                is NetworkResult.Loading -> result
+            }
+        }
+        is NetworkResult.Error -> authResult
+        is NetworkResult.Loading -> NetworkResult.Loading
+    }
+
     override suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo> = when (val authResult = ensureAuthenticated()) {
         is NetworkResult.Success -> {
             when (
@@ -138,11 +150,21 @@ class DelugeClient(
                 is NetworkResult.Success -> {
                     when (val rpcResult = result.data.resultOrError()) {
                         is NetworkResult.Success -> {
+                            val externalIp =
+                                if (downloadClient.showExternalIpAddress) {
+                                    when (val ipResult = getExternalIp()) {
+                                        is NetworkResult.Success -> ipResult.data.takeIf { it.isNotBlank() }
+                                        else -> null
+                                    }
+                                } else {
+                                    null
+                                }
                             NetworkResult.Success(
                                 DownloadTransferInfo(
                                     client = downloadClient,
                                     downloadSpeed = rpcResult.data.downloadRate.toLong(),
                                     uploadSpeed = rpcResult.data.uploadRate.toLong(),
+                                    externalIp = externalIp,
                                 ),
                             )
                         }

@@ -19,12 +19,16 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DelugeClientTest {
-    private fun client(password: String = "secret") = DownloadClient(
+    private fun client(
+        password: String = "secret",
+        showExternalIpAddress: Boolean = false,
+    ) = DownloadClient(
         id = 1,
         type = DownloadClientType.Deluge,
         label = "deluge",
         url = "http://localhost:8112",
         password = EncryptedString(password),
+        showExternalIpAddress = showExternalIpAddress,
     )
 
     private fun httpClient(mockEngine: MockEngine) = HttpClient(mockEngine) {
@@ -149,5 +153,106 @@ class DelugeClientTest {
         assertEquals("Ubuntu.iso", item.name)
         assertEquals(0.5, item.progress)
         assertEquals(512000L, item.downloadSpeed)
+    }
+
+    @Test
+    fun testGetExternalIp() = runTest {
+        val mockEngine =
+            MockEngine { request ->
+                val body = (request.body as? TextContent)?.text.orEmpty()
+                if ("\"method\":\"auth.login\"" in body) {
+                    respond(
+                        content = """{"id":1,"result":true,"error":null}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                } else {
+                    assertTrue("\"method\":\"core.get_external_ip\"" in body)
+                    respond(
+                        content = """{"result":"203.0.113.45","error":null,"id":2}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type", "application/json"),
+                    )
+                }
+            }
+
+        val deluge = DelugeClient(client(), httpClient(mockEngine))
+        val result = deluge.getExternalIp()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals("203.0.113.45", result.data)
+    }
+
+    @Test
+    fun testGetTransferInfoWithShowExternalIpEnabled() = runTest {
+        val mockEngine =
+            MockEngine { request ->
+                val body = (request.body as? TextContent)?.text.orEmpty()
+                when {
+                    "\"method\":\"auth.login\"" in body -> {
+                        respond(
+                            content = """{"id":1,"result":true,"error":null}""",
+                            status = HttpStatusCode.OK,
+                            headers = headersOf("Content-Type", "application/json"),
+                        )
+                    }
+                    "\"method\":\"core.get_session_status\"" in body -> {
+                        respond(
+                            content = """{"id":2,"result":{"download_rate":102400.0,"upload_rate":51200.0},"error":null}""",
+                            status = HttpStatusCode.OK,
+                            headers = headersOf("Content-Type", "application/json"),
+                        )
+                    }
+                    "\"method\":\"core.get_external_ip\"" in body -> {
+                        respond(
+                            content = """{"result":"203.0.113.45","error":null,"id":3}""",
+                            status = HttpStatusCode.OK,
+                            headers = headersOf("Content-Type", "application/json"),
+                        )
+                    }
+                    else -> respond(content = "", status = HttpStatusCode.NotFound)
+                }
+            }
+
+        val deluge = DelugeClient(client(showExternalIpAddress = true), httpClient(mockEngine))
+        val result = deluge.getTransferInfo()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(102400L, result.data.downloadSpeed)
+        assertEquals(51200L, result.data.uploadSpeed)
+        assertEquals("203.0.113.45", result.data.externalIp)
+    }
+
+    @Test
+    fun testGetTransferInfoWithShowExternalIpDisabled() = runTest {
+        val mockEngine =
+            MockEngine { request ->
+                val body = (request.body as? TextContent)?.text.orEmpty()
+                when {
+                    "\"method\":\"auth.login\"" in body -> {
+                        respond(
+                            content = """{"id":1,"result":true,"error":null}""",
+                            status = HttpStatusCode.OK,
+                            headers = headersOf("Content-Type", "application/json"),
+                        )
+                    }
+                    "\"method\":\"core.get_session_status\"" in body -> {
+                        respond(
+                            content = """{"id":2,"result":{"download_rate":102400.0,"upload_rate":51200.0},"error":null}""",
+                            status = HttpStatusCode.OK,
+                            headers = headersOf("Content-Type", "application/json"),
+                        )
+                    }
+                    else -> respond(content = "", status = HttpStatusCode.NotFound)
+                }
+            }
+
+        val deluge = DelugeClient(client(showExternalIpAddress = false), httpClient(mockEngine))
+        val result = deluge.getTransferInfo()
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(102400L, result.data.downloadSpeed)
+        assertEquals(51200L, result.data.uploadSpeed)
+        assertEquals(null, result.data.externalIp)
     }
 }

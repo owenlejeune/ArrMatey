@@ -378,7 +378,7 @@ fun AddEditDownloadClientScreen(
                     }
                 }
 
-                AnimatedVisibility(visible = uiState.selectedType == DownloadClientType.QBittorrent) {
+                AnimatedVisibility(visible = uiState.selectedType.supportsExternalIp) {
                     Card(
                         shape = MaterialTheme.shapes.large,
                         colors =

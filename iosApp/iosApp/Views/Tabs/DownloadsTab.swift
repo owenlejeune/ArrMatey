@@ -379,7 +379,7 @@ struct ClientFilterChip: View {
                     Text("↓ \((info?.downloadSpeed ?? 0).bytesAsFileSizeString())/s ↑ \((info?.uploadSpeed ?? 0).bytesAsFileSizeString())/s")
                         .font(.subheadline)
                     
-                    if client.type == .qbittorrent && client.showExternalIpAddress, let externalIp = info?.externalIp, !externalIp.isEmpty {
+                    if client.type.supportsExternalIp && client.showExternalIpAddress, let externalIp = info?.externalIp, !externalIp.isEmpty {
                         Text(externalIp)
                             .font(.caption)
                             .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)

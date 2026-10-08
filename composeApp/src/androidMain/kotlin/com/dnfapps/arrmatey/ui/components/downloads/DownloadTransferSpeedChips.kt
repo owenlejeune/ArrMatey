@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
-import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import dev.icerock.moko.resources.compose.painterResource
 
@@ -42,7 +41,7 @@ fun DownloadTransferSpeedChips(
         Spacer(Modifier.width(18.dp))
         downloadClients.forEach { client ->
             val info = transferInfo.firstOrNull { it.client.id == client.id }
-            val showIp = client.type == DownloadClientType.QBittorrent && client.showExternalIpAddress
+            val showIp = client.type.supportsExternalIp && client.showExternalIpAddress
             val externalIp = info?.externalIp
             FilterChip(
                 selected = downloadClients.size > 1 && selectedClientIds.contains(client.id),

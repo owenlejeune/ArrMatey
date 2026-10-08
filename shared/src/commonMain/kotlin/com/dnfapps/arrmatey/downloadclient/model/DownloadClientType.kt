@@ -15,6 +15,7 @@ enum class DownloadClientType(
     val tabIcon: ImageResource,
     val github: String,
     val website: String,
+    val supportsExternalIp: Boolean = false,
 ) {
     QBittorrent(
         displayName = "qBittorrent",
@@ -24,6 +25,7 @@ enum class DownloadClientType(
         tabIcon = MR.images.qbittorrent_tab,
         github = "https://github.com/qbittorrent/qBittorrent",
         website = "https://www.qbittorrent.org/",
+        supportsExternalIp = true,
     ),
     SABnzbd(
         displayName = "SABnzbd",
@@ -42,6 +44,7 @@ enum class DownloadClientType(
         tabIcon = MR.images.deluge_tab,
         github = "https://github.com/deluge-torrent/deluge",
         website = "https://www.deluge-torrent.org/",
+        supportsExternalIp = true,
     ),
     Transmission(
         displayName = "Transmission",
