@@ -75,6 +75,11 @@ struct ArrLibraryFilesAreaView: View {
                 searchIds: viewModel.automaticSearchIds,
                 onAutomaticSearch: { viewModel.performAutomaticLookup() }
             )
+        } else if let volume = success.arrMedia as? ComicVolume {
+            ComicIssuesArea(
+                volume: volume,
+                instanceId: currentInstanceId
+            )
         }
     }
 }

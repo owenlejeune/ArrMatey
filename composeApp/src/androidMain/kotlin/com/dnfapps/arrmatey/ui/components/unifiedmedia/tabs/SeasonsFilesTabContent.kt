@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
@@ -28,6 +29,7 @@ import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
 import com.dnfapps.arrmatey.ui.components.AudiobookFileView
 import com.dnfapps.arrmatey.ui.components.BooksArea
+import com.dnfapps.arrmatey.ui.components.ComicIssuesArea
 import com.dnfapps.arrmatey.ui.components.MovieFileView
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
@@ -60,6 +62,7 @@ fun SeasonsFilesTabContent(
     onNavigateToBookDetails: (Author, Book) -> Unit,
     onNavigateToBookRelease: (Long) -> Unit,
     onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
+    onNavigateToComicReleases: (Long, Boolean) -> Unit,
     selectedBookMediaFilter: BookMediaFilterBy = BookMediaFilterBy.All,
     onBookMediaTypeFilterChanged: (BookMediaFilterBy) -> Unit = {},
     onEditAuthor: (() -> Unit)? = null,
@@ -159,6 +162,17 @@ fun SeasonsFilesTabContent(
                         searchIds = automaticSearchIds,
                         onAutomaticSearch = { item.id?.let { onBookAutomaticSearch(it) } },
                         onNavigateToAudiobookRelease = onNavigateToAudiobookRelease,
+                    )
+
+                is ComicVolume ->
+                    ComicIssuesArea(
+                        volume = item,
+                        searchIds = automaticSearchIds,
+                        onAutomaticSearch = { onBookAutomaticSearch(it) },
+                        onVolumeAutomaticSearch = { item.id?.let { onBookAutomaticSearch(it) } },
+                        onNavigateToComicRelease = { issueId -> onNavigateToComicReleases(issueId, false) },
+                        onNavigateToVolumeRelease = { item.id?.let { volId -> onNavigateToComicReleases(volId, true) } },
+                        modifier = Modifier.padding(horizontal = 24.dp),
                     )
 
                 is ArrSeries, is SearchAudiobook, is MockMedia, null -> {}

@@ -4,8 +4,10 @@ import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
 import com.dnfapps.arrmatey.arr.api.model.BookMediaType
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
+import com.dnfapps.arrmatey.arr.api.model.MonitoringScheme
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.api.model.SeriesType
+import com.dnfapps.arrmatey.arr.api.model.SpecialVersion
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
@@ -67,6 +69,11 @@ data class InstancePreferences(
     val addChaptarrEbookMonitorFuture: Boolean = true,
     // Audiobookshelf
     val addAudiobookMonitored: Boolean = true,
+    // Kapowarr
+    val addKapowarrMonitorVolume: Boolean = true,
+    val addKapowarrMonitorNewIssues: Boolean = true,
+    val addKapowarrMonitoringScheme: MonitoringScheme = MonitoringScheme.All,
+    val addKapowarrSpecialVersion: SpecialVersion = SpecialVersion.Automatic,
     // Delete Media defaults
     val deleteDeleteFiles: Boolean = false,
     val deleteAddExclusion: Boolean = false,
@@ -175,5 +182,21 @@ data class InstancePreferences(
         mediaType: BookMediaType,
     ): InstancePreferences = copy(
         addChaptarrMediaType = mediaType,
+    )
+
+    fun copyWithKapowarrAddDefaults(
+        monitorVolume: Boolean,
+        monitorNewIssues: Boolean,
+        monitoringScheme: MonitoringScheme,
+        specialVersion: SpecialVersion,
+        rootFolderPath: String?,
+        searchOnAdd: Boolean,
+    ): InstancePreferences = copy(
+        addKapowarrMonitorVolume = monitorVolume,
+        addKapowarrMonitorNewIssues = monitorNewIssues,
+        addKapowarrMonitoringScheme = monitoringScheme,
+        addKapowarrSpecialVersion = specialVersion,
+        addRootFolderPath = rootFolderPath,
+        addSearchOnAdd = searchOnAdd,
     )
 }

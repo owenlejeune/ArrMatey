@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.BookMediaType
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
@@ -78,6 +79,15 @@ fun EditMediaSheet(
             EditAudiobookSheet(
                 item = item,
                 qualityProfiles = qualityProfiles,
+                rootFolders = rootFolders,
+                editInProgress = editInProgress,
+                onEditItem = onEditItem,
+                onDismiss = onDismiss,
+            )
+
+        is ComicVolume ->
+            EditComicSheet(
+                item = item,
                 rootFolders = rootFolders,
                 editInProgress = editInProgress,
                 onEditItem = onEditItem,

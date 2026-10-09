@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.arr.api.client.ArrClient
 import com.dnfapps.arrmatey.arr.api.client.BookshelfClient
+import com.dnfapps.arrmatey.arr.api.client.KapowarrClient
 import com.dnfapps.arrmatey.arr.api.client.LidarrClient
 import com.dnfapps.arrmatey.arr.api.client.ListenarrClient
 import com.dnfapps.arrmatey.arr.api.client.RadarrClient
@@ -135,7 +136,8 @@ open class ArrInstanceRepository(
         InstanceType.Bookshelf -> BookshelfClient(instance, httpClient)
         InstanceType.Listenarr -> ListenarrClient(instance, httpClient)
         InstanceType.Chaptarr -> BookshelfClient(instance, httpClient)
-        else -> TODO()
+        InstanceType.Kapowarr -> KapowarrClient(instance, httpClient)
+        else -> throw UnsupportedOperationException("Cannot create ArrClient for instance of type ${instance.type}")
     }
 
     override suspend fun testConnection(): NetworkResult<Unit> = client.testConnection()

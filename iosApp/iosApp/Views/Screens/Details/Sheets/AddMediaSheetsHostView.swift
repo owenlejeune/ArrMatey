@@ -105,6 +105,22 @@ struct AddMediaSheetsHostView: View {
                     selectedInstance: viewModel.addSheetUiState.targetInstance,
                     onInstanceSelected: { viewModel.setAddSheetTargetInstance(instance: $0) }
                 )
+            } else if let comic = arrMedia as? ComicVolume {
+                AddComicForm(
+                    volume: comic,
+                    addItemStatus: viewModel.addItemStatus,
+                    rootFolders: viewModel.addSheetUiState.rootFolders.isEmpty ? viewModel.rootFolders : viewModel.addSheetUiState.rootFolders,
+                    preferences: viewModel.preferences,
+                    onUpdatePreferences: { viewModel.updatePreferences(preferences: $0) },
+                    onAddItem: { newItem, searchOnAdd in
+                        viewModel.smartAdd(item: newItem, searchOnAdd: searchOnAdd, targetInstanceId: viewModel.addSheetUiState.targetInstance?.id)
+                        onDismiss()
+                    },
+                    onDismiss: { onDismiss() },
+                    instances: viewModel.addSheetUiState.availableInstances,
+                    selectedInstance: viewModel.addSheetUiState.targetInstance,
+                    onInstanceSelected: { viewModel.setAddSheetTargetInstance(instance: $0) }
+                )
             }
         }
     }

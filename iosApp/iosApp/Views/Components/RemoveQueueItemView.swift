@@ -14,10 +14,22 @@ struct RemoveQueueItemView: View {
     @State private var remove: Bool = false
     @State private var block: Bool = false
     @State private var skip: Bool = true
-    
+
     let deleteInProgress: Bool
+    let showBlocklist: Bool
     let onDelete: (Bool, Bool, Bool) -> Void
-    
+
+    init(
+        deleteInProgress: Bool,
+        showBlocklist: Bool = true,
+        onDelete: @escaping (Bool, Bool, Bool) -> Void
+    ) {
+        self.deleteInProgress = deleteInProgress
+        self.showBlocklist = showBlocklist
+        self.onDelete = onDelete
+        self._block = State(initialValue: showBlocklist)
+    }
+
     var body: some View {
         Form {
             Section {
@@ -25,18 +37,20 @@ struct RemoveQueueItemView: View {
             } footer: {
                 Text(MR.strings().client_remove_message.localized())
             }
-            
-            Section {
-                Toggle(MR.strings().blocklist_title.localized(), isOn: $block)
-            } footer: {
-                Text(MR.strings().blocklist_message.localized())
-            }
-            
-            if block {
+
+            if showBlocklist {
                 Section {
-                    Toggle(MR.strings().skip_redownload_title.localized(), isOn: $skip)
+                    Toggle(MR.strings().blocklist_title.localized(), isOn: $block)
                 } footer: {
-                    Text(MR.strings().skip_redownload_message.localized())
+                    Text(MR.strings().blocklist_message.localized())
+                }
+
+                if block {
+                    Section {
+                        Toggle(MR.strings().skip_redownload_title.localized(), isOn: $skip)
+                    } footer: {
+                        Text(MR.strings().skip_redownload_message.localized())
+                    }
                 }
             }
         }
@@ -44,7 +58,7 @@ struct RemoveQueueItemView: View {
         .task {
             guard let saved = await preferencesStore.queueRemovalPreferences.firstValue() else { return }
             remove = saved.removeFromClient
-            block = saved.addToBlocklist
+            block = saved.addToBlocklist && showBlocklist
             skip = saved.skipRedownload
         }
         .toolbar {
@@ -53,11 +67,11 @@ struct RemoveQueueItemView: View {
                     preferencesStore.saveQueueRemovalPreferences(
                         preferences: QueueRemovalPreferences(
                             removeFromClient: remove,
-                            addToBlocklist: block,
-                            skipRedownload: skip
+                            addToBlocklist: showBlocklist ? block : false,
+                            skipRedownload: showBlocklist ? (block && skip) : false
                         )
                     )
-                    onDelete(remove, block, block && skip)
+                    onDelete(remove, showBlocklist ? block : false, showBlocklist ? (block && skip) : false)
                 } label: {
                     Label(MR.strings().delete.localized(), systemImage: "trash")
                         .foregroundStyle(.white)

@@ -29,5 +29,8 @@ sealed interface InstanceTypeIdentifiable {
                 is SearchAudiobook,
                 is MockMedia.Listenarr,
                 -> InstanceType.Listenarr
+                is ComicVolume,
+                is MockMedia.Kapowarr,
+                -> InstanceType.Kapowarr
             }
 }

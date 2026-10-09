@@ -17,6 +17,7 @@ internal object PreferenceKeys {
     val CHAPTARR_INFO_CARD = booleanPreferencesKey("chaptarrInfoCard")
     val BAZARR_INFO_CARD = booleanPreferencesKey("bazarrInfoCard")
     val TRACEARR_INFO_CARD = booleanPreferencesKey("tracearrInfoCard")
+    val KAPOWARR_INFO_CARD = booleanPreferencesKey("kapowarrInfoCard")
 
     val CALENDAR_VIEW_TYPE = stringPreferencesKey("calendarViewType")
     val CALENDAR_CONTENT_FILTER = stringPreferencesKey("calendarContentFilter")
@@ -76,5 +77,6 @@ internal object PreferenceKeys {
         InstanceType.Chaptarr -> CHAPTARR_INFO_CARD
         InstanceType.Bazarr -> BAZARR_INFO_CARD
         InstanceType.Tracearr -> TRACEARR_INFO_CARD
+        InstanceType.Kapowarr -> KAPOWARR_INFO_CARD
     }
 }

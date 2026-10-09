@@ -64,7 +64,7 @@ fun BoxScope.DetailHeaderBanner(
         Box(
             modifier =
             Modifier
-                .height(gradientHeight)
+                .height(gradientHeight.coerceAtLeast(180.dp))
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .background(
@@ -72,7 +72,8 @@ fun BoxScope.DetailHeaderBanner(
                         colors =
                         listOf(
                             Color.Transparent,
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.6f),
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
                             MaterialTheme.colorScheme.background,
                         ),
                         startY = 0f,

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.navigation
 
+import androidx.compose.runtime.Stable
 import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
@@ -14,6 +15,7 @@ import kotlinx.coroutines.runBlocking
  * Orchestrates navigation across the application.
  * Focuses on switching between feature navigators and managing global UI state.
  */
+@Stable
 class NavigationManager(
     private val tabNavigators: Map<TabItem, Navigator<*>>,
     val settings: SettingsTabNavigator,
@@ -64,6 +66,7 @@ class NavigationManager(
             TabItem.Standard.MUSIC -> shortcutManager?.pushLibraryShortcut(InstanceType.Lidarr)
             TabItem.Standard.BOOKS -> shortcutManager?.pushLibraryShortcut(InstanceType.Bookshelf)
             TabItem.Standard.AUDIOBOOKS -> shortcutManager?.pushLibraryShortcut(InstanceType.Listenarr)
+            TabItem.Standard.COMICS -> shortcutManager?.pushLibraryShortcut(InstanceType.Kapowarr)
             else -> {}
         }
     }
@@ -83,6 +86,7 @@ class NavigationManager(
         InstanceType.Lidarr -> TabItem.Standard.MUSIC
         InstanceType.Bookshelf -> TabItem.Standard.BOOKS
         InstanceType.Listenarr -> TabItem.Standard.AUDIOBOOKS
+        InstanceType.Kapowarr -> TabItem.Standard.COMICS
         else -> throw IllegalStateException("Invalid arr type $type")
     }
 

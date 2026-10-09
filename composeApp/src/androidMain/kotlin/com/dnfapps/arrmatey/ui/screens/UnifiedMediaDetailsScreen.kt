@@ -59,6 +59,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookMediaType
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.getChangedRootFolderPath
@@ -138,6 +139,7 @@ fun UnifiedMediaDetailsScreen(
     onNavigateToBookRelease: (bookId: Long, instanceId: Long?) -> Unit,
     onNavigateToAudiobookRelease: (audiobookId: Long?, query: String?, instanceId: Long?) -> Unit,
     onNavigateToAlbumRelease: (artistId: Long, albumId: Long, instanceId: Long?) -> Unit,
+    onNavigateToComicReleases: (mediaId: Long, isVolume: Boolean, instanceId: Long?) -> Unit,
     onPersonClick: (Long) -> Unit,
     onMediaClick: ((Long, RequestType) -> Unit)? = null,
     onNavigateToUser: ((String) -> Unit)? = null,
@@ -483,6 +485,8 @@ fun UnifiedMediaDetailsScreen(
                                 certification = successState.getCertification(LocalLocale.current.platformLocale.country),
                                 releasedBy = successState.releasedBy,
                                 seasonCount = successState.seasonCount?.let { mokoPlural(MR.plurals.seasons, it) },
+                                volumeString = successState.volumeString,
+                                issueCountString = successState.issueCountString,
                                 genres = successState.genres,
                                 isExpanded = isExpanded,
                                 wideRailIsVisible = wideRailIsVisible,
@@ -650,6 +654,9 @@ fun UnifiedMediaDetailsScreen(
                                             onNavigateToBookRelease = { onNavigateToBookRelease(it, currentInstanceId) },
                                             onNavigateToAudiobookRelease = { id, query ->
                                                 onNavigateToAudiobookRelease(id, query, currentInstanceId)
+                                            },
+                                            onNavigateToComicReleases = { mediaId, isVolume ->
+                                                onNavigateToComicReleases(mediaId, isVolume, currentInstanceId)
                                             },
                                             selectedBookMediaFilter = selectedBookMediaFilter,
                                             onBookMediaTypeFilterChanged = { selectedBookMediaFilter = it },
@@ -879,11 +886,13 @@ fun UnifiedMediaDetailsScreen(
                         } else {
                             null
                         }
+                    val isKapowarr = successState?.arrMedia is ComicVolume
                     ConfirmDeleteAlert(
                         deleteInProgress = deleteStatus is OperationStatus.InProgress,
                         initialAddExclusion = preferences.deleteAddExclusion,
                         initialDeleteFiles = preferences.deleteDeleteFiles,
                         instanceLabel = currentInstLabel,
+                        showAddExclusion = !isKapowarr,
                         onDismiss = { confirmDelete = false },
                         onDelete = { deleteFiles, addExclusion ->
                             viewModel.deleteMedia(deleteFiles, addExclusion)

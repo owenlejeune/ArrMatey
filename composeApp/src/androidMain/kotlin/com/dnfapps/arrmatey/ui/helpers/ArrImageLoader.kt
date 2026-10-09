@@ -30,16 +30,27 @@ class ArrImageLoader(
                     val headersBuilder = NetworkHeaders.Builder().set("Accept", "image/*")
 
                     val authenticatedUrl =
-                        if (instance.type == InstanceType.Tracearr) {
-                            headersBuilder.set("Authorization", "Bearer ${instance.apiKey.value}")
-                            url
-                        } else {
-                            headersBuilder.set("X-Api-Key", instance.apiKey.value)
-                            if (!url.contains("apikey=")) {
-                                val separator = if (url.contains("?")) "&" else "?"
-                                "$url${separator}apikey=${instance.apiKey.value}"
-                            } else {
+                        when (instance.type) {
+                            InstanceType.Tracearr -> {
+                                headersBuilder.set("Authorization", "Bearer ${instance.apiKey.value}")
                                 url
+                            }
+                            InstanceType.Kapowarr -> {
+                                if (!url.contains("api_key=") && !url.contains("apikey=")) {
+                                    val separator = if (url.contains("?")) "&" else "?"
+                                    "$url${separator}api_key=${instance.apiKey.value}"
+                                } else {
+                                    url
+                                }
+                            }
+                            else -> {
+                                headersBuilder.set("X-Api-Key", instance.apiKey.value)
+                                if (!url.contains("apikey=")) {
+                                    val separator = if (url.contains("?")) "&" else "?"
+                                    "$url${separator}apikey=${instance.apiKey.value}"
+                                } else {
+                                    url
+                                }
                             }
                         }
 

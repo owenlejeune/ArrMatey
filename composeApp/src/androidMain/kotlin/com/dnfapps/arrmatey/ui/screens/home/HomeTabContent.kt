@@ -53,6 +53,7 @@ fun StandardTabContent(
         TabItem.Standard.MUSIC -> ArrTab(tab.associatedType ?: InstanceType.Lidarr, windowSizeClass, wideRailIsVisible, tab.associatedTypes)
         TabItem.Standard.BOOKS -> ArrTab(tab.associatedType ?: InstanceType.Bookshelf, windowSizeClass, wideRailIsVisible, tab.associatedTypes)
         TabItem.Standard.AUDIOBOOKS -> ArrTab(tab.associatedType ?: InstanceType.Listenarr, windowSizeClass, wideRailIsVisible, tab.associatedTypes)
+        TabItem.Standard.COMICS -> ArrTab(tab.associatedType ?: InstanceType.Kapowarr, windowSizeClass, wideRailIsVisible, tab.associatedTypes)
         TabItem.Standard.ACTIVITY -> ActivityTab(wideRailIsVisible)
         TabItem.Standard.DOWNLOADS -> DownloadsTab(wideRailIsVisible)
         TabItem.Standard.CALENDAR -> CalendarTab(windowSizeClass, wideRailIsVisible)

@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
@@ -430,6 +431,7 @@ class LibraryRepository(
                             is Arrtist -> item.copy(monitored = status)
                             is Author -> item.copy(monitored = status)
                             is Audiobook -> item.copy(monitored = status)
+                            is ComicVolume -> item.copy(monitored = status)
                             is SearchAudiobook -> item
                             is MockMedia -> item
                         }
@@ -452,6 +454,7 @@ class LibraryRepository(
                     is Arrtist -> item.copy(monitored = status)
                     is Author -> item.copy(monitored = status)
                     is Audiobook -> item.copy(monitored = status)
+                    is ComicVolume -> item.copy(monitored = status)
                     is SearchAudiobook -> item
                     is MockMedia -> item
                 }

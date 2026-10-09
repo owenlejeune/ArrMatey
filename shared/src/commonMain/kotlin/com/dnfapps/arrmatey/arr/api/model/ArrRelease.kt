@@ -125,4 +125,12 @@ sealed interface ReleaseParams {
         override val mediaId: Long?,
         val query: String,
     ) : ReleaseParams
+
+    data class ComicVolume(
+        override val mediaId: Long,
+    ) : ReleaseParams
+
+    data class ComicIssue(
+        override val mediaId: Long,
+    ) : ReleaseParams
 }

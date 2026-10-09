@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
@@ -248,6 +249,25 @@ fun MediaRequestOrAddSheet(
     val seriesTags = remember(targetInstanceId) { mutableStateListOf<Int>() }
     var seriesSearchOnAdd by remember(preferences.addSearchOnAdd, targetInstanceId) { mutableStateOf(preferences.addSearchOnAdd) }
 
+    // Add Comic state
+    var comicMonitorVolume by remember(preferences.addKapowarrMonitorVolume, targetInstanceId) { mutableStateOf(preferences.addKapowarrMonitorVolume) }
+    var comicMonitorNewIssues by remember(preferences.addKapowarrMonitorNewIssues, targetInstanceId) { mutableStateOf(preferences.addKapowarrMonitorNewIssues) }
+    var comicMonitoringScheme by remember(preferences.addKapowarrMonitoringScheme, targetInstanceId) { mutableStateOf(preferences.addKapowarrMonitoringScheme) }
+    var comicSpecialVersion by remember(preferences.addKapowarrSpecialVersion, targetInstanceId) { mutableStateOf(preferences.addKapowarrSpecialVersion) }
+    val fallbackVolumeLabel = mokoString(MR.strings.type_volume)
+    var comicVolumeFolder by remember(arrMedia, targetInstanceId, fallbackVolumeLabel) {
+        val vol = arrMedia as? ComicVolume
+        val volNum = vol?.volumeNumber?.let { if (it < 10) "0$it" else "$it" } ?: "01"
+        mutableStateOf(vol?.folder ?: "${vol?.title ?: fallbackVolumeLabel}/$fallbackVolumeLabel $volNum${vol?.year?.let { " ($it)" } ?: ""}")
+    }
+    var comicRootFolder by remember(effectiveRootFolders, preferences.addRootFolderPath, targetInstanceId) {
+        mutableStateOf(
+            effectiveRootFolders.firstOrNull { it.path == preferences.addRootFolderPath }
+                ?: effectiveRootFolders.firstOrNull(),
+        )
+    }
+    var comicSearchOnAdd by remember(preferences.addSearchOnAdd, targetInstanceId) { mutableStateOf(preferences.addSearchOnAdd) }
+
     val isActionEnabled =
         if (showMode == SheetMode.Request) {
             !isBusy && seerrMedia != null && (seerrMedia !is TvDetails || selectedSeasons.isNotEmpty())
@@ -255,6 +275,7 @@ fun MediaRequestOrAddSheet(
             when (arrMedia) {
                 is ArrSeries -> !isBusy && seriesQualityProfile != null && seriesRootFolder != null
                 is ArrMovie -> !isBusy && movieQualityProfile != null && movieRootFolder != null
+                is ComicVolume -> !isBusy && comicRootFolder != null && comicVolumeFolder.isNotBlank()
                 else -> false
             }
         }
@@ -437,6 +458,29 @@ fun MediaRequestOrAddSheet(
                                             enabled = !isBusy,
                                         )
 
+                                    is ComicVolume ->
+                                        ComicAddConfigurationContent(
+                                            instances = addSheetUiState.availableInstances,
+                                            selectedInstance = addSheetUiState.targetInstance,
+                                            onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
+                                            rootFolders = effectiveRootFolders,
+                                            rootFolder = comicRootFolder,
+                                            onRootFolderChange = { comicRootFolder = it },
+                                            volumeFolder = comicVolumeFolder,
+                                            onVolumeFolderChange = { comicVolumeFolder = it },
+                                            monitorVolume = comicMonitorVolume,
+                                            onMonitorVolumeChange = { comicMonitorVolume = it },
+                                            monitorNewIssues = comicMonitorNewIssues,
+                                            onMonitorNewIssuesChange = { comicMonitorNewIssues = it },
+                                            selectedMonitoringScheme = comicMonitoringScheme,
+                                            onMonitoringSchemeChange = { comicMonitoringScheme = it },
+                                            selectedSpecialVersion = comicSpecialVersion,
+                                            onSpecialVersionChange = { comicSpecialVersion = it },
+                                            searchOnAdd = comicSearchOnAdd,
+                                            onSearchOnAddChange = { comicSearchOnAdd = it },
+                                            enabled = !isBusy,
+                                        )
+
                                     else -> {}
                                 }
                             }
@@ -523,6 +567,29 @@ fun MediaRequestOrAddSheet(
                                                     tags = movieTags,
                                                 )
                                             viewModel.smartAdd(newItem, movieSearchOnAdd, addSheetUiState.targetInstance?.id)
+                                        }
+                                    }
+
+                                    is ComicVolume -> {
+                                        val rf = comicRootFolder
+                                        if (rf != null) {
+                                            viewModel.updatePreferences(
+                                                preferences.copy(
+                                                    addRootFolderPath = rf.path,
+                                                    addSearchOnAdd = comicSearchOnAdd,
+                                                ),
+                                            )
+                                            val newItem = arrMedia.copy(
+                                                monitored = comicMonitorVolume,
+                                                monitorNewIssues = comicMonitorNewIssues,
+                                                folder = comicVolumeFolder,
+                                                volumeFolder = comicVolumeFolder,
+                                                specialVersion = comicSpecialVersion.value,
+                                                monitoringScheme = comicMonitoringScheme,
+                                                rootFolder = rf.id,
+                                                searchOnAdd = comicSearchOnAdd,
+                                            )
+                                            viewModel.smartAdd(newItem, comicSearchOnAdd, addSheetUiState.targetInstance?.id)
                                         }
                                     }
 

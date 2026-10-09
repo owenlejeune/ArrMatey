@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.arr.usecase
 import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
+import com.dnfapps.arrmatey.arr.api.model.KapowarrRelease
 import com.dnfapps.arrmatey.arr.api.model.LidarrRelease
 import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
 import com.dnfapps.arrmatey.arr.api.model.MovieRelease
@@ -35,6 +36,7 @@ class DownloadReleaseUseCase(
                 is LidarrRelease -> buildLidarrPayload(release, force)
                 is BookshelfRelease -> buildBookshelfPayload(release)
                 is ListenarrRelease -> buildListenarrPayload(release)
+                is KapowarrRelease -> buildKapowarrPayload(release)
             }
         return repository.downloadRelease(payload)
     }
@@ -76,5 +78,12 @@ class DownloadReleaseUseCase(
     private fun buildListenarrPayload(release: ListenarrRelease): DownloadReleasePayload = DownloadReleasePayload.AudioBook(
         audiobookId = release.mediaId ?: -1,
         searchResult = release,
+    )
+
+    private fun buildKapowarrPayload(release: KapowarrRelease): DownloadReleasePayload = DownloadReleasePayload.Comic(
+        guid = release.link ?: release.guid,
+        indexerId = release.indexerId,
+        issueId = release.mediaId,
+        volumeId = release.mediaId,
     )
 }

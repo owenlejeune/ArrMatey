@@ -21,8 +21,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -51,6 +53,8 @@ fun UnifiedDetailsHeader(
     certification: String?,
     releasedBy: String?,
     seasonCount: String?,
+    volumeString: String? = null,
+    issueCountString: String? = null,
     genres: List<String>,
     bannerGradientHeight: Dp? = null,
     isExpanded: Boolean = false,
@@ -118,14 +122,25 @@ fun UnifiedDetailsHeader(
 
                 RatingsSection(ratings)
 
+                val textShadow = Shadow(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                    offset = Offset(1f, 1f),
+                    blurRadius = 6f,
+                )
+
                 listOfNotNull(
                     year,
+                    volumeString,
                     runtimeString,
                     seasonCount,
+                    issueCountString,
                 ).joinToString(BULLET).takeUnless { it.isEmpty() }?.let { info ->
                     Text(
                         text = info,
-                        style = MaterialTheme.typography.bodyMediumEmphasized,
+                        style = MaterialTheme.typography.bodyMediumEmphasized.copy(
+                            shadow = textShadow,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
                 listOfNotNull(
@@ -134,14 +149,19 @@ fun UnifiedDetailsHeader(
                 ).joinToString(BULLET).takeUnless { it.isEmpty() }?.let { info ->
                     Text(
                         text = info,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            shadow = textShadow,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
-                genres.takeUnless { it.isEmpty() }?.let { genres ->
+                genres.takeUnless { it.isEmpty() }?.let { genresList ->
                     Text(
-                        text = genres.joinToString(BULLET),
+                        text = genresList.joinToString(BULLET),
                         color = MaterialTheme.colorScheme.secondary,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            shadow = textShadow,
+                        ),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )

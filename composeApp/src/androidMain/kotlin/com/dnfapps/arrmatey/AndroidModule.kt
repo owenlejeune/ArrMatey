@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.navigation.AudiobooksTabNavigator
 import com.dnfapps.arrmatey.navigation.BazarrTabNavigator
 import com.dnfapps.arrmatey.navigation.BooksTabNavigator
 import com.dnfapps.arrmatey.navigation.CalendarTabNavigator
+import com.dnfapps.arrmatey.navigation.ComicsTabNavigator
 import com.dnfapps.arrmatey.navigation.DashboardTabNavigator
 import com.dnfapps.arrmatey.navigation.DiscoverTabNavigator
 import com.dnfapps.arrmatey.navigation.LibraryTabNavigator
@@ -48,6 +49,7 @@ val androidModule =
         single { DashboardTabNavigator() }
         single { BazarrTabNavigator() }
         single { TracearrTabNavigator() }
+        single { ComicsTabNavigator() }
 
         // Navigation Manager
         single {
@@ -62,6 +64,7 @@ val androidModule =
                     TabItem.Standard.CALENDAR to get<CalendarTabNavigator>(),
                     TabItem.Standard.BOOKS to get<BooksTabNavigator>(),
                     TabItem.Standard.AUDIOBOOKS to get<AudiobooksTabNavigator>(),
+                    TabItem.Standard.COMICS to get<ComicsTabNavigator>(),
                 )
             NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }

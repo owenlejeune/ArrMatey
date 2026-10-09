@@ -89,11 +89,13 @@ struct UnifiedMediaDetailsSheetsModifier: ViewModifier {
                 let label: String? = (success?.availableInstances.count ?? 0) > 1
                     ? success?.availableInstances.first(where: { $0.id == success?.selectedInstanceId?.int64Value })?.label
                     : nil
+                let isKapowarr = success?.arrMedia is ComicVolume
                 DeleteMediaSheet(
                     isLoading: viewModel.deleteStatus is OperationStatusInProgress,
                     initialAddExclusion: viewModel.preferences.deleteAddExclusion,
                     initialDeleteFiles: viewModel.preferences.deleteDeleteFiles,
                     instanceLabel: label,
+                    showAddExclusion: !isKapowarr,
                     onConfirm: { addExclusion, deleteFiles in
                         viewModel.deleteMedia(deleteFiles: deleteFiles, addImportExclusion: addExclusion)
                     }

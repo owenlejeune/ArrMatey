@@ -36,6 +36,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.state.MediaPreviewUiState
@@ -54,6 +55,7 @@ import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAuthorSheet
+import com.dnfapps.arrmatey.ui.sheets.AddComicSheet
 import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
 import com.dnfapps.arrmatey.utils.mokoString
@@ -271,6 +273,19 @@ private fun AddMediaSheet(
                 uiState.qualityProfiles,
                 uiState.rootFolders,
                 uiState.relativePath,
+                uiState.addItemStatus == OperationStatus.InProgress,
+                uiState.preferences,
+                onUpdatePreferences,
+                onAddItem,
+                onDismiss,
+                instances = uiState.instances,
+                selectedInstance = uiState.selectedInstance ?: uiState.instances.firstOrNull(),
+                onInstanceSelected = onInstanceSelected,
+            )
+        is ComicVolume ->
+            AddComicSheet(
+                item,
+                uiState.rootFolders,
                 uiState.addItemStatus == OperationStatus.InProgress,
                 uiState.preferences,
                 onUpdatePreferences,

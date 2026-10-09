@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.getChangedRootFolderPath
 import com.dnfapps.arrmatey.arr.api.model.hasRootFolderChanged
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
@@ -69,6 +70,7 @@ import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
+import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
 import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
 import com.dnfapps.arrmatey.ui.components.MediaView
@@ -505,10 +507,12 @@ fun UnifiedLibraryScreen(
             }
 
             confirmDelete?.let { item ->
+                val isKapowarr = item is ComicVolume
                 ConfirmDeleteAlert(
                     deleteInProgress = deleteStatus is OperationStatus.InProgress,
                     initialAddExclusion = preferences.deleteAddExclusion,
                     initialDeleteFiles = preferences.deleteDeleteFiles,
+                    showAddExclusion = !isKapowarr,
                     onDismiss = { confirmDelete = null },
                     onDelete = { deleteFiles, addExclusion ->
                         unifiedLibraryViewModel.deleteMedia(item, deleteFiles, addExclusion)
@@ -566,10 +570,12 @@ fun UnifiedLibraryScreen(
             }
 
             if (confirmBulkDelete) {
+                val isKapowarr = currentType == InstanceType.Kapowarr
                 ConfirmDeleteAlert(
                     deleteInProgress = false,
                     initialAddExclusion = preferences.deleteAddExclusion,
                     initialDeleteFiles = preferences.deleteDeleteFiles,
+                    showAddExclusion = !isKapowarr,
                     onDismiss = { confirmBulkDelete = false },
                     onDelete = { deleteFiles, addExclusion ->
                         unifiedLibraryViewModel.deleteSelected(deleteFiles, addExclusion)
