@@ -173,6 +173,7 @@ class ImportDataUseCase(
                 global.dualPanelSupport?.let { preferencesStore.setDualPanelSupport(it) }
                 global.useColoredActivityCards?.let { preferencesStore.setUseColoredActivityCards(it) }
                 global.useColoredCalendarCards?.let { preferencesStore.setUseColoredCalendarCards(it) }
+                global.startOfWeekMonday?.let { preferencesStore.setStartOfWeekMonday(it) }
                 global.showInfoCards?.forEach { (type, visible) ->
                     preferencesStore.setInfoCardVisibility(type, visible)
                 }

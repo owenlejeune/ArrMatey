@@ -11,8 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import com.dnfapps.arrmatey.arr.state.CalendarState
 import com.dnfapps.arrmatey.entensions.daysInMonth
-import com.dnfapps.arrmatey.shared.*
-import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.datetime.LocalDate
 
@@ -23,21 +21,13 @@ fun CalendarMonthGrid(
     onDateSelected: (LocalDate) -> Unit,
     state: CalendarState,
 ) {
-    val firstDayOfMonth = LocalDate(currentMonth.year, currentMonth.month, 1)
     val daysInMonth = currentMonth.daysInMonth()
-    val firstDayOfWeek = firstDayOfMonth.dayOfWeek.ordinal + 1
+    val firstDayOfWeek = state.firstDayOfWeek(currentMonth)
+    val headers = state.weekdayHeaders()
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            listOf(
-                MR.strings.sun,
-                MR.strings.mon,
-                MR.strings.tues,
-                MR.strings.wed,
-                MR.strings.thu,
-                MR.strings.fri,
-                MR.strings.sat,
-            ).forEach { day ->
+            headers.forEach { day ->
                 Text(
                     text = mokoString(day),
                     modifier = Modifier.weight(1f),

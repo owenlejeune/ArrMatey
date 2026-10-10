@@ -64,6 +64,7 @@ internal object PreferenceKeys {
     val OVERLAY_TAB_BACK_OPENS_DRAWER = booleanPreferencesKey("overlayTabBackOpensDrawer")
     val USE_COLORED_ACTIVITY_CARDS = booleanPreferencesKey("useColoredActivityCards")
     val USE_COLORED_CALENDAR_CARDS = booleanPreferencesKey("useColoredCalendarCards")
+    val START_OF_WEEK_MONDAY = booleanPreferencesKey("startOfWeekMonday")
 
     fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> SONARR_INFO_CARD
