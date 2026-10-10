@@ -2,8 +2,6 @@
 //  CalendarMonthView.swift
 //  iosApp
 //
-//  Created by Owen LeJeune on 2026-02-09.
-//
 
 import Shared
 import SwiftUI
@@ -14,14 +12,14 @@ struct CalendarMonthView: View {
     var useFullColorCards: Bool = false
     let onItemClick: (CalendarItem, Int64?) -> Void
     let onLoadMore: () -> Void
-    
+
     @State private var currentMonth: Date
     @State private var selectedDate: LocalDate
-    
+
     private var isCurrentMonth: Bool {
         Calendar.current.isDate(currentMonth, equalTo: Date(), toGranularity: .month)
     }
-        
+
     init(
         state: CalendarState,
         instances: [Instance],
@@ -38,7 +36,7 @@ struct CalendarMonthView: View {
         _currentMonth = State(initialValue: today)
         _selectedDate = State(initialValue: state.today)
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -46,9 +44,9 @@ struct CalendarMonthView: View {
                     Image(systemName: "chevron.left")
                         .font(.title3)
                 }
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     if !isCurrentMonth {
                         currentMonth = Date()
@@ -59,22 +57,22 @@ struct CalendarMonthView: View {
                         .fontWeight(.semibold)
                         .foregroundColor(isCurrentMonth ? .themePrimary : .primary)
                 }
-                
+
                 Spacer()
-                
+
                 Button(action: nextMonth) {
                     Image(systemName: "chevron.right")
                         .font(.title3)
                 }
             }
             .padding()
-            
+
             CalendarMonthGrid(currentMonth: currentMonth, selectedDate: selectedDate, onDateSelected: { date in
                 selectedDate = date
             }, state: state)
-            
+
             Divider().padding(.vertical, 8)
-            
+
             if isDateInCurrentMonth(selectedDate) {
                 ScrollView {
                     CalendarDaySection(
@@ -104,21 +102,21 @@ struct CalendarMonthView: View {
             checkLoadMore()
         }
     }
-    
+
     private func checkLoadMore() {
         guard let monthStart = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: currentMonth)),
               let monthRange = Calendar.current.range(of: .day, in: .month, for: monthStart),
               let lastDayOfMonth = Calendar.current.date(byAdding: .day, value: monthRange.count - 1, to: monthStart) else {
             return
         }
-        
+
         let components = Calendar.current.dateComponents([.year, .month, .day], from: lastDayOfMonth)
         let kotlinLastDay = LocalDate(
             year: Int32(components.year ?? 2024),
             month: Int32(components.month ?? 1),
             day: Int32(components.day ?? 1)
         )
-        
+
         if let lastLoadedDate = state.dates.last, kotlinLastDay.compareTo(other: lastLoadedDate) > 0 {
             onLoadMore()
         }

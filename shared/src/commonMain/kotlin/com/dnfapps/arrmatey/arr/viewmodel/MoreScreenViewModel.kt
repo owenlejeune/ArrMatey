@@ -106,6 +106,14 @@ class MoreScreenViewModel(
                 initialValue = false,
             )
 
+    val startOfWeekMonday =
+        preferencesStore.startOfWeekMonday
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
     val appTheme =
         preferencesStore.appTheme
             .stateIn(
@@ -362,6 +370,10 @@ class MoreScreenViewModel(
 
     fun toggleUseColoredCalendarCards() {
         preferencesStore.toggleUseColoredCalendarCards()
+    }
+
+    fun toggleStartOfWeekMonday() {
+        preferencesStore.toggleStartOfWeekMonday()
     }
 
     fun setAppTheme(theme: AppTheme) {

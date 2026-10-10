@@ -22,6 +22,7 @@ class PreferencesViewModel: ObservableObject {
     @Published var isFirstLaunch: Bool = false
     @Published var useColoredActivityCards: Bool = false
     @Published var useColoredCalendarCards: Bool = false
+    @Published var startOfWeekMonday: Bool = false
     @Published var useFloatingNavigationBar: Bool = false
     @Published var hideFloatingNavigationBarLabels: Bool = false
 
@@ -58,6 +59,9 @@ class PreferencesViewModel: ObservableObject {
         }
         preferenceStore.useColoredCalendarCards.observeAsync(on: self) { owner, val in
             owner.useColoredCalendarCards = val.boolValue
+        }
+        preferenceStore.startOfWeekMonday.observeAsync(on: self) { owner, val in
+            owner.startOfWeekMonday = val.boolValue
         }
         preferenceStore.useFloatingNavigationBar.observeAsync(on: self) { owner, val in
             owner.useFloatingNavigationBar = val.boolValue
@@ -124,6 +128,10 @@ class PreferencesViewModel: ObservableObject {
 
     func toggleHideFloatingNavigationBarLabels() {
         preferenceStore.toggleHideFloatingNavigationBarLabels()
+    }
+
+    func toggleStartOfWeekMonday() {
+        preferenceStore.toggleStartOfWeekMonday()
     }
 
 }

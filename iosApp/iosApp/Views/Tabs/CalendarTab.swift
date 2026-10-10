@@ -2,8 +2,6 @@
 //  CalendarTab.swift
 //  iosApp
 //
-//  Created by Owen LeJeune on 2026-02-09.
-//
 
 import Shared
 import SwiftUI
@@ -17,7 +15,6 @@ struct CalendarTab: View {
 struct CalendarTabContent: View {
 
     @StateObject private var viewModel = CalendarViewModelS()
-    @StateObject private var moreViewModel = MoreScreenViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     @State private var showCalendarCustomizationSheet = false
 
@@ -70,7 +67,7 @@ struct CalendarTabContent: View {
             viewModel.load()
         }
         .sheet(isPresented: $showCalendarCustomizationSheet) {
-            CalendarCardCustomizationSheet(viewModel: moreViewModel)
+            CalendarCardCustomizationSheet(viewModel: MoreScreenViewModelS())
         }
     }
 

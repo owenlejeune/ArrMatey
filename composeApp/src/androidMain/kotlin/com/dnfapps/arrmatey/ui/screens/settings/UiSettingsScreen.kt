@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CalendarViewWeek
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Image
@@ -82,6 +83,7 @@ fun UiSettingsScreen(
     val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
     val useColoredActivityCards by viewModel.useColoredActivityCards.collectAsStateWithLifecycle()
     val useColoredCalendarCards by viewModel.useColoredCalendarCards.collectAsStateWithLifecycle()
+    val startOfWeekMonday by viewModel.startOfWeekMonday.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
     val overlayTabBackOpensDrawer by viewModel.overlayTabBackOpensDrawer.collectAsStateWithLifecycle()
     val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
@@ -273,6 +275,18 @@ fun UiSettingsScreen(
                         title = mokoString(MR.strings.calendar_cards),
                         subtitle = mokoString(MR.strings.calendar_cards_description),
                         onClick = { showCalendarCustomizationSheet = true },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.CalendarViewWeek),
+                        title = mokoString(MR.strings.start_week_on_monday),
+                        subtitle = mokoString(MR.strings.start_week_on_monday_desc),
+                        trailingContent = {
+                            Switch(
+                                checked = startOfWeekMonday,
+                                onCheckedChange = { viewModel.toggleStartOfWeekMonday() },
+                            )
+                        },
+                        onClick = { viewModel.toggleStartOfWeekMonday() },
                     ),
                     SettingItem(
                         icon = IconSource.Vector(Icons.Default.Image),

@@ -116,7 +116,7 @@ sealed interface UnifiedMediaDetailsUiState {
             if (hasSeasonsOrFiles) add(UnifiedMediaDetailsTab.SeasonsFiles)
             add(UnifiedMediaDetailsTab.Overview)
             if (hasArrId) add(UnifiedMediaDetailsTab.Activity)
-            if (hasTracearr(isTracearrConfigured)) {
+            if (hasTracearr(isTracearrConfigured) && (arrMedia?.id ?: 0) > 0) {
                 add(UnifiedMediaDetailsTab.Analytics)
                 add(UnifiedMediaDetailsTab.Steams)
             }

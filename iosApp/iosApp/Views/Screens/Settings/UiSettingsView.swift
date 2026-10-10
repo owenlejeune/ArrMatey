@@ -25,6 +25,18 @@ struct UiSettingsView: View {
                 )) {
                     Text(MR.strings().service_icons_title.localized())
                 }
+
+                Toggle(isOn: Binding(
+                    get: { viewModel.startOfWeekMonday },
+                    set: { _ in viewModel.toggleStartOfWeekMonday() }
+                )) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(MR.strings().start_week_on_monday.localized())
+                        Text(MR.strings().start_week_on_monday_desc.localized())
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             } header: {
                 Text(MR.strings().appearance.localized())
             }
