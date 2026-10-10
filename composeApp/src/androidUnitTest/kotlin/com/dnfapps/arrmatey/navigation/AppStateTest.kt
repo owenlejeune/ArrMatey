@@ -41,4 +41,14 @@ class AppStateTest {
         assertEquals(TabItem.Settings, appState.overlayTab.value)
         assertFalse(appState.drawerExpanded.value) // Should close drawer
     }
+
+    @Test
+    fun testAddInstanceSheet() {
+        assertNull(appState.addInstanceSheetType.value)
+        appState.openAddInstanceSheet(com.dnfapps.arrmatey.instances.model.InstanceType.Sonarr)
+        assertEquals(com.dnfapps.arrmatey.instances.model.InstanceType.Sonarr, appState.addInstanceSheetType.value)
+
+        appState.closeAddInstanceSheet()
+        assertNull(appState.addInstanceSheetType.value)
+    }
 }

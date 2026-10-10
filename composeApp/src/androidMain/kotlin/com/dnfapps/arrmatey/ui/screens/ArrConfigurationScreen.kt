@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.ExpandCircleDown
 import androidx.compose.material.icons.filled.WifiFind
 import androidx.compose.material3.Button
@@ -96,7 +97,7 @@ fun ArrConfigurationScreen(
     onIsSlowInstanceChanged: (Boolean) -> Unit,
     onCustomTimeoutChanged: (Long?) -> Unit,
     onHeadersChanged: (List<InstanceHeader>) -> Unit,
-    onTestConnection: () -> Unit,
+    onTestConnection: (() -> Unit)? = null,
     onLocalNetworkEnabledChanged: (Boolean) -> Unit,
     onLocalNetworkUrlChanged: (String) -> Unit,
     onLocalNetworkSsidChanged: (List<String>) -> Unit,
@@ -142,6 +143,36 @@ fun ArrConfigurationScreen(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        AnimatedVisibility(
+            visible = testResult == false,
+        ) {
+            Card(
+                colors =
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                ),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ErrorOutline,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                    )
+                    Column {
+                        Text(
+                            text = mokoString(MR.strings.connection_failed),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                    }
+                }
+            }
+        }
         AMOutlinedTextField(
             label = mokoString(MR.strings.label),
             value = instanceLabel,
@@ -253,16 +284,6 @@ fun ArrConfigurationScreen(
             localNetworkConfigured = uiState.localNetworkConfigured,
             headers = headers,
             onHeadersChanged = onHeadersChanged,
-        )
-
-        TestConnectionSection(
-            isTesting = isTesting,
-            testButtonEnabled =
-            !isTesting &&
-                apiEndpoint.isNotBlank() &&
-                (uiState.noApiKeyRequired || apiKey.isNotBlank()),
-            testResult = testResult,
-            onTestConnection = onTestConnection,
         )
     }
 }

@@ -34,6 +34,7 @@ class NavigationManager(
     val drawerExpandedState: StateFlow<Boolean> = appState.drawerExpanded
     val selectedTab: StateFlow<TabItem?> = appState.selectedTab
     val overlayTab: StateFlow<TabItem?> = appState.overlayTab
+    val addInstanceSheetType: StateFlow<InstanceType?> = appState.addInstanceSheetType
 
     // UI state actions
     fun openDrawer() = appState.setDrawerOpen(true)
@@ -105,8 +106,11 @@ class NavigationManager(
     }
 
     fun openNewInstanceScreen(type: InstanceType) {
-        openOverlay(TabItem.Settings)
-        settings.toAddInstance(type)
+        appState.openAddInstanceSheet(type)
+    }
+
+    fun closeAddInstanceSheet() {
+        appState.closeAddInstanceSheet()
     }
 
     fun openEditInstanceScreen(id: Long) {

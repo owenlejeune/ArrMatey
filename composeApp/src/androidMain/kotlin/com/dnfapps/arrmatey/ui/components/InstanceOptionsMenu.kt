@@ -4,6 +4,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MoreVert
@@ -16,6 +17,7 @@ import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +40,7 @@ fun InstanceOptionsMenu(
     onSearchFiltered: (() -> Unit)? = null,
     onUpdateLibrary: () -> Unit,
     onBackupDatabase: () -> Unit,
+    onDelete: (() -> Unit)? = null,
     trigger: @Composable (onClick: () -> Unit) -> Unit = { onClick ->
         IconButton(onClick = onClick) {
             Icon(
@@ -158,6 +161,30 @@ fun InstanceOptionsMenu(
                         onBackupDatabase()
                     },
                 )
+
+                if (onDelete != null) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = mokoString(MR.strings.delete),
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        },
+                        shapes = MenuDefaults.itemShape(0, 1),
+                        selected = false,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                            )
+                        },
+                        onClick = {
+                            expanded = false
+                            onDelete()
+                        },
+                    )
+                }
             }
         }
     }

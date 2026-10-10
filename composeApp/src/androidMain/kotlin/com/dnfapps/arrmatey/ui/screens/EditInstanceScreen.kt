@@ -1,10 +1,12 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,13 +62,6 @@ fun EditInstanceScreen(
     val instance by viewModel.instance.collectAsStateWithLifecycle()
 
     var confirmDelete by remember { mutableStateOf(false) }
-    var saveClicked by remember { mutableStateOf(false) }
-
-    LaunchedEffect(uiState.testResult) {
-        if (uiState.testResult == true && saveClicked) {
-            viewModel.updateInstance()
-        }
-    }
 
     LaunchedEffect(uiState.editResult) {
         if (uiState.editResult is InsertResult.Success) {
@@ -110,13 +106,25 @@ fun EditInstanceScreen(
                     Button(
                         onClick = {
                             scope.launch {
-                                saveClicked = true
-                                viewModel.testConnection()
+                                viewModel.updateInstance()
                             }
                         },
+                        enabled = uiState.saveButtonEnabled && !uiState.testing,
                         modifier = Modifier.padding(end = 12.dp),
                     ) {
-                        Text(text = mokoString(MR.strings.save))
+                        AnimatedContent(
+                            targetState = uiState.testing,
+                            label = "save_button",
+                        ) { isTesting ->
+                            if (isTesting) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                )
+                            } else {
+                                Text(text = mokoString(MR.strings.save))
+                            }
+                        }
                     }
                 },
             )

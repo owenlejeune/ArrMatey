@@ -522,7 +522,7 @@ val viewModelModule =
             EditInstanceViewModel(instanceId, get(), get(), get(), get(), get())
         }
         viewModel { (instanceId: Long) ->
-            ArrInstanceDashboardViewModel(instanceId, get(), get())
+            ArrInstanceDashboardViewModel(instanceId, get(), get(), get(), get())
         }
         viewModelOf(::CalendarViewModel)
         viewModelOf(::RequestsViewModel)
