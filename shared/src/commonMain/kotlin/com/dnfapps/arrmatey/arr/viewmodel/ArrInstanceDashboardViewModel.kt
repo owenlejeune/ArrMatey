@@ -7,7 +7,9 @@ import com.dnfapps.arrmatey.arr.state.HttpErrorType
 import com.dnfapps.arrmatey.arr.usecase.ExecuteArrCommandUseCase
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
+import com.dnfapps.arrmatey.instances.usecase.DeleteInstanceUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.notifications.NotificationManager
 import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +21,8 @@ class ArrInstanceDashboardViewModel(
     private val instanceId: Long,
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
     private val executeArrCommandUseCase: ExecuteArrCommandUseCase,
+    private val deleteInstanceUseCase: DeleteInstanceUseCase,
+    private val notificationManager: NotificationManager,
 ) : ViewModel() {
     private val _state = MutableStateFlow<ArrDashboardState>(ArrDashboardState.Initial)
     val state: StateFlow<ArrDashboardState> = _state.asStateFlow()
@@ -116,6 +120,17 @@ class ArrInstanceDashboardViewModel(
         viewModelScope.launch {
             val result = executeArrCommandUseCase.backupDatabase(instanceId)
             _lastCommandResult.value = result is NetworkResult.Success
+        }
+    }
+
+    fun deleteInstance() {
+        viewModelScope.launch {
+            _instance.value?.let { inst ->
+                if (inst.notificationsEnabled) {
+                    notificationManager.cancelNotificationsForInstance(inst.label)
+                }
+                deleteInstanceUseCase(inst)
+            }
         }
     }
 }

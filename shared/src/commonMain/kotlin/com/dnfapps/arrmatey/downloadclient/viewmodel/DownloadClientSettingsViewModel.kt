@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientUseCase
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.utils.isValidUrl
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +40,10 @@ class DownloadClientSettingsViewModel(
 
     private var originalClient: DownloadClient? = null
     private var pendingClientId: Long? = null
+
+    private var testJob: Job? = null
+    private var localTestJob: Job? = null
+    private var submitJob: Job? = null
 
     init {
         refreshClient(downloadClientId)
@@ -72,27 +77,56 @@ class DownloadClientSettingsViewModel(
         }
     }
 
+    private fun cancelActiveTesting() {
+        if (_uiState.value.isTesting || testJob?.isActive == true || submitJob?.isActive == true) {
+            testJob?.cancel()
+            testJob = null
+            submitJob?.cancel()
+            submitJob = null
+            pendingClientId?.let { id ->
+                val cleanupId = id
+                pendingClientId = null
+                viewModelScope.launch {
+                    deleteDownloadClientUseCase(cleanupId)
+                    downloadClientManager.removeApi(cleanupId)
+                }
+            }
+            _uiState.update { it.copy(isTesting = false, testResult = null, mutationState = DownloadClientMutationState.Initial) }
+        }
+        if (_uiState.value.localTesting || localTestJob?.isActive == true) {
+            localTestJob?.cancel()
+            localTestJob = null
+            _uiState.update { it.copy(localTesting = false, localTestResult = null) }
+        }
+    }
+
     fun updateLabel(label: String) {
+        cancelActiveTesting()
         _uiState.update { it.copy(label = label).validate() }
     }
 
     fun updateSelectedType(type: DownloadClientType) {
+        cancelActiveTesting()
         _uiState.update { it.copy(selectedType = type).validate() }
     }
 
     fun updateUrl(url: String) {
-        _uiState.update { it.copy(url = url).validate() }
+        cancelActiveTesting()
+        _uiState.update { it.copy(url = url, endpointError = false).validate() }
     }
 
     fun updateUsername(username: String) {
+        cancelActiveTesting()
         _uiState.update { it.copy(username = username).validate() }
     }
 
     fun updatePassword(password: String) {
+        cancelActiveTesting()
         _uiState.update { it.copy(password = password).validate() }
     }
 
     fun updateApiKey(apiKey: String) {
+        cancelActiveTesting()
         _uiState.update {
             val newApiKey = if (it.noApiKeyRequired) "" else apiKey
             it.copy(apiKey = newApiKey).validate()
@@ -100,6 +134,7 @@ class DownloadClientSettingsViewModel(
     }
 
     fun updateNoApiKeyRequired(enabled: Boolean) {
+        cancelActiveTesting()
         _uiState.update {
             val newApiKey = if (enabled) "" else it.apiKey
             val newUsername = if (enabled) "" else it.username
@@ -114,22 +149,27 @@ class DownloadClientSettingsViewModel(
     }
 
     fun updateHeaders(headers: List<InstanceHeader>) {
+        cancelActiveTesting()
         _uiState.update { it.copy(headers = headers).validate() }
     }
 
     fun updateLocalNetworkEnabled(enabled: Boolean) {
-        _uiState.update { it.copy(localNetworkEnabled = enabled).validate() }
+        cancelActiveTesting()
+        _uiState.update { it.copy(localNetworkEnabled = enabled, localTestResult = null).validate() }
     }
 
     fun updateLocalNetworkUrl(url: String) {
-        _uiState.update { it.copy(localNetworkEndpoint = url, localNetworkEndpointError = false).validate() }
+        cancelActiveTesting()
+        _uiState.update { it.copy(localNetworkEndpoint = url, localNetworkEndpointError = false, localTestResult = null).validate() }
     }
 
     fun updateLocalNetworkSsid(ssids: List<String>) {
-        _uiState.update { it.copy(localNetworkSsids = ssids).validate() }
+        cancelActiveTesting()
+        _uiState.update { it.copy(localNetworkSsids = ssids, localTestResult = null).validate() }
     }
 
     fun updateShowExternalIpAddress(enabled: Boolean) {
+        cancelActiveTesting()
         _uiState.update { it.copy(showExternalIpAddress = enabled).validate() }
     }
 
@@ -145,7 +185,7 @@ class DownloadClientSettingsViewModel(
     }
 
     fun testConnection() {
-        viewModelScope.launch {
+        testJob = viewModelScope.launch {
             _uiState.update { it.copy(isTesting = true, testResult = null) }
             val client = buildDownloadClient()
             val resultFlow = testDownloadClientConnectionUseCase(client)
@@ -163,7 +203,7 @@ class DownloadClientSettingsViewModel(
     }
 
     fun testLocalConnection() {
-        viewModelScope.launch {
+        localTestJob = viewModelScope.launch {
             if (!uiState.value.localNetworkEndpoint.isValidUrl()) {
                 _uiState.update { it.copy(localNetworkEndpointError = true) }
                 return@launch
@@ -242,7 +282,7 @@ class DownloadClientSettingsViewModel(
     }
 
     private fun createClient(downloadClient: DownloadClient) {
-        viewModelScope.launch {
+        submitJob = viewModelScope.launch {
             if (!_uiState.value.url.isValidUrl()) {
                 _uiState.update { it.copy(endpointError = true, isTesting = false) }
                 return@launch
@@ -316,7 +356,7 @@ class DownloadClientSettingsViewModel(
     }
 
     private fun updateClient(downloadClient: DownloadClient) {
-        viewModelScope.launch {
+        submitJob = viewModelScope.launch {
             _uiState.update { it.copy(isTesting = true) }
 
             when (val updateResult = updateDownloadClientUseCase(downloadClient)) {

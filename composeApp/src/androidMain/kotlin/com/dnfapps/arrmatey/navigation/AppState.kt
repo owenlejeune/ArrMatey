@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.navigation
 
 import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +19,9 @@ class AppState {
     private val _overlayTab = MutableStateFlow<TabItem?>(null)
     val overlayTab: StateFlow<TabItem?> = _overlayTab.asStateFlow()
 
+    private val _addInstanceSheetType = MutableStateFlow<InstanceType?>(null)
+    val addInstanceSheetType: StateFlow<InstanceType?> = _addInstanceSheetType.asStateFlow()
+
     fun setDrawerOpen(isOpen: Boolean) {
         _drawerExpanded.value = isOpen
     }
@@ -34,5 +38,13 @@ class AppState {
 
     fun closeOverlay() {
         _overlayTab.value = null
+    }
+
+    fun openAddInstanceSheet(type: InstanceType) {
+        _addInstanceSheetType.value = type
+    }
+
+    fun closeAddInstanceSheet() {
+        _addInstanceSheetType.value = null
     }
 }

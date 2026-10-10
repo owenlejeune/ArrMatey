@@ -46,6 +46,7 @@ import com.dnfapps.arrmatey.ui.screens.home.HomeDrawerContent
 import com.dnfapps.arrmatey.ui.screens.home.HomeFloatingNavBar
 import com.dnfapps.arrmatey.ui.screens.home.HomeMainContent
 import com.dnfapps.arrmatey.ui.screens.home.HomeNavigationRail
+import com.dnfapps.arrmatey.ui.screens.onboarding.AddInstanceSheet
 import com.dnfapps.arrmatey.ui.sheets.TabCustomizationSheet
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -71,6 +72,7 @@ fun HomeScreen(
     val drawerExtendedState by navigationManager.drawerExpandedState.collectAsStateWithLifecycle()
     val overlayTab by navigationManager.overlayTab.collectAsStateWithLifecycle()
     val selectedTab by navigationManager.selectedTab.collectAsStateWithLifecycle()
+    val addInstanceSheetType by navigationManager.addInstanceSheetType.collectAsStateWithLifecycle()
 
     val useServiceNavIcons by preferencesStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
     val useFloatingNavigationBar by preferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
@@ -257,6 +259,14 @@ fun HomeScreen(
         if (showReorderSheet) {
             TabCustomizationSheet(
                 onDismissRequest = { showReorderSheet = false },
+            )
+        }
+
+        addInstanceSheetType?.let { type ->
+            AddInstanceSheet(
+                initialType = type,
+                isTypeLocked = true,
+                onDismiss = { navigationManager.closeAddInstanceSheet() },
             )
         }
     }

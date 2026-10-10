@@ -16,6 +16,7 @@ class NavigationManagerTest {
             every { drawerExpanded } returns MutableStateFlow(false)
             every { selectedTab } returns MutableStateFlow(null)
             every { overlayTab } returns MutableStateFlow(null)
+            every { addInstanceSheetType } returns MutableStateFlow(null)
         }
     private val tabManager = mockk<TabManager>()
     private val instanceRepository = mockk<InstanceRepository>()

@@ -1,15 +1,18 @@
 package com.dnfapps.arrmatey.ui.screens.onboarding
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -47,15 +50,12 @@ import org.koin.compose.viewmodel.koinViewModel
 fun AddInstanceSheet(
     onDismiss: () -> Unit,
     initialType: InstanceType = InstanceType.Sonarr,
+    isTypeLocked: Boolean = false,
     viewModel: AddInstanceViewModel = koinViewModel(),
 ) {
     val scope = rememberCoroutineScope()
-    var selectedInstanceType by remember { mutableStateOf(initialType) }
+    var selectedInstanceType by remember(initialType) { mutableStateOf(initialType) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        viewModel.reset()
-    }
 
     LaunchedEffect(selectedInstanceType) {
         viewModel.reset()
@@ -108,9 +108,21 @@ fun AddInstanceSheet(
                             viewModel.createInstance(selectedInstanceType)
                         }
                     },
-                    enabled = uiState.saveButtonEnabled,
+                    enabled = uiState.saveButtonEnabled && !uiState.testing,
                 ) {
-                    Text(text = mokoString(MR.strings.save))
+                    AnimatedContent(
+                        targetState = uiState.testing,
+                        label = "save_button",
+                    ) { isTesting ->
+                        if (isTesting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Text(text = mokoString(MR.strings.save))
+                        }
+                    }
                 }
             }
 
@@ -129,6 +141,7 @@ fun AddInstanceSheet(
                     options = InstanceType.entries,
                     selectedOption = selectedInstanceType,
                     onOptionSelected = { selectedInstanceType = it },
+                    enabled = !isTypeLocked,
                     label = {
                         Text(
                             text = mokoString(MR.strings.instance_type),

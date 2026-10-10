@@ -1,15 +1,18 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -44,18 +47,15 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun AddInstanceScreen(
     initialType: InstanceType = InstanceType.Sonarr,
+    isTypeLocked: Boolean = false,
     viewModel: AddInstanceViewModel = koinViewModel(),
     onBack: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
-    var selectedInstanceType by remember { mutableStateOf(initialType) }
+    var selectedInstanceType by remember(initialType) { mutableStateOf(initialType) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        viewModel.reset()
-    }
 
     LaunchedEffect(selectedInstanceType) {
         viewModel.reset()
@@ -90,10 +90,22 @@ fun AddInstanceScreen(
                                 viewModel.createInstance(selectedInstanceType)
                             }
                         },
-                        enabled = uiState.saveButtonEnabled,
+                        enabled = uiState.saveButtonEnabled && !uiState.testing,
                         modifier = Modifier.padding(end = 16.dp),
                     ) {
-                        Text(text = mokoString(MR.strings.save))
+                        AnimatedContent(
+                            targetState = uiState.testing,
+                            label = "save_button",
+                        ) { isTesting ->
+                            if (isTesting) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                )
+                            } else {
+                                Text(text = mokoString(MR.strings.save))
+                            }
+                        }
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -122,6 +134,7 @@ fun AddInstanceScreen(
                 options = InstanceType.entries,
                 selectedOption = selectedInstanceType,
                 onOptionSelected = { selectedInstanceType = it },
+                enabled = !isTypeLocked,
                 label = {
                     Text(
                         text = mokoString(MR.strings.instance_type),

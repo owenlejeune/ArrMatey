@@ -415,13 +415,6 @@ fun AddEditDownloadClientScreen(
                     onLocalNetworkSsidChanged = { viewModel.updateLocalNetworkSsid(it) },
                     onTestLocalConnection = { viewModel.testLocalConnection() },
                 )
-
-                TestConnectionSection(
-                    isTesting = uiState.isTesting,
-                    testButtonEnabled = !uiState.isTesting && uiState.url.isNotBlank(),
-                    testResult = uiState.testResult,
-                    onTestConnection = { viewModel.testConnection() },
-                )
             }
         }
 

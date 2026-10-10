@@ -57,7 +57,6 @@ import com.dnfapps.arrmatey.ui.components.LabelledCheckbox
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.screens.CustomHeaderSection
 import com.dnfapps.arrmatey.ui.screens.LocalNetworkArea
-import com.dnfapps.arrmatey.ui.screens.TestConnectionSection
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.thenGet
 import kotlinx.coroutines.launch
@@ -379,13 +378,6 @@ fun AddDownloadClientSheet(
                     onLocalNetworkUrlChanged = { viewModel.updateLocalNetworkUrl(it) },
                     onLocalNetworkSsidChanged = { viewModel.updateLocalNetworkSsid(it) },
                     onTestLocalConnection = { viewModel.testLocalConnection() },
-                )
-
-                TestConnectionSection(
-                    isTesting = uiState.isTesting,
-                    testButtonEnabled = !uiState.isTesting && uiState.url.isNotBlank(),
-                    testResult = uiState.testResult,
-                    onTestConnection = { viewModel.testConnection() },
                 )
             }
         }

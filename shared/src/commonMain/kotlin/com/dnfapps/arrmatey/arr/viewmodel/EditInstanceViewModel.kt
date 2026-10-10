@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.instances.usecase.TestNewInstanceConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
 import com.dnfapps.arrmatey.notifications.NotificationManager
 import com.dnfapps.arrmatey.utils.isValidUrl
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +34,10 @@ class EditInstanceViewModel(
 
     private var _instance = MutableStateFlow<Instance?>(null)
     val instance: StateFlow<Instance?> = _instance.asStateFlow()
+
+    private var testJob: Job? = null
+    private var localTestJob: Job? = null
+    private var updateJob: Job? = null
 
     init {
         refreshInstance()
@@ -61,78 +66,104 @@ class EditInstanceViewModel(
         }
     }
 
+    private fun cancelActiveTesting() {
+        if (_uiState.value.testing || testJob?.isActive == true || updateJob?.isActive == true) {
+            testJob?.cancel()
+            testJob = null
+            updateJob?.cancel()
+            updateJob = null
+            _uiState.update { it.copy(testing = false, testResult = null) }
+        }
+        if (_uiState.value.localTesting || localTestJob?.isActive == true) {
+            localTestJob?.cancel()
+            localTestJob = null
+            _uiState.update { it.copy(localTesting = false, localTestResult = null) }
+        }
+    }
+
     fun setApiEndpoint(endpoint: String) {
+        cancelActiveTesting()
         _uiState.update {
             it
                 .copy(
                     apiEndpoint = endpoint,
                     testResult = null,
+                    endpointError = false,
                 ).validate()
         }
     }
 
     fun setApiKey(value: String) {
+        cancelActiveTesting()
         _uiState.update {
             it
                 .copy(
                     apiKey = if (it.noApiKeyRequired) "" else value,
-                    testing = false,
                     testResult = null,
                 ).validate()
         }
     }
 
     fun setNoApiKeyRequired(enabled: Boolean) {
+        cancelActiveTesting()
         _uiState.update {
             it
                 .copy(
                     noApiKeyRequired = enabled,
                     apiKey = if (enabled) "" else it.apiKey,
-                    testing = false,
                     testResult = null,
                 ).validate()
         }
     }
 
     fun setIsSlowInstance(value: Boolean) {
-        _uiState.update { it.copy(isSlowInstance = value).validate() }
+        cancelActiveTesting()
+        _uiState.update { it.copy(isSlowInstance = value, testResult = null).validate() }
     }
 
     fun setCustomTimeout(value: Long?) {
-        _uiState.update { it.copy(customTimeout = value?.takeIf { v -> v > 0L }).validate() }
+        cancelActiveTesting()
+        _uiState.update { it.copy(customTimeout = value?.takeIf { v -> v > 0L }, testResult = null).validate() }
     }
 
     fun setInstanceLabel(value: String) {
+        cancelActiveTesting()
         _uiState.update {
-            it.copy(instanceLabel = value).validate()
+            it.copy(instanceLabel = value, testResult = null).validate()
         }
     }
 
     fun updateHeaders(headers: List<InstanceHeader>) {
+        cancelActiveTesting()
         _uiState.update {
-            it.copy(headers = headers).validate()
+            it.copy(headers = headers, testResult = null).validate()
         }
     }
 
     fun setLocalNetworkEnabled(enabled: Boolean) {
-        _uiState.update { it.copy(localNetworkEnabled = enabled).validate() }
+        cancelActiveTesting()
+        _uiState.update { it.copy(localNetworkEnabled = enabled, localTestResult = null).validate() }
     }
 
     fun setLocalNetworkUrl(url: String) {
-        _uiState.update { it.copy(localNetworkUrl = url).validate() }
+        cancelActiveTesting()
+        _uiState.update { it.copy(localNetworkUrl = url, localNetworkUrlError = false, localTestResult = null).validate() }
     }
 
     fun setLocalNetworkSsids(ssids: List<String>) {
-        _uiState.update { it.copy(localNetworkSsids = ssids).validate() }
+        cancelActiveTesting()
+        _uiState.update { it.copy(localNetworkSsids = ssids, localTestResult = null).validate() }
     }
 
     fun toggleNotificationsEnabled() {
+        cancelActiveTesting()
         _uiState.update {
             it.copy(notificationsEnabled = !it.notificationsEnabled)
         }
     }
 
     fun reset() {
+        cancelActiveTesting()
         _uiState.value = AddInstanceUiState()
     }
 
@@ -141,7 +172,7 @@ class EditInstanceViewModel(
         val type = instance.value?.type ?: return
         if (state.testing) return
 
-        viewModelScope.launch {
+        testJob = viewModelScope.launch {
             if (!state.apiEndpoint.isValidUrl()) {
                 _uiState.update { it.copy(endpointError = true, testing = false) }
                 return@launch
@@ -173,7 +204,7 @@ class EditInstanceViewModel(
         if (state.localTesting || state.localNetworkUrl.isBlank()) return
         val type = instance.value?.type ?: return
 
-        viewModelScope.launch {
+        localTestJob = viewModelScope.launch {
             if (!state.localNetworkUrl.isValidUrl()) {
                 _uiState.update { it.copy(localNetworkUrlError = true, localTesting = false) }
                 return@launch
@@ -201,6 +232,7 @@ class EditInstanceViewModel(
 
     fun updateInstance() {
         val s = _uiState.value
+        if (s.testing) return
         val originalInstance =
             instance.value ?: run {
                 _uiState.update {
@@ -211,29 +243,61 @@ class EditInstanceViewModel(
                 return
             }
 
-        val updated =
-            originalInstance.copy(
-                label = s.instanceLabel,
-                url = s.apiEndpoint,
-                apiKey = EncryptedString(s.apiKey),
-                noApiKeyRequired = s.noApiKeyRequired,
-                slowInstance = s.isSlowInstance,
-                customTimeout = if (s.isSlowInstance) s.customTimeout else null,
-                headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
-                localNetworkEnabled = s.localNetworkEnabled,
-                localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() },
-                localNetworkSsids = s.localNetworkSsids.filter { it.isNotBlank() },
-                notificationsEnabled = s.notificationsEnabled,
-            )
+        updateJob = viewModelScope.launch {
+            if (!s.apiEndpoint.isValidUrl()) {
+                _uiState.update { it.copy(endpointError = true, testing = false) }
+                return@launch
+            }
 
-        viewModelScope.launch {
+            _uiState.update { it.copy(testing = true, endpointError = false, testResult = null) }
+
+            val success =
+                testNewInstanceConnectionUseCase(
+                    s.apiEndpoint,
+                    s.apiKey,
+                    originalInstance.type,
+                    s.headers,
+                    s.noApiKeyRequired,
+                )
+
+            if (!success) {
+                _uiState.update {
+                    it.copy(
+                        testing = false,
+                        testResult = false,
+                    ).validate()
+                }
+                return@launch
+            }
+
+            val updated =
+                originalInstance.copy(
+                    label = s.instanceLabel,
+                    url = s.apiEndpoint,
+                    apiKey = EncryptedString(s.apiKey),
+                    noApiKeyRequired = s.noApiKeyRequired,
+                    slowInstance = s.isSlowInstance,
+                    customTimeout = if (s.isSlowInstance) s.customTimeout else null,
+                    headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
+                    localNetworkEnabled = s.localNetworkEnabled,
+                    localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() },
+                    localNetworkSsids = s.localNetworkSsids.filter { it.isNotBlank() },
+                    notificationsEnabled = s.notificationsEnabled,
+                )
+
             if (originalInstance.notificationsEnabled && !updated.notificationsEnabled) {
                 instance.value?.label?.let { instanceName ->
                     notificationManager.cancelNotificationsForInstance(instanceName)
                 }
             }
             val result = updateInstanceUseCase(updated)
-            _uiState.update { it.copy(editResult = result) }
+            _uiState.update {
+                it.copy(
+                    testing = false,
+                    testResult = true,
+                    editResult = result,
+                ).validate()
+            }
         }
     }
 
@@ -248,8 +312,7 @@ class EditInstanceViewModel(
 
     private fun AddInstanceUiState.validate(): AddInstanceUiState {
         val isValid =
-            testResult == true &&
-                apiEndpoint.isNotEmpty() &&
+            apiEndpoint.isNotEmpty() &&
                 (noApiKeyRequired || apiKey.isNotEmpty()) &&
                 instanceLabel.isNotEmpty() &&
                 (!localNetworkEnabled || (localNetworkUrl.isValidUrl() && localNetworkSsids.isNotEmpty())) &&

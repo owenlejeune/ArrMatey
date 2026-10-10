@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -21,6 +22,7 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -29,6 +31,9 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -76,6 +81,8 @@ fun ArrInstanceDashboard(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val lastCommandResult by viewModel.lastCommandResult.collectAsStateWithLifecycle()
 
+    var confirmDelete by remember { mutableStateOf(false) }
+
     val commandQueuedMessage = mokoString(MR.strings.command_queued)
     val commandErrorMessage = mokoString(MR.strings.error_generic_title)
 
@@ -121,6 +128,7 @@ fun ArrInstanceDashboard(
                         onSearchAllMissing = { viewModel.searchAllMissing() },
                         onUpdateLibrary = { viewModel.updateLibrary() },
                         onBackupDatabase = { viewModel.backupDatabase() },
+                        onDelete = { confirmDelete = true },
                     )
                 },
                 scrollBehavior = scrollBehavior,
@@ -128,6 +136,31 @@ fun ArrInstanceDashboard(
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { contentPadding ->
+        if (confirmDelete) {
+            AlertDialog(
+                onDismissRequest = { confirmDelete = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.deleteInstance()
+                            confirmDelete = false
+                            onBack()
+                        },
+                    ) { Text(mokoString(MR.strings.yes)) }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            confirmDelete = false
+                        },
+                    ) { Text(mokoString(MR.strings.no)) }
+                },
+                title = { Text(mokoString(MR.strings.confirm)) },
+                text = {
+                    Text(mokoString(MR.strings.confirm_delete_instance, instance?.label ?: ""))
+                },
+            )
+        }
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refresh() },
