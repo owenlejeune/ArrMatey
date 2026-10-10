@@ -86,7 +86,7 @@ struct EditComicSheet: View {
                             volumeFolder: volumeFolder,
                             specialVersion: selectedSpecialVersion.value,
                             monitoringScheme: selectedMonitoringScheme,
-                            rootFolder: rootFolderId
+                            rootFolder: rootFolderId?.asKotlinInt
                         )
                         onEditItem(updatedItem)
                     } label: {
