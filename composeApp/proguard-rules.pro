@@ -46,3 +46,6 @@
 
 # Room reflection-based access and metadata
 -keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod, MethodParameters
+
+# AboutLibraries
+-keep class com.mikepenz.aboutlibraries.** { *; }
