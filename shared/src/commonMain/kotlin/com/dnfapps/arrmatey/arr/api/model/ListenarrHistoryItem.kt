@@ -30,16 +30,16 @@ data class ListenarrHistoryItem(
     override val instanceId: Long? = null,
     override val instanceName: String? = null,
     override val instanceType: InstanceType? = null,
-    val audiobookId: Long,
-    val audiobookTitle: String,
-    val message: String,
-    val source: String,
+    val audiobookId: Long = 0,
+    val audiobookTitle: String? = null,
+    val message: String? = null,
+    val source: String? = null,
 ) : HistoryItem {
     override val languages: List<Language>
         get() = emptyList()
 
-    override val displayTitle: String
-        get() = data["File Path"] ?: audiobookTitle
+    override val displayTitle: String?
+        get() = data["File Path"] ?: audiobookTitle ?: sourceTitle
 
     override val quality: QualityInfo?
         get() = null
