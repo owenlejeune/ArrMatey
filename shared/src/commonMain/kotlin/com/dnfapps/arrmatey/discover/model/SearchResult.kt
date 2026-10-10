@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.LidarrRatings
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.MovieRatings
@@ -74,6 +75,9 @@ sealed interface SearchResult {
                 is SearchAudiobook,
                 is MockMedia.Listenarr,
                 -> InstanceType.Listenarr
+                is ComicVolume,
+                is MockMedia.Kapowarr,
+                -> InstanceType.Kapowarr
             }
         val aspectRatio: AspectRatio =
             when (media) {

@@ -22,11 +22,14 @@ class GenericClient(
         try {
             val response =
                 httpClient.safeGet<Any>("${endpoint.trimEnd('/')}/${type.apiBase}/${type.testEndpoint}") {
-                    if (!noApiKeyRequired) {
-                        if (type == InstanceType.Tracearr) {
-                            header("Authorization", "Bearer $apiKey")
-                        } else {
-                            header("X-Api-Key", apiKey)
+                    if (!noApiKeyRequired && apiKey.isNotEmpty()) {
+                        when (type) {
+                            InstanceType.Tracearr ->
+                                header("Authorization", "Bearer $apiKey")
+                            InstanceType.Kapowarr ->
+                                url.parameters.append("api_key", apiKey)
+                            else ->
+                                header("X-Api-Key", apiKey)
                         }
                     }
                     headers.forEach { h ->

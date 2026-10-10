@@ -17,11 +17,17 @@ struct UnifiedMediaDetailsHeader: View {
         if let year = success.year {
             items.append(year)
         }
+        if let volumeString = success.volumeString {
+            items.append(volumeString)
+        }
         if let runtime = success.runtimeString, !runtime.isEmpty {
             items.append(runtime)
         }
         if let seasonCount = success.seasonCount {
             items.append(MR.plurals().seasons.localized(seasonCount.intValue))
+        }
+        if let issueCountString = success.issueCountString {
+            items.append(issueCountString)
         }
         if let certification = success.getCertification(countryCode: Locale.current.region?.identifier ?? "") {
             items.append(certification)

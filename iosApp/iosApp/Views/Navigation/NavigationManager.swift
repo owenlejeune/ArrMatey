@@ -65,6 +65,10 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         get { paths[TabItemStandard.audiobooks.key] ?? NavigationPath() }
         set { paths[TabItemStandard.audiobooks.key] = newValue }
     }
+    var comicPath: NavigationPath {
+        get { paths[TabItemStandard.comics.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.comics.key] = newValue }
+    }
     var seerrPath: NavigationPath {
         get { paths[TabItemStandard.requests.key] ?? NavigationPath() }
         set { paths[TabItemStandard.requests.key] = newValue }
@@ -613,6 +617,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .lidarr: return TabItemStandard.music as TabItem
         case .bookshelf: return TabItemStandard.books as TabItem
         case .listenarr: return TabItemStandard.audiobooks as TabItem
+        case .kapowarr: return TabItemStandard.comics as TabItem
         case .chaptarr: return TabItemStandard.books as TabItem
         case .seerr: return TabItemStandard.requests as TabItem
         case .prowlarr: return TabItemStandard.prowlarr as TabItem

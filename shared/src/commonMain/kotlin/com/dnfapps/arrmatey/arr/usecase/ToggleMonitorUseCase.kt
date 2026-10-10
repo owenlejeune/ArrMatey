@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
@@ -26,6 +27,7 @@ class ToggleMonitorUseCase {
                 is Arrtist -> item.copy(monitored = !item.monitored)
                 is Author -> item.copy(monitored = !item.monitored)
                 is Audiobook -> item.copy(monitored = !item.monitored)
+                is ComicVolume -> item.copy(monitored = !item.monitored)
                 is SearchAudiobook -> item
                 is MockMedia -> item
             }

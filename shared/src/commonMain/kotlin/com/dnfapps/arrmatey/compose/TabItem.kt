@@ -58,6 +58,7 @@ sealed interface TabItem {
         MUSIC("music.quarternote.3", MR.strings.music, associatedTypes = listOf(InstanceType.Lidarr)),
         BOOKS("book", MR.strings.books, associatedTypes = listOf(InstanceType.Bookshelf, InstanceType.Chaptarr)),
         AUDIOBOOKS("book.closed", MR.strings.audiobooks, associatedTypes = listOf(InstanceType.Listenarr, InstanceType.Chaptarr)),
+        COMICS("laser.burst", MR.strings.comics, associatedTypes = listOf(InstanceType.Kapowarr)),
         ACTIVITY("square.and.arrow.down", MR.strings.activity),
         DOWNLOADS("arrow.down.circle", MR.strings.downloads),
         CALENDAR("calendar", MR.strings.schedule),

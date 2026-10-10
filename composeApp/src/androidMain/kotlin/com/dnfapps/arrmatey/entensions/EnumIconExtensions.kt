@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Schedule
@@ -48,7 +49,7 @@ val ContentFilter.imageVector: ImageVector
             ContentFilter.MoviesOnly -> Icons.Default.Movie
             ContentFilter.EpisodesOnly -> Icons.Default.Tv
             ContentFilter.AlbumsOnly -> Icons.Default.MusicNote
-            ContentFilter.BooksOnly -> Icons.Default.Book
+            ContentFilter.BooksOnly -> Icons.AutoMirrored.Default.MenuBook
             ContentFilter.AudiobooksOnly -> Icons.Default.Headphones
         }
 
@@ -63,6 +64,7 @@ val TabItem.androidIcon: ImageVector
                     TabItem.Standard.MUSIC -> Icons.Default.MusicNote
                     TabItem.Standard.BOOKS -> Icons.AutoMirrored.Default.MenuBook
                     TabItem.Standard.AUDIOBOOKS -> Icons.Default.AudioFile
+                    TabItem.Standard.COMICS -> Icons.Default.Book
                     TabItem.Standard.ACTIVITY -> Icons.Default.Download
                     TabItem.Standard.DOWNLOADS -> Icons.Default.CloudDownload
                     TabItem.Standard.CALENDAR -> Icons.Default.CalendarMonth

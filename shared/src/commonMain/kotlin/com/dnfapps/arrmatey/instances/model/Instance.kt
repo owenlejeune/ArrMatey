@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.ArrRed
+import com.dnfapps.arrmatey.ui.theme.ArrYellowDark
 import com.dnfapps.arrmatey.ui.theme.ChaptarrRed
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.utils.AspectRatio
@@ -213,6 +214,24 @@ enum class InstanceType(
         mockMedia = MockMedia.Listenarr,
         associatedColor = ArrLightPurple,
     ),
+    Kapowarr(
+        resource = MR.strings.kapowarr_description,
+        github = "https://github.com/Casvt/Kapowarr",
+        website = "https://github.com/Casvt/Kapowarr",
+        icon = MR.images.kapowarr,
+        tabIcon = MR.images.kapowarr_tab,
+        defaultPort = 5656,
+        supportsActivityQueue = true,
+        apiBase = "api",
+        testEndpoint = "system/status",
+        getApiKeyEndpoint = "settings/general",
+        includeTopLevelAutomaticSearchOption = true,
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = true,
+        mockCover = MR.images.kapowarr_mock_poster,
+        mockMedia = MockMedia.Kapowarr,
+        associatedColor = ArrYellowDark,
+    ),
     Seerr(
         resource = MR.strings.seerr_description,
         github = "https://github.com/seerr-team/seerr",
@@ -280,7 +299,7 @@ enum class InstanceType(
     ;
 
     companion object {
-        fun arrs() = listOf(Sonarr, Radarr, Lidarr, Chaptarr, Bookshelf, Listenarr)
+        fun arrs() = listOf(Sonarr, Radarr, Lidarr, Chaptarr, Bookshelf, Listenarr, Kapowarr)
     }
 
     val isBookshelfOrChaptarr: Boolean

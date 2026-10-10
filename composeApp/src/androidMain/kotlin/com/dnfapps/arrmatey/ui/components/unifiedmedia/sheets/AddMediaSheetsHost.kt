@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
@@ -20,6 +21,7 @@ import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAuthorSheet
+import com.dnfapps.arrmatey.ui.sheets.AddComicSheet
 import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
 
@@ -165,6 +167,22 @@ fun AddMediaSheetsHost(
                 onDismiss = onDismiss,
             )
         }
+
+        is ComicVolume ->
+            AddComicSheet(
+                item = arrMedia,
+                rootFolders = effectiveRootFolders,
+                addInProgress = isAddInProgress,
+                preferences = preferences,
+                instances = addSheetUiState.availableInstances,
+                selectedInstance = addSheetUiState.targetInstance,
+                onInstanceSelected = onInstanceSelected,
+                onAddItem = { newItem, searchOnAdd ->
+                    onSmartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
+                },
+                onUpdatePreferences = onUpdatePreferences,
+                onDismiss = onDismiss,
+            )
 
         else -> {}
     }

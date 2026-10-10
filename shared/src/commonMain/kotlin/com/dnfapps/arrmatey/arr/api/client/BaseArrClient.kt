@@ -14,12 +14,14 @@ import com.dnfapps.arrmatey.arr.api.model.QueuePage
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeDelete
 import com.dnfapps.networking.safeGet
 import com.dnfapps.networking.safePost
 import com.dnfapps.networking.safePut
 import io.ktor.client.HttpClient
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -116,11 +118,20 @@ abstract class BaseArrClient(
      * Helpers
      */
 
+    protected fun HttpRequestBuilder.appendInstanceApiKey() {
+        if (instance.type == InstanceType.Kapowarr && !instance.noApiKeyRequired && instance.apiKey.value.isNotEmpty()) {
+            if (!url.parameters.contains("api_key")) {
+                url.parameters.append("api_key", instance.apiKey.value)
+            }
+        }
+    }
+
     protected suspend inline fun <reified T> get(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
     ): NetworkResult<T> = httpClient
         .safeGet<T>("$baseUrl/$endpoint") {
+            appendInstanceApiKey()
             url {
                 params.forEach { (key, value) ->
                     parameters.append(key, value.toString())
@@ -133,6 +144,7 @@ abstract class BaseArrClient(
         body: T,
     ): NetworkResult<R> = httpClient
         .safePost<R>("$baseUrl/$endpoint") {
+            appendInstanceApiKey()
             contentType(ContentType.Application.Json)
             setBody(body)
         }.rebuild()
@@ -142,6 +154,7 @@ abstract class BaseArrClient(
         body: T,
     ): NetworkResult<R> = httpClient
         .safePut<R>("$baseUrl/$endpoint") {
+            appendInstanceApiKey()
             contentType(ContentType.Application.Json)
             setBody(body)
         }.rebuild()
@@ -151,6 +164,7 @@ abstract class BaseArrClient(
         body: T,
         params: Map<String, Any> = emptyMap(),
     ): NetworkResult<R> = httpClient.safeDelete("$baseUrl/$endpoint") {
+        appendInstanceApiKey()
         contentType(ContentType.Application.Json)
         url {
             params.forEach { (key, value) ->
@@ -164,6 +178,7 @@ abstract class BaseArrClient(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
     ): NetworkResult<T> = httpClient.safeDelete("$baseUrl/$endpoint") {
+        appendInstanceApiKey()
         url {
             params.forEach { (key, value) ->
                 parameters.append(key, value.toString())

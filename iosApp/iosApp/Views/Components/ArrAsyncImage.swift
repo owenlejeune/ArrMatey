@@ -47,6 +47,13 @@ func arrImageRequest(for url: URL) -> URLRequest {
     if let instance {
         if instance.type == .tracearr {
             request.setValue("Bearer \(instance.apiKey)", forHTTPHeaderField: "Authorization")
+        } else if instance.type == .kapowarr {
+            if !urlStr.contains("api_key=") && !urlStr.contains("apikey=") {
+                let separator = urlStr.contains("?") ? "&" : "?"
+                if let authenticatedUrl = URL(string: "\(urlStr)\(separator)api_key=\(instance.apiKey)") {
+                    request.url = authenticatedUrl
+                }
+            }
         } else {
             request.setValue("\(instance.apiKey)", forHTTPHeaderField: "X-Api-Key")
         }

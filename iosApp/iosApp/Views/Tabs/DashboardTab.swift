@@ -1435,24 +1435,26 @@ struct DashboardInstanceDashboardSection: View {
                             }
                         }
 
-                        VStack(spacing: 4) {
-                            ForEach(instanceState.disks, id: \.path) { disk in
-                                HStack(spacing: 8) {
-                                    Text(disk.path ?? MR.strings().unknown.localized())
-                                        .font(.system(size: 10, weight: .medium))
-                                        .foregroundColor(.secondary)
-                                        .lineLimit(1)
+                        if !instanceState.disks.isEmpty {
+                            VStack(spacing: 4) {
+                                ForEach(instanceState.disks, id: \.path) { disk in
+                                    HStack(spacing: 8) {
+                                        Text(disk.path ?? MR.strings().unknown.localized())
+                                            .font(.system(size: 10, weight: .medium))
+                                            .foregroundColor(.secondary)
+                                            .lineLimit(1)
 
-                                    let usedSpace = disk.totalSpace - disk.freeSpace
-                                    Text("\(usedSpace.bytesAsFileSizeString()) / \(disk.totalSpace.bytesAsFileSizeString())")
-                                        .font(.system(size: 8))
-                                        .foregroundColor(.secondary.opacity(0.7))
+                                        let usedSpace = disk.totalSpace - disk.freeSpace
+                                        Text("\(usedSpace.bytesAsFileSizeString()) / \(disk.totalSpace.bytesAsFileSizeString())")
+                                            .font(.system(size: 8))
+                                            .foregroundColor(.secondary.opacity(0.7))
 
-                                    Spacer()
+                                        Spacer()
 
-                                    Text("\(Int(disk.usedPercentage * 100))% full")
-                                        .font(.system(size: 8))
-                                        .foregroundColor(disk.usedPercentage > 0.9 ? .red : .secondary)
+                                        Text("\(Int(disk.usedPercentage * 100))% full")
+                                            .font(.system(size: 8))
+                                            .foregroundColor(disk.usedPercentage > 0.9 ? .red : .secondary)
+                                    }
                                 }
                             }
                         }

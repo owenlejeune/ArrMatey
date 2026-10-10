@@ -195,11 +195,13 @@ fun ArrInstanceDashboard(
                             )
                         }
 
-                        Text(
-                            text = mokoString(MR.strings.disk_space),
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                        DiskSpaceSection(state.disks)
+                        if (state.disks.isNotEmpty()) {
+                            Text(
+                                text = mokoString(MR.strings.disk_space),
+                                style = MaterialTheme.typography.headlineSmall,
+                            )
+                            DiskSpaceSection(state.disks)
+                        }
 
                         state.softwareStatus?.let { ss ->
                             val infoItems =

@@ -160,7 +160,7 @@ struct SidebarContentView: View {
     private var mediaTabs: [AnyTabItem] {
         allActiveTabs.filter { tab in
             guard let standard = tab.item as? TabItemStandard else { return false }
-            return standard == .shows || standard == .movies || standard == .music || standard == .books || standard == .audiobooks
+            return standard == .shows || standard == .movies || standard == .music || standard == .books || standard == .audiobooks || standard == .comics
         }
     }
 

@@ -43,4 +43,13 @@ sealed interface DownloadReleasePayload {
         override val guid: String = searchResult.torrentUrl ?: "",
         override val indexerId: Int = -1,
     ) : DownloadReleasePayload
+
+    @Serializable
+    data class Comic(
+        override val guid: String,
+        override val indexerId: Int,
+        val issueId: Long? = null,
+        val volumeId: Long? = null,
+        val forceMatch: Boolean = false,
+    ) : DownloadReleasePayload
 }

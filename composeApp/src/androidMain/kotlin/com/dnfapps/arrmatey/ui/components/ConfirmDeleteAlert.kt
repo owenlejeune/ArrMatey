@@ -36,6 +36,7 @@ fun ConfirmDeleteAlert(
     initialAddExclusion: Boolean = false,
     initialDeleteFiles: Boolean = false,
     instanceLabel: String? = null,
+    showAddExclusion: Boolean = true,
     onDismiss: () -> Unit,
     onDelete: (Boolean, Boolean) -> Unit,
 ) {
@@ -67,12 +68,14 @@ fun ConfirmDeleteAlert(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            LabelledSwitch(
-                label = mokoString(MR.strings.add_exclusion),
-                sublabel = mokoString(MR.strings.add_exclusion_description),
-                checked = addExclusion,
-                onCheckedChange = { addExclusion = !addExclusion },
-            )
+            if (showAddExclusion) {
+                LabelledSwitch(
+                    label = mokoString(MR.strings.add_exclusion),
+                    sublabel = mokoString(MR.strings.add_exclusion_description),
+                    checked = addExclusion,
+                    onCheckedChange = { addExclusion = !addExclusion },
+                )
+            }
             LabelledSwitch(
                 label = mokoString(MR.strings.delete_files),
                 sublabel = mokoString(MR.strings.delete_files_description),
@@ -80,7 +83,7 @@ fun ConfirmDeleteAlert(
                 onCheckedChange = { deleteFiles = !deleteFiles },
             )
             Button(
-                onClick = { onDelete(deleteFiles, addExclusion) },
+                onClick = { onDelete(deleteFiles, if (showAddExclusion) addExclusion else false) },
                 colors =
                 ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error,

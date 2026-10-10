@@ -147,6 +147,8 @@ class InstanceManager(
         InstanceType.Listenarr -> ListenarrRepository(instance, httpClient, logger)
 
         InstanceType.Chaptarr -> ReadarrRepository(instance, httpClient, logger)
+
+        InstanceType.Kapowarr -> KapowarrRepository(instance, httpClient, logger)
     }
 
     fun getArrRepository(instanceId: Long): ArrInstanceRepository? = _instanceRepositories.value[instanceId] as? ArrInstanceRepository?
@@ -168,6 +170,8 @@ class InstanceManager(
     fun getBazarrRepository(instanceId: Long): BazarrInstanceRepository? = _instanceRepositories.value[instanceId] as? BazarrInstanceRepository
 
     fun getTracearrRepository(instanceId: Long): TracearrRepository? = _instanceRepositories.value[instanceId] as? TracearrRepository
+
+    fun getKapowarrRepository(instanceId: Long): KapowarrRepository? = _instanceRepositories.value[instanceId] as? KapowarrRepository
 
     fun getRepository(instanceId: Long): InstanceScopedRepository? = _instanceRepositories.value[instanceId]
 
@@ -203,6 +207,8 @@ class InstanceManager(
     fun getSelectedListenarrRepository(): Flow<ListenarrRepository?> = getSelectedArrRepositoryTyped<ListenarrRepository>(InstanceType.Listenarr)
 
     fun getSelectedChaptarrRepository(): Flow<ReadarrRepository?> = getSelectedArrRepositoryTyped<ReadarrRepository>(InstanceType.Chaptarr)
+
+    fun getSelectedKapowarrRepository(): Flow<KapowarrRepository?> = getSelectedArrRepositoryTyped<KapowarrRepository>(InstanceType.Kapowarr)
 
     private inline fun <reified T : ArrInstanceRepository> getSelectedArrRepositoryTyped(type: InstanceType): Flow<T?> = instanceRepository
         .observeSelectedInstance(type)
@@ -308,15 +314,7 @@ class InstanceManager(
         val arrInstanceIds =
             configuredInstances
                 .filter { instance ->
-                    instance.type in
-                        setOf(
-                            InstanceType.Sonarr,
-                            InstanceType.Radarr,
-                            InstanceType.Lidarr,
-                            InstanceType.Bookshelf,
-                            InstanceType.Listenarr,
-                            InstanceType.Chaptarr,
-                        )
+                    instance.type in InstanceType.arrs()
                 }.map { it.id }
                 .toSet()
 

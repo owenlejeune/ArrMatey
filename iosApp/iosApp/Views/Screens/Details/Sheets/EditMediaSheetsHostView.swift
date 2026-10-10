@@ -105,6 +105,16 @@ struct EditMediaSheetsHostView: View {
                             onDismissEditMedia()
                         }
                     )
+                } else if let comic = arrMedia as? ComicVolume {
+                    EditComicSheet(
+                        item: comic,
+                        rootFolders: viewModel.rootFolders,
+                        editInProgress: viewModel.editStatus is OperationStatusInProgress,
+                        onEditItem: { updatedItem in
+                            viewModel.editItem(item: updatedItem)
+                            onDismissEditMedia()
+                        }
+                    )
                 }
             }
         }

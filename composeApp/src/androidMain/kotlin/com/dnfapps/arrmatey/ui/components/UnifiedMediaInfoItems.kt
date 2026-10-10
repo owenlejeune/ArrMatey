@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.Tag
@@ -41,6 +42,7 @@ fun buildArrInfoItems(
                 is Arrtist -> artistInfo(arrMedia, qualityProfiles, tags, onEditPath)
                 is Author -> authorInfo(arrMedia, qualityProfiles, tags, onEditPath)
                 is Audiobook -> audiobookInfo(arrMedia, onEditPath)
+                is ComicVolume -> comicVolumeInfo(arrMedia, onEditPath)
                 else -> emptyList()
             }
         addAll(arrItems)
@@ -283,5 +285,28 @@ fun audiobookInfo(
         }
         add(InfoItem(mokoString(MR.strings.size_on_disk), diskSize))
         add(InfoItem(mokoString(MR.strings.path), (audiobook.path ?: unknown), onClick = onEditPath))
+    }
+}
+
+@Composable
+fun comicVolumeInfo(
+    volume: ComicVolume,
+    onEditPath: () -> Unit,
+): List<InfoItem> {
+    val unknown = mokoString(MR.strings.unknown)
+    val publisher = volume.publisher
+    val year = volume.year
+    return buildList {
+        if (!publisher.isNullOrBlank()) {
+            add(InfoItem(mokoString(MR.strings.publisher), publisher))
+        }
+        if (year != null && year > 0) {
+            add(InfoItem(mokoString(MR.strings.year), year.toString()))
+        }
+        add(InfoItem(mokoString(MR.strings.issues), "${volume.issuesDownloaded} / ${volume.issueCount}"))
+        if (volume.totalSize > 0) {
+            add(InfoItem(mokoString(MR.strings.size_on_disk), volume.totalSize.bytesAsFileSizeString()))
+        }
+        add(InfoItem(mokoString(MR.strings.path), (volume.folder ?: unknown), onClick = onEditPath))
     }
 }

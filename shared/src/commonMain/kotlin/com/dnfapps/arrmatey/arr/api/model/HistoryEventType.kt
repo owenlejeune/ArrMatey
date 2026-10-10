@@ -66,8 +66,6 @@ enum class HistoryEventType(
     @SerialName("bokFileDeleted")
     BookFileDelete(MR.strings.book_file_deleted),
 
-    // Listenarr
-
     @SerialName("Added")
     Added(MR.strings.added),
 
@@ -76,4 +74,16 @@ enum class HistoryEventType(
 
     @SerialName("File Added")
     AudiobookFileAdded(MR.strings.audiobook_file_added),
+
+    @SerialName("downloadImported")
+    DownloadImported(MR.strings.download_imported),
+
+    @SerialName("trackFileImported")
+    TrackFileImported(MR.strings.track_file_imported),
+
+    @SerialName("trackFileDeleted")
+    TrackFileDelete(MR.strings.track_file_deleted),
+
+    @SerialName("albumImportIncomplete")
+    AlbumImportIncomplete(MR.strings.album_import_incomplete),
 }

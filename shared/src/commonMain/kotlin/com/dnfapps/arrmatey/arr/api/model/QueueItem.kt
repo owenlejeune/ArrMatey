@@ -130,6 +130,7 @@ fun List<QueueItem>.groupByTask(): List<QueueItem> = groupBy { it.taskGroup }
                 is LidarrQueueItem -> first.copy(taskGroupCount = size)
                 is ReadarrQueueItem -> first.copy(taskGroupCount = size)
                 is ListenarrQueueItem -> first
+                is KapowarrQueueItem -> first
             }
         } ?: first
     }
@@ -143,6 +144,7 @@ object QueueItemSerializer : JsonContentPolymorphicSerializer<QueueItem>(QueueIt
             "series" in jsonObject -> SonarrQueueItem.serializer()
             "album" in jsonObject -> LidarrQueueItem.serializer()
             "author" in jsonObject || "book" in jsonObject -> ReadarrQueueItem.serializer()
+            "volume_id" in jsonObject || "issue_id" in jsonObject || "download_service" in jsonObject -> KapowarrQueueItem.serializer()
             else -> throw SerializationException("Unknown MediaItem type")
         }
     }

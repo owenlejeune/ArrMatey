@@ -71,6 +71,12 @@ sealed interface MediaScreen : NavKey {
         val instanceId: Long? = null,
     ) : MediaScreen
 
+    data class ComicReleases(
+        val mediaId: Long,
+        val isVolume: Boolean = false,
+        val instanceId: Long? = null,
+    ) : MediaScreen
+
     data class AudiobookRelease(
         val audiobookId: Long?,
         val query: String,

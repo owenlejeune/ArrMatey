@@ -8,11 +8,13 @@ import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryItem
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.DownloadedMediaItem
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryEventType
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.HistoryStateFilter
+import com.dnfapps.arrmatey.arr.api.model.KapowarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ListenarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
@@ -159,6 +161,7 @@ class ActivityQueueViewModel(
                     HistoryEventType.BookFileImported,
                     HistoryEventType.AudiobookFileAdded,
                     HistoryEventType.Added,
+                    HistoryEventType.DownloadImported,
                 )
 
             val filteredHistory =
@@ -291,6 +294,41 @@ class ActivityQueueViewModel(
                                 media = audiobook,
                                 date = hist.date,
                                 size = audiobook?.fileSize,
+                                indexer = hist.source,
+                                instanceId = instId,
+                                instanceName = instName,
+                                instanceType = instType,
+                            )
+                        }
+
+                        is KapowarrHistoryItem -> {
+                            val volume = library.firstOrNull { it.id == hist.volumeId } as? ComicVolume
+                            val issue = volume?.issues?.firstOrNull { it.id == hist.issueId }
+                            val issueSubtitle = when {
+                                issue != null -> {
+                                    val num = issue.issueNumber ?: issue.calculatedIssueNumber?.toInt()?.toString()
+                                    val issueTitle = issue.title
+                                    when {
+                                        num != null && !issueTitle.isNullOrBlank() -> "#$num • $issueTitle"
+                                        num != null -> "#$num"
+                                        !issueTitle.isNullOrBlank() -> issueTitle
+                                        else -> null
+                                    }
+                                }
+                                else -> null
+                            }
+                            val fallbackSubtitle = hist.fileTitle ?: hist.webSubTitle ?: hist.webTitle
+                            val finalSubtitle = (issueSubtitle ?: fallbackSubtitle)
+                                ?.takeUnless { it.equals(volume?.title, ignoreCase = true) }
+                                ?: volume?.publisher
+
+                            DownloadedMediaItem(
+                                id = "history_${instId}_${hist.id}",
+                                title = volume?.title ?: hist.displayTitle ?: "Unknown Volume",
+                                subtitle = finalSubtitle,
+                                media = volume,
+                                date = hist.date,
+                                size = volume?.fileSize,
                                 indexer = hist.source,
                                 instanceId = instId,
                                 instanceName = instName,

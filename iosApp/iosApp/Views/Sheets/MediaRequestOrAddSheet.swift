@@ -95,6 +95,15 @@ private struct MediaRequestOrAddSheetContent: View {
     @State private var selectedSeriesTags: Set<Int> = []
     @State private var searchSeriesOnAdd: Bool = false
 
+    // Add Comic State
+    @State private var comicMonitorVolume: Bool = true
+    @State private var comicMonitorNewIssues: Bool = true
+    @State private var comicMonitoringScheme: MonitoringScheme = .all
+    @State private var comicSpecialVersion: SpecialVersion = .automatic
+    @State private var comicVolumeFolder: String = ""
+    @State private var selectedComicRootFolderId: Int32?
+    @State private var comicSearchOnAdd: Bool = false
+
     private var uiSuccess: UnifiedMediaDetailsUiStateSuccess? {
         viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess
     }
@@ -147,6 +156,10 @@ private struct MediaRequestOrAddSheetContent: View {
         effectiveRootFolders.first { $0.id == selectedSeriesRootFolderId }?.path
     }
 
+    private var selectedComicRootFolderPath: String? {
+        effectiveRootFolders.first { $0.id == selectedComicRootFolderId }?.path
+    }
+
     private var isActionEnabled: Bool {
         if isBusy { return false }
         if selectedMode == .request {
@@ -156,6 +169,8 @@ private struct MediaRequestOrAddSheetContent: View {
                 return selectedSeriesQualityProfileId != nil && selectedSeriesRootFolderPath != nil
             } else if arrMedia is ArrMovie {
                 return selectedMovieQualityProfileId != nil && selectedMovieRootFolderPath != nil
+            } else if arrMedia is ComicVolume {
+                return selectedComicRootFolderPath != nil && !comicVolumeFolder.isEmpty
             }
             return false
         }
@@ -240,6 +255,8 @@ private struct MediaRequestOrAddSheetContent: View {
                         seriesAddConfigView(series: series)
                     } else if let movie = arrMedia as? ArrMovie {
                         movieAddConfigView(movie: movie)
+                    } else if let comic = arrMedia as? ComicVolume {
+                        comicAddConfigView(comic: comic)
                     } else {
                         ProgressView()
                             .frame(maxWidth: .infinity, minHeight: 180)
@@ -278,6 +295,9 @@ private struct MediaRequestOrAddSheetContent: View {
             if force || selectedSeriesRootFolderId == nil || !effectiveRootFolders.contains(where: { $0.id == selectedSeriesRootFolderId }) {
                 selectedSeriesRootFolderId = firstId
             }
+            if force || selectedComicRootFolderId == nil || !effectiveRootFolders.contains(where: { $0.id == selectedComicRootFolderId }) {
+                selectedComicRootFolderId = firstId
+            }
         }
     }
 
@@ -291,6 +311,12 @@ private struct MediaRequestOrAddSheetContent: View {
         useSeasonFolders = prefs.addSeriesSeasonFolder
         searchSeriesOnAdd = prefs.addSearchOnAdd
 
+        comicMonitorVolume = prefs.addKapowarrMonitorVolume
+        comicMonitorNewIssues = prefs.addKapowarrMonitorNewIssues
+        comicMonitoringScheme = prefs.addKapowarrMonitoringScheme
+        comicSpecialVersion = prefs.addKapowarrSpecialVersion
+        comicSearchOnAdd = prefs.addSearchOnAdd
+
         if let qp = effectiveQualityProfiles.first(where: { $0.id == prefs.addQualityProfileId?.int32Value }) ?? effectiveQualityProfiles.first {
             selectedMovieQualityProfileId = qp.id
             selectedSeriesQualityProfileId = qp.id
@@ -299,6 +325,13 @@ private struct MediaRequestOrAddSheetContent: View {
         if let rf = effectiveRootFolders.first(where: { $0.path == prefs.addRootFolderPath }) ?? effectiveRootFolders.first {
             selectedMovieRootFolderId = rf.id
             selectedSeriesRootFolderId = rf.id
+            selectedComicRootFolderId = rf.id
+        }
+
+        if let vol = arrMedia as? ComicVolume {
+            let volNum = vol.volumeNumber.map { $0.intValue < 10 ? "0\($0.intValue)" : "\($0.intValue)" } ?? "01"
+            let fallbackLabel = MR.strings().type_volume.localized()
+            comicVolumeFolder = vol.folder ?? "\(vol.title ?? fallbackLabel)/\(fallbackLabel) \(volNum)\(vol.year.flatMap { " (\($0))" } ?? "")"
         }
 
         if let tv = seerrMedia as? TvDetails {
@@ -579,6 +612,61 @@ private struct MediaRequestOrAddSheetContent: View {
         }
     }
 
+    // MARK: - Comic Section
+    @ViewBuilder
+    private func comicAddConfigView(comic: ComicVolume) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            let instances = viewModel.addSheetUiState.availableInstances
+            if instances.count > 1, let target = viewModel.addSheetUiState.targetInstance {
+                Picker(MR.strings().instances.localized(), selection: Binding(
+                    get: { target },
+                    set: { viewModel.setAddSheetTargetInstance(instance: $0) }
+                )) {
+                    ForEach(instances, id: \.id) { inst in
+                        Text(inst.label).tag(inst)
+                    }
+                }
+                .disabled(isBusy)
+            }
+
+            if !effectiveRootFolders.isEmpty {
+                Picker(MR.strings().root_folder.localized(), selection: $selectedComicRootFolderId) {
+                    ForEach(effectiveRootFolders, id: \.self) { rf in
+                        Text("\(rf.path)\(rf.isDefault ? " (\(MR.strings().default_label.localized()))" : "")")
+                            .tag(rf.id as Int32?)
+                    }
+                }
+                .disabled(isBusy)
+            }
+
+            TextField(MR.strings().volume_folder.localized(), text: $comicVolumeFolder)
+                .disabled(isBusy)
+
+            Toggle(MR.strings().monitor_volume.localized(), isOn: $comicMonitorVolume)
+                .disabled(isBusy)
+
+            Toggle(MR.strings().monitor_new_issues.localized(), isOn: $comicMonitorNewIssues)
+                .disabled(isBusy)
+
+            Picker(MR.strings().monitoring_scheme.localized(), selection: $comicMonitoringScheme) {
+                ForEach(MonitoringScheme.allCases, id: \.self) { scheme in
+                    Text(scheme.resource.localized()).tag(scheme)
+                }
+            }
+            .disabled(isBusy)
+
+            Picker(MR.strings().special_version.localized(), selection: $comicSpecialVersion) {
+                ForEach(SpecialVersion.allCases, id: \.self) { version in
+                    Text(version.resource.localized()).tag(version)
+                }
+            }
+            .disabled(isBusy)
+
+            Toggle(MR.strings().search_missing_volume.localized(), isOn: $comicSearchOnAdd)
+                .disabled(isBusy)
+        }
+    }
+
     // MARK: - Footer
     @ViewBuilder
     private var footerView: some View {
@@ -661,6 +749,28 @@ private struct MediaRequestOrAddSheetContent: View {
                     tags: Array(selectedMovieTags.map { $0.asKotlinInt })
                 )
                 viewModel.smartAdd(item: newMovie, searchOnAdd: searchMovieOnAdd, targetInstanceId: viewModel.addSheetUiState.targetInstance?.id)
+            } else if let comic = arrMedia as? ComicVolume, let path = selectedComicRootFolderPath, let rf = effectiveRootFolders.first(where: { $0.path == path }) {
+                viewModel.updatePreferences(
+                    preferences: prefs.doCopyWithKapowarrAddDefaults(
+                        monitorVolume: comicMonitorVolume,
+                        monitorNewIssues: comicMonitorNewIssues,
+                        monitoringScheme: comicMonitoringScheme,
+                        specialVersion: comicSpecialVersion,
+                        rootFolderPath: path,
+                        searchOnAdd: comicSearchOnAdd
+                    )
+                )
+                let newVolume = comic.doCopyForCreation(
+                    monitored: comicMonitorVolume,
+                    monitorNewIssues: comicMonitorNewIssues,
+                    folder: comicVolumeFolder,
+                    volumeFolder: comicVolumeFolder,
+                    specialVersion: comicSpecialVersion.value,
+                    monitoringScheme: comicMonitoringScheme,
+                    rootFolder: rf.id.asKotlinInt,
+                    searchOnAdd: comicSearchOnAdd
+                )
+                viewModel.smartAdd(item: newVolume, searchOnAdd: comicSearchOnAdd, targetInstanceId: viewModel.addSheetUiState.targetInstance?.id)
             }
         }
     }

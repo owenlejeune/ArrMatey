@@ -42,7 +42,6 @@ import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
@@ -86,6 +85,7 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorOptions
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
@@ -105,12 +105,11 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.*
-import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
+import com.dnfapps.arrmatey.ui.components.ConfirmDeleteAlert
 import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
 import com.dnfapps.arrmatey.ui.components.InstancePicker
-import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.components.MediaView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
@@ -476,10 +475,12 @@ fun ArrLibraryScreen(
         }
 
         confirmDelete?.let { item ->
+            val isKapowarr = item is ComicVolume
             ConfirmDeleteAlert(
                 deleteInProgress = deleteStatus is OperationStatus.InProgress,
                 initialAddExclusion = preferences.deleteAddExclusion,
                 initialDeleteFiles = preferences.deleteDeleteFiles,
+                showAddExclusion = !isKapowarr,
                 onDismiss = { confirmDelete = null },
                 onDelete = { deleteFiles, addExclusion ->
                     arrMediaViewModel.deleteMedia(item, deleteFiles, addExclusion)
@@ -538,10 +539,12 @@ fun ArrLibraryScreen(
         }
 
         if (confirmBulkDelete) {
+            val isKapowarr = arrMediaViewModel.instanceType == InstanceType.Kapowarr
             ConfirmDeleteAlert(
                 deleteInProgress = false,
                 initialAddExclusion = preferences.deleteAddExclusion,
                 initialDeleteFiles = preferences.deleteDeleteFiles,
+                showAddExclusion = !isKapowarr,
                 onDismiss = { confirmBulkDelete = false },
                 onDelete = { deleteFiles, addExclusion ->
                     arrMediaViewModel.deleteSelected(deleteFiles, addExclusion)
@@ -702,64 +705,6 @@ private fun SelectionActionItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun ConfirmDeleteAlert(
-    deleteInProgress: Boolean,
-    initialAddExclusion: Boolean = false,
-    initialDeleteFiles: Boolean = false,
-    onDismiss: () -> Unit,
-    onDelete: (Boolean, Boolean) -> Unit,
-) {
-    var addExclusion by remember { mutableStateOf(initialAddExclusion) }
-    var deleteFiles by remember { mutableStateOf(initialDeleteFiles) }
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier =
-            Modifier
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
-        ) {
-            LabelledSwitch(
-                label = mokoString(MR.strings.add_exclusion),
-                sublabel = mokoString(MR.strings.add_exclusion_description),
-                checked = addExclusion,
-                onCheckedChange = { addExclusion = !addExclusion },
-            )
-            LabelledSwitch(
-                label = mokoString(MR.strings.delete_files),
-                sublabel = mokoString(MR.strings.delete_files_description),
-                checked = deleteFiles,
-                onCheckedChange = { deleteFiles = !deleteFiles },
-            )
-            Button(
-                onClick = { onDelete(deleteFiles, addExclusion) },
-                colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                ),
-                enabled = !deleteInProgress,
-            ) {
-                if (deleteInProgress) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = null,
-                    )
-                    Text(text = mokoString(MR.strings.delete))
-                }
-            }
-        }
-    }
-}
-
 @Composable
 internal fun EditMediaSheet(
     item: ArrMedia,
@@ -822,6 +767,7 @@ internal fun EditMediaSheet(
                 onEditItem = onEditItem,
                 onDismiss = onDismiss,
             )
+        is ComicVolume,
         is SearchAudiobook,
         is MockMedia,
         -> {}

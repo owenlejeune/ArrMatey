@@ -48,6 +48,16 @@ sealed class CommandPayload(
     ) : CommandPayload("BookSearch")
 
     @Serializable
+    data class Volume(
+        val volumeIds: List<Long>,
+    ) : CommandPayload("VolumeSearch")
+
+    @Serializable
+    data class Issue(
+        val issueIds: List<Long>,
+    ) : CommandPayload("IssueSearch")
+
+    @Serializable
     data class Audiobook(
         val audiobookId: Long,
     ) : CommandPayload("name_not_needed")

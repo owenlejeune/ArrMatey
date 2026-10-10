@@ -65,6 +65,9 @@ class GetMediaDetailsUseCase(
                             InstanceType.Listenarr -> {
                                 send(MediaDetailsUiState.Success(item = data))
                             }
+                            InstanceType.Kapowarr -> {
+                                send(MediaDetailsUiState.Success(item = data))
+                            }
                             else -> throw IllegalStateException("Unsupported instance type ${repository.instance.type}")
                         }
                     }

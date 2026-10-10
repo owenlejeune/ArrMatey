@@ -10,16 +10,16 @@ import SwiftUI
 
 struct ArrInstanceDashboard: View {
     private let id: Int64
-    
+
     @StateObject private var viewModel: ArrInstanceDashboardViewModelS
-    
+
     @EnvironmentObject private var navigationManager: NavigationManager
-    
+
     init(id: Int64) {
         self.id = id
         _viewModel = StateObject(wrappedValue: ArrInstanceDashboardViewModelS(id))
     }
-    
+
     var body: some View {
         contentForState()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -28,7 +28,7 @@ struct ArrInstanceDashboard: View {
                     NavigationLink(value: SettingsRoute.editInstance(id)) {
                         Image(systemName: "pencil")
                     }
-                    
+
                     InstanceOptionsMenu(
                         instanceUrl: viewModel.instance?.url,
                         onRunRssSync: { viewModel.runRssSync() },
@@ -41,11 +41,11 @@ struct ArrInstanceDashboard: View {
                 }
             }
     }
-    
+
     @ViewBuilder
     private func contentForState() -> some View {
         let state = viewModel.state
-        
+
         if state is ArrDashboardStateInitial {
             ZStack { EmptyView() }
         } else if state is ArrDashboardStateLoading {
@@ -58,7 +58,7 @@ struct ArrInstanceDashboard: View {
             ZStack { EmptyView() }
         }
     }
-    
+
     @ViewBuilder
     private func successArea(_ state: ArrDashboardStateSuccess) -> some View {
         ZStack {
@@ -72,7 +72,7 @@ struct ArrInstanceDashboard: View {
             viewModel.refresh()
         }
     }
-    
+
     @ViewBuilder
     private func healthArea(_ state: ArrDashboardStateSuccess) -> some View {
         Section {
@@ -83,41 +83,43 @@ struct ArrInstanceDashboard: View {
             Text(MR.strings().health.localized())
         }
     }
-    
+
     @ViewBuilder
     private func diskSpaceArea(_ state: ArrDashboardStateSuccess) -> some View {
-        Section {
-            ForEach(state.disks) { disk in
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text(disk.path ?? MR.strings().unknown.localized())
-                            .font(.headline)
-                        Spacer()
-                        Text(disk.freeSpace.bytesAsFileSizeString() + " " + MR.strings().free_space.localized())
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+        if !state.disks.isEmpty {
+            Section {
+                ForEach(state.disks) { disk in
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(disk.path ?? MR.strings().unknown.localized())
+                                .font(.headline)
+                            Spacer()
+                            Text(disk.freeSpace.bytesAsFileSizeString() + " " + MR.strings().free_space.localized())
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+
+                        ProgressView(value: disk.usedPercentage)
+                            .tint(disk.usedPercentage > 0.9 ? .red : .accentColor)
+
+                        HStack {
+                            Text(MR.strings().total_space.localized() + ": " + disk.totalSpace.bytesAsFileSizeString())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(Int(disk.usedPercentage * 100))%")
+                                .font(.caption)
+                                .bold()
+                        }
                     }
-                    
-                    ProgressView(value: disk.usedPercentage)
-                        .tint(disk.usedPercentage > 0.9 ? .red : .accentColor)
-                    
-                    HStack {
-                        Text(MR.strings().total_space.localized() + ": " + disk.totalSpace.bytesAsFileSizeString())
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("\(Int(disk.usedPercentage * 100))%")
-                            .font(.caption)
-                            .bold()
-                    }
+                    .padding(.vertical, 4)
                 }
-                .padding(.vertical, 4)
+            } header: {
+                Text(MR.strings().disk_space.localized())
             }
-        } header: {
-            Text(MR.strings().disk_space.localized())
         }
     }
-    
+
     private func infoItems(state: ArrDashboardStateSuccess, instance: Instance?) -> [InfoItem] {
         [
             InfoItem(label: MR.strings().host_endpoint.localized(), value: instance?.url ?? ""),
@@ -128,11 +130,11 @@ struct ArrInstanceDashboard: View {
             InfoItem(label: MR.strings().host_os.localized(), value: state.softwareStatus?.hostOs ?? MR.strings().unknown.localized())
         ]
     }
-    
+
     @ViewBuilder
     private func infoArea(_ state: ArrDashboardStateSuccess) -> some View {
         let items = infoItems(state: state, instance: viewModel.instance)
-        
+
         Section {
             VStack(spacing: 12) {
                 ForEach(items, id: \.self) { info in
@@ -148,7 +150,7 @@ struct ArrInstanceDashboard: View {
                             .multilineTextAlignment(.trailing)
                             .frame(maxWidth: .infinity, alignment: .trailing)
                     }
-                    
+
                     if info != items.last {
                         Divider()
                     }
@@ -158,14 +160,14 @@ struct ArrInstanceDashboard: View {
             Text(MR.strings().system_info.localized())
         }
     }
-    
+
     private var loadingArea: some View {
         ZStack {
             ProgressView()
                 .progressViewStyle(.circular)
         }
     }
-    
+
     @ViewBuilder
     private func errorArea(_ error: ArrDashboardStateError) -> some View {
         ZStack {

@@ -162,6 +162,7 @@ fun ArrMedia.toJson(): String {
             is Audiobook -> ArrMedia.json.encodeToJsonElement(AudiobookSerializer, this)
             is SearchAudiobook -> ArrMedia.json.encodeToJsonElement(SearchAudiobookSerializer, this)
             is MockMedia -> ArrMedia.json.encodeToJsonElement(MockMedia.serializer(), this)
+            is ComicVolume -> ArrMedia.json.encodeToJsonElement(ComicVolumeSerializer, this)
         }
 
     return ArrMedia.json.encodeToString(element)
@@ -233,6 +234,17 @@ object SearchAudiobookSerializer :
     }
 }
 
+object ComicVolumeSerializer :
+    JsonTransformingSerializer<ComicVolume>(ComicVolume.serializer()) {
+    override fun transformSerialize(element: JsonElement): JsonElement {
+        val obj = element.jsonObject
+        return buildJsonObject {
+            obj.forEach { (k, v) -> put(k, v) }
+            put("mediaType", InstanceType.Kapowarr.name)
+        }
+    }
+}
+
 object AnyArrMediaSerializer : KSerializer<ArrMedia> {
     override val descriptor: SerialDescriptor
         get() = buildClassSerialDescriptor("AnyArrmedia")
@@ -251,6 +263,7 @@ object AnyArrMediaSerializer : KSerializer<ArrMedia> {
             InstanceType.Bookshelf.name -> decoder.json.decodeFromJsonElement(Author.serializer(), element)
             InstanceType.Listenarr.name -> decoder.json.decodeFromJsonElement(Audiobook.serializer(), element)
             InstanceType.Listenarr.name + "_search" -> decoder.json.decodeFromJsonElement(SearchAudiobook.serializer(), element)
+            InstanceType.Kapowarr.name -> decoder.json.decodeFromJsonElement(ComicVolume.serializer(), element)
             else -> error("Unknown mediaType: $mediaType")
         }
     }
@@ -270,6 +283,7 @@ object AnyArrMediaSerializer : KSerializer<ArrMedia> {
                 is Audiobook -> json.encodeToJsonElement(AudiobookSerializer, value)
                 is SearchAudiobook -> json.encodeToJsonElement(SearchAudiobookSerializer, value)
                 is MockMedia -> json.encodeToJsonElement(MockMedia.serializer(), value)
+                is ComicVolume -> json.encodeToJsonElement(ComicVolumeSerializer, value)
             }
         encoder.encodeJsonElement(element)
     }

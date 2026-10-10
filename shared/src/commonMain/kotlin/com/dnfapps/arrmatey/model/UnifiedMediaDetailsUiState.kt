@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
@@ -199,6 +200,17 @@ sealed interface UnifiedMediaDetailsUiState {
 
         val releasedBy: String?
             get() = arrMedia?.releasedBy
+
+        val volumeString: String?
+            get() = (arrMedia as? ComicVolume)?.let { vol ->
+                vol.specialVersion?.takeIf { it.isNotBlank() }
+                    ?: vol.volumeNumber?.let { "Volume $it" }
+            }
+
+        val issueCountString: String?
+            get() = (arrMedia as? ComicVolume)?.let { vol ->
+                if (vol.issueCount > 0) "${vol.issuesDownloaded}/${vol.issueCount} issues" else null
+            }
 
         val upcomingDateString: String?
             get() {

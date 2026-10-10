@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toAudiobookRelease
 import com.dnfapps.arrmatey.navigation.toBookDetails
 import com.dnfapps.arrmatey.navigation.toBookRelease
+import com.dnfapps.arrmatey.navigation.toComicReleases
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toEpisodeDetails
 import com.dnfapps.arrmatey.navigation.toMovieReleases
@@ -69,6 +70,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onNavigateToBookRelease = { bookId, instId -> navigation.toBookRelease(bookId, instId) },
             onNavigateToAudiobookRelease = { id, query, instId -> navigation.toAudiobookRelease(id, query ?: "", instId) },
             onNavigateToAlbumRelease = { artistId, albumId, instId -> navigation.toAlbumRelease(albumId, artistId, instId) },
+            onNavigateToComicReleases = { mediaId, isVolume, instId -> navigation.toComicReleases(mediaId, isVolume, instId) },
             onPersonClick = { navigation.toPersonDetails(it) },
             onMediaClick = { tmdbId, type -> navigation.toDetails(tmdbId = tmdbId, requestType = type) },
             onNavigateToUser = { userRef -> navigation.toTracearrUser(userRef) },
@@ -153,6 +155,20 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             )
         InteractiveSearchScreen(
             instanceType = InstanceType.Bookshelf,
+            releaseParams = releaseParams,
+            instanceId = params.instanceId,
+            onBack = { navigation.popBackStack() },
+        )
+    }
+    entry<MediaScreen.ComicReleases> { params ->
+        val releaseParams =
+            if (params.isVolume) {
+                ReleaseParams.ComicVolume(params.mediaId)
+            } else {
+                ReleaseParams.ComicIssue(params.mediaId)
+            }
+        InteractiveSearchScreen(
+            instanceType = InstanceType.Kapowarr,
             releaseParams = releaseParams,
             instanceId = params.instanceId,
             onBack = { navigation.popBackStack() },

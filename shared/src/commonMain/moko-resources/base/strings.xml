@@ -16,6 +16,7 @@
     <string name="movie">Movie</string>
     <string name="music">Music</string>
     <string name="books">Books</string>
+    <string name="comics">Comics</string>
     <string name="indexers">Indexers</string>
     <string name="home">Home</string>
     <string name="requests">Requests</string>
@@ -436,6 +437,10 @@
     <string name="history_state_ignored">Ignored</string>
     <string name="filter_by_state">State</string>
     <string name="no_history">No history</string>
+    <string name="download_imported">Download Imported</string>
+    <string name="track_file_imported">Track File Imported</string>
+    <string name="album_import_incomplete">Album Import Incomplete</string>
+    <string name="track_file_deleted">Track File Deleted</string>
 
     <!-- Errors -->
     <string name="error">Error</string>
@@ -469,6 +474,8 @@
     <string name="chaptarr">Chaptarr</string>
     <string name="chaptarr_description">Chaptarr is a Readarr fork built to accommodate audiobook and eBook libraries in one instance. It helps you organize and maintain a collection of books with rich metadata, including narrator and edition information that many general-purpose media managers struggle to track, or don't try to at all.</string>
     <string name="listenarr_description">Listenarr is a fast, feature-rich, cross-platform audiobook management server. Built with a focus on being a complete solution for all your audiobook downloading needs. Set up your own server and get ready to streamline your audiobook listening!</string>
+    <string name="kapowarr">Kapowarr</string>
+    <string name="kapowarr_description">Kapowarr allows you to build a digital library of comics. You can add volumes, map them to a folder and start managing! Download, rename, move and convert issues of the volume (including TPBs, One Shots, Hard Covers, and more). The whole process is automated and can be customised in the settings.</string>
     <string name="prowlarr_description">Prowlarr is an indexer manager/proxy built on the popular *arr .net/reactjs base stack to integrate with your various PVR apps. Prowlarr supports management of both Torrent Trackers and Usenet Indexers.</string>
     <string name="prowlarr">Prowlarr</string>
     <string name="no_indexers_configured">No indexers configured</string>
@@ -1127,4 +1134,33 @@
     <string name="saving_will_add_ebook_support">Saving will add an e-book root folder and configure e-books for this author.</string>
     <string name="start_week_on_monday">Start week on Monday</string>
     <string name="start_week_on_monday_desc">Use Monday as the first day of the week in the calendar month view</string>
+
+    <!-- Kapowarr -->
+    <string name="type_volume">Volume</string>
+    <string name="volume_folder">Volume Folder</string>
+    <string name="monitor_volume">Monitor Volume</string>
+    <string name="monitor_new_issues">Monitor New Issues</string>
+    <string name="monitor_new_issues_desc">When new issues come out, automatically monitor them.</string>
+    <string name="monitoring_scheme">Monitoring Scheme</string>
+    <string name="monitoring_scheme_desc">Choose which issues to monitor that have already been released.</string>
+    <string name="special_version">Special Version</string>
+    <string name="add_volume">Add Volume</string>
+    <string name="search_missing_volume">Start search for missing volume</string>
+
+    <!-- Monitoring Scheme -->
+    <string name="monitoring_scheme_all">All</string>
+    <string name="monitoring_scheme_missing">Missing</string>
+    <string name="monitoring_scheme_none">None</string>
+
+    <!-- Special Version -->
+    <string name="special_version_auto">Automatic</string>
+    <string name="special_version_normal">Normal Volume</string>
+    <string name="special_version_tpb">Trade Paperback</string>
+    <string name="special_version_oneshot">One Shot</string>
+    <string name="special_version_hardcover">Hardcover</string>
+    <string name="special_version_omnibus">Omnibus</string>
+    <string name="special_version_volume_as_issue">Volume as Issue</string>
+    <string name="volume_folder_desc">Make empty to generate the default folder</string>
+    <string name="special_version_desc">Type of volume</string>
+    <string name="monitoring_scheme_edit_desc">Apply a monitoring scheme once, on save.</string>
 </resources>

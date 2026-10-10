@@ -22,6 +22,7 @@ struct TabItemContent: View {
                 case .music: MusicTab()
                 case .books: BooksTab()
                 case .audiobooks: AudiobooksTab()
+                case .comics: ComicsTab()
                 case .activity: ActivityTab()
                 case .calendar: CalendarTab()
                 case .downloads: DownloadsTab()

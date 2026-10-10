@@ -14,31 +14,31 @@ struct QueueItemInfoSheet: View {
     let deleteInProgress: Bool
     let onDelete: (Bool, Bool, Bool) -> Void
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     Spacer(minLength: 12)
-                    
+
                     VStack(alignment: .leading, spacing: 4) {
                         Text(item.titleLabel)
                             .font(.system(size: 22, weight: .bold))
                             .foregroundColor(.themePrimary)
-                        
+
                         Text(item.title ?? MR.strings().unknown.localized())
                             .font(.system(size: 18, weight: .semibold))
                     }
-                    
+
                     HStack(spacing: 4) {
                         Text(item.statusLabel)
                             .fontWeight(.medium)
                             .foregroundColor(.secondary)
-                        
+
                         Text("• \(item.quality.qualityLabel) • \(formatBytes(item.size))")
                     }
                     .font(.subheadline)
-                    
+
                     let chipItems = ([item.scoreLabel].compactMap { $0 }) + item.customFormats.map { $0.name }
                     HFlow {
                         ForEach(chipItems, id: \.self) { chip in
@@ -51,7 +51,7 @@ struct QueueItemInfoSheet: View {
                         }
                     }
                     .padding(.bottom, 2)
-                    
+
                     if let errorMessage = item.errorMessage {
                         errorCard(errorMessage)
                     } else {
@@ -59,9 +59,9 @@ struct QueueItemInfoSheet: View {
                             statusCard(status)
                         }
                     }
-                    
+
                     Divider().padding(.vertical, 8)
-                    
+
                     let infoItems = getInfoItems()
                     LazyVGrid(columns: [GridItem(.flexible(), alignment: .leading), GridItem(.flexible(), alignment: .leading)], spacing: 12) {
                         ForEach(infoItems, id: \.key) { key, value in
@@ -74,10 +74,10 @@ struct QueueItemInfoSheet: View {
                             }
                         }
                     }
-                    
+
                     HStack(spacing: 24) {
                         NavigationLink {
-                            RemoveQueueItemView(deleteInProgress: deleteInProgress, onDelete: onDelete)
+                            RemoveQueueItemView(deleteInProgress: deleteInProgress, showBlocklist: item.type != .kapowarr, onDelete: onDelete)
                         } label: {
                             Label {
                                 Text(MR.strings().remove.localized())
@@ -93,7 +93,7 @@ struct QueueItemInfoSheet: View {
                             .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
-                        
+
                         if item.needsManualImport {
                             NavigationLink {
                                 ManualImportSheet(item: item, onDismiss: { dismiss() })
@@ -124,7 +124,7 @@ struct QueueItemInfoSheet: View {
             .presentationDragIndicator(.visible)
         }
     }
-    
+
     @ViewBuilder
     private func errorCard(_ message: String) -> some View {
         Text(message)
@@ -134,7 +134,7 @@ struct QueueItemInfoSheet: View {
             .foregroundColor(.red)
             .cornerRadius(12)
     }
-    
+
     @ViewBuilder
     private func statusCard(_ status: QueueStatusMessage) -> some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -154,7 +154,7 @@ struct QueueItemInfoSheet: View {
         .background(Color(uiColor: .secondarySystemBackground))
         .cornerRadius(12)
     }
-    
+
     private func getInfoItems() -> [(key: String, value: String?)] {
         var items: [(key: String, value: String?)] = []
         items.append((key: MR.strings().protocol.localized(), value: item.protocol.name))
@@ -167,7 +167,7 @@ struct QueueItemInfoSheet: View {
         items.append((key: MR.strings().destination.localized(), value: item.outputPath))
         return items
     }
-    
+
     private func formatBytes(_ size: Float) -> String {
         ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
     }

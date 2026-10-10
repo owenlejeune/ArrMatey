@@ -71,7 +71,7 @@ fun createInstanceClient(
         }
 
         instance?.let { instance ->
-            if (!instance.noApiKeyRequired) {
+            if (!instance.noApiKeyRequired && instance.apiKey.value.isNotEmpty()) {
                 when (instance.type) {
                     InstanceType.Tracearr ->
                         header(HttpHeaders.Authorization, "Bearer ${instance.apiKey.value}")

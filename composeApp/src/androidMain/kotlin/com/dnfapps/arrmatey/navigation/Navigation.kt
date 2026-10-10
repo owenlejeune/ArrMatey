@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.navigation
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.NavKey
@@ -16,6 +17,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 /**
  * A generic navigator that manages a reactive backstack of screens.
  */
+@Stable
 interface Navigator<T : NavKey> {
     val backStack: SnapshotStateList<T>
 
@@ -94,6 +96,7 @@ class CalendarTabNavigator : BaseNavigator<NavKey>(CalendarScreen.Home)
 class BooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 
 class AudiobooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
+class ComicsTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 
 class SettingsTabNavigator : BaseNavigator<SettingsScreen>(SettingsScreen.Landing)
 
@@ -110,6 +113,12 @@ class TracearrTabNavigator : BaseNavigator<NavKey>(TracearrScreen.Main)
 private fun Navigator<*>.nav(): Navigator<NavKey> = this as Navigator<NavKey>
 
 fun Navigator<*>.toLibrary() = nav().navigateTo(ArrScreen.Library)
+
+fun Navigator<*>.toComicReleases(
+    mediaId: Long,
+    isVolume: Boolean,
+    instanceId: Long? = null,
+) = nav().navigateTo(MediaScreen.ComicReleases(mediaId, isVolume, instanceId))
 
 fun Navigator<*>.toHome() = nav().navigateTo(SeerrScreen.Home)
 
@@ -329,6 +338,7 @@ fun Navigator<SettingsScreen>.onInstanceTap(
     InstanceType.Bookshelf,
     InstanceType.Listenarr,
     InstanceType.Chaptarr,
+    InstanceType.Kapowarr,
     -> toArrDashboard(id)
     InstanceType.Seerr,
     InstanceType.Bazarr,

@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
@@ -70,6 +71,7 @@ fun ArrMedia.getUpcomingDateString(
             "${mokoStrings.getString(MR.strings.release_date)} $it"
         }
     is SearchAudiobook -> releaseDate?.ifTodayOrAfter()?.format("MMMM d, yyyy")
+    is ComicVolume -> null
     is MockMedia -> "Next Airing: Monday"
 }
 

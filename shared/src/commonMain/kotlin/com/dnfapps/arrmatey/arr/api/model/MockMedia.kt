@@ -72,6 +72,7 @@ sealed class MockMedia(
     data object Chaptarr : MockMedia(title = "A Totally Awesome Book")
 
     data object Listenarr : MockMedia(title = "A Totally Awesome Book")
+    data object Kapowarr : MockMedia(title = "A Totally Awesome Comic")
 }
 
 object MockData {

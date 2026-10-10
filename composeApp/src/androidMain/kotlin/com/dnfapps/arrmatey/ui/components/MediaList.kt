@@ -59,6 +59,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
@@ -70,7 +71,6 @@ import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.rememberHtml
 import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.shared.*
-import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
@@ -608,7 +608,37 @@ private fun MediaDetails(
             is Audiobook -> AudiobookDetails(item, isActive, showBannerBackground)
             is SearchAudiobook -> SearchAudiobookDetails(item, showBannerBackground)
             is MockMedia -> MockDetails(item, showBannerBackground)
+            is ComicVolume -> ComicVolumeDetails(item, showBannerBackground)
         }
+    }
+}
+
+@Composable
+private fun ComicVolumeDetails(
+    item: ComicVolume,
+    showBannerBackground: Boolean,
+) {
+    val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
+    val publisher = item.publisher
+    val yearStr = item.year?.toString()
+    val secondLine = listOfNotNull(publisher, yearStr).joinToString(BULLET)
+    if (secondLine.isNotEmpty()) {
+        Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    }
+
+    if (item.id != null) {
+        Text(
+            text = "${item.issuesDownloaded}/${item.issueCount}",
+            style = MaterialTheme.typography.labelSmall,
+            color = contentColor,
+            modifier = Modifier.padding(top = 8.dp, bottom = 2.dp),
+        )
+        LinearProgressIndicator(
+            progress = { item.statusProgress },
+            modifier = Modifier.fillMaxWidth().height(4.dp),
+            color = item.statusColor,
+            trackColor = item.statusColor.copy(alpha = 0.24f),
+        )
     }
 }
 
