@@ -28,6 +28,7 @@ data class GlobalPreferencesExport(
     val dualPanelSupport: Boolean? = null,
     val useColoredActivityCards: Boolean? = null,
     val useColoredCalendarCards: Boolean? = null,
+    val startOfWeekMonday: Boolean? = null,
     // Info Cards
     val showInfoCards: Map<InstanceType, Boolean>? = null,
     // Discover & Integrations
@@ -58,6 +59,7 @@ data class GlobalPreferencesExport(
                 dualPanelSupport != null ||
                 useColoredActivityCards != null ||
                 useColoredCalendarCards != null ||
+                startOfWeekMonday != null ||
                 showInfoCards != null ||
                 calendarFilterState != null ||
                 downloadQueueSortState != null ||

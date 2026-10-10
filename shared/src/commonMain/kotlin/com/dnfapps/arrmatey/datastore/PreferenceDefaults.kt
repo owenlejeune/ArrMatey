@@ -19,6 +19,7 @@ object PreferenceDefaults {
     const val OVERLAY_TAB_BACK_OPENS_DRAWER: Boolean = true
     const val USE_COLORED_ACTIVITY_CARDS: Boolean = false
     const val USE_COLORED_CALENDAR_CARDS: Boolean = false
+    const val START_OF_WEEK_MONDAY: Boolean = false
     const val SEARCH_SHOW_BANNERS: Boolean = true
     const val DUAL_PANEL_SUPPORT: Boolean = true
 

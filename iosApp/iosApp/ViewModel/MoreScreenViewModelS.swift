@@ -23,6 +23,7 @@ class MoreScreenViewModelS: ObservableObject {
     @Published private(set) var hideInstanceSwitcher: Bool = false
     @Published private(set) var useColoredActivityCards: Bool = false
     @Published private(set) var useColoredCalendarCards: Bool = false
+    @Published private(set) var startOfWeekMonday: Bool = false
     @Published private(set) var searchShowBanners: Bool = true
     @Published private(set) var searchShowInstanceIndicatorShadow: Bool = true
     @Published private(set) var unifiedLibrarySearchAllInstances: Bool = true
@@ -60,6 +61,9 @@ class MoreScreenViewModelS: ObservableObject {
         }
         viewModel.useColoredCalendarCards.observeAsync(on: self) { owner, val in
             owner.useColoredCalendarCards = val.boolValue
+        }
+        viewModel.startOfWeekMonday.observeAsync(on: self) { owner, val in
+            owner.startOfWeekMonday = val.boolValue
         }
         viewModel.searchShowBanners.observeAsync(on: self) { owner, show in
             owner.searchShowBanners = show.boolValue
@@ -109,6 +113,10 @@ class MoreScreenViewModelS: ObservableObject {
 
     func toggleUseColoredCalendarCards() {
         viewModel.toggleUseColoredCalendarCards()
+    }
+
+    func toggleStartOfWeekMonday() {
+        viewModel.toggleStartOfWeekMonday()
     }
 
     func toggleSearchShowBanners() {

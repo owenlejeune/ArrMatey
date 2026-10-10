@@ -120,6 +120,7 @@ class ExportDataUseCase(
                     dualPanelSupport = if (includeUiPreferences) preferencesStore.dualPanelSupport.first() else null,
                     useColoredActivityCards = if (includeUiPreferences) preferencesStore.useColoredActivityCards.first() else null,
                     useColoredCalendarCards = if (includeUiPreferences) preferencesStore.useColoredCalendarCards.first() else null,
+                    startOfWeekMonday = if (includeUiPreferences) preferencesStore.startOfWeekMonday.first() else null,
                     showInfoCards = if (includeUiPreferences) preferencesStore.showInfoCards.first() else null,
                     discoverSectionPreferences =
                     if (includeIntegrationsPreferences) preferencesStore.discoverSectionPreferences.first() else null,
