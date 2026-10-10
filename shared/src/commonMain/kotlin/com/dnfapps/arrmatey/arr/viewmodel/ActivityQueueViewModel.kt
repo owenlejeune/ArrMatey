@@ -162,6 +162,7 @@ class ActivityQueueViewModel(
                     HistoryEventType.AudiobookFileAdded,
                     HistoryEventType.Added,
                     HistoryEventType.DownloadImported,
+                    HistoryEventType.AlbumImportIncomplete,
                 )
 
             val filteredHistory =
@@ -289,7 +290,7 @@ class ActivityQueueViewModel(
                             val audiobook = library.firstOrNull { it.id == hist.audiobookId } as? Audiobook
                             DownloadedMediaItem(
                                 id = "history_${instId}_${hist.id}",
-                                title = audiobook?.title ?: hist.audiobookTitle,
+                                title = audiobook?.title ?: hist.audiobookTitle ?: hist.displayTitle ?: "Unknown Audiobook",
                                 subtitle = audiobook?.authors?.joinToString(", "),
                                 media = audiobook,
                                 date = hist.date,

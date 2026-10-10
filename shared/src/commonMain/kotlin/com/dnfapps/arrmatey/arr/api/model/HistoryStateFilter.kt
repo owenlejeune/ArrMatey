@@ -33,8 +33,15 @@ enum class HistoryStateFilter(
                     HistoryEventType.MovieFolderImported,
                     HistoryEventType.SeriesFolderImported,
                     HistoryEventType.BookFileImported,
+                    HistoryEventType.MovieFileImported,
+                    HistoryEventType.TrackFileImported,
+                    HistoryEventType.BookFileAdded,
+                    HistoryEventType.MovieFileAdded,
+                    HistoryEventType.TrackFileAdded,
+                    HistoryEventType.EpisodeFileAdded,
                     HistoryEventType.AudiobookFileAdded,
                     HistoryEventType.Added,
+                    HistoryEventType.DownloadImported,
                 )
         Failed -> eventType == HistoryEventType.DownloadFailed
         Deleted ->
@@ -43,7 +50,15 @@ enum class HistoryStateFilter(
                     HistoryEventType.MovieFileDeleted,
                     HistoryEventType.EpisodeFileDeleted,
                     HistoryEventType.BookFileDelete,
+                    HistoryEventType.BookFileDeleted,
+                    HistoryEventType.TrackFileDelete,
                     HistoryEventType.AudiobookFileRemoved,
+                    HistoryEventType.MovieDeleted,
+                    HistoryEventType.SeriesDeleted,
+                    HistoryEventType.BookDeleted,
+                    HistoryEventType.AuthorDeleted,
+                    HistoryEventType.AlbumDeleted,
+                    HistoryEventType.ArtistDeleted,
                 )
         Renamed ->
             eventType in
@@ -51,6 +66,7 @@ enum class HistoryStateFilter(
                     HistoryEventType.MovieFileRenamed,
                     HistoryEventType.EpisodeFileRenamed,
                     HistoryEventType.BookFileRenamed,
+                    HistoryEventType.Moved,
                 )
         Ignored -> eventType == HistoryEventType.DownloadIgnored
     }
