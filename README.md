@@ -276,6 +276,10 @@ Found a bug? Please [open an issue](https://github.com/owenlejeune/ArrMatey/issu
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## AI Disclaimer
+
+AI has assisted in the development of this application but all architecture/design decisions and the majority of code are written by humans.
+
 ## Acknowledgments
 
 - [Sonarr](https://sonarr.tv/) - Smart PVR for newsgroup and bittorrent users
