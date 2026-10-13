@@ -32,6 +32,7 @@ class NavigationManager(
 ) {
     // Reactive UI state properties
     val drawerExpandedState: StateFlow<Boolean> = appState.drawerExpanded
+    val drawerGesturesEnabled: StateFlow<Boolean> = appState.drawerGesturesEnabled
     val selectedTab: StateFlow<TabItem?> = appState.selectedTab
     val overlayTab: StateFlow<TabItem?> = appState.overlayTab
     val addInstanceSheetType: StateFlow<InstanceType?> = appState.addInstanceSheetType
@@ -42,6 +43,8 @@ class NavigationManager(
     fun closeDrawer() = appState.setDrawerOpen(false)
 
     fun setDrawerOpen(isOpen: Boolean) = appState.setDrawerOpen(isOpen)
+
+    fun setDrawerGesturesEnabled(enabled: Boolean) = appState.setDrawerGesturesEnabled(enabled)
 
     fun setSelectedTab(tab: TabItem) = appState.setSelectedTab(tab)
 
@@ -100,6 +103,11 @@ class NavigationManager(
 
     fun getNavigator(tab: TabItem?): Navigator<*>? = tab?.let { tabNavigators[it] }
 
+    fun isCurrentScreenRoot(tab: TabItem?): Boolean {
+        val navigator = getNavigator(tab) ?: return true
+        return navigator.backStack.size <= 1
+    }
+
     // Convenience methods for specific feature transitions
     fun openSettings() {
         openOverlay(TabItem.Settings)
@@ -134,6 +142,7 @@ class NavigationManager(
             InstanceType.Seerr -> openRequestsTab()
             InstanceType.Prowlarr -> openProwlarrTab()
             InstanceType.Bazarr -> openBazarrTab()
+            InstanceType.Tracearr, InstanceType.Tautulli -> openMonitoringTab()
             else -> navigateToTab(tabFor(type))
         }
     }
@@ -150,8 +159,8 @@ class NavigationManager(
         navigateToTab(TabItem.Standard.BAZARR)
     }
 
-    fun openTracearrTab() {
-        navigateToTab(TabItem.Standard.TRACEARR)
+    fun openMonitoringTab() {
+        navigateToTab(TabItem.Standard.MONITORING)
     }
 
     fun openDownloadClientsTab() {
@@ -197,6 +206,7 @@ class NavigationManager(
                         else -> TabItem.Standard.DISCOVER
                     }
                 }
+
                 RequestType.Tv -> {
                     when {
                         visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY
@@ -207,6 +217,7 @@ class NavigationManager(
                         else -> TabItem.Standard.DISCOVER
                     }
                 }
+
                 else -> {
                     when {
                         visibleTabs.any { it == TabItem.Standard.LIBRARY } -> TabItem.Standard.LIBRARY

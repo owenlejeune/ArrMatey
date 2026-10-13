@@ -23,7 +23,7 @@ import com.dnfapps.arrmatey.navigation.toEpisodeDetails
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDisplay
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
-import com.dnfapps.arrmatey.ui.components.navigation.tracearrNavEntries
+import com.dnfapps.arrmatey.ui.components.navigation.monitoringNavEntries
 import com.dnfapps.arrmatey.ui.screens.ArrInstanceDashboard
 import com.dnfapps.arrmatey.ui.screens.BazarrDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.BazarrScreen
@@ -177,7 +177,7 @@ fun DashboardTab(
                     },
                 )
             }
-            tracearrNavEntries(
+            monitoringNavEntries(
                 navigation = navigation,
                 isExpanded = isExpanded,
                 isLargeScreen = isLargeScreen,

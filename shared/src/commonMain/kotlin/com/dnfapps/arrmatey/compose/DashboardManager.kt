@@ -17,7 +17,6 @@ import com.dnfapps.arrmatey.shared.dashboard_recently_added
 import com.dnfapps.arrmatey.shared.dashboard_seerr_overview
 import com.dnfapps.arrmatey.shared.dashboard_todays_releases
 import com.dnfapps.arrmatey.shared.dashboard_tracearr_active_streams
-import com.dnfapps.arrmatey.shared.dashboard_tracearr_overview
 import com.dnfapps.arrmatey.shared.dashboard_upcoming_releases
 import com.dnfapps.arrmatey.shared.issues
 import com.dnfapps.arrmatey.shared.requests
@@ -97,14 +96,27 @@ enum class DashboardCards(
     UpcomingReleases(strings.dashboard_upcoming_releases),
     InstanceDashboard(strings.dashboard_instance_dashboards),
     BazarrOverview(strings.dashboard_bazarr_overview),
-    TracearrOverview(strings.dashboard_tracearr_overview),
-    TracearrActiveStreams(strings.dashboard_tracearr_active_streams),
+
+    @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+    @kotlinx.serialization.json.JsonNames("TracearrOverview")
+    PlaybackOverview(strings.dashboard_playback_overview),
+
+    @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+    @kotlinx.serialization.json.JsonNames("TracearrActiveStreams")
+    ActiveStreams(strings.dashboard_tracearr_active_streams),
+
     DiscoverFeed(strings.dashboard_discover_feed),
     DiscoverSpotlight(strings.dashboard_discover_spotlight),
     DiscoverQuickPick(strings.dashboard_discover_quick_pick),
     ;
 
     companion object {
+        fun fromStoredName(name: String): DashboardCards? = when (name) {
+            "TracearrOverview", "PlaybackOverview" -> PlaybackOverview
+            "TracearrActiveStreams", "ActiveStreams" -> ActiveStreams
+            else -> runCatching { valueOf(name) }.getOrNull()
+        }
+
         val defaultEntries: List<DashboardCards>
             get() =
                 listOf(
@@ -114,8 +126,8 @@ enum class DashboardCards(
                     PendingIssues,
                     ProwlarrOverview,
                     BazarrOverview,
-                    TracearrOverview,
-                    TracearrActiveStreams,
+                    PlaybackOverview,
+                    ActiveStreams,
                     ActivityQueue,
                     RecentlyAdded,
                     OnToday,

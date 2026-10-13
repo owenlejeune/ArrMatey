@@ -10,7 +10,7 @@ enum class HttpErrorType {
     ;
 
     companion object {
-        internal fun fromErrorType(type: ErrorType) = when (type) {
+        fun fromErrorType(type: ErrorType) = when (type) {
             ErrorType.Http -> Http
             ErrorType.Network -> Network
             ErrorType.Timeout -> Timeout
@@ -19,4 +19,4 @@ enum class HttpErrorType {
     }
 }
 
-internal fun ErrorType.toHttpError(): HttpErrorType = HttpErrorType.fromErrorType(this)
+fun ErrorType.toHttpError(): HttpErrorType = HttpErrorType.fromErrorType(this)

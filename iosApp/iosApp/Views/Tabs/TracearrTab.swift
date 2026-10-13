@@ -9,7 +9,7 @@ struct TracearrTab: View {
 
 struct TracearrTabContent: View {
     @StateObject private var viewModel = TracearrViewModelS()
-    @StateObject private var instancesViewModel = InstancesViewModelS(type: .tracearr)
+    @StateObject private var instancesViewModel = InstancesViewModelS(types: [.tracearr, .tautulli])
     @StateObject private var globalPreferences = PreferencesViewModel()
     @EnvironmentObject private var navigationManager: NavigationManager
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -22,87 +22,7 @@ struct TracearrTabContent: View {
                 NoInstanceView(type: .tracearr)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let success = viewModel.state as? TracearrStateSuccess {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        if let stats = success.stats {
-                            TracearrDashboardStatsView(
-                                stats: stats,
-                                isExpanded: isLargeScreen,
-                                onNavigateToHistory: {
-                                    navigationManager.go(to: TracearrRoute.history)
-                                },
-                                onNavigateToAllUsers: {
-                                    navigationManager.go(to: TracearrRoute.users)
-                                },
-                                onNavigateToViolations: {
-                                    navigationManager.go(to: TracearrRoute.violations)
-                                },
-                                onNavigateToActivity: {
-                                    navigationManager.go(to: TracearrRoute.activity)
-                                }
-                            )
-                        }
-
-                        nowPlayingHeader(count: success.streams.count)
-
-                        if success.streams.isEmpty {
-                            VStack(spacing: 12) {
-                                Image(systemName: "tv")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(.secondary)
-                                Text(MR.strings().no_active_streams.localized())
-                                    .foregroundColor(.secondary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 40)
-                        } else {
-                            LazyVStack(spacing: 16) {
-                                ForEach(success.streams, id: \.id) { session in
-                                    TracearrStreamCardView(session: session)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            viewModel.setSelectedStream(session)
-                                        }
-                                }
-                            }
-                        }
-
-                        // History Section Header
-                        historyHeader
-
-                        let historyItems = Array(success.history.prefix(5))
-                        if historyItems.isEmpty {
-                            VStack(spacing: 8) {
-                                Text(MR.strings().no_history.localized())
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 20)
-                        } else if isLargeScreen {
-                            TracearrHistoryTableView(
-                                items: historyItems,
-                                onClickItem: { historyItem in
-                                    viewModel.setSelectedHistoryStream(historyItem)
-                                }
-                            )
-                        } else {
-                            LazyVStack(spacing: 16) {
-                                ForEach(historyItems, id: \.id) { historyItem in
-                                    TracearrHistoryCardView(item: historyItem)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            viewModel.setSelectedHistoryStream(historyItem)
-                                        }
-                                }
-                            }
-                        }
-                    }
-                    .padding(16)
-                }
-                .refreshable {
-                    viewModel.refresh()
-                }
+                successView(success)
             } else if viewModel.state is TracearrStateLoading || viewModel.state is TracearrStateInitial {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -147,18 +67,118 @@ struct TracearrTabContent: View {
                 ToolbarItem(placement: .topBarLeading) {
                     InstancePickerMenu(
                         instances: instancesViewModel.instancesState.instances,
+                        selectedInstanceId: instancesViewModel.instancesState.selectedInstance?.id,
                         onChangeInstance: { instancesViewModel.setInstanceActive($0) },
-                        onAddNewInstance: { navigationManager.goToNewInstance(of: .tracearr) }
+                        onAddNewInstance: { navigationManager.goToNewInstance(of: instancesViewModel.instancesState.selectedInstance?.type ?? .tracearr) }
                     )
                     .menuIndicator(.hidden)
                 }
-            } else if navigationManager.shouldShowDrawerButton(for: TabItemStandard.tracearr.key) {
+            } else if navigationManager.shouldShowDrawerButton(for: TabItemStandard.monitoring.key) {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         navigationManager.showLauncher = true
                     } label: {
                         Image(systemName: "line.3.horizontal")
                     }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func successView(_ success: TracearrStateSuccess) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if let stats = success.stats {
+                    statsView(stats)
+                }
+
+                nowPlayingHeader(count: success.streams.count)
+
+                streamsView(success.streams)
+
+                historyHeader
+
+                historyView(success.history)
+            }
+            .padding(16)
+        }
+        .refreshable {
+            viewModel.refresh()
+        }
+    }
+
+    @ViewBuilder
+    private func statsView(_ stats: TracearrTodayStats) -> some View {
+        TracearrDashboardStatsView(
+            stats: stats,
+            isExpanded: isLargeScreen,
+            onNavigateToHistory: {
+                navigationManager.go(to: TracearrRoute.history)
+            },
+            onNavigateToAllUsers: {
+                navigationManager.go(to: TracearrRoute.users)
+            },
+            onNavigateToViolations: {
+                navigationManager.go(to: TracearrRoute.violations)
+            },
+            onNavigateToActivity: {
+                navigationManager.go(to: TracearrRoute.activity)
+            }
+        )
+    }
+
+    @ViewBuilder
+    private func streamsView(_ streams: [TracearrStreamSession]) -> some View {
+        if streams.isEmpty {
+            VStack(spacing: 12) {
+                Image(systemName: "tv")
+                    .font(.system(size: 48))
+                    .foregroundColor(.secondary)
+                Text(MR.strings().no_active_streams.localized())
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 40)
+        } else {
+            LazyVStack(spacing: 16) {
+                ForEach(streams, id: \.id) { session in
+                    TracearrStreamCardView(session: session)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.setSelectedStream(session)
+                        }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func historyView(_ history: [TracearrHistoryItem]) -> some View {
+        let historyItems = Array(history.prefix(5))
+        if historyItems.isEmpty {
+            VStack(spacing: 8) {
+                Text(MR.strings().no_history.localized())
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+        } else if isLargeScreen {
+            TracearrHistoryTableView(
+                items: historyItems,
+                onClickItem: { historyItem in
+                    viewModel.setSelectedHistoryStream(historyItem)
+                }
+            )
+        } else {
+            LazyVStack(spacing: 16) {
+                ForEach(historyItems, id: \.id) { historyItem in
+                    TracearrHistoryCardView(item: historyItem)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            viewModel.setSelectedHistoryStream(historyItem)
+                        }
                 }
             }
         }

@@ -39,11 +39,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
 import com.dnfapps.arrmatey.tracearr.state.TracearrState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
+import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.InstancePicker
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
@@ -76,8 +78,8 @@ fun TracearrHomeScreen(
     viewModel: TracearrViewModel = koinViewModel(),
     instancesViewModel: InstancesViewModel =
         koinViewModel(
-            key = InstanceType.Tracearr.name,
-            parameters = { parametersOf(InstanceType.Tracearr) },
+            key = "monitoring_instances",
+            parameters = { parametersOf(listOf(InstanceType.Tracearr, InstanceType.Tautulli)) },
         ),
     globalPreferencesStore: PreferencesStore = koinInject(),
 ) {
@@ -87,6 +89,7 @@ fun TracearrHomeScreen(
     val hideInstancePicker by globalPreferencesStore.hideInstanceSwitcher.collectAsStateWithLifecycle(false)
 
     val selectedSession by viewModel.selectedSession.collectAsStateWithLifecycle()
+    val navManager = navigationManager
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -109,7 +112,7 @@ fun TracearrHomeScreen(
                 actions = {
                     if (instancesState.instances.isNotEmpty() && (!hideInstancePicker || instancesState.instances.size > 1)) {
                         InstancePicker(
-                            type = InstanceType.Tracearr,
+                            type = instancesState.selectedInstance?.type ?: InstanceType.Tracearr,
                             currentInstance = instancesState.selectedInstance,
                             typeInstances = instancesState.instances,
                             onInstanceSelected = { instancesViewModel.setInstanceActive(it) },
@@ -146,16 +149,18 @@ fun TracearrHomeScreen(
                     )
                 }
                 is TracearrState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = currentState.message,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
+                    ErrorView(
+                        message = currentState.message,
+                        onOpenSettings = {
+                            instancesState.selectedInstance?.let {
+                                navManager.openEditInstanceScreen(it.id)
+                            }
+                        },
+                        onRetry = {
+                            viewModel.refresh()
+                        },
+                        modifier = Modifier.fillMaxSize().wrapContentSize(),
+                    )
                 }
                 is TracearrState.Success -> {
                     LazyColumn(

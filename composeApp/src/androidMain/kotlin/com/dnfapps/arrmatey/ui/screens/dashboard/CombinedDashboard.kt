@@ -85,6 +85,7 @@ import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
@@ -98,6 +99,7 @@ import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.screens.monitoring.PlaybackStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.screens.requests.IssueDetailsSheet
 import com.dnfapps.arrmatey.ui.screens.requests.IssuesList
 import com.dnfapps.arrmatey.ui.screens.requests.RequestsList
@@ -144,6 +146,7 @@ fun DashboardCardContent(
     onIssueClick: (MediaIssuePackage) -> Unit = {},
     onRequestActivityItem: (QueueItem) -> Unit = {},
     onRequestStreamSession: (TracearrStreamSession) -> Unit = {},
+    onRequestPlaybackStreamSession: (PlaybackStreamSession) -> Unit = {},
     onHealthClick: () -> Unit = {},
     onSeerrRequestsStatClick: () -> Unit = {},
     onSeerrIssuesStatClick: () -> Unit = {},
@@ -267,7 +270,7 @@ fun DashboardCardContent(
                 },
             )
 
-        DashboardCards.TracearrOverview ->
+        DashboardCards.PlaybackOverview ->
             DashboardTracearrSection(
                 state = currentState,
                 isExpanded = false,
@@ -286,13 +289,13 @@ fun DashboardCardContent(
                 },
             )
 
-        DashboardCards.TracearrActiveStreams ->
+        DashboardCards.ActiveStreams ->
             DashboardActiveStreamsSection(
                 state = currentState,
                 isEditing = isEditing,
                 enabled = enabled,
                 onItemClick = { session ->
-                    if (!isEditing && enabled) onRequestStreamSession(session)
+                    if (!isEditing && enabled) onRequestPlaybackStreamSession(session)
                 },
             )
 
@@ -406,6 +409,7 @@ fun CombinedDashboard(
     var selectedIssueForSheet by remember { mutableStateOf<MediaIssuePackage?>(null) }
     var selectedActivityItem by remember { mutableStateOf<QueueItem?>(null) }
     var selectedTracearrStreamSession by remember { mutableStateOf<TracearrStreamSession?>(null) }
+    var selectedPlaybackStreamSession by remember { mutableStateOf<PlaybackStreamSession?>(null) }
     var selectedMediaForRequest by remember { mutableStateOf<DiscoverResult?>(null) }
     var showConfirmRemoveActivity by remember { mutableStateOf(false) }
     var showHealthNoticesSheet by remember { mutableStateOf(false) }
@@ -663,8 +667,8 @@ fun CombinedDashboard(
                                                         { onNavigateToBazarrTab() }
                                                     }
 
-                                                    DashboardCards.TracearrOverview,
-                                                    DashboardCards.TracearrActiveStreams,
+                                                    DashboardCards.PlaybackOverview,
+                                                    DashboardCards.ActiveStreams,
                                                     -> {
                                                         { onNavigateToTracearrTab() }
                                                     }
@@ -706,6 +710,18 @@ fun CombinedDashboard(
                                                     onIssueClick = { selectedIssueForSheet = it },
                                                     onRequestActivityItem = { selectedActivityItem = it },
                                                     onRequestStreamSession = { selectedTracearrStreamSession = it },
+                                                    onRequestPlaybackStreamSession = { session ->
+                                                        if (session.instanceType == InstanceType.Tracearr) {
+                                                            val tracearrSession = currentState.activeStreams.firstOrNull { it.id == session.sessionId }
+                                                            if (tracearrSession != null) {
+                                                                selectedTracearrStreamSession = tracearrSession
+                                                            } else {
+                                                                selectedPlaybackStreamSession = session
+                                                            }
+                                                        } else {
+                                                            selectedPlaybackStreamSession = session
+                                                        }
+                                                    },
                                                     onHealthClick = { showHealthNoticesSheet = true },
                                                     onSeerrRequestsStatClick = {
                                                         showSeerrRequestsSheet = true
@@ -927,6 +943,29 @@ fun CombinedDashboard(
                         },
                         onNavigateToUser = {
                             selectedTracearrStreamSession = null
+                            onNavigateToTracearrUsers()
+                        },
+                    )
+                }
+
+                selectedPlaybackStreamSession?.let { session ->
+                    PlaybackStreamDetailsSheet(
+                        session = session,
+                        onDismissRequest = { selectedPlaybackStreamSession = null },
+                        onTerminateStream = { message ->
+                            viewModel.terminatePlaybackStream(session, message)
+                            selectedPlaybackStreamSession = null
+                        },
+                        onNavigateToDetails = { type, tmdbId ->
+                            selectedPlaybackStreamSession = null
+                            if (tmdbId != null) {
+                                type?.requestType?.let { reqType ->
+                                    onNavigateToSeerrMediaDetails(tmdbId, reqType)
+                                }
+                            }
+                        },
+                        onNavigateToUser = {
+                            selectedPlaybackStreamSession = null
                             onNavigateToTracearrUsers()
                         },
                     )

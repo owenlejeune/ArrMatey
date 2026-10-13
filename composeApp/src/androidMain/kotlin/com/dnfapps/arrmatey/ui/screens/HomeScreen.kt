@@ -159,9 +159,15 @@ fun HomeScreen(
             )
         }
 
+        val currentTab = overlayTab ?: visibleTabs.getOrNull(pagerState.currentPage) ?: selectedTab
+        val isRootScreen = navigationManager.isCurrentScreenRoot(currentTab)
+        val drawerGesturesEnabled by navigationManager.drawerGesturesEnabled.collectAsStateWithLifecycle()
+
         ModalNavigationDrawer(
             gesturesEnabled =
-            overlayTab !is TabItem.CustomWebpage &&
+            drawerGesturesEnabled &&
+                isRootScreen &&
+                overlayTab !is TabItem.CustomWebpage &&
                 !drawerState.isAnimationRunning,
             drawerState = drawerState,
             drawerContent = {

@@ -29,6 +29,8 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
+import com.dnfapps.arrmatey.monitoring.model.PlaybackSummaryStats
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.Keyword
@@ -68,6 +70,7 @@ sealed interface CombinedDashboardState {
         val prowlarrStats: List<ProwlarrDashboardState> = emptyList(),
         val bazarrStats: List<BazarrDashboardState> = emptyList(),
         val tracearrStats: List<TracearrDashboardState> = emptyList(),
+        val playbackStats: List<PlaybackDashboardState> = emptyList(),
         val trendingMedia: List<DiscoverResult> = emptyList(),
         val popularMovies: List<DiscoverResult> = emptyList(),
         val popularTv: List<DiscoverResult> = emptyList(),
@@ -92,6 +95,9 @@ sealed interface CombinedDashboardState {
 
         val activeStreams: List<TracearrStreamSession>
             get() = tracearrStats.flatMap { it.activeStreams }
+
+        val playbackActiveStreams: List<PlaybackStreamSession>
+            get() = playbackStats.flatMap { it.activeStreams }
 
         val spotlightMedia: List<DiscoverResult>
             get() {
@@ -651,6 +657,12 @@ data class TracearrDashboardState(
     val instance: Instance,
     val stats: TracearrTodayStats? = null,
     val activeStreams: List<TracearrStreamSession> = emptyList(),
+)
+
+data class PlaybackDashboardState(
+    val instance: Instance,
+    val stats: PlaybackSummaryStats? = null,
+    val activeStreams: List<PlaybackStreamSession> = emptyList(),
 )
 
 data class DashboardCalendarItem(

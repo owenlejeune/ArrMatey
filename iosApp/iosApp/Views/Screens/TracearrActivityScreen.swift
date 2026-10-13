@@ -41,10 +41,10 @@ struct TracearrActivityScreen: View {
 
                     ScrollView {
                         if isDualColumn {
-                            dualColumnLayout(response: success.response)
+                            dualColumnLayout(response: success.response, servers: success.servers)
                                 .padding(16)
                         } else {
-                            singleColumnLayout(response: success.response)
+                            singleColumnLayout(response: success.response, servers: success.servers)
                                 .padding(16)
                         }
                     }
@@ -91,9 +91,9 @@ struct TracearrActivityScreen: View {
     }
 
     @ViewBuilder
-    private func singleColumnLayout(response: TracearrActivityResponse) -> some View {
+    private func singleColumnLayout(response: TracearrActivityResponse, servers: [TracearrServer]) -> some View {
         VStack(spacing: 16) {
-            PlaysOverTimeCard(plays: response.plays)
+            PlaysOverTimeCard(plays: response.plays, servers: servers)
             ConcurrentStreamsCard(concurrent: response.concurrent)
             ActivityByDayOfWeekCard(byDay: response.byDayOfWeek)
             ActivityByHourOfDayCard(byHour: response.byHourOfDay)
@@ -103,10 +103,10 @@ struct TracearrActivityScreen: View {
     }
 
     @ViewBuilder
-    private func dualColumnLayout(response: TracearrActivityResponse) -> some View {
+    private func dualColumnLayout(response: TracearrActivityResponse, servers: [TracearrServer]) -> some View {
         VStack(spacing: 16) {
             HStack(alignment: .top, spacing: 16) {
-                PlaysOverTimeCard(plays: response.plays)
+                PlaysOverTimeCard(plays: response.plays, servers: servers)
                 ConcurrentStreamsCard(concurrent: response.concurrent)
             }
             HStack(alignment: .top, spacing: 16) {
@@ -217,9 +217,10 @@ private struct PlayDataPoint: Identifiable {
 
 private struct PlaysOverTimeCard: View {
     let plays: [TracearrActivityPlay]
+    var servers: [TracearrServer] = []
 
     private var serverNames: [String] {
-        let names = plays.compactMap { $0.serverId }.filter { !$0.isEmpty }
+        let names = plays.compactMap { $0.serverName ?? $0.serverId }.filter { !$0.isEmpty }
         var unique: [String] = []
         for name in names {
             if !unique.contains(name) {
@@ -250,13 +251,13 @@ private struct PlaysOverTimeCard: View {
             for server in servers {
                 for date in uniqueDates {
                     let label = formatChartDateLabel(date)
-                    let playCount = plays.first { ($0.serverId ?? unknownStr) == server && $0.date == date }?.count ?? 0
+                    let playCount = plays.first { ($0.serverName ?? $0.serverId ?? unknownStr) == server && $0.date == date }?.count ?? 0
                     result.append(PlayDataPoint(server: server, dateLabel: label, count: Double(playCount)))
                 }
             }
         } else {
             for server in servers {
-                let matching = plays.filter { ($0.serverId ?? unknownStr) == server }
+                let matching = plays.filter { ($0.serverName ?? $0.serverId ?? unknownStr) == server }
                 for (idx, play) in matching.enumerated() {
                     let label = formatChartDateLabel(play.date)
                     result.append(PlayDataPoint(server: server, dateLabel: label.isEmpty ? "\(idx + 1)" : label, count: Double(play.count)))
@@ -267,8 +268,12 @@ private struct PlaysOverTimeCard: View {
     }
 
     private var serverColors: [Color] {
-        serverNames.enumerated().map { index, _ in
-            chartPalette[index % chartPalette.count]
+        let unknownStr = MR.strings().unknown.localized()
+        return serverNames.map { server in
+            let play = plays.first { ($0.serverName ?? $0.serverId ?? unknownStr) == server }
+            let matchingServer = servers.first { $0.serverId == server || $0.serverName == server || $0.name == server || $0.id == server }
+            let type = play?.serverType ?? matchingServer?.serverType
+            return Color.serverColor(type: type, name: server)
         }
     }
 
@@ -283,13 +288,13 @@ private struct PlaysOverTimeCard: View {
                             x: .value("Date", point.dateLabel),
                             y: .value("Plays", point.count)
                         )
-                        .foregroundStyle(by: .value("Server", point.server))
+                        .foregroundStyle(by: .value(MR.strings().server.localized(), point.server))
 
                         PointMark(
                             x: .value("Date", point.dateLabel),
                             y: .value("Plays", point.count)
                         )
-                        .foregroundStyle(by: .value("Server", point.server))
+                        .foregroundStyle(by: .value(MR.strings().server.localized(), point.server))
                     }
                     .chartForegroundStyleScale(domain: serverNames, range: serverColors)
                     .chartLegend(.hidden)
@@ -455,8 +460,9 @@ private struct ActivityByHourOfDayCard: View {
                 .cornerRadius(4)
             }
             .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: 8)) { _ in
-                    AxisValueLabel(orientation: .vertical)
+                AxisMarks(values: points.filter { $0.hour % 3 == 0 }.map { $0.hourLabel }) { _ in
+                    AxisGridLine()
+                    AxisValueLabel()
                 }
             }
             .frame(height: 200)

@@ -30,20 +30,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.entensions.bullet
-import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
-import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
 import com.dnfapps.arrmatey.utils.mokoString
+import kotlin.math.roundToInt
 
 @Composable
 fun DashboardActiveStreamsSection(
     state: CombinedDashboardState.Success,
     isEditing: Boolean,
     enabled: Boolean = true,
-    onItemClick: (TracearrStreamSession) -> Unit = {},
+    onItemClick: (PlaybackStreamSession) -> Unit = {},
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -54,7 +53,8 @@ fun DashboardActiveStreamsSection(
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
     ) {
-        val streams = state.activeStreams
+        val streams = state.playbackActiveStreams
+        val hasMonitoringInstances = state.playbackStats.isNotEmpty() || state.tracearrStats.isNotEmpty()
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -73,9 +73,9 @@ fun DashboardActiveStreamsSection(
                 )
             }
 
-            if (state.tracearrStats.isEmpty()) {
+            if (!hasMonitoringInstances) {
                 Text(
-                    text = mokoString(MR.strings.no_type_instances_message, InstanceType.Tracearr.name),
+                    text = mokoString(MR.strings.no_type_instances_message, mokoString(MR.strings.monitoring)),
                     modifier =
                     Modifier
                         .fillMaxWidth()
@@ -97,29 +97,8 @@ fun DashboardActiveStreamsSection(
                 )
             } else {
                 streams.take(5).forEach { session ->
-                    val displayTitle =
-                        session.grandparentTitle
-                            ?: session.showTitle
-                            ?: session.mediaTitle
-                            ?: session.channelTitle
-                            ?: mokoString(MR.strings.unknown)
-
-                    val isEpisode =
-                        session.mediaType == TracearrMediaType.Episode ||
-                            (session.seasonNumber != null && session.episodeNumber != null)
-                    val episodeInfo =
-                        if (isEpisode) {
-                            val seasonStr = session.seasonNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
-                            val episodeStr = session.episodeNumber?.let { if (it < 10) "0$it" else "$it" } ?: "00"
-                            val epTitle = session.mediaTitle
-                            if (!epTitle.isNullOrBlank() && epTitle != displayTitle) {
-                                "S${seasonStr}E$episodeStr • $epTitle"
-                            } else {
-                                "S${seasonStr}E$episodeStr"
-                            }
-                        } else {
-                            null
-                        }
+                    val displayTitle = session.grandparentTitle?.takeIf { it.isNotBlank() } ?: session.displayTitle.ifBlank { mokoString(MR.strings.unknown) }
+                    val subtitle = session.subtitle
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -131,10 +110,14 @@ fun DashboardActiveStreamsSection(
                                 .size(8.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    getTracearrServerColor(
-                                        session.server?.type ?: session.serverType,
-                                        session.server?.name ?: session.serverName,
-                                    ),
+                                    if (session.serverType != null) {
+                                        getTracearrServerColor(
+                                            session.serverType,
+                                            session.serverName,
+                                        )
+                                    } else {
+                                        session.instanceType.associatedColor
+                                    },
                                 ),
                         )
                         Column(modifier = Modifier.weight(1f)) {
@@ -146,9 +129,9 @@ fun DashboardActiveStreamsSection(
                                 overflow = TextOverflow.Ellipsis,
                             )
 
-                            if (episodeInfo != null) {
+                            if (!subtitle.isNullOrBlank()) {
                                 Text(
-                                    episodeInfo,
+                                    subtitle,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
@@ -158,8 +141,9 @@ fun DashboardActiveStreamsSection(
 
                             val statusRow =
                                 buildString {
-                                    if (session.effectiveUsername.isNotBlank()) {
-                                        append(session.effectiveUsername)
+                                    val user = session.userDisplayName.ifBlank { session.username }
+                                    if (user.isNotBlank()) {
+                                        append(user)
                                     }
                                     val stateStr =
                                         when {
@@ -171,7 +155,7 @@ fun DashboardActiveStreamsSection(
                                         if (isNotEmpty()) bullet()
                                         append(stateStr)
                                     }
-                                    val quality = session.quality ?: session.resolution
+                                    val quality = session.qualityProfile ?: session.videoResolution
                                     if (!quality.isNullOrBlank()) {
                                         if (isNotEmpty()) bullet()
                                         append(quality)
@@ -179,9 +163,10 @@ fun DashboardActiveStreamsSection(
                                 }
 
                             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                session.effectiveServerName.takeIf { it.isNotBlank() }?.let {
+                                val serverOrInstance = session.serverName ?: session.instanceLabel
+                                if (serverOrInstance.isNotBlank()) {
                                     Text(
-                                        "$it • ",
+                                        "$serverOrInstance • ",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.primary,
                                     )
@@ -194,10 +179,24 @@ fun DashboardActiveStreamsSection(
                             }
                         }
 
-                        val totalMs = session.totalDurationMs ?: session.durationMs ?: 0L
-                        val progressMs = session.progressMs ?: 0L
-                        if (totalMs > 0 && progressMs > 0) {
-                            val percent = ((progressMs.toFloat() / totalMs.toFloat()) * 100).toInt().coerceIn(0, 100)
+                        val percent =
+                            when {
+                                session.progressPercent > 0f -> {
+                                    val raw = session.progressPercent
+                                    val p = if (raw <= 1f) (raw * 100f).roundToInt() else raw.roundToInt()
+                                    p.coerceIn(0, 100)
+                                }
+                                else -> {
+                                    val totalMs = session.totalDurationMs ?: 0L
+                                    val progressMs = session.progressMs ?: 0L
+                                    if (totalMs > 0 && progressMs > 0) {
+                                        ((progressMs.toFloat() / totalMs.toFloat()) * 100f).roundToInt().coerceIn(0, 100)
+                                    } else {
+                                        null
+                                    }
+                                }
+                            }
+                        if (percent != null) {
                             Text(
                                 "$percent%",
                                 style = MaterialTheme.typography.labelMedium,

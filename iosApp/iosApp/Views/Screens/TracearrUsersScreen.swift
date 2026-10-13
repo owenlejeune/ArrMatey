@@ -158,10 +158,10 @@ struct TracearrUserCardView: View {
             if !detail.accounts.isEmpty {
                 FlowLayout(spacing: 8) {
                     ForEach(detail.accounts, id: \.serverId) { account in
-                        let serverName = account.serverType?.name ?? "Server"
+                        let serverName = account.serverName ?? account.serverType?.name ?? MR.strings().server.localized()
                         let userLabel = account.username ?? account.serverUserId ?? account.externalUserId ?? ""
                         let label = !userLabel.isEmpty ? "\(serverName): \(userLabel)" : serverName
-                        let serverColor = Color.serverColor(type: account.serverType, name: account.username)
+                        let serverColor = Color.serverColor(type: account.serverType, name: account.serverName ?? account.username)
 
                         HStack(spacing: 4) {
                             Image(systemName: "server.rack")

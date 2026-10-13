@@ -85,9 +85,13 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         get { paths[TabItemStandard.bazarr.key] ?? NavigationPath() }
         set { paths[TabItemStandard.bazarr.key] = newValue }
     }
+    var monitoringPath: NavigationPath {
+        get { paths[TabItemStandard.monitoring.key] ?? NavigationPath() }
+        set { paths[TabItemStandard.monitoring.key] = newValue }
+    }
     var tracearrPath: NavigationPath {
-        get { paths[TabItemStandard.tracearr.key] ?? NavigationPath() }
-        set { paths[TabItemStandard.tracearr.key] = newValue }
+        get { monitoringPath }
+        set { monitoringPath = newValue }
     }
     var libraryPath: NavigationPath {
         get { paths[TabItemStandard.library.key] ?? NavigationPath() }
@@ -220,9 +224,9 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             dPath.append(route)
             paths[TabItemStandard.dashboard.key] = dPath
         } else {
-            var tPath = paths[TabItemStandard.tracearr.key] ?? NavigationPath()
+            var tPath = paths[TabItemStandard.monitoring.key] ?? NavigationPath()
             tPath.append(route)
-            paths[TabItemStandard.tracearr.key] = tPath
+            paths[TabItemStandard.monitoring.key] = tPath
         }
     }
 
@@ -379,10 +383,10 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             push(route)
         } else if let type = instanceType {
             go(to: route, of: type)
-        } else if selectedTab.key == TabItemStandard.tracearr.key {
-            var tPath = paths[TabItemStandard.tracearr.key] ?? NavigationPath()
+        } else if selectedTab.key == TabItemStandard.monitoring.key {
+            var tPath = paths[TabItemStandard.monitoring.key] ?? NavigationPath()
             tPath.append(route)
-            paths[TabItemStandard.tracearr.key] = tPath
+            paths[TabItemStandard.monitoring.key] = tPath
         } else {
             var sPath = paths[TabItemStandard.requests.key] ?? NavigationPath()
             sPath.append(route)
@@ -532,8 +536,12 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         navigateToTab(TabItemStandard.bazarr as TabItem)
     }
 
+    func openMonitoringTab() {
+        navigateToTab(TabItemStandard.monitoring as TabItem)
+    }
+
     func openTracearrTab() {
-        navigateToTab(TabItemStandard.tracearr as TabItem)
+        openMonitoringTab()
     }
 
     func openDownloadsTab() {
@@ -622,7 +630,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         case .seerr: return TabItemStandard.requests as TabItem
         case .prowlarr: return TabItemStandard.prowlarr as TabItem
         case .bazarr: return TabItemStandard.bazarr as TabItem
-        case .tracearr: return TabItemStandard.tracearr as TabItem
+        case .tracearr: return TabItemStandard.monitoring as TabItem
+        case .tautulli: return TabItemStandard.monitoring as TabItem
         }
     }
 
@@ -718,6 +727,7 @@ enum TracearrRoute: Hashable {
     case users
     case violations
     case activity
+    case stats
 }
 
 extension MediaRoute {

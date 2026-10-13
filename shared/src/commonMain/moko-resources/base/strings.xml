@@ -516,6 +516,30 @@
     <string name="bazarr_description">Bazarr is a companion application to Sonarr and Radarr. It manages and downloads subtitles based on your requirements. You define your preferences by TV show or movie and Bazarr takes care of everything for you.</string>
     <string name="tracearr">Tracearr</string>
     <string name="tracearr_description">Tracearr is a monitoring platform for Plex, Jellyfin, and Emby. Track streams in real-time, dig into playback analytics, and spot account sharing before it gets out of hand.</string>
+    <string name="tautulli">Tautulli</string>
+    <string name="tautulli_description">Tautulli is a monitoring and analytics application for Plex Media Server. Track active streams in real-time, inspect playback history, and terminate sessions.</string>
+    <string name="terminate_stream">Terminate stream</string>
+    <string name="terminate_stream_dialog_title">Terminate Stream</string>
+    <string name="terminate_stream_dialog_message">Enter an optional message to display on the client device:</string>
+    <string name="terminate_stream_confirm">Terminate</string>
+    <string name="terminate_stream_success">Stream terminated</string>
+    <string name="monitoring">Monitoring</string>
+    <string name="dashboard_playback_overview">Playback Overview</string>
+    <string name="stream_decision_transcode">TRANSCODE</string>
+    <string name="stream_decision_direct_play">DIRECT PLAY</string>
+    <string name="stream_decision_direct_stream">DIRECT STREAM</string>
+    <string name="direct">Direct</string>
+    <string name="network">Network</string>
+    <string name="bandwidth">Bandwidth</string>
+    <string name="bandwidth_mbps">%s Mbps</string>
+    <string name="bandwidth_kbps">%d Kbps</string>
+    <string name="wan">WAN</string>
+    <string name="lan">LAN</string>
+    <string name="label_player_device">Player / Device</string>
+    <string name="message_optional">Message (optional)</string>
+    <string name="add_tautulli">Add Tautulli</string>
+    <string name="add_tracearr">Add Tracearr</string>
+    <string name="admin">Admin</string>
 
     <!-- Movie Statuses -->
     <string name="tba">TBA</string>
@@ -1017,7 +1041,6 @@
     <string name="seven_days">7 Days</string>
     <string name="total_plays">Total Plays</string>
     <string name="viewers">Viewers</string>
-    <string name="server">Server</string>
     <string name="servers">Servers</string>
     <string name="per_server_breakdown">Per-Server Breakdown</string>
     <string name="top_watchers">Top Watchers</string>
@@ -1163,4 +1186,18 @@
     <string name="volume_folder_desc">Make empty to generate the default folder</string>
     <string name="special_version_desc">Type of volume</string>
     <string name="monitoring_scheme_edit_desc">Apply a monitoring scheme once, on save.</string>
+
+    <string name="session">Session</string>
+    <string name="stream">Stream</string>
+    <string name="state">State</string>
+    <string name="decision">Decision</string>
+    <string name="original">Original</string>
+    <string name="top_movies">Top movies</string>
+    <string name="popular_movies">Popular movies</string>
+    <string name="top_tv">Top TV shows</string>
+    <string name="popular_tv">Popular TV shows</string>
+    <string name="top_music">Top music</string>
+    <string name="popular_music">Popular music</string>
+    <string name="top_platforms">Top platforms</string>
+    <string name="no_stats_available">No statistics available</string>
 </resources>

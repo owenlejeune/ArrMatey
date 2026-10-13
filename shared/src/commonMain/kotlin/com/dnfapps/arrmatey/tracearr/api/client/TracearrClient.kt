@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaDetails
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaWatchers
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrPeriod
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrServersResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamsResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
@@ -30,6 +31,11 @@ class TracearrClient(
 
     suspend fun testConnection(): NetworkResult<Unit> {
         val url = "${instance.getEffectiveBaseUrl()}/${instance.type.testEndpoint}"
+        return httpClient.safeGet(url)
+    }
+
+    suspend fun getServers(): NetworkResult<TracearrServersResponse> {
+        val url = "$v2BaseUrl/public/servers"
         return httpClient.safeGet(url)
     }
 

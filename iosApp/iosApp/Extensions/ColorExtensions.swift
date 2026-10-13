@@ -142,6 +142,7 @@ extension InstanceType {
         case .prowlarr: return .arrOrange
         case .bazarr: return Color(hex: 0x0FA3B1)
         case .tracearr: return Color(hex: 0x00b4d8)
+        case .tautulli: return Color(hex: 0xe5a00d)
         default: return .accentColor
         }
     }

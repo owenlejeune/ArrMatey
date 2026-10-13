@@ -194,6 +194,7 @@ struct TracearrHistorySectionView: View {
     let uiState: TracearrMediaUiState
     let onLoadMore: () -> Void
     var onClickItem: ((TracearrHistoryItem) -> Void)? = nil
+    var onClickActiveStream: ((TracearrStreamSession) -> Void)? = nil
     var isLargeScreen: Bool? = nil
 
     private var effectiveIsLargeScreen: Bool {
@@ -202,7 +203,27 @@ struct TracearrHistorySectionView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            if uiState.historyItems.isEmpty && !uiState.isLoading {
+            if !uiState.activeStreams.isEmpty {
+                Text(MR.strings().now_playing.localized())
+                    .font(.title3.bold())
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                ForEach(uiState.activeStreams, id: \.id) { session in
+                    TracearrStreamCardView(session: session)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            onClickActiveStream?(session)
+                        }
+                }
+            }
+
+            if !uiState.activeStreams.isEmpty && !uiState.historyItems.isEmpty {
+                Text(MR.strings().history.localized())
+                    .font(.title3.bold())
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            if uiState.historyItems.isEmpty && uiState.activeStreams.isEmpty && !uiState.isLoading {
                 VStack(spacing: 8) {
                     Text(MR.strings().no_stream_history.localized())
                         .foregroundColor(.secondary)
@@ -211,7 +232,7 @@ struct TracearrHistorySectionView: View {
                 .frame(maxWidth: .infinity)
                 .background(Color(UIColor.secondarySystemBackground))
                 .cornerRadius(12)
-            } else {
+            } else if !uiState.historyItems.isEmpty {
                 if effectiveIsLargeScreen {
                     TracearrHistoryTableView(
                         items: uiState.historyItems,

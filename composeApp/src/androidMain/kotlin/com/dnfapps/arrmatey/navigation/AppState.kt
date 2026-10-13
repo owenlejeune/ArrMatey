@@ -22,6 +22,13 @@ class AppState {
     private val _addInstanceSheetType = MutableStateFlow<InstanceType?>(null)
     val addInstanceSheetType: StateFlow<InstanceType?> = _addInstanceSheetType.asStateFlow()
 
+    private val _drawerGesturesEnabled = MutableStateFlow(true)
+    val drawerGesturesEnabled: StateFlow<Boolean> = _drawerGesturesEnabled.asStateFlow()
+
+    fun setDrawerGesturesEnabled(enabled: Boolean) {
+        _drawerGesturesEnabled.value = enabled
+    }
+
     fun setDrawerOpen(isOpen: Boolean) {
         _drawerExpanded.value = isOpen
     }

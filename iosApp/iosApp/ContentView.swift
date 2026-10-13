@@ -174,7 +174,7 @@ struct SidebarContentView: View {
     private var managementTabs: [AnyTabItem] {
         allActiveTabs.filter { tab in
             guard let standard = tab.item as? TabItemStandard else { return false }
-            return standard == .prowlarr || standard == .bazarr || standard == .tracearr
+            return standard == .prowlarr || standard == .bazarr || standard == .monitoring
         }
     }
 

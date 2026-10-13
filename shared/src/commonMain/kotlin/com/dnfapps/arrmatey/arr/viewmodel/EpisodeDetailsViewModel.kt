@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetPlaybackMonitoringRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.TracearrMediaUiState
@@ -42,6 +43,7 @@ class EpisodeDetailsViewModel(
     getActivityTasksUseCase: GetActivityTasksUseCase,
     private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
     private val getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
+    private val getPlaybackMonitoringRepositoryUseCase: GetPlaybackMonitoringRepositoryUseCase? = null,
     private val preferencesStore: PreferencesStore,
 ) : ViewModel() {
     private val _episode = MutableStateFlow(episode)
@@ -93,10 +95,12 @@ class EpisodeDetailsViewModel(
             observeSelectedInstance()
         }
 
-        tracearrHandler.observeTracearrDataForRef(
+        tracearrHandler.observeTracearrDataForEpisode(
             scope = viewModelScope,
-            refFlow = _episode.map { it.tvdbId?.takeIf { id -> id > 0 }?.let { id -> "episode:tvdb:$id" } },
+            episodeFlow = _episode,
+            seriesTitleFlow = _episode.map { it.series?.title },
             getTracearrInstanceRepositoryUseCase = getTracearrInstanceRepositoryUseCase,
+            getPlaybackMonitoringRepositoryUseCase = getPlaybackMonitoringRepositoryUseCase,
             preferencesStore = preferencesStore,
         )
     }
@@ -206,6 +210,7 @@ class EpisodeDetailsViewModel(
             scope = viewModelScope,
             getTracearrInstanceRepositoryUseCase = getTracearrInstanceRepositoryUseCase,
             preferencesStore = preferencesStore,
+            getPlaybackMonitoringRepositoryUseCase = getPlaybackMonitoringRepositoryUseCase,
         )
     }
 }

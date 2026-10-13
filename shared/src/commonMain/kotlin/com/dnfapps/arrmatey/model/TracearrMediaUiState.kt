@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaDetails
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaServerStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaWatchers
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 
 enum class TracearrStatsWindowType {
     AllTime,
@@ -17,13 +18,14 @@ data class TracearrMediaUiState(
     val mediaDetails: TracearrMediaDetails? = null,
     val stats: TracearrMediaStats? = null,
     val watchers: TracearrMediaWatchers? = null,
+    val activeStreams: List<TracearrStreamSession> = emptyList(),
     val historyItems: List<TracearrHistoryItem> = emptyList(),
     val nextHistoryCursor: String? = null,
     val isLoadingHistoryMore: Boolean = false,
     val selectedStatsWindow: TracearrStatsWindowType = TracearrStatsWindowType.AllTime,
     val isLoading: Boolean = false,
 ) {
-    constructor() : this(false) // empty constructor for ios
+    constructor() : this(false)
 
     val totalPlays: Long
         get() =

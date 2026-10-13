@@ -106,4 +106,8 @@ class DashboardViewModelS: ObservableObject {
     func loadNextDiscoverPage(category: DiscoverCategory) {
         viewModel.loadNextDiscoverPage(category: category)
     }
+
+    func terminatePlaybackStream(session: PlaybackStreamSession, message: String? = nil) {
+        viewModel.terminatePlaybackStream(session: session, message: message)
+    }
 }

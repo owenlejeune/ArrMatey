@@ -47,10 +47,11 @@ func arrImageRequest(for url: URL) -> URLRequest {
     if let instance {
         if instance.type == .tracearr {
             request.setValue("Bearer \(instance.apiKey)", forHTTPHeaderField: "Authorization")
-        } else if instance.type == .kapowarr {
+        } else if instance.type == .kapowarr || instance.type == .tautulli {
             if !urlStr.contains("api_key=") && !urlStr.contains("apikey=") {
                 let separator = urlStr.contains("?") ? "&" : "?"
-                if let authenticatedUrl = URL(string: "\(urlStr)\(separator)api_key=\(instance.apiKey)") {
+                let param = instance.type == .tautulli ? "apikey" : "api_key"
+                if let authenticatedUrl = URL(string: "\(urlStr)\(separator)\(param)=\(instance.apiKey)") {
                     request.url = authenticatedUrl
                 }
             }

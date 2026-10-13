@@ -380,6 +380,7 @@ fun EpisodeDetailsScreen(
                                 uiState = tracearrState,
                                 onLoadMore = { viewModel.loadMoreTracearrHistory() },
                                 onClickItem = { selectedTracearrStreamSession = it.toStreamSession() },
+                                onClickActiveStream = { selectedTracearrStreamSession = it },
                                 isLargeScreen = isExpanded,
                                 modifier = Modifier.padding(horizontal = 24.dp),
                             )

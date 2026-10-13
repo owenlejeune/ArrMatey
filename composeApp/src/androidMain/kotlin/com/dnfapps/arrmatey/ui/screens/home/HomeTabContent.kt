@@ -13,10 +13,10 @@ import com.dnfapps.arrmatey.ui.tabs.CalendarTab
 import com.dnfapps.arrmatey.ui.tabs.DashboardTab
 import com.dnfapps.arrmatey.ui.tabs.DiscoverTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
+import com.dnfapps.arrmatey.ui.tabs.MonitoringTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
 import com.dnfapps.arrmatey.ui.tabs.SeerrTab
 import com.dnfapps.arrmatey.ui.tabs.SettingsTabNavHost
-import com.dnfapps.arrmatey.ui.tabs.TracearrTab
 import com.dnfapps.arrmatey.ui.tabs.UnifiedLibraryTab
 
 @Composable
@@ -62,6 +62,6 @@ fun StandardTabContent(
         TabItem.Standard.DASHBOARD -> DashboardTab(windowSizeClass)
         TabItem.Standard.BAZARR -> BazarrTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.DISCOVER -> DiscoverTab(windowSizeClass, wideRailIsVisible)
-        TabItem.Standard.TRACEARR -> TracearrTab(windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.MONITORING -> MonitoringTab(windowSizeClass, wideRailIsVisible)
     }
 }

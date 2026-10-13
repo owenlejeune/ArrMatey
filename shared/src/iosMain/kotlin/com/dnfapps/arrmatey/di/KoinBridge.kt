@@ -41,11 +41,15 @@ import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.arrmatey.monitoring.viewmodel.MonitoringHistoryViewModel
+import com.dnfapps.arrmatey.monitoring.viewmodel.MonitoringViewModel
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
+import com.dnfapps.arrmatey.tautulli.viewmodel.TautulliStatsViewModel
+import com.dnfapps.arrmatey.tautulli.viewmodel.TautulliUsersViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrActivityViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrHistoryViewModel
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUserViewModel
@@ -157,9 +161,17 @@ object KoinBridge : KoinComponent {
 
     fun getTracearrViewModel(): TracearrViewModel = getKoin().get()
 
+    fun getMonitoringViewModel(): MonitoringViewModel = getKoin().get()
+
+    fun getMonitoringHistoryViewModel(): MonitoringHistoryViewModel = getKoin().get()
+
     fun getTracearrHistoryViewModel(): TracearrHistoryViewModel = getKoin().get()
 
     fun getTracearrUsersViewModel(): TracearrUsersViewModel = getKoin().get()
+
+    fun getTautulliUsersViewModel(): TautulliUsersViewModel = getKoin().get()
+
+    fun getTautulliStatsViewModel(): TautulliStatsViewModel = getKoin().get()
 
     fun getTracearrViolationsViewModel(): TracearrViolationsViewModel = getKoin().get()
 

@@ -73,7 +73,7 @@ val TabItem.androidIcon: ImageVector
                     TabItem.Standard.PROWLARR -> Icons.AutoMirrored.Filled.ManageSearch
                     TabItem.Standard.BAZARR -> Icons.Default.Subtitles
                     TabItem.Standard.DASHBOARD -> Icons.Default.Dashboard
-                    TabItem.Standard.TRACEARR -> Icons.Default.Analytics
+                    TabItem.Standard.MONITORING -> Icons.Default.Analytics
                 }
             is TabItem.CustomWebpage -> Icons.Default.Language
             is TabItem.Settings -> Icons.Default.Settings

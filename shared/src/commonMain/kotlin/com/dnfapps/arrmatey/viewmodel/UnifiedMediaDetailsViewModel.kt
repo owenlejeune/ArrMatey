@@ -35,6 +35,7 @@ import com.dnfapps.arrmatey.instances.repository.ReadarrRepository
 import com.dnfapps.arrmatey.instances.repository.SonarrRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetPlaybackMonitoringRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
@@ -94,6 +95,7 @@ class UnifiedMediaDetailsViewModel(
     getSeerrInstanceRepositoryUseCase: GetSeerrInstanceRepositoryUseCase,
     getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
     private val getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
+    private val getPlaybackMonitoringRepositoryUseCase: GetPlaybackMonitoringRepositoryUseCase? = null,
     toggleMonitorUseCase: ToggleMonitorUseCase,
     updateMediaUseCase: UpdateMediaUseCase,
     deleteMediaUseCase: DeleteMediaUseCase,
@@ -229,6 +231,7 @@ class UnifiedMediaDetailsViewModel(
             seerrServiceHandler = seerrServiceHandler,
             tracearrHandler = tracearrHandler,
             getTracearrInstanceRepositoryUseCase = getTracearrInstanceRepositoryUseCase,
+            getPlaybackMonitoringRepositoryUseCase = getPlaybackMonitoringRepositoryUseCase,
             onIsMonitoredUpdated = { _isMonitored.value = it },
         )
 
@@ -825,6 +828,7 @@ class UnifiedMediaDetailsViewModel(
             scope = viewModelScope,
             getTracearrInstanceRepositoryUseCase = getTracearrInstanceRepositoryUseCase,
             preferencesStore = preferencesStore,
+            getPlaybackMonitoringRepositoryUseCase = getPlaybackMonitoringRepositoryUseCase,
         )
     }
 }

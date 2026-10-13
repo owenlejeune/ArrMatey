@@ -31,6 +31,7 @@ struct DashboardTabContent: View {
     @State private var selectedIssueForSheet: MediaIssuePackage? = nil
     @State private var selectedActivityItem: IdentifiableQueueItem? = nil
     @State private var selectedTracearrStreamSession: TracearrStreamSession? = nil
+    @State private var selectedPlaybackStreamSession: PlaybackStreamSession? = nil
     @State private var selectedMediaForRequest: DiscoverResult? = nil
 
     @State private var toastMessage: String? = nil
@@ -219,6 +220,25 @@ struct DashboardTabContent: View {
                 }
             )
         }
+        .sheet(item: $selectedPlaybackStreamSession) { session in
+            PlaybackStreamDetailsSheet(
+                session: session,
+                onTerminateStream: { message in
+                    viewModel.terminatePlaybackStream(session: session, message: message)
+                    selectedPlaybackStreamSession = nil
+                },
+                onNavigateToDetails: { type, tmdbId in
+                    selectedPlaybackStreamSession = nil
+                    if let tmdbId = tmdbId, let reqType = type?.requestType {
+                        navigationManager.goToSeerrDetailsOnDashboard(tmdbId: tmdbId, requestType: reqType)
+                    }
+                },
+                onNavigateToUser: { _ in
+                    selectedPlaybackStreamSession = nil
+                    navigationManager.go(to: TracearrRoute.users)
+                }
+            )
+        }
         .sheet(item: Binding(
             get: { selectedMediaForRequest.map { IdentifiableDiscoverResult(result: $0) } },
             set: { selectedMediaForRequest = $0?.result }
@@ -242,7 +262,14 @@ struct DashboardTabContent: View {
                         onRequestClick: { selectedRequestForSheet = $0 },
                         onIssueClick: { selectedIssueForSheet = $0 },
                         onActivityClick: { selectedActivityItem = IdentifiableQueueItem(item: $0) },
-                        onStreamClick: { selectedTracearrStreamSession = $0 },
+                        onStreamClick: { session in
+                            if session.instanceType == .tracearr,
+                               let tracearr = state.activeStreams.first(where: { $0.id == session.sessionId }) {
+                                selectedTracearrStreamSession = tracearr
+                            } else {
+                                selectedPlaybackStreamSession = session
+                            }
+                        },
                         onHealthClick: { showHealthSheet = true },
                         onSeerrRequestsStatClick: {
                             requestsViewModel.setSelectedTab(.requests)
@@ -304,7 +331,7 @@ struct DashboardTabContent: View {
         case .seerrOverview, .pendingRequests, .pendingIssues: navigationManager.openRequestsTab()
         case .prowlarrOverview: navigationManager.openProwlarrTab()
         case .bazarrOverview: navigationManager.openBazarrTab()
-        case .tracearrOverview, .tracearrActiveStreams: navigationManager.openTracearrTab()
+        case .playbackOverview, .activeStreams: navigationManager.openMonitoringTab()
         case .downloadClients: navigationManager.openDownloadsTab()
         case .activityQueue: navigationManager.openActivityTab()
         case .onToday, .upcomingReleases: navigationManager.openScheduleTab()
@@ -371,7 +398,7 @@ struct DashboardCardWrapper: View {
     var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
     var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
     var onActivityClick: ((QueueItem) -> Void)? = nil
-    var onStreamClick: ((TracearrStreamSession) -> Void)? = nil
+    var onStreamClick: ((PlaybackStreamSession) -> Void)? = nil
     var onHealthClick: (() -> Void)? = nil
     var onSeerrRequestsStatClick: (() -> Void)? = nil
     var onSeerrIssuesStatClick: (() -> Void)? = nil
@@ -424,7 +451,7 @@ struct DashboardCardView: View {
     var onRequestClick: ((MediaRequestPackage) -> Void)? = nil
     var onIssueClick: ((MediaIssuePackage) -> Void)? = nil
     var onActivityClick: ((QueueItem) -> Void)? = nil
-    var onStreamClick: ((TracearrStreamSession) -> Void)? = nil
+    var onStreamClick: ((PlaybackStreamSession) -> Void)? = nil
     var onHealthClick: (() -> Void)? = nil
     var onSeerrRequestsStatClick: (() -> Void)? = nil
     var onSeerrIssuesStatClick: (() -> Void)? = nil
@@ -450,8 +477,8 @@ struct DashboardCardView: View {
             case .onToday: DashboardTodaySection(state: state, isEditing: isEditing)
             case .upcomingReleases: DashboardUpcomingSection(state: state, isEditing: isEditing)
             case .bazarrOverview: DashboardBazarrSection(state: state, isEditing: isEditing)
-            case .tracearrOverview: DashboardTracearrSection(state: state, isEditing: isEditing)
-            case .tracearrActiveStreams: DashboardActiveStreamsSection(state: state, isEditing: isEditing, onItemClick: onStreamClick)
+            case .playbackOverview: DashboardTracearrSection(state: state, isEditing: isEditing)
+            case .activeStreams: DashboardActiveStreamsSection(state: state, isEditing: isEditing, onItemClick: onStreamClick)
             case .instanceDashboard: DashboardInstanceDashboardSection(state: state, isEditing: isEditing)
             case .discoverFeed:
                 DashboardDiscoverFeedSection(
@@ -1022,10 +1049,11 @@ struct DashboardActivityQueueSection: View {
 struct DashboardActiveStreamsSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
-    var onItemClick: ((TracearrStreamSession) -> Void)? = nil
+    var onItemClick: ((PlaybackStreamSession) -> Void)? = nil
+    @EnvironmentObject private var navigationManager: NavigationManager
 
-    private var activeStreams: [TracearrStreamSession] {
-        state.tracearrStats.flatMap { $0.activeStreams }
+    private var activeStreams: [PlaybackStreamSession] {
+        state.playbackActiveStreams
     }
 
     var body: some View {
@@ -1051,7 +1079,7 @@ struct DashboardActiveStreamsSection: View {
                     }) {
                         HStack {
                             let dotColor: Color = {
-                                Color.serverColor(type: session.server?.type ?? session.serverType, name: session.server?.name ?? session.serverName)
+                                Color.serverColor(type: session.serverType, name: session.serverName)
                             }()
 
                             Circle()
@@ -1072,8 +1100,8 @@ struct DashboardActiveStreamsSection: View {
                                 }
 
                                 HStack(spacing: 4) {
-                                    if !session.effectiveServerName.isEmpty {
-                                        Text("\(session.effectiveServerName) •")
+                                    if let sName = session.serverName, !sName.isEmpty {
+                                        Text("\(sName) •")
                                             .font(.caption)
                                             .foregroundColor(.accentColor)
                                     }
@@ -1109,29 +1137,19 @@ struct DashboardActiveStreamsSection: View {
         }
     }
 
-    private func displayTitle(for session: TracearrStreamSession) -> String {
-        session.grandparentTitle ?? session.showTitle ?? session.mediaTitle ?? session.channelTitle ?? MR.strings().unknown.localized()
+    private func displayTitle(for session: PlaybackStreamSession) -> String {
+        session.displayTitle
     }
 
-    private func episodeInfo(for session: TracearrStreamSession) -> String? {
-        let isEpisode = session.mediaType == .episode || (session.seasonNumber != nil && session.episodeNumber != nil)
-        guard isEpisode else { return nil }
-        let s = session.seasonNumber?.intValue ?? 0
-        let e = session.episodeNumber?.intValue ?? 0
-        let sStr = String(format: "%02d", s)
-        let eStr = String(format: "%02d", e)
-        let mainTitle = displayTitle(for: session)
-        if let epTitle = session.mediaTitle, !epTitle.isEmpty, epTitle != mainTitle {
-            return "S\(sStr)E\(eStr) • \(epTitle)"
-        } else {
-            return "S\(sStr)E\(eStr)"
-        }
+    private func episodeInfo(for session: PlaybackStreamSession) -> String? {
+        session.subtitle ?? session.parentTitle
     }
 
-    private func streamStatusText(for session: TracearrStreamSession) -> String {
+    private func streamStatusText(for session: PlaybackStreamSession) -> String {
         var parts: [String] = []
-        if !session.effectiveUsername.isEmpty {
-            parts.append(session.effectiveUsername)
+        let user = session.userDisplayName.isEmpty ? session.username : session.userDisplayName
+        if !user.isEmpty {
+            parts.append(user)
         }
         if let state = session.state {
             if state.lowercased() == "paused" {
@@ -1142,18 +1160,27 @@ struct DashboardActiveStreamsSection: View {
                 parts.append(state.capitalized)
             }
         }
-        if let quality = session.quality ?? session.resolution {
+        if let dev = session.device ?? session.player, !dev.isEmpty {
+            parts.append(dev)
+        }
+        if let quality = session.videoResolution {
             parts.append(quality)
         }
         return parts.joined(separator: " • ")
     }
 
-    private func progressPercentage(for session: TracearrStreamSession) -> String? {
-        let total = session.totalDurationMs?.int64Value ?? session.durationMs?.int64Value ?? 0
-        let progress = session.progressMs?.int64Value ?? 0
-        guard total > 0, progress > 0 else { return nil }
-        let percent = Int((Double(progress) / Double(total)) * 100)
-        return "\(min(max(percent, 0), 100))%"
+    private func progressPercentage(for session: PlaybackStreamSession) -> String? {
+        if session.progressPercent > 0 {
+            let raw = Double(session.progressPercent)
+            let percent = raw <= 1.0 ? Int((raw * 100).rounded()) : Int(raw.rounded())
+            return "\(min(max(percent, 0), 100))%"
+        }
+        if let total = session.totalDurationMs?.int64Value, total > 0,
+           let progress = session.progressMs?.int64Value, progress > 0 {
+            let percent = Int((Double(progress) / Double(total)) * 100)
+            return "\(min(max(percent, 0), 100))%"
+        }
+        return nil
     }
 }
 

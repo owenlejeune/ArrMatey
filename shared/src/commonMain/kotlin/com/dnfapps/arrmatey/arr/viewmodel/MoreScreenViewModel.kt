@@ -257,7 +257,7 @@ class MoreScreenViewModel(
 
     val hasTracearr =
         instances
-            .map { list -> list.any { it.type == InstanceType.Tracearr } }
+            .map { list -> list.any { it.type == InstanceType.Tracearr || it.type == InstanceType.Tautulli } }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),

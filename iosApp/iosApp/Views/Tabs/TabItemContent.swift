@@ -31,7 +31,7 @@ struct TabItemContent: View {
                 case .prowlarr: ProwlarrTab()
                 case .bazarr: BazarrTab()
                 case .dashboard: DashboardTab()
-                case .tracearr: TracearrTab()
+                case .monitoring: MonitoringTab()
                 }
             } else if let custom = tabItem as? TabItemCustomWebpage {
                 CustomWebpageViewerScreen(webpageId: custom.id)

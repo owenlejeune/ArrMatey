@@ -344,6 +344,7 @@ fun Navigator<SettingsScreen>.onInstanceTap(
     InstanceType.Bazarr,
     InstanceType.Prowlarr,
     InstanceType.Tracearr,
+    InstanceType.Tautulli,
     -> toEditInstance(id)
 }
 

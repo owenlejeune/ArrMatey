@@ -15,6 +15,7 @@ import com.dnfapps.arrmatey.arr.state.DashboardCalendarItem
 import com.dnfapps.arrmatey.arr.state.DownloadClientDashboardState
 import com.dnfapps.arrmatey.arr.state.InstanceNetworkStatus
 import com.dnfapps.arrmatey.arr.state.NetworkStatusState
+import com.dnfapps.arrmatey.arr.state.PlaybackDashboardState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.arr.state.TracearrDashboardState
@@ -28,13 +29,16 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueBundle
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.arrmatey.instances.repository.PlaybackMonitoringRepository
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.TracearrRepository
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -286,6 +290,34 @@ class CombinedDashboardViewModel(
                 initialValue = emptyList(),
             )
 
+    private val playbackInstancesFlow =
+        instanceManager.instanceRepositories
+            .flatMapLatest { repoMap ->
+                val playbackRepos = repoMap.values.filterIsInstance<PlaybackMonitoringRepository>()
+                if (playbackRepos.isEmpty()) {
+                    flowOf(emptyList())
+                } else {
+                    val flows =
+                        playbackRepos.map { repo ->
+                            combine(
+                                repo.summaryStats,
+                                repo.streamSessions,
+                            ) { stats, streams ->
+                                PlaybackDashboardState(
+                                    instance = repo.instance,
+                                    stats = stats,
+                                    activeStreams = streams,
+                                )
+                            }
+                        }
+                    combine(flows) { it.toList() }
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
+
     private val downloadsFlow =
         downloadQueueService.allTransfers
             .debounce(500.milliseconds)
@@ -451,6 +483,7 @@ class CombinedDashboardViewModel(
                     _quickPickItem,
                     _isRefreshing,
                     _isDiscoverLoadingMore,
+                    playbackInstancesFlow,
                 ),
             ) { args ->
                 @Suppress("UNCHECKED_CAST")
@@ -510,6 +543,9 @@ class CombinedDashboardViewModel(
                 @Suppress("UNCHECKED_CAST")
                 val isDiscoverLoadingMore = args[18] as Map<DiscoverCategory, Boolean>
 
+                @Suppress("UNCHECKED_CAST")
+                val playbackStats = (args[19] as? List<PlaybackDashboardState>) ?: emptyList()
+
                 CombinedDashboardState.Success(
                     instances = instances,
                     seerrInstances = seerrInstances,
@@ -523,6 +559,7 @@ class CombinedDashboardViewModel(
                     prowlarrStats = prowlarrStats,
                     bazarrStats = bazarrStats,
                     tracearrStats = tracearrStats,
+                    playbackStats = playbackStats,
                     trendingMedia = trending,
                     popularMovies = popularMovies,
                     popularTv = popularTv,
@@ -537,6 +574,7 @@ class CombinedDashboardViewModel(
                         bazarrStats,
                         downloadClients,
                         tracearrStats,
+                        playbackStats,
                     ),
                     isRefreshing = refreshing,
                     isLoadingMoreDiscover = isDiscoverLoadingMore,
@@ -808,6 +846,7 @@ class CombinedDashboardViewModel(
         bazarrInstances: List<BazarrDashboardState>,
         downloadClients: List<DownloadClientDashboardState>,
         tracearrInstances: List<TracearrDashboardState> = emptyList(),
+        playbackInstances: List<PlaybackDashboardState> = emptyList(),
     ): NetworkStatusState {
         val networkUtils = getNetworkUtils()
         val currentSsid =
@@ -885,6 +924,20 @@ class CombinedDashboardViewModel(
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
                     icon = state.instance.type.icon,
                     isOnline = state.stats != null,
+                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled,
+                ),
+            )
+        }
+
+        val otherMonitoring = playbackInstances.filter { it.instance.type != InstanceType.Tracearr }
+        otherMonitoring.forEach { state ->
+            instanceStatuses.add(
+                InstanceNetworkStatus(
+                    instanceName = state.instance.label,
+                    isLocal = state.instance.isUsingLocalNetwork(),
+                    currentEndpoint = state.instance.getEffectiveBaseUrl(),
+                    icon = state.instance.type.icon,
+                    isOnline = state.stats != null || state.activeStreams.isNotEmpty(),
                     isLocalSwitchingEnabled = state.instance.localNetworkEnabled,
                 ),
             )
@@ -970,6 +1023,16 @@ class CombinedDashboardViewModel(
                     repo.refreshStreams()
                 } catch (e: Exception) {
                     logger.error(e) { "Error refreshing Tracearr instance ${repo.instance.label}" }
+                }
+            }
+
+            val monitoringRepos = instanceManager.getAllPlaybackMonitoringRepositories()
+            monitoringRepos.forEach { repo ->
+                try {
+                    repo.refreshPlaybackStats()
+                    repo.refreshPlaybackStreams()
+                } catch (e: Exception) {
+                    logger.error(e) { "Error refreshing monitoring instance ${repo.instance.label}" }
                 }
             }
 
@@ -1088,5 +1151,13 @@ class CombinedDashboardViewModel(
 
     fun toggleDashboardSearch() {
         preferencesStore.setShowDashboardSearch(!showDashboardSearch.value)
+    }
+
+    fun terminatePlaybackStream(session: PlaybackStreamSession, message: String? = null) {
+        viewModelScope.launch {
+            val repo = instanceManager.getAllPlaybackMonitoringRepositories().find { it.instance.id == session.instanceId }
+            repo?.terminatePlaybackStream(sessionId = session.sessionId, message = message)
+            refresh()
+        }
     }
 }

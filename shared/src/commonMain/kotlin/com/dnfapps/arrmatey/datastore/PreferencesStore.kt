@@ -680,7 +680,7 @@ class DefaultPreferencesStore(
                 raw
                     .takeUnless { it.isEmpty() }
                     ?.split("~")
-                    ?.mapNotNull { runCatching { DashboardCards.valueOf(it) }.getOrNull() }
+                    ?.mapNotNull { DashboardCards.fromStoredName(it) }
                     ?: emptyList()
             } ?: PreferenceDefaults.DASHBOARD_CARDS_ORDER
         }

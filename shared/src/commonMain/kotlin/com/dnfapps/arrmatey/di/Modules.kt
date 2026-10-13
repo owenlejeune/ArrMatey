@@ -125,8 +125,10 @@ import com.dnfapps.arrmatey.instances.usecase.DismissInfoCardUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetPlaybackMonitoringRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetProwlarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetTautulliInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesUseCase
@@ -143,6 +145,10 @@ import com.dnfapps.arrmatey.instances.usecase.UpdateCalendarFilterPreferenceUseC
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
 import com.dnfapps.arrmatey.logging.FileSink
+import com.dnfapps.arrmatey.monitoring.usecase.GetPlaybackStreamsUseCase
+import com.dnfapps.arrmatey.monitoring.usecase.TerminatePlaybackStreamUseCase
+import com.dnfapps.arrmatey.monitoring.viewmodel.MonitoringHistoryViewModel
+import com.dnfapps.arrmatey.monitoring.viewmodel.MonitoringViewModel
 import com.dnfapps.arrmatey.notifications.NotificationCleanupUseCase
 import com.dnfapps.arrmatey.notifications.ScheduleNotificationUseCase
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
@@ -175,6 +181,8 @@ import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
+import com.dnfapps.arrmatey.tautulli.viewmodel.TautulliStatsViewModel
+import com.dnfapps.arrmatey.tautulli.viewmodel.TautulliUsersViewModel
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrActivityUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrHistoryUseCase
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrStatsTodayUseCase
@@ -342,6 +350,10 @@ val useCaseModule =
         factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get(), get()) }
         factory { GetBazarrInstanceRepositoryUseCase(get()) }
         factory { GetTracearrInstanceRepositoryUseCase(get()) }
+        factory { GetTautulliInstanceRepositoryUseCase(get()) }
+        factory { GetPlaybackMonitoringRepositoryUseCase(get()) }
+        factory { GetPlaybackStreamsUseCase(get()) }
+        factory { TerminatePlaybackStreamUseCase(get()) }
         factory { GetTracearrStreamsUseCase() }
         factory { GetTracearrStatsTodayUseCase() }
         factory { GetTracearrHistoryUseCase() }
@@ -465,6 +477,7 @@ val viewModelModule =
                 getSeerrInstanceRepositoryUseCase = get(),
                 getBazarrInstanceRepositoryUseCase = get(),
                 getTracearrInstanceRepositoryUseCase = get(),
+                getPlaybackMonitoringRepositoryUseCase = get(),
                 toggleMonitorUseCase = get(),
                 updateMediaUseCase = get(),
                 deleteMediaUseCase = get(),
@@ -514,7 +527,7 @@ val viewModelModule =
         }
 
         viewModel { (seriesId: Long, episode: Episode) ->
-            EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get(), get(), get(), get(), get())
+            EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
         viewModelOf(::MoreScreenViewModel)
         viewModelOf(::AddInstanceViewModel)
@@ -560,9 +573,13 @@ val viewModelModule =
             BazarrDetailsViewModel(id, type, get(), get(), get(), get(), get())
         }
         viewModelOf(::CombinedDashboardViewModel)
+        viewModelOf(::MonitoringViewModel)
+        viewModelOf(::MonitoringHistoryViewModel)
         viewModelOf(::TracearrViewModel)
         viewModelOf(::TracearrHistoryViewModel)
         viewModelOf(::TracearrUsersViewModel)
+        viewModelOf(::TautulliUsersViewModel)
+        viewModelOf(::TautulliStatsViewModel)
         viewModelOf(::TracearrViolationsViewModel)
         viewModelOf(::TracearrActivityViewModel)
         viewModel { (userRef: String) ->

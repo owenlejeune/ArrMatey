@@ -19,17 +19,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var isSeerrConfigured: Bool = false
     @Published private(set) var activeInstance: Instance? = nil
     @Published private(set) var activeSeerrInstance: Instance? = nil
-    @Published private(set) var tracearrState: TracearrMediaUiState = TracearrMediaUiState(
-        isTracearrConfigured: false,
-        mediaDetails: nil,
-        stats: nil,
-        watchers: nil,
-        historyItems: [],
-        nextHistoryCursor: nil,
-        isLoadingHistoryMore: false,
-        selectedStatsWindow: TracearrStatsWindowType.allTime,
-        isLoading: false
-    )
+    @Published private(set) var tracearrState: TracearrMediaUiState = TracearrMediaUiState()
 
     @Published var isReportIssueSheetVisible: Bool = false
     @Published var isViewRequestSheetVisible: Bool = false

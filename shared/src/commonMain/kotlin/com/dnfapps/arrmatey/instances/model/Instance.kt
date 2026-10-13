@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.ui.theme.ArrYellowDark
 import com.dnfapps.arrmatey.ui.theme.ChaptarrRed
+import com.dnfapps.arrmatey.ui.theme.TautulliOrange
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.getNetworkUtils
@@ -295,6 +296,22 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = false,
         associatedColor = TracearrBlue,
+    ),
+    Tautulli(
+        resource = MR.strings.tautulli_description,
+        github = "https://github.com/Tautulli/Tautulli",
+        website = "https://tautulli.com/",
+        icon = MR.images.tautulli,
+        tabIcon = MR.images.tautulli_tab,
+        defaultPort = 8181,
+        supportsActivityQueue = false,
+        apiBase = "api/v2",
+        testEndpoint = "?cmd=server_status",
+        getApiKeyEndpoint = "settings#tab_tabs-web_interface",
+        includeTopLevelAutomaticSearchOption = false,
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = false,
+        associatedColor = TautulliOrange,
     ),
     ;
 

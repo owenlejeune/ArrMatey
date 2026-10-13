@@ -1,0 +1,335 @@
+package com.dnfapps.arrmatey.ui.screens.monitoring
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.monitoring.model.PlaybackHistoryItem
+import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamDecision
+import com.dnfapps.arrmatey.shared.*
+import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrServerType
+import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
+import com.dnfapps.arrmatey.ui.theme.ArrOrange
+import com.dnfapps.arrmatey.ui.theme.ArrRed
+import com.dnfapps.arrmatey.ui.theme.TracearrBlue
+import com.dnfapps.arrmatey.ui.theme.TracearrDarkBlue
+import com.dnfapps.arrmatey.ui.theme.TracearrLightBlue
+import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
+import com.dnfapps.arrmatey.utils.AspectRatio
+import com.dnfapps.arrmatey.utils.format
+import com.dnfapps.arrmatey.utils.mokoString
+import kotlin.time.Instant
+
+@Composable
+fun PlaybackHistoryCard(
+    item: PlaybackHistoryItem,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+) {
+    val edgeColor =
+        getTracearrServerColor(
+            type = item.serverType ?: if (item.instanceType == InstanceType.Tautulli) TracearrServerType.Plex else null,
+            name = item.serverName,
+        )
+
+    val percent = (item.percentComplete ?: 0).toFloat()
+    val progressFraction = (percent / 100f).coerceIn(0f, 1f)
+
+    val isWatched = item.watched == true || percent >= 90f
+    val isAbandoned = !isWatched && percent < 10f
+    val isSampled = !isWatched && !isAbandoned
+
+    Card(
+        onClick = { onClick?.invoke() },
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors =
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
+    ) {
+        Row(
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+        ) {
+            Box(
+                modifier =
+                Modifier
+                    .width(6.dp)
+                    .fillMaxHeight()
+                    .background(edgeColor),
+            )
+
+            Column(
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(
+                        modifier =
+                        Modifier
+                            .width(60.dp)
+                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .clip(MaterialTheme.shapes.small)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val imageUrl = item.posterUrl
+                        if (!imageUrl.isNullOrRelative()) {
+                            AsyncImage(
+                                model = rememberRemoteImageData(imageUrl, trim = false),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxWidth(),
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                val username =
+                                    item.userDisplayName.ifEmpty { item.username.ifEmpty { mokoString(MR.strings.user) } }
+                                val avatarUrl = item.userAvatarUrl
+
+                                if (!avatarUrl.isNullOrEmpty()) {
+                                    AsyncImage(
+                                        model = rememberRemoteImageData(avatarUrl, trim = false),
+                                        contentDescription = null,
+                                        modifier =
+                                        Modifier
+                                            .size(18.dp)
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop,
+                                    )
+                                } else {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = ArrOrange,
+                                        modifier = Modifier.size(18.dp),
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(
+                                                text = username.take(1).uppercase(),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold,
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Text(
+                                    text = username,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                )
+                            }
+
+                            StatusChip(
+                                isWatched = isWatched,
+                                isSampled = isSampled,
+                                isAbandoned = isAbandoned,
+                            )
+                        }
+
+                        val displayTitle = item.displayTitle.ifEmpty { mokoString(MR.strings.unknown) }
+                        Text(
+                            text = displayTitle,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        val subtitle = item.subtitle
+                        if (!subtitle.isNullOrBlank()) {
+                            Text(
+                                text = subtitle,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            LinearProgressIndicator(
+                                progress = { progressFraction },
+                                modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(2.dp)),
+                                color = TracearrBlue,
+                                trackColor = MaterialTheme.colorScheme.surface,
+                            )
+
+                            item.durationSeconds?.let { durationSec ->
+                                Text(
+                                    text = formatDurationSeconds(durationSec),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val serverName = (item.serverName ?: item.instanceLabel).ifEmpty { mokoString(MR.strings.server) }
+                    val isTranscoding = item.streamDecision == PlaybackStreamDecision.Transcode
+                    val decisionText = if (isTranscoding) mokoString(MR.strings.transcode) else mokoString(MR.strings.direct_play)
+
+                    Text(
+                        text = "$serverName · $decisionText",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+
+                    val resolution = item.resolution ?: "1080p"
+                    val dateText = if (item.dateEpochSeconds > 0L) {
+                        Instant.fromEpochSeconds(item.dateEpochSeconds).format("MMM d, yyyy, HH:mm")
+                    } else {
+                        null
+                    }
+                    val rightText = if (dateText != null) "$dateText · $resolution" else resolution
+
+                    Text(
+                        text = rightText,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusChip(
+    isWatched: Boolean,
+    isSampled: Boolean,
+    isAbandoned: Boolean,
+) {
+    val isDark = isSystemInDarkTheme()
+    val (label, containerColor, contentColor) =
+        when {
+            isWatched ->
+                Triple(
+                    mokoString(MR.strings.watched),
+                    Color(0xFF4CAF50).copy(alpha = if (isDark) 0.25f else 0.15f),
+                    if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32),
+                )
+            isSampled ->
+                Triple(
+                    mokoString(MR.strings.sampled),
+                    Color(0xFFF59E0B).copy(alpha = if (isDark) 0.25f else 0.15f),
+                    if (isDark) Color(0xFFFBBF24) else Color(0xFFB45309),
+                )
+            isAbandoned ->
+                Triple(
+                    mokoString(MR.strings.abandoned),
+                    ArrRed.copy(alpha = if (isDark) 0.25f else 0.15f),
+                    if (isDark) Color(0xFFEF5350) else Color(0xFFC62828),
+                )
+            else ->
+                Triple(
+                    mokoString(MR.strings.unknown),
+                    TracearrBlue.copy(alpha = if (isDark) 0.25f else 0.15f),
+                    if (isDark) TracearrLightBlue else TracearrDarkBlue,
+                )
+        }
+
+    Surface(
+        shape = MaterialTheme.shapes.extraSmall,
+        color = containerColor,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = contentColor,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+        )
+    }
+}
+
+private fun String?.isNullOrRelative(): Boolean {
+    if (this.isNullOrEmpty()) return true
+    return !this.startsWith("http://") && !this.startsWith("https://")
+}
+
+private fun formatDurationSeconds(totalSeconds: Long): String {
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return if (minutes > 0) "${minutes}m ${seconds}s" else "${seconds}s"
+}

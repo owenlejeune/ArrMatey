@@ -102,9 +102,16 @@ class InstanceManager(
                         repository.getSystemStatus()
                         repository.refreshBadges()
                     }
-                    is TracearrRepository -> {
-                        repository.getTodayStats()
-                        repository.getPublicStreams()
+                    is PlaybackMonitoringRepository -> {
+                        when (repository) {
+                            is TracearrRepository -> {
+                                repository.getTodayStats()
+                                repository.getPublicStreams()
+                            }
+                            is TautulliRepository -> {
+                                repository.refreshStreams()
+                            }
+                        }
                     }
                     is SeerrInstanceRepository -> repository.refreshCounts()
                 }
@@ -135,6 +142,7 @@ class InstanceManager(
         InstanceType.Prowlarr -> ProwlarrInstanceRepository(instance, httpClient)
         InstanceType.Bazarr -> BazarrInstanceRepository(instance, httpClient)
         InstanceType.Tracearr -> TracearrRepository(instance, httpClient)
+        InstanceType.Tautulli -> TautulliRepository(instance, httpClient)
 
         InstanceType.Sonarr -> SonarrRepository(instance, httpClient, logger)
 
@@ -305,6 +313,49 @@ class InstanceManager(
             }
         }
 
+    fun getTautulliRepository(instanceId: Long): TautulliRepository? = _instanceRepositories.value[instanceId] as? TautulliRepository
+
+    fun getSelectedTautulliRepository(): Flow<TautulliRepository?> = instanceRepository
+        .observeSelectedInstance(InstanceType.Tautulli)
+        .flatMapLatest { instance ->
+            if (instance == null) {
+                _instanceRepositories.map { r ->
+                    r.values.filterIsInstance<TautulliRepository>().firstOrNull { it.instance.type == InstanceType.Tautulli }
+                }
+            } else {
+                _instanceRepositories.map { r ->
+                    val repo = r[instance.id] as? TautulliRepository
+                    if (repo != null && repo.instance.type == InstanceType.Tautulli) {
+                        repo
+                    } else {
+                        r.values.filterIsInstance<TautulliRepository>().firstOrNull { it.instance.type == InstanceType.Tautulli }
+                    }
+                }
+            }
+        }
+
+    fun getSelectedPlaybackMonitoringRepository(): Flow<PlaybackMonitoringRepository?> {
+        val monitoringTypes = listOf(InstanceType.Tracearr, InstanceType.Tautulli)
+        return instanceRepository
+            .observeSelectedInstanceByTypes(monitoringTypes)
+            .flatMapLatest { instance ->
+                if (instance == null) {
+                    _instanceRepositories.map { r ->
+                        r.values.filterIsInstance<PlaybackMonitoringRepository>().firstOrNull { it.instance.type in monitoringTypes }
+                    }
+                } else {
+                    _instanceRepositories.map { r ->
+                        val repo = r[instance.id] as? PlaybackMonitoringRepository
+                        if (repo != null && repo.instance.type in monitoringTypes) {
+                            repo
+                        } else {
+                            r.values.filterIsInstance<PlaybackMonitoringRepository>().firstOrNull { it.instance.type in monitoringTypes }
+                        }
+                    }
+                }
+            }
+    }
+
     fun getAllRepositories(): List<InstanceScopedRepository> = _instanceRepositories.value.values.toList()
 
     fun getAllArrRepositories(): List<ArrInstanceRepository> = _instanceRepositories.value.values.filterIsInstance<ArrInstanceRepository>()
@@ -337,6 +388,12 @@ class InstanceManager(
     fun getAllBazarrRepositories(): List<BazarrInstanceRepository> = _instanceRepositories.value.values.filterIsInstance<BazarrInstanceRepository>()
 
     fun getAllTracearrRepositories(): List<TracearrRepository> = _instanceRepositories.value.values.filterIsInstance<TracearrRepository>()
+
+    fun getAllTautulliRepositories(): List<TautulliRepository> = _instanceRepositories.value.values.filterIsInstance<TautulliRepository>()
+
+    fun getAllPlaybackMonitoringRepositories(): List<PlaybackMonitoringRepository> = _instanceRepositories.value.values.filterIsInstance<PlaybackMonitoringRepository>()
+
+    fun observeAllPlaybackMonitoringRepositories(): Flow<List<PlaybackMonitoringRepository>> = _instanceRepositories.map { it.values.filterIsInstance<PlaybackMonitoringRepository>() }
 
     fun repositoriesByType(type: InstanceType): Flow<List<InstanceScopedRepository>> = instanceRepository
         .observeInstancesByType(type)

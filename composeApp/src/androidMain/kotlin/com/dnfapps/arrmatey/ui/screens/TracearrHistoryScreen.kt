@@ -40,6 +40,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
 import com.dnfapps.arrmatey.tracearr.state.TracearrHistoryState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrHistoryViewModel
+import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
@@ -112,16 +113,11 @@ fun TracearrHistoryScreen(
                     )
                 }
                 is TracearrHistoryState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = currentState.message,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
+                    ErrorView(
+                        message = currentState.message,
+                        onRetry = { viewModel.refresh() },
+                        modifier = Modifier.fillMaxSize().wrapContentSize(),
+                    )
                 }
                 is TracearrHistoryState.Success -> {
                     val listState = rememberLazyListState()

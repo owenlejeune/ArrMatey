@@ -49,8 +49,10 @@ import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrHistoryItem
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaWatcher
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryCard
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrHistoryTable
+import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamCard
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -398,12 +400,35 @@ fun TracearrHistorySection(
     modifier: Modifier = Modifier,
     isLargeScreen: Boolean = false,
     onClickItem: ((TracearrHistoryItem) -> Unit)? = null,
+    onClickActiveStream: ((TracearrStreamSession) -> Unit)? = null,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        if (uiState.historyItems.isEmpty() && !uiState.isLoading) {
+        if (uiState.activeStreams.isNotEmpty()) {
+            Text(
+                text = mokoString(MR.strings.now_playing),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            uiState.activeStreams.forEach { session ->
+                TracearrStreamCard(
+                    session = session,
+                    onClick = { onClickActiveStream?.invoke(session) },
+                )
+            }
+        }
+
+        if (uiState.activeStreams.isNotEmpty() && uiState.historyItems.isNotEmpty()) {
+            Text(
+                text = mokoString(MR.strings.history),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        if (uiState.historyItems.isEmpty() && uiState.activeStreams.isEmpty() && !uiState.isLoading) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors =
@@ -425,7 +450,7 @@ fun TracearrHistorySection(
                     )
                 }
             }
-        } else {
+        } else if (uiState.historyItems.isNotEmpty()) {
             if (isLargeScreen) {
                 TracearrHistoryTable(
                     items = uiState.historyItems,

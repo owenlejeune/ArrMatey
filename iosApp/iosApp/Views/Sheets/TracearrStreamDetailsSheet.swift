@@ -291,13 +291,13 @@ struct TracearrStreamDetailsSheet: View {
 
                 Spacer()
 
-                let serverTypeName = session.server?.type?.name ?? session.serverType?.name ?? session.serverName ?? "Server"
+                let serverTypeName = session.server?.type?.name ?? session.serverType?.name ?? session.serverName ?? MR.strings().server.localized()
                 Text(serverTypeName)
                     .font(.subheadline.bold())
                     .foregroundColor(serverColor)
 
                 let sName = session.effectiveServerName
-                if !sName.isEmpty {
+                if !sName.isEmpty && sName.caseInsensitiveCompare(serverTypeName) != .orderedSame {
                     Text("· \(sName)")
                         .font(.subheadline.bold())
                 }

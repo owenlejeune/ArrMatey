@@ -120,7 +120,8 @@ struct EpisodeDetailsScreen: View {
                         TracearrHistorySectionView(
                             uiState: tracearrState,
                             onLoadMore: { viewModel.loadMoreTracearrHistory() },
-                            onClickItem: { selectedTracearrSession = $0.toStreamSession() }
+                            onClickItem: { selectedTracearrSession = $0.toStreamSession() },
+                            onClickActiveStream: { selectedTracearrSession = $0 }
                         )
                     }
 

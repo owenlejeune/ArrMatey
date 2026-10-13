@@ -20,7 +20,6 @@ import com.dnfapps.arrmatey.shared.requests
 import com.dnfapps.arrmatey.shared.schedule
 import com.dnfapps.arrmatey.shared.series
 import com.dnfapps.arrmatey.shared.settings
-import com.dnfapps.arrmatey.shared.tracearr
 import dev.icerock.moko.resources.StringResource
 
 sealed interface TabItem {
@@ -67,7 +66,7 @@ sealed interface TabItem {
         PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedTypes = listOf(InstanceType.Prowlarr)),
         BAZARR("captions.bubble", MR.strings.bazarr, associatedTypes = listOf(InstanceType.Bazarr)),
         DASHBOARD("rectangle.grid.3x1", MR.strings.dashboard),
-        TRACEARR("tv.badge.wifi", MR.strings.tracearr, associatedTypes = listOf(InstanceType.Tracearr)),
+        MONITORING("tv.badge.wifi", MR.strings.monitoring, associatedTypes = listOf(InstanceType.Tracearr, InstanceType.Tautulli)),
         ;
 
         override val key: String get() = "standard_$name"

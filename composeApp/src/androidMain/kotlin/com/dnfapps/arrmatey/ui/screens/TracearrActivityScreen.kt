@@ -27,7 +27,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.androidModule
 import com.dnfapps.arrmatey.di.appModules
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrActivityByDoW
@@ -71,19 +72,24 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrActivityQuality
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrActivityRange
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrActivityResponse
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrPeriod
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrServer
 import com.dnfapps.arrmatey.tracearr.state.TracearrActivityState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrActivityViewModel
+import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.helpers.LocalIsTabActive
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrMateyTheme
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrYellow
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.ui.theme.TracearrDarkBlue
+import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
@@ -99,6 +105,8 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLa
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.Insets
 import com.patrykandpatrick.vico.compose.common.MarkerCornerBasedShape
@@ -126,6 +134,17 @@ fun TracearrActivityScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val selectedPeriod by viewModel.selectedPeriod.collectAsStateWithLifecycle()
+
+    val navManager = navigationManager
+    val isTabActive = LocalIsTabActive.current
+    DisposableEffect(isTabActive) {
+        if (isTabActive) {
+            navManager.setDrawerGesturesEnabled(false)
+        }
+        onDispose {
+            navManager.setDrawerGesturesEnabled(true)
+        }
+    }
 
     TracearrActivityContent(
         state = state,
@@ -218,24 +237,11 @@ fun TracearrActivityContent(
                     )
                 }
                 is TracearrActivityState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text(
-                                text = state.message,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                            Button(onClick = onRefresh) {
-                                Text(mokoString(MR.strings.retry))
-                            }
-                        }
-                    }
+                    ErrorView(
+                        message = state.message,
+                        onRetry = onRefresh,
+                        modifier = Modifier.fillMaxSize().wrapContentSize(),
+                    )
                 }
                 is TracearrActivityState.Success -> {
                     Column(modifier = Modifier.fillMaxSize()) {
@@ -275,6 +281,7 @@ fun TracearrActivityContent(
                                     ) {
                                         PlaysOverTimeCard(
                                             plays = state.response.plays,
+                                            servers = state.servers,
                                             modifier =
                                             Modifier
                                                 .weight(1f)
@@ -358,7 +365,7 @@ fun TracearrActivityContent(
                                 ),
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
-                                item { PlaysOverTimeCard(plays = state.response.plays) }
+                                item { PlaysOverTimeCard(plays = state.response.plays, servers = state.servers) }
                                 item { ConcurrentStreamsCard(concurrent = state.response.concurrent) }
                                 item { ActivityByDayOfWeekCard(byDay = state.response.byDayOfWeek) }
                                 item { ActivityByHourOfDayCard(byHour = state.response.byHourOfDay) }
@@ -448,13 +455,14 @@ private fun formatChartDateLabel(dateStr: String?): String {
 private fun PlaysOverTimeCard(
     plays: List<TracearrActivityPlay>,
     modifier: Modifier = Modifier,
+    servers: List<TracearrServer> = emptyList(),
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
     val unknownString = mokoString(MR.strings.unknown)
     val serverNames =
         remember(plays, unknownString) {
-            plays.mapNotNull { it.serverId }.distinct().ifEmpty {
+            plays.mapNotNull { it.serverName ?: it.serverId }.distinct().ifEmpty {
                 if (plays.isNotEmpty()) listOf(unknownString) else emptyList()
             }
         }
@@ -474,32 +482,27 @@ private fun PlaysOverTimeCard(
             if (dates.isNotEmpty()) {
                 serverNames.map { server ->
                     dates.map { d ->
-                        plays.firstOrNull { (it.serverId ?: unknownString) == server && it.date == d }?.count?.toDouble() ?: 0.0
+                        plays.firstOrNull { (it.serverName ?: it.serverId ?: unknownString) == server && it.date == d }?.count?.toDouble() ?: 0.0
                     }
                 }
             } else {
-                val grouped = plays.groupBy { it.serverId ?: unknownString }
+                val grouped = plays.groupBy { it.serverName ?: it.serverId ?: unknownString }
                 serverNames.map { server ->
                     grouped[server]?.map { it.count.toDouble() } ?: listOf(0.0)
                 }
             }
         }
 
-    val palette =
-        listOf(
-            ArrOrange,
-            Color(0xFF00BCD4),
-            Color(0xFF4CAF50),
-            Color(0xFF9C27B0),
-            Color(0xFF2196F3),
-            Color(0xFFE91E63),
-            Color(0xFFFF5722),
-            Color(0xFF009688),
-        )
-
     val serverColors =
-        remember(serverNames) {
-            serverNames.mapIndexed { index, _ -> palette[index % palette.size] }
+        remember(serverNames, servers, plays, unknownString) {
+            serverNames.map { server ->
+                val play = plays.firstOrNull { (it.serverName ?: it.serverId ?: unknownString) == server }
+                val matchingServer = servers.firstOrNull {
+                    it.serverId == server || it.serverName == server || it.name == server || it.id == server
+                }
+                val type = play?.serverType ?: matchingServer?.serverType
+                getTracearrServerColor(type, server)
+            }
         }
 
     LaunchedEffect(serverSeriesData) {
@@ -518,7 +521,7 @@ private fun PlaysOverTimeCard(
 
     val defaultLine =
         LineCartesianLayer.rememberLine(
-            fill = LineCartesianLayer.LineFill.single(Fill(ArrOrange)),
+            fill = LineCartesianLayer.LineFill.single(Fill(TracearrBlue)),
         )
     val lineLines =
         serverColors.map { color ->
@@ -579,6 +582,8 @@ private fun PlaysOverTimeCard(
                         marker = rememberMarker(),
                     ),
                     modelProducer = modelProducer,
+                    scrollState = rememberVicoScrollState(scrollEnabled = false),
+                    zoomState = rememberFitWidthZoomState(),
                     modifier =
                     Modifier
                         .fillMaxWidth()
@@ -681,6 +686,8 @@ private fun ConcurrentStreamsCard(
                         marker = rememberMarker(),
                     ),
                     modelProducer = modelProducer,
+                    scrollState = rememberVicoScrollState(scrollEnabled = false),
+                    zoomState = rememberFitWidthZoomState(),
                     modifier =
                     Modifier
                         .fillMaxWidth()
@@ -745,6 +752,8 @@ private fun ActivityByDayOfWeekCard(
                 marker = rememberMarker(),
             ),
             modelProducer = modelProducer,
+            scrollState = rememberVicoScrollState(scrollEnabled = false),
+            zoomState = rememberFitWidthZoomState(),
             modifier =
             Modifier
                 .fillMaxWidth()
@@ -782,14 +791,13 @@ private fun ActivityByHourOfDayCard(
                 rememberColumnCartesianLayer(
                     columnProvider =
                     ColumnCartesianLayer.ColumnProvider.series(
-                        rememberLineComponent(fill = Fill(ArrBlue), 16.dp),
+                        rememberLineComponent(fill = Fill(ArrBlue), 8.dp),
                     ),
                 ),
                 startAxis = VerticalAxis.rememberStart(),
                 bottomAxis =
                 HorizontalAxis.rememberBottom(
-                    itemPlacer = remember { HorizontalAxis.ItemPlacer.aligned(spacing = { 2 }) },
-                    labelRotationDegrees = 45f,
+                    itemPlacer = remember { HorizontalAxis.ItemPlacer.aligned(spacing = { 3 }) },
                     valueFormatter =
                     CartesianValueFormatter { _, x, _ ->
                         val hr = (x.toInt() % 24 + 24) % 24
@@ -804,6 +812,8 @@ private fun ActivityByHourOfDayCard(
                 marker = rememberMarker(),
             ),
             modelProducer = modelProducer,
+            scrollState = rememberVicoScrollState(scrollEnabled = false),
+            zoomState = rememberFitWidthZoomState(),
             modifier =
             Modifier
                 .fillMaxWidth()
@@ -811,6 +821,14 @@ private fun ActivityByHourOfDayCard(
         )
     }
 }
+
+@Composable
+private fun rememberFitWidthZoomState() = rememberVicoZoomState(
+    zoomEnabled = false,
+    initialZoom = Zoom.Content,
+    minZoom = Zoom.Content,
+    maxZoom = Zoom.Content,
+)
 
 @Composable
 private fun PlatformsCard(
@@ -863,8 +881,8 @@ private fun PlatformsCard(
     val chart =
         rememberPieChart(
             sliceProvider = sliceProvider,
-            innerSize = PieSize.Inner.fixed(65.dp),
-            outerSize = PieSize.Outer.fixed(115.dp),
+            innerSize = PieSize.Inner.fixed(90.dp),
+            outerSize = PieSize.Outer.fixed(160.dp),
         )
 
     ChartCardContainer(
@@ -878,21 +896,13 @@ private fun PlatformsCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(240.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    PieChartHost(
-                        chart = chart,
-                        modelProducer = modelProducer,
-                        modifier = Modifier.size(240.dp),
-                    )
-                }
+                PieChartHost(
+                    chart = chart,
+                    modelProducer = modelProducer,
+                    modifier = Modifier.size(160.dp),
+                )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 LegendRow(items = items.map { it.first to it.second.second })
             }
@@ -942,8 +952,8 @@ private fun StreamQualityCard(
     val chart =
         rememberPieChart(
             sliceProvider = sliceProvider,
-            innerSize = PieSize.Inner.fixed(65.dp),
-            outerSize = PieSize.Outer.fixed(115.dp),
+            innerSize = PieSize.Inner.fixed(90.dp),
+            outerSize = PieSize.Outer.fixed(160.dp),
         )
 
     ChartCardContainer(
@@ -957,21 +967,13 @@ private fun StreamQualityCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(240.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    PieChartHost(
-                        chart = chart,
-                        modelProducer = modelProducer,
-                        modifier = Modifier.size(240.dp),
-                    )
-                }
+                PieChartHost(
+                    chart = chart,
+                    modelProducer = modelProducer,
+                    modifier = Modifier.size(160.dp),
+                )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 LegendRow(items = items.map { it.first to it.second.second })
             }
@@ -998,7 +1000,6 @@ private fun ChartCardContainer(
             Modifier
                 .padding(16.dp)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
                 text = title,

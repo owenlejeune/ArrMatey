@@ -201,4 +201,6 @@ sealed interface TracearrScreen : NavKey {
     data object Violations : TracearrScreen
 
     data object Activity : TracearrScreen
+
+    data object Stats : TracearrScreen
 }

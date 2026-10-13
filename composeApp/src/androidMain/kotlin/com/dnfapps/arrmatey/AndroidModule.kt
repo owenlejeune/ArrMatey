@@ -65,6 +65,10 @@ val androidModule =
                     TabItem.Standard.BOOKS to get<BooksTabNavigator>(),
                     TabItem.Standard.AUDIOBOOKS to get<AudiobooksTabNavigator>(),
                     TabItem.Standard.COMICS to get<ComicsTabNavigator>(),
+                    TabItem.Standard.DASHBOARD to get<DashboardTabNavigator>(),
+                    TabItem.Standard.BAZARR to get<BazarrTabNavigator>(),
+                    TabItem.Standard.MONITORING to get<TracearrTabNavigator>(),
+                    TabItem.Settings to get<SettingsTabNavigator>(),
                 )
             NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }

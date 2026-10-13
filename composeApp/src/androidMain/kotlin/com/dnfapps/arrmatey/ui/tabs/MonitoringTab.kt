@@ -12,14 +12,14 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
+import com.dnfapps.arrmatey.ui.components.navigation.monitoringNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
-import com.dnfapps.arrmatey.ui.components.navigation.tracearrNavEntries
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun TracearrTab(
+fun MonitoringTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
     navigationManager: NavigationManager = koinInject(),
@@ -35,7 +35,7 @@ fun TracearrTab(
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
         entryProvider =
         entryProvider {
-            tracearrNavEntries(
+            monitoringNavEntries(
                 navigation = navigation,
                 isExpanded = isExpanded,
                 isLargeScreen = isLargeScreen,

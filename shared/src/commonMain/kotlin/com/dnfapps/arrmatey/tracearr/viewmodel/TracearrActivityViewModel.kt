@@ -7,8 +7,11 @@ import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCa
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrPeriod
 import com.dnfapps.arrmatey.tracearr.state.TracearrActivityState
 import com.dnfapps.arrmatey.tracearr.usecase.GetTracearrActivityUseCase
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -79,15 +82,31 @@ class TracearrActivityViewModel(
             _state.value = TracearrActivityState.Loading
         }
 
-        getTracearrActivityUseCase(repo, period = period)
-            .onSuccess { response ->
-                _state.value =
-                    TracearrActivityState.Success(
-                        response = response,
-                        period = period,
-                    )
-            }.onError { _, msg, _ ->
-                _state.value = TracearrActivityState.Error(msg ?: "Failed to load activity")
+        coroutineScope {
+            val serversDeferred = async {
+                if (repo.servers.value.isNotEmpty()) {
+                    repo.servers.value
+                } else {
+                    when (val res = repo.getServers()) {
+                        is NetworkResult.Success -> res.data
+                        else -> emptyList()
+                    }
+                }
             }
+            val activityResult = getTracearrActivityUseCase(repo, period = period)
+            val servers = serversDeferred.await()
+
+            activityResult
+                .onSuccess { response ->
+                    _state.value =
+                        TracearrActivityState.Success(
+                            response = response,
+                            period = period,
+                            servers = servers,
+                        )
+                }.onError { _, msg, _ ->
+                    _state.value = TracearrActivityState.Error(msg ?: "Failed to load activity")
+                }
+        }
     }
 }

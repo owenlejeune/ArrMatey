@@ -35,9 +35,9 @@ import com.dnfapps.arrmatey.utils.mokoString
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ErrorView(
-    errorType: HttpErrorType,
+    errorType: HttpErrorType = HttpErrorType.Unexpected,
     message: String,
-    onOpenSettings: () -> Unit,
+    onOpenSettings: () -> Unit = {},
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {

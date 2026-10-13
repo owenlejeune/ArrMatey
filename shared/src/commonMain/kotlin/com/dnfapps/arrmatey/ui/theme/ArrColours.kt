@@ -22,6 +22,7 @@ val TracearrNavy = Color(0xFF061019)
 val TracearrLightBlue = Color(0xFF48cae4)
 
 val PlexColor = Color(0xFFE5A00D)
+val TautulliOrange = PlexColor
 val JellyfinColor = Color(0xFFAA5CC3)
 val EmbyColor = Color(0xFF52B54B)
 

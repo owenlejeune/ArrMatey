@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -97,6 +98,90 @@ fun NoInstanceView(
                     text = mokoString(MR.strings.add_instance),
                     style = MaterialTheme.typography.labelLarge,
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun NoMonitoringInstanceView(
+    modifier: Modifier = Modifier,
+) {
+    val navManager = navigationManager
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 24.dp),
+        ) {
+            Box(
+                modifier =
+                Modifier
+                    .size(96.dp)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CloudQueue,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = mokoString(MR.strings.no_type_instances, mokoString(MR.strings.monitoring)),
+                    style = MaterialTheme.typography.titleLargeEmphasized,
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = mokoString(MR.strings.no_type_instances_message, mokoString(MR.strings.monitoring)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { navManager.openNewInstanceScreen(InstanceType.Tautulli) },
+                    colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                ) {
+                    Icon(imageVector = Icons.Default.AddCircle, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = mokoString(MR.strings.add_tautulli),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+
+                Button(
+                    onClick = { navManager.openNewInstanceScreen(InstanceType.Tracearr) },
+                    colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ),
+                ) {
+                    Icon(imageVector = Icons.Default.AddCircle, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = mokoString(MR.strings.add_tracearr),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
             }
         }
     }

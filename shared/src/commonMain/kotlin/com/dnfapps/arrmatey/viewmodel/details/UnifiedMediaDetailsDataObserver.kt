@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SonarrRepository
+import com.dnfapps.arrmatey.instances.usecase.GetPlaybackMonitoringRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
@@ -41,6 +42,7 @@ class UnifiedMediaDetailsDataObserver(
     private val seerrServiceHandler: UnifiedMediaDetailsSeerrServiceHandler,
     private val tracearrHandler: UnifiedMediaDetailsTracearrHandler,
     private val getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
+    private val getPlaybackMonitoringRepositoryUseCase: GetPlaybackMonitoringRepositoryUseCase? = null,
     private val onIsMonitoredUpdated: (Boolean) -> Unit,
 ) {
     private val dataFlow: Flow<
@@ -114,6 +116,7 @@ class UnifiedMediaDetailsDataObserver(
             scope = scope,
             uiStateFlow = uiStateFlow,
             getTracearrInstanceRepositoryUseCase = getTracearrInstanceRepositoryUseCase,
+            getPlaybackMonitoringRepositoryUseCase = getPlaybackMonitoringRepositoryUseCase,
             preferencesStore = preferencesStore,
             initialTmdbId = tmdbId,
             initialRequestType = resolvedRequestType,

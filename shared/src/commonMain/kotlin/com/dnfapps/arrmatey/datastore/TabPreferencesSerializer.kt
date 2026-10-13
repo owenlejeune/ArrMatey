@@ -23,14 +23,18 @@ internal object TabPreferencesSerializer {
                 return Json.decodeFromString<TabPreferences>(jsonString)
             }
 
-            fun extractKey(element: JsonElement): String? = if (element is JsonPrimitive) {
-                "standard_${element.content}"
-            } else {
-                element.jsonObject["key"]?.jsonPrimitive?.content
-                    ?: element.jsonObject["id"]
-                        ?.jsonPrimitive
-                        ?.content
-                        ?.let { "webpage_$it" }
+            fun extractKey(element: JsonElement): String? {
+                val raw =
+                    if (element is JsonPrimitive) {
+                        "standard_${element.content}"
+                    } else {
+                        element.jsonObject["key"]?.jsonPrimitive?.content
+                            ?: element.jsonObject["id"]
+                                ?.jsonPrimitive
+                                ?.content
+                                ?.let { "webpage_$it" }
+                    }
+                return if (raw == "standard_TRACEARR") TabItem.Standard.MONITORING.key else raw
             }
 
             val migratedVisible = jsonElement["bottomTabItems"]?.jsonArray?.mapNotNull { extractKey(it) } ?: emptyList()

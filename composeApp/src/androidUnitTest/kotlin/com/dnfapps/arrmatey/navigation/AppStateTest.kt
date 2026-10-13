@@ -27,6 +27,17 @@ class AppStateTest {
     }
 
     @Test
+    fun testSetDrawerGesturesEnabled() {
+        assertTrue(appState.drawerGesturesEnabled.value)
+
+        appState.setDrawerGesturesEnabled(false)
+        assertFalse(appState.drawerGesturesEnabled.value)
+
+        appState.setDrawerGesturesEnabled(true)
+        assertTrue(appState.drawerGesturesEnabled.value)
+    }
+
+    @Test
     fun testSetSelectedTab() {
         appState.setSelectedTab(TabItem.Standard.DASHBOARD)
         assertEquals(TabItem.Standard.DASHBOARD, appState.selectedTab.value)

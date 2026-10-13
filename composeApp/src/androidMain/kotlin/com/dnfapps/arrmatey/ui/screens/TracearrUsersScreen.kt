@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,6 +58,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
 import com.dnfapps.arrmatey.tracearr.state.TracearrUsersState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrUsersViewModel
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
+import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
@@ -127,24 +127,11 @@ fun TracearrUsersScreen(
                     )
                 }
                 is TracearrUsersState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text(
-                                text = currentState.message,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                            Button(onClick = { viewModel.refresh() }) {
-                                Text(mokoString(MR.strings.retry))
-                            }
-                        }
-                    }
+                    ErrorView(
+                        message = currentState.message,
+                        onRetry = { viewModel.refresh() },
+                        modifier = Modifier.fillMaxSize().wrapContentSize(),
+                    )
                 }
                 is TracearrUsersState.Success -> {
                     val listState = rememberLazyListState()
@@ -400,8 +387,8 @@ private fun TracearrUserCard(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     detail.accounts.forEach { acc ->
-                        val serverColor = getTracearrServerColor(acc.serverType, acc.username)
-                        val typeName = acc.serverType?.name ?: "Server"
+                        val serverColor = getTracearrServerColor(acc.serverType, acc.serverName ?: acc.username)
+                        val typeName = acc.serverName ?: acc.serverType?.name ?: mokoString(MR.strings.server)
                         val userLabel = acc.username ?: acc.serverUserId ?: acc.externalUserId ?: ""
                         val label = if (userLabel.isNotBlank()) "$typeName: $userLabel" else typeName
 

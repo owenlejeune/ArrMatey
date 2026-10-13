@@ -90,6 +90,8 @@ class TabManager(
         visible + hidden
     }
 
+    private fun normalizeKey(key: String): String = if (key == "standard_TRACEARR") TabItem.Standard.MONITORING.key else key
+
     private fun buildVisibleTabs(
         prefs: TabPreferences,
         webpages: List<CustomWebpage>,
@@ -98,7 +100,7 @@ class TabManager(
         val webpageItems = webpages.associate { "webpage_${it.id}" to TabItem.CustomWebpage(it.id, it.name, it.url, it.headers) }
         val allItems = standardItems + webpageItems
 
-        return prefs.orderedVisibleKeys.mapNotNull { key -> allItems[key] }
+        return prefs.orderedVisibleKeys.mapNotNull { key -> allItems[normalizeKey(key)] }
     }
 
     private fun buildDrawerTabs(
@@ -110,9 +112,9 @@ class TabManager(
         val allItems = standardItems + webpageItems
 
         return buildList {
-            prefs.orderedHiddenKeys.mapNotNull { key -> allItems[key] }.forEach { add(it) }
+            prefs.orderedHiddenKeys.mapNotNull { key -> allItems[normalizeKey(key)] }.forEach { add(it) }
 
-            val tracked = (prefs.orderedVisibleKeys + prefs.orderedHiddenKeys + prefs.orderedRemovedKeys).toSet()
+            val tracked = (prefs.orderedVisibleKeys + prefs.orderedHiddenKeys + prefs.orderedRemovedKeys).map { normalizeKey(it) }.toSet()
 
             // Add untracked standard items (newly added to enum)
             TabItem.Standard.entries.filter { it.key !in tracked && !it.isDisabled }.forEach {
@@ -133,6 +135,6 @@ class TabManager(
         val webpageItems = webpages.associate { "webpage_${it.id}" to TabItem.CustomWebpage(it.id, it.name, it.url, it.headers) }
         val allItems = standardItems + webpageItems
 
-        return prefs.orderedRemovedKeys.mapNotNull { key -> allItems[key] }
+        return prefs.orderedRemovedKeys.mapNotNull { key -> allItems[normalizeKey(key)] }
     }
 }

@@ -408,7 +408,7 @@ fun TracearrStreamDetailsSheet(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        val serverTypeName = serverType?.name ?: session.serverName ?: "Server"
+                        val serverTypeName = serverType?.name ?: session.serverName ?: mokoString(MR.strings.server)
                         Text(
                             text = serverTypeName,
                             style = MaterialTheme.typography.bodyMedium,
@@ -416,7 +416,7 @@ fun TracearrStreamDetailsSheet(
                             color = serverColor,
                         )
                         val sName = session.effectiveServerName
-                        if (sName.isNotEmpty()) {
+                        if (sName.isNotEmpty() && !sName.equals(serverTypeName, ignoreCase = true)) {
                             Text(
                                 text = "· $sName",
                                 style = MaterialTheme.typography.bodyMedium,

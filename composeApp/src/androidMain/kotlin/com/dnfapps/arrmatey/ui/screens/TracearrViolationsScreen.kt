@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -52,6 +51,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.ViolationSeverity
 import com.dnfapps.arrmatey.tracearr.state.TracearrViolationsState
 import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViolationsViewModel
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
+import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrViolationCard
@@ -142,24 +142,11 @@ fun TracearrViolationsContent(
                     )
                 }
                 is TracearrViolationsState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Text(
-                                text = state.message,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                            Button(onClick = onRefresh) {
-                                Text(mokoString(MR.strings.retry))
-                            }
-                        }
-                    }
+                    ErrorView(
+                        message = state.message,
+                        onRetry = onRefresh,
+                        modifier = Modifier.fillMaxSize().wrapContentSize(),
+                    )
                 }
                 is TracearrViolationsState.Success -> {
                     val listState = rememberLazyListState()
