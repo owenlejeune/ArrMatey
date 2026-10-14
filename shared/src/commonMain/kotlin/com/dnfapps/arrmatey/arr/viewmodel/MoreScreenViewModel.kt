@@ -25,6 +25,9 @@ import com.dnfapps.arrmatey.utils.GridSpacing
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
+import com.dnfapps.arrmatey.wol.model.WolDevice
+import com.dnfapps.arrmatey.wol.repository.WolDeviceRepository
+import com.dnfapps.arrmatey.wol.sendWolPacket
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,6 +46,7 @@ class MoreScreenViewModel(
     instanceRepository: InstanceRepository,
     downloadClientRepository: DownloadClientRepository,
     customWebpageRepository: CustomWebpageRepository,
+    private val wolDeviceRepository: WolDeviceRepository,
     private val testInstanceConnectionUseCase: TestInstanceConnectionUseCase,
     private val testDownloadClientConnectionUseCase: TestDownloadClientConnectionUseCase,
     private val preferencesStore: PreferencesStore,
@@ -283,6 +287,21 @@ class MoreScreenViewModel(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList(),
             )
+
+    val wolDevices =
+        wolDeviceRepository
+            .getAllWolDevices()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
+
+    fun sendWol(device: WolDevice) {
+        viewModelScope.launch {
+            sendWolPacket(device.macAddress, device.ipAddress, device.port)
+        }
+    }
 
     init {
         observeInstances()

@@ -114,6 +114,7 @@ import com.dnfapps.arrmatey.ui.tabs.DiscoverSearchOverlay
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
+import com.dnfapps.arrmatey.wol.model.WolDevice
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -157,6 +158,7 @@ fun DashboardCardContent(
     onShuffleQuickPick: () -> Unit = {},
     onMediaRequestClick: (DiscoverResult) -> Unit = {},
     onLoadMoreDiscoverFeed: (DiscoverCategory) -> Unit = {},
+    onSendWol: (WolDevice) -> Unit = {},
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
@@ -268,6 +270,12 @@ fun DashboardCardContent(
                 onInstanceClicked = { id ->
                     onNavigateToArrDashboard(id)
                 },
+            )
+
+        DashboardCards.WolDevices ->
+            DashboardWolSection(
+                wolDevices = currentState.wolDevices,
+                onSendWol = onSendWol,
             )
 
         DashboardCards.PlaybackOverview ->
@@ -738,6 +746,7 @@ fun CombinedDashboard(
                                                     onLoadMoreDiscoverFeed = { category ->
                                                         viewModel.loadNextDiscoverPage(category)
                                                     },
+                                                    onSendWol = { device -> viewModel.sendWol(device) },
                                                 )
                                             }
                                             if (isEditing) {
@@ -877,6 +886,7 @@ fun CombinedDashboard(
                                                 onNavigateToMediaDetails = onNavigateToMediaDetails,
                                                 onNavigateToSeerrMediaDetails = onNavigateToSeerrMediaDetails,
                                                 onNavigateToDiscoverTab = onNavigateToDiscoverTab,
+                                                onSendWol = {},
                                             )
                                         }
                                     }

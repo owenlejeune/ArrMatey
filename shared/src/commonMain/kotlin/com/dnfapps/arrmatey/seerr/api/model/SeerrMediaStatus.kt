@@ -4,7 +4,7 @@ import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
 
-enum class MediaStatus(
+enum class SeerrMediaStatus(
     val value: Int,
     val resource: StringResource,
 ) {

@@ -18,6 +18,7 @@ class MoreScreenViewModelS: ObservableObject {
     @Published private(set) var selectedCustomizationPreferences = InstancePreferences()
     @Published private(set) var downloadClients: [DownloadClient] = []
     @Published private(set) var customWebpages: [CustomWebpage] = []
+    @Published private(set) var wolDevices: [WolDevice] = []
     @Published private(set) var connectionStatuses: [KotlinLong:OperationStatus] = [:]
     @Published private(set) var useServiceNavLogos: Bool = false
     @Published private(set) var hideInstanceSwitcher: Bool = false
@@ -49,6 +50,7 @@ class MoreScreenViewModelS: ObservableObject {
         viewModel.selectedCustomizationPreferences.observeAsync(on: self, to: \.selectedCustomizationPreferences)
         viewModel.downloadClients.observeAsync(on: self, to: \.downloadClients)
         viewModel.customWebpages.observeAsync(on: self, to: \.customWebpages)
+        viewModel.wolDevices.observeAsync(on: self, to: \.wolDevices)
         viewModel.testingStatus.observeAsync(on: self, to: \.connectionStatuses)
         viewModel.useServiceNavLogos.observeAsync(on: self) { owner, useLogos in
             owner.useServiceNavLogos = useLogos.boolValue
@@ -153,6 +155,10 @@ class MoreScreenViewModelS: ObservableObject {
 
     func setSelectedCustomizationInstance(_ instance: Instance) {
         viewModel.setSelectedCustomizationInstanceId(id: instance.id)
+    }
+
+    func sendWol(device: WolDevice) {
+        viewModel.sendWol(device: device)
     }
 }
 

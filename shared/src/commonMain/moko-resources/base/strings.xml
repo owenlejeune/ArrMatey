@@ -68,7 +68,7 @@
     <string name="unified_media">Unified Media</string>
     <string name="unified_media_description">Control how media details screens integrate with your services to combine Arr library data with Seerr details, Bazarr subtitles, and Tracearr playback analytics.</string>
     <string name="setup_seerr_for_in_app_details">Setup Seerr (Overseerr/Jellyseerr) to view person and media details directly in the app.</string>
-    <string name="services_description">Services, Download Clients, and Custom Webpages</string>
+    <string name="services_description">Services, Download Clients, Custom Webpages, and Wake-on-LAN</string>
     <string name="integrations_description">Control how your services work together</string>
     <string name="backup_restore_description">Save and restore your services and app configurations</string>
     <string name="user_interface_description">Theming and customization options</string>
@@ -1201,4 +1201,17 @@
     <string name="popular_music">Popular music</string>
     <string name="top_platforms">Top platforms</string>
     <string name="no_stats_available">No statistics available</string>
+
+    <!-- Wake on Lan -->
+    <string name="wake_on_lan">Wake on Lan</string>
+    <string name="wol_devices">Wake on Lan Devices</string>
+    <string name="add_wol_device">Add Wake on Lan device</string>
+    <string name="edit_wol_device">Edit Wake on Lan Device</string>
+    <string name="mac_address">MAC Address</string>
+    <string name="ip_address">IP / Broadcast Address</string>
+    <string name="port">Port</string>
+    <string name="wake">Wake</string>
+    <string name="wake_packet_sent">Wake packet sent to %1$s</string>
+    <string name="wake_packet_sent_title">Wake Packet Sent</string>
+    <string name="confirm_delete_wol_device">Are you sure you want to delete this Wake on Lan device?</string>
 </resources>

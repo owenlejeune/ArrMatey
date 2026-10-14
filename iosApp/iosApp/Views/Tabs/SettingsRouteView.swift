@@ -44,6 +44,10 @@ struct SettingsRouteView: View {
             AddEditCustomWebpageScreen()
         case .editCustomWebpage(let id):
             AddEditCustomWebpageScreen(id: id)
+        case .newWolDevice:
+            AddEditWolDeviceScreen()
+        case .editWolDevice(let id):
+            AddEditWolDeviceScreen(id: id)
         }
     }
 }

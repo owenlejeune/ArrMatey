@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,12 +54,15 @@ fun ServicesSettingsScreen(
     onNavigateToAddDownloadClient: () -> Unit,
     onNavigateToEditCustomWebpage: (Long) -> Unit,
     onNavigateToAddCustomWebpage: () -> Unit,
+    onNavigateToEditWolDevice: (Long) -> Unit,
+    onNavigateToAddWolDevice: () -> Unit,
     onBack: () -> Unit,
     viewModel: MoreScreenViewModel = koinViewModel(),
 ) {
     val allInstances by viewModel.instances.collectAsStateWithLifecycle()
     val allDownloadClients by viewModel.downloadClients.collectAsStateWithLifecycle()
     val allCustomWebPages by viewModel.customWebpages.collectAsStateWithLifecycle()
+    val allWolDevices by viewModel.wolDevices.collectAsStateWithLifecycle()
     val instanceConnectionStatues by viewModel.testingStatus.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -205,6 +209,36 @@ fun ServicesSettingsScreen(
                         icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                         onClick = {
                             onNavigateToAddCustomWebpage()
+                        },
+                    ),
+            )
+
+            SettingsGroup(
+                title = mokoString(MR.strings.wake_on_lan),
+                items =
+                allWolDevices.map { device ->
+                    SettingItem(
+                        title = device.name,
+                        subtitle = device.macAddress,
+                        icon = IconSource.Vector(Icons.Default.PowerSettingsNew),
+                        onClick = {
+                            onNavigateToEditWolDevice(device.id)
+                        },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
+                    )
+                } +
+                    SettingItem(
+                        title = mokoString(MR.strings.add_wol_device),
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        icon = IconSource.Vector(Icons.Default.AddCircleOutline),
+                        onClick = {
+                            onNavigateToAddWolDevice()
                         },
                     ),
             )

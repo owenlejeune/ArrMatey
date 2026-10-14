@@ -23,6 +23,10 @@ struct ServicesSettingsView: View {
         viewModel.customWebpages
     }
 
+    private var wolDevices: [WolDevice] {
+        viewModel.wolDevices
+    }
+
     private func route(for instance: Instance) -> SettingsRoute {
         switch instance.type {
         case .sonarr, .radarr, .lidarr, .bookshelf, .listenarr, .chaptarr:
@@ -69,8 +73,40 @@ struct ServicesSettingsView: View {
             } header: {
                 Text(MR.strings().custom_webpages.localized())
             }
+
+            Section {
+                ForEach(wolDevices, id: \.self) { device in
+                    WolDeviceCard(device: device)
+                }
+                NavigationLink(value: SettingsRoute.newWolDevice) {
+                    Text(MR.strings().add_wol_device.localized())
+                        .foregroundColor(.themePrimary)
+                }
+            } header: {
+                Text(MR.strings().wake_on_lan.localized())
+            }
         }
         .navigationTitle(MR.strings().services.localized())
+    }
+}
+
+struct WolDeviceCard: View {
+    let device: WolDevice
+
+    var body: some View {
+        NavigationLink(value: SettingsRoute.editWolDevice(device.id)) {
+            HStack(spacing: 8) {
+                Image(systemName: "power.circle")
+                    .frame(width: 32, height: 32)
+                    .foregroundColor(.themePrimary)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(device.name)
+                        .font(.system(size: 18, weight: .medium))
+                    Text(device.macAddress)
+                        .font(.system(size: 16))
+                }
+            }
+        }
     }
 }
 

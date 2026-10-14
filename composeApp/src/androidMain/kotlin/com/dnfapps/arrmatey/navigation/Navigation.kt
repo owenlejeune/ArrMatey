@@ -320,6 +320,20 @@ fun Navigator<SettingsScreen>.toEditCustomWebpage(id: Long) {
     navigateTo(SettingsScreen.EditCustomWebpage(id))
 }
 
+fun Navigator<SettingsScreen>.toAddWolDevice() {
+    if (backStack.lastOrNull() != SettingsScreen.Services) {
+        navigateTo(SettingsScreen.Services)
+    }
+    navigateTo(SettingsScreen.AddWolDevice)
+}
+
+fun Navigator<SettingsScreen>.toEditWolDevice(id: Long) {
+    if (backStack.lastOrNull() != SettingsScreen.Services) {
+        navigateTo(SettingsScreen.Services)
+    }
+    navigateTo(SettingsScreen.EditWolDevice(id))
+}
+
 fun Navigator<SettingsScreen>.toServices() = navigateTo(SettingsScreen.Services)
 
 fun Navigator<SettingsScreen>.toUserInterface() = navigateTo(SettingsScreen.UserInterface)

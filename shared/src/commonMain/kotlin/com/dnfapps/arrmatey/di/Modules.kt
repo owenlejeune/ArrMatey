@@ -209,6 +209,12 @@ import com.dnfapps.arrmatey.webpage.usecase.GetCustomWebpageUseCase
 import com.dnfapps.arrmatey.webpage.usecase.UpdateCustomWebpageUseCase
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
+import com.dnfapps.arrmatey.wol.repository.WolDeviceRepository
+import com.dnfapps.arrmatey.wol.usecase.AddWolDeviceUseCase
+import com.dnfapps.arrmatey.wol.usecase.DeleteWolDeviceUseCase
+import com.dnfapps.arrmatey.wol.usecase.GetWolDeviceUseCase
+import com.dnfapps.arrmatey.wol.usecase.UpdateWolDeviceUseCase
+import com.dnfapps.arrmatey.wol.viewmodel.WolDeviceConfigurationViewModel
 import dev.shivathapaa.logger.api.LogLevel
 import dev.shivathapaa.logger.api.LoggerFactory
 import dev.shivathapaa.logger.core.LoggerConfig
@@ -243,6 +249,7 @@ val databaseModule =
         single { get<ArrMateyDatabase>().getInstanceDao() }
         single { get<ArrMateyDatabase>().getDownloadClientDao() }
         single { get<ArrMateyDatabase>().getCustomWebpageDao() }
+        single { get<ArrMateyDatabase>().getWolDeviceDao() }
     }
 
 val networkModule =
@@ -287,6 +294,7 @@ val repositoryModule =
         single { DownloadClientManager(get(), get()) }
 
         single { CustomWebpageRepository(get()) }
+        single { WolDeviceRepository(get()) }
 
         single { TabManager(get(), get()) }
         single { DashboardManager(get()) }
@@ -407,6 +415,10 @@ val useCaseModule =
         factory { UpdateCustomWebpageUseCase(get()) }
         factory { DeleteCustomWebpageUseCase(get()) }
         factory { GetCustomWebpageUseCase(get()) }
+        factory { AddWolDeviceUseCase(get()) }
+        factory { UpdateWolDeviceUseCase(get()) }
+        factory { DeleteWolDeviceUseCase(get()) }
+        factory { GetWolDeviceUseCase(get()) }
         factory { CloseIssueUseCase(get()) }
         factory { NotificationCleanupUseCase(get()) }
         factory { ScheduleNotificationUseCase(get(), get()) }
@@ -558,6 +570,9 @@ val viewModelModule =
         viewModelOf(::DownloadClientsViewModel)
         viewModel { (webpageId: Long?) ->
             CustomWebpageConfigurationViewModel(webpageId, get(), get(), get(), get())
+        }
+        viewModel { (deviceId: Long?) ->
+            WolDeviceConfigurationViewModel(deviceId, get(), get(), get(), get())
         }
         viewModel { (webpageId: Long) ->
             CustomWebpageViewerViewModel(webpageId, get(), get())

@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.arr.state
 import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
@@ -33,6 +34,7 @@ import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
 import com.dnfapps.arrmatey.monitoring.model.PlaybackSummaryStats
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.Issue
+import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.Keyword
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
@@ -41,11 +43,14 @@ import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.Network
 import com.dnfapps.arrmatey.seerr.api.model.ProductionCompany
 import com.dnfapps.arrmatey.seerr.api.model.RequestMedia
+import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RequestUser
+import com.dnfapps.arrmatey.seerr.api.model.SeerrMediaStatus
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
+import com.dnfapps.arrmatey.wol.model.WolDevice
 import dev.icerock.moko.resources.ImageResource
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -78,6 +83,7 @@ sealed interface CombinedDashboardState {
         val upcomingTv: List<DiscoverResult> = emptyList(),
         val quickPickItem: DiscoverResult? = null,
         val networkStatus: NetworkStatusState? = null,
+        val wolDevices: List<WolDevice> = emptyList(),
         val isRefreshing: Boolean = false,
         val isLoadingMoreDiscover: Map<DiscoverCategory, Boolean> = emptyMap(),
     ) : CombinedDashboardState {
@@ -123,22 +129,21 @@ sealed interface CombinedDashboardState {
 
         fun isLoadingDiscoverFeed(category: DiscoverCategory): Boolean = isLoadingMoreDiscover[category] == true
 
-        fun resolveMediaStatus(item: DiscoverResult): com.dnfapps.arrmatey.seerr.api.model.MediaStatus {
+        fun resolveMediaStatus(item: DiscoverResult): SeerrMediaStatus {
             val directStatus =
                 item.mediaInfo?.status?.let {
-                    com.dnfapps.arrmatey.seerr.api.model.MediaStatus
-                        .fromValue(it)
+                    SeerrMediaStatus.fromValue(it)
                 }
-            if (directStatus != null && directStatus != com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Unknown) {
+            if (directStatus != null && directStatus != SeerrMediaStatus.Unknown) {
                 return directStatus
             }
 
             if (item.mediaInfo?.requests?.isNotEmpty() == true) {
                 if (item.mediaInfo.requests.any { it.status == 1 }) {
-                    return com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Pending
+                    return SeerrMediaStatus.Pending
                 }
                 if (item.mediaInfo.requests.any { it.status == 2 }) {
-                    return com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Processing
+                    return SeerrMediaStatus.Processing
                 }
             }
 
@@ -150,17 +155,17 @@ sealed interface CombinedDashboardState {
                             (item.mediaInfo?.tmdbId != null && pkg.request.media.tmdbId == item.mediaInfo.tmdbId)
                     }
                 }
-            if (isPending) return com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Pending
+            if (isPending) return SeerrMediaStatus.Pending
 
             val isInLibrary =
                 instances.any { inst ->
                     inst.library.any { media ->
                         when (media) {
-                            is com.dnfapps.arrmatey.arr.api.model.ArrMovie ->
+                            is ArrMovie ->
                                 (media.tmdbId > 0 && media.tmdbId == item.id) ||
                                     (item.mediaInfo?.tmdbId != null && media.tmdbId == item.mediaInfo.tmdbId)
 
-                            is com.dnfapps.arrmatey.arr.api.model.ArrSeries ->
+                            is ArrSeries ->
                                 (media.tmdbId != null && media.tmdbId > 0 && media.tmdbId == item.id) ||
                                     (item.mediaInfo?.tvdbId != null && media.tvdbId == item.mediaInfo.tvdbId) ||
                                     (item.mediaInfo?.tmdbId != null && media.tmdbId == item.mediaInfo.tmdbId)
@@ -169,9 +174,9 @@ sealed interface CombinedDashboardState {
                         }
                     }
                 }
-            if (isInLibrary) return com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Available
+            if (isInLibrary) return SeerrMediaStatus.Available
 
-            return com.dnfapps.arrmatey.seerr.api.model.MediaStatus.Unknown
+            return SeerrMediaStatus.Unknown
         }
     }
 
@@ -383,6 +388,17 @@ sealed interface CombinedDashboardState {
                     MockMedia.Readarr,
                 )
 
+            val mockWolDevices =
+                listOf(
+                    WolDevice(
+                        id = 1,
+                        name = "Media Server",
+                        macAddress = "00:11:22:33:44:55",
+                        ipAddress = "255.255.255.255",
+                        port = 9,
+                    ),
+                )
+
             val mockEpisode =
                 Episode(
                     id = 1,
@@ -536,6 +552,7 @@ sealed interface CombinedDashboardState {
                 activityQueue = listOf(mockQueueItem),
                 recentlyAdded = recentlyAdded,
                 trendingMedia = mockDiscover,
+                wolDevices = mockWolDevices,
                 popularMovies = mockDiscover.filter { it.mediaType == RequestType.Movie },
                 popularTv = mockDiscover.filter { it.mediaType == RequestType.Tv },
                 upcomingMovies = mockDiscover.filter { it.mediaType == RequestType.Movie },
@@ -625,10 +642,10 @@ data class SeerrDashboardState(
     val isOnline: Boolean = true,
 ) {
     val pendingRequests: List<MediaRequestPackage>
-        get() = requests.filter { it.request.matchesFilter(com.dnfapps.arrmatey.seerr.api.model.RequestState.Pending) }
+        get() = requests.filter { it.request.matchesFilter(RequestState.Pending) }
 
     val openIssues: List<MediaIssuePackage>
-        get() = issues.filter { it.issue.matchesFilter(com.dnfapps.arrmatey.seerr.api.model.IssueState.Open) }
+        get() = issues.filter { it.issue.matchesFilter(IssueState.Open) }
 }
 
 data class DownloadClientDashboardState(

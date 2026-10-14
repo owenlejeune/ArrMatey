@@ -480,6 +480,7 @@ struct DashboardCardView: View {
             case .playbackOverview: DashboardTracearrSection(state: state, isEditing: isEditing)
             case .activeStreams: DashboardActiveStreamsSection(state: state, isEditing: isEditing, onItemClick: onStreamClick)
             case .instanceDashboard: DashboardInstanceDashboardSection(state: state, isEditing: isEditing)
+            case .wolDevices: DashboardWolSection(state: state, isEditing: isEditing)
             case .discoverFeed:
                 DashboardDiscoverFeedSection(
                     state: state,
@@ -738,6 +739,62 @@ struct DashboardTracearrSection: View {
                     onNavigateToViolations: { navigationManager.go(to: TracearrRoute.violations) },
                     onNavigateToActivity: { navigationManager.go(to: TracearrRoute.activity) }
                 )
+            }
+        }
+    }
+}
+
+struct DashboardWolSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+
+    @EnvironmentObject private var dashboardViewModel: DashboardViewModelS
+
+    var body: some View {
+        let devices = state.wolDevices
+        if devices.isEmpty && !isEditing {
+            EmptyView()
+        } else {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    Image(systemName: "power.circle")
+                        .font(.system(size: 20))
+                        .foregroundColor(.themePrimary)
+                    Text(MR.strings().wake_on_lan.localized())
+                        .font(.headline)
+                        .bold()
+                    Spacer()
+                }
+
+                Divider()
+
+                if devices.isEmpty {
+                    Text("No Wake on Lan devices configured")
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 8)
+                } else {
+                    ForEach(devices, id: \.self) { device in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(device.name)
+                                    .font(.subheadline)
+                                    .bold()
+                                Text(device.macAddress)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Button {
+                                dashboardViewModel.sendWol(device: device)
+                            } label: {
+                                Label(MR.strings().wake.localized(), systemImage: "power")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.small)
+                        }
+                    }
+                }
             }
         }
     }

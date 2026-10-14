@@ -714,6 +714,8 @@ enum SettingsRoute: Hashable {
     case editDownloadClient(Int64)
     case newCustomWebpage
     case editCustomWebpage(Int64)
+    case newWolDevice
+    case editWolDevice(Int64)
 }
 
 enum BazarrRoute: Hashable {

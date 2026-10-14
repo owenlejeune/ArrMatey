@@ -108,6 +108,7 @@ enum class DashboardCards(
     DiscoverFeed(strings.dashboard_discover_feed),
     DiscoverSpotlight(strings.dashboard_discover_spotlight),
     DiscoverQuickPick(strings.dashboard_discover_quick_pick),
+    WolDevices(strings.wake_on_lan),
     ;
 
     companion object {

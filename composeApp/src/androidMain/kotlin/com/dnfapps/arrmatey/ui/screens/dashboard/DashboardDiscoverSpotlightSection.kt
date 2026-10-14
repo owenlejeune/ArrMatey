@@ -55,8 +55,8 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
-import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.api.model.SeerrMediaStatus
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.MediaRequestTypeChip
@@ -245,7 +245,7 @@ fun DashboardDiscoverSpotlightSection(
                                     }
 
                                     item.mediaInfo?.let { info ->
-                                        StatusOverlay(MediaStatus.fromValue(info.status))
+                                        StatusOverlay(SeerrMediaStatus.fromValue(info.status))
                                     }
                                 }
 
@@ -394,16 +394,16 @@ fun DashboardDiscoverSpotlightSection(
                                 val mediaStatus = state.resolveMediaStatus(item)
                                 val (buttonLabel, buttonIcon, isTonal) =
                                     when (mediaStatus) {
-                                        MediaStatus.Available -> {
+                                        SeerrMediaStatus.Available -> {
                                             if (item.mediaType == RequestType.Tv) {
                                                 Triple(MR.strings.request_more, Icons.Default.Add, false)
                                             } else {
                                                 Triple(MR.strings.available, Icons.Default.Check, true)
                                             }
                                         }
-                                        MediaStatus.Pending -> Triple(MR.strings.pending, Icons.Default.Schedule, true)
-                                        MediaStatus.Processing -> Triple(MR.strings.processing, Icons.Default.Schedule, true)
-                                        MediaStatus.PartiallyAvailable -> Triple(MR.strings.request_more, Icons.Default.Add, false)
+                                        SeerrMediaStatus.Pending -> Triple(MR.strings.pending, Icons.Default.Schedule, true)
+                                        SeerrMediaStatus.Processing -> Triple(MR.strings.processing, Icons.Default.Schedule, true)
+                                        SeerrMediaStatus.PartiallyAvailable -> Triple(MR.strings.request_more, Icons.Default.Add, false)
                                         else -> Triple(MR.strings.request, Icons.Default.Add, false)
                                     }
 

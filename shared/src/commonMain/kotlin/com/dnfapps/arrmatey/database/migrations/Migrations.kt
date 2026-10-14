@@ -161,6 +161,23 @@ private val MIGRATION_13_14 =
         }
     }
 
+private val MIGRATION_14_15 =
+    object : Migration(14, 15) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS wol_devices (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    name TEXT NOT NULL,
+                    macAddress TEXT NOT NULL,
+                    ipAddress TEXT DEFAULT NULL,
+                    port INTEGER NOT NULL DEFAULT 9
+                )
+                """.trimIndent(),
+            )
+        }
+    }
+
 val migrations =
     arrayOf(
         MIGRATION_1_2,
@@ -176,4 +193,5 @@ val migrations =
         MIGRATION_11_12,
         MIGRATION_12_13,
         MIGRATION_13_14,
+        MIGRATION_14_15,
     )

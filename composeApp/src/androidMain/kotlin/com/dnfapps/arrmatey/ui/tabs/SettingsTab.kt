@@ -11,11 +11,13 @@ import com.dnfapps.arrmatey.navigation.onInstanceTap
 import com.dnfapps.arrmatey.navigation.toAddCustomWebpage
 import com.dnfapps.arrmatey.navigation.toAddDownloadClient
 import com.dnfapps.arrmatey.navigation.toAddInstance
+import com.dnfapps.arrmatey.navigation.toAddWolDevice
 import com.dnfapps.arrmatey.navigation.toBackupRestore
 import com.dnfapps.arrmatey.navigation.toDev
 import com.dnfapps.arrmatey.navigation.toEditCustomWebpage
 import com.dnfapps.arrmatey.navigation.toEditDownloadClient
 import com.dnfapps.arrmatey.navigation.toEditInstance
+import com.dnfapps.arrmatey.navigation.toEditWolDevice
 import com.dnfapps.arrmatey.navigation.toIntegrations
 import com.dnfapps.arrmatey.navigation.toOnboarding
 import com.dnfapps.arrmatey.navigation.toServices
@@ -27,6 +29,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.ui.screens.AddEditCustomWebpageScreen
 import com.dnfapps.arrmatey.ui.screens.AddEditDownloadClientScreen
+import com.dnfapps.arrmatey.ui.screens.AddEditWolDeviceScreen
 import com.dnfapps.arrmatey.ui.screens.AddInstanceScreen
 import com.dnfapps.arrmatey.ui.screens.ArrInstanceDashboard
 import com.dnfapps.arrmatey.ui.screens.DevSettingsScreen
@@ -72,6 +75,8 @@ fun SettingsTabNavHost(
                     onNavigateToAddDownloadClient = { navigation.toAddDownloadClient() },
                     onNavigateToEditCustomWebpage = { id -> navigation.toEditCustomWebpage(id) },
                     onNavigateToAddCustomWebpage = { navigation.toAddCustomWebpage() },
+                    onNavigateToEditWolDevice = { id -> navigation.toEditWolDevice(id) },
+                    onNavigateToAddWolDevice = { navigation.toAddWolDevice() },
                     onBack = { navigation.popBackStack() },
                 )
             }
@@ -155,6 +160,17 @@ fun SettingsTabNavHost(
             entry<SettingsScreen.EditCustomWebpage> {
                 AddEditCustomWebpageScreen(
                     webpageId = it.id,
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.AddWolDevice> {
+                AddEditWolDeviceScreen(
+                    onBack = { navigation.popBackStack() },
+                )
+            }
+            entry<SettingsScreen.EditWolDevice> {
+                AddEditWolDeviceScreen(
+                    deviceId = it.id,
                     onBack = { navigation.popBackStack() },
                 )
             }

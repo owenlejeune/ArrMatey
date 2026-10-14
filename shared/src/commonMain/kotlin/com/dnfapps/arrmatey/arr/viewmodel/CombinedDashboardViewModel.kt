@@ -43,6 +43,9 @@ import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.utils.getNetworkUtils
+import com.dnfapps.arrmatey.wol.model.WolDevice
+import com.dnfapps.arrmatey.wol.repository.WolDeviceRepository
+import com.dnfapps.arrmatey.wol.sendWolPacket
 import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.Dispatchers
@@ -82,6 +85,7 @@ class CombinedDashboardViewModel(
     private val dashboardManager: DashboardManager,
     private val preferencesStore: PreferencesStore,
     private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
+    private val wolDeviceRepository: WolDeviceRepository,
     private val logger: Logger,
 ) : ViewModel() {
     private val _removeItemState = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
@@ -484,6 +488,7 @@ class CombinedDashboardViewModel(
                     _isRefreshing,
                     _isDiscoverLoadingMore,
                     playbackInstancesFlow,
+                    wolDeviceRepository.getAllWolDevices(),
                 ),
             ) { args ->
                 @Suppress("UNCHECKED_CAST")
@@ -546,6 +551,9 @@ class CombinedDashboardViewModel(
                 @Suppress("UNCHECKED_CAST")
                 val playbackStats = (args[19] as? List<PlaybackDashboardState>) ?: emptyList()
 
+                @Suppress("UNCHECKED_CAST")
+                val wolDevices = (args[20] as? List<WolDevice>) ?: emptyList()
+
                 CombinedDashboardState.Success(
                     instances = instances,
                     seerrInstances = seerrInstances,
@@ -566,6 +574,7 @@ class CombinedDashboardViewModel(
                     upcomingMovies = upcomingMovies,
                     upcomingTv = upcomingTv,
                     quickPickItem = quickPick,
+                    wolDevices = wolDevices,
                     networkStatus =
                     resolveNetworkStatus(
                         instances,
@@ -1086,6 +1095,12 @@ class CombinedDashboardViewModel(
 
     fun addCard(card: DashboardCards) {
         dashboardManager.addCard(card)
+    }
+
+    fun sendWol(device: WolDevice) {
+        viewModelScope.launch {
+            sendWolPacket(device.macAddress, device.ipAddress, device.port)
+        }
     }
 
     fun approveRequest(

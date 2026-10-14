@@ -110,4 +110,8 @@ class DashboardViewModelS: ObservableObject {
     func terminatePlaybackStream(session: PlaybackStreamSession, message: String? = nil) {
         viewModel.terminatePlaybackStream(session: session, message: message)
     }
+
+    func sendWol(device: WolDevice) {
+        viewModel.sendWol(device: device)
+    }
 }

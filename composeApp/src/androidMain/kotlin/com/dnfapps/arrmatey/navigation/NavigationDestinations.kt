@@ -158,6 +158,12 @@ sealed interface SettingsScreen : NavKey {
     data class EditCustomWebpage(
         val id: Long,
     ) : SettingsScreen
+
+    data object AddWolDevice : SettingsScreen
+
+    data class EditWolDevice(
+        val id: Long,
+    ) : SettingsScreen
 }
 
 sealed interface DashboardScreen : NavKey {

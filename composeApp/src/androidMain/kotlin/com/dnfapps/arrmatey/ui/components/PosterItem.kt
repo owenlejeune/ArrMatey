@@ -50,9 +50,9 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
-import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.api.model.SeerrMediaStatus
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -247,7 +247,7 @@ fun PosterItem(
                     MediaTypeOverlay(item.mediaType)
                     item.mediaInfo?.let { info ->
                         StatusOverlay(
-                            status = MediaStatus.fromValue(info.status),
+                            status = SeerrMediaStatus.fromValue(info.status),
                             modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
                         )
                     }
@@ -356,7 +356,7 @@ fun PosterItem(
                 MediaTypeOverlay(item.requestType)
                 item.mediaInfo?.let { info ->
                     StatusOverlay(
-                        status = MediaStatus.fromValue(info.status),
+                        status = SeerrMediaStatus.fromValue(info.status),
                         modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
                     )
                 }
@@ -407,14 +407,14 @@ private fun BoxScope.MediaTypeOverlay(type: RequestType) {
 
 @Composable
 fun StatusOverlay(
-    status: MediaStatus,
+    status: SeerrMediaStatus,
     modifier: Modifier = Modifier,
 ) {
     val (icon, color) =
         when (status) {
-            MediaStatus.Available -> Icons.Default.CheckCircle to Color(0xFF50d27d)
-            MediaStatus.PartiallyAvailable -> Icons.Default.RemoveCircle to Color(0xFFfbbf24)
-            MediaStatus.Pending, MediaStatus.Processing -> Icons.Default.Schedule to Color(0xFF3b82f6)
+            SeerrMediaStatus.Available -> Icons.Default.CheckCircle to Color(0xFF50d27d)
+            SeerrMediaStatus.PartiallyAvailable -> Icons.Default.RemoveCircle to Color(0xFFfbbf24)
+            SeerrMediaStatus.Pending, SeerrMediaStatus.Processing -> Icons.Default.Schedule to Color(0xFF3b82f6)
             else -> return
         }
 

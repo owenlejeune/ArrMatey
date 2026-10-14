@@ -60,6 +60,7 @@ import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
+import com.dnfapps.arrmatey.wol.viewmodel.WolDeviceConfigurationViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.parameter.parametersOf
 
@@ -149,6 +150,8 @@ object KoinBridge : KoinComponent {
     fun getBazarrMediaSubtitlesViewModel(target: BazarrMediaTarget): BazarrMediaSubtitlesViewModel = getKoin().get { parametersOf(target) }
 
     fun getCustomWebpageConfigurationViewModel(webpageId: Long?): CustomWebpageConfigurationViewModel = getKoin().get { parametersOf(webpageId) }
+
+    fun getWolDeviceConfigurationViewModel(deviceId: Long?): WolDeviceConfigurationViewModel = getKoin().get { parametersOf(deviceId) }
 
     fun getCustomWebpageViewerViewModel(webpageId: Long): CustomWebpageViewerViewModel = getKoin().get { parametersOf(webpageId) }
 
