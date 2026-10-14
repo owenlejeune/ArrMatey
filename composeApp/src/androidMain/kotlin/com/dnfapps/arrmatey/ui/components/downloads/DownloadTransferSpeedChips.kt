@@ -61,10 +61,15 @@ fun DownloadTransferSpeedChips(
                     Column(
                         modifier = Modifier.padding(vertical = 2.dp),
                     ) {
+                        val speedText =
+                            if (client.type.supportsUpload) {
+                                "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  " +
+                                    "↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s"
+                            } else {
+                                "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s"
+                            }
                         Text(
-                            text =
-                            "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  " +
-                                "↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s",
+                            text = speedText,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

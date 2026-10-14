@@ -376,8 +376,13 @@ struct ClientFilterChip: View {
                     .frame(width: 16, height: 16)
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("↓ \((info?.downloadSpeed ?? 0).bytesAsFileSizeString())/s ↑ \((info?.uploadSpeed ?? 0).bytesAsFileSizeString())/s")
-                        .font(.subheadline)
+                    if client.type.supportsUpload {
+                        Text("↓ \((info?.downloadSpeed ?? 0).bytesAsFileSizeString())/s ↑ \((info?.uploadSpeed ?? 0).bytesAsFileSizeString())/s")
+                            .font(.subheadline)
+                    } else {
+                        Text("↓ \((info?.downloadSpeed ?? 0).bytesAsFileSizeString())/s")
+                            .font(.subheadline)
+                    }
                     
                     if client.type.supportsExternalIp && client.showExternalIpAddress, let externalIp = info?.externalIp, !externalIp.isEmpty {
                         Text(externalIp)

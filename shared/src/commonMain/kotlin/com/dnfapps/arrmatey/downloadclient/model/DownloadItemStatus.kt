@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.downloadclient.model
 
 import com.dnfapps.arrmatey.downloadclient.api.model.DelugeTorrentState
+import com.dnfapps.arrmatey.downloadclient.api.model.NzbgetGroupStatus
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTorrentState
 import com.dnfapps.arrmatey.downloadclient.api.model.SABnzbdQueueSlotStatus
 import com.dnfapps.arrmatey.shared.*
@@ -84,6 +85,33 @@ enum class DownloadItemStatus(
             SABnzbdQueueSlotStatus.Propagating -> Propagating
             SABnzbdQueueSlotStatus.Fetching -> Fetching
             SABnzbdQueueSlotStatus.Unknown -> Unknown
+        }
+
+        fun from(state: NzbgetGroupStatus, paused: Boolean = false): DownloadItemStatus {
+            if (paused || state.isPaused) {
+                return DownloadingPaused
+            }
+            return when (state) {
+                NzbgetGroupStatus.Downloading -> Downloading
+                NzbgetGroupStatus.Queued,
+                NzbgetGroupStatus.PostProcessingQueued,
+                NzbgetGroupStatus.QueueScriptQueued,
+                -> Queued
+                NzbgetGroupStatus.ParCheck,
+                NzbgetGroupStatus.Repair,
+                -> Checking
+                NzbgetGroupStatus.Unpack,
+                NzbgetGroupStatus.PostUnpackRenaming,
+                NzbgetGroupStatus.Moving,
+                -> Moving
+                NzbgetGroupStatus.PostProcessingScript,
+                NzbgetGroupStatus.QueueScriptExecuting,
+                -> Fetching
+                NzbgetGroupStatus.Success -> UploadingPaused
+                NzbgetGroupStatus.Failure -> Error
+                NzbgetGroupStatus.Paused -> DownloadingPaused
+                NzbgetGroupStatus.Unknown -> Unknown
+            }
         }
     }
 }

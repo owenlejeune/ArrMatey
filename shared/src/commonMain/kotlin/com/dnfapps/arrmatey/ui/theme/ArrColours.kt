@@ -30,6 +30,7 @@ val QBittorrentColor = Color(0xFF2F679E)
 val SABnzbdColor = Color(0xFFFFB300)
 val DelugeColor = Color(0xFF3B7BBF)
 val TransmissionColor = Color(0xFFC92A2A)
+val NZBGetColor = Color(0xFF4ABC96)
 
 val DownloadClientType.associatedColor: Color
     get() =
@@ -38,6 +39,7 @@ val DownloadClientType.associatedColor: Color
             DownloadClientType.SABnzbd -> SABnzbdColor
             DownloadClientType.Deluge -> DelugeColor
             DownloadClientType.Transmission -> TransmissionColor
+            DownloadClientType.NZBGet -> NZBGetColor
         }
 
 val TracearrServerType?.brandColor: Color

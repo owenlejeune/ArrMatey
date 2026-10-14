@@ -48,7 +48,14 @@ struct DownloadQueueItemView: View {
             }
         }
         .padding(16)
+        .padding(.leading, showClientInfo ? 4 : 0)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .overlay(alignment: .leading) {
+            if showClientInfo {
+                item.client.type.associatedSwiftColor
+                    .frame(width: 5)
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)

@@ -148,6 +148,19 @@ extension InstanceType {
     }
 }
 
+extension DownloadClientType {
+    var associatedSwiftColor: Color {
+        switch self {
+        case .qbittorrent: return Color(hex: 0x2F679E)
+        case .sabnzbd: return Color(hex: 0xFFFFB300)
+        case .deluge: return Color(hex: 0x3B7BBF)
+        case .transmission: return Color(hex: 0xC92A2A)
+        case .nzbget: return Color(hex: 0x4ABC96)
+        default: return .accentColor
+        }
+    }
+}
+
 extension UInt64 {
     func toSwiftUI() -> Color {
         return Color(argb: self)

@@ -865,6 +865,10 @@ struct DashboardDownloadClientsSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
 
+    private var totalDownloadSpeed: Int64 {
+        state.downloadTransfers.reduce(0) { $0 + $1.downloadSpeed }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -872,34 +876,76 @@ struct DashboardDownloadClientsSection: View {
                 Text(MR.strings().download_clients.localized())
                     .font(.headline)
                     .bold()
+                Spacer()
+                if totalDownloadSpeed > 0 {
+                    Text("\(totalDownloadSpeed.bytesAsFileSizeString())/s")
+                        .font(.caption2)
+                        .bold()
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.accentColor.opacity(0.15))
+                        .foregroundColor(.accentColor)
+                        .clipShape(Capsule())
+                }
             }
 
-            ForEach(state.downloadClients, id: \.client.id) { clientState in
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text(clientState.client.label)
-                            .font(.subheadline)
-                            .bold()
-                        Text("\(clientState.activeDownloadsCount) Downloads")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                    if let transfer = clientState.transferInfo {
-                        VStack(alignment: .trailing) {
-                            Text(transfer.downloadSpeed.bytesAsFileSizeString() + "/s")
-                                .font(.caption)
+            if state.downloadClients.isEmpty {
+                Text(MR.strings().no_type_instances_message.formatted(args: ["Download Client"]))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 8)
+            } else {
+                ForEach(state.downloadClients, id: \.client.id) { clientState in
+                    HStack(spacing: 12) {
+                        clientState.client.type.icon.toImage(renderingMode: .original)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 28, height: 28)
+                            .padding(6)
+                            .background(Color(UIColor.secondarySystemBackground).opacity(0.6))
+                            .cornerRadius(8)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(clientState.client.label)
+                                .font(.subheadline)
                                 .bold()
-                                .foregroundColor(.green)
-                            Text(transfer.uploadSpeed.bytesAsFileSizeString() + "/s")
-                                .font(.caption)
-                                .foregroundColor(.blue)
+                            HStack(spacing: 4) {
+                                Text("\(clientState.activeDownloadsCount) \(MR.strings().downloads.localized())")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                if !clientState.isOnline {
+                                    Circle()
+                                        .fill(Color.red)
+                                        .frame(width: 6, height: 6)
+                                    Text(MR.strings().offline.localized())
+                                        .font(.caption)
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        }
+                        Spacer()
+                        if clientState.isOnline, let transfer = clientState.transferInfo {
+                            VStack(alignment: .trailing, spacing: 2) {
+                                if transfer.downloadSpeed > 0 {
+                                    Text("↓ \(transfer.downloadSpeed.bytesAsFileSizeString())/s")
+                                        .font(.caption)
+                                        .bold()
+                                        .foregroundColor(.green)
+                                }
+                                if clientState.client.type.supportsUpload && transfer.uploadSpeed > 0 {
+                                    Text("↑ \(transfer.uploadSpeed.bytesAsFileSizeString())/s")
+                                        .font(.caption)
+                                        .bold()
+                                        .foregroundColor(.blue)
+                                }
+                            }
                         }
                     }
+                    .padding(12)
+                    .background(Color(UIColor.tertiarySystemBackground))
+                    .cornerRadius(12)
                 }
-                .padding(12)
-                .background(Color(UIColor.tertiarySystemBackground))
-                .cornerRadius(12)
             }
 
             if !state.activeDownloads.isEmpty {

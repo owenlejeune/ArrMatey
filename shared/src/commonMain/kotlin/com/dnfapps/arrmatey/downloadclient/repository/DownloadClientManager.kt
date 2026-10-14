@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.downloadclient.repository
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
 import com.dnfapps.arrmatey.downloadclient.api.DelugeClient
 import com.dnfapps.arrmatey.downloadclient.api.DownloadClientApi
+import com.dnfapps.arrmatey.downloadclient.api.NzbgetClient
 import com.dnfapps.arrmatey.downloadclient.api.QBittorrentClient
 import com.dnfapps.arrmatey.downloadclient.api.SABnzbdClient
 import com.dnfapps.arrmatey.downloadclient.api.TransmissionClient
@@ -136,6 +137,7 @@ class DownloadClientManager(
             DownloadClientType.SABnzbd -> SABnzbdClient(downloadClient, httpClient)
             DownloadClientType.Deluge -> DelugeClient(downloadClient, httpClient)
             DownloadClientType.Transmission -> TransmissionClient(downloadClient, httpClient)
+            DownloadClientType.NZBGet -> NzbgetClient(downloadClient, httpClient)
         }
     }
 

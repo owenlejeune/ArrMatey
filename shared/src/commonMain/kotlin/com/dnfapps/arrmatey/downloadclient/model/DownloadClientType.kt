@@ -16,6 +16,7 @@ enum class DownloadClientType(
     val github: String,
     val website: String,
     val supportsExternalIp: Boolean = false,
+    val supportsUpload: Boolean = true,
 ) {
     QBittorrent(
         displayName = "qBittorrent",
@@ -26,6 +27,7 @@ enum class DownloadClientType(
         github = "https://github.com/qbittorrent/qBittorrent",
         website = "https://www.qbittorrent.org/",
         supportsExternalIp = true,
+        supportsUpload = true,
     ),
     SABnzbd(
         displayName = "SABnzbd",
@@ -35,6 +37,7 @@ enum class DownloadClientType(
         tabIcon = MR.images.sabnzbd_tab,
         github = "https://github.com/sabnzbd/sabnzbd",
         website = "https://sabnzbd.org/",
+        supportsUpload = false,
     ),
     Deluge(
         displayName = "Deluge",
@@ -45,6 +48,7 @@ enum class DownloadClientType(
         github = "https://github.com/deluge-torrent/deluge",
         website = "https://www.deluge-torrent.org/",
         supportsExternalIp = true,
+        supportsUpload = true,
     ),
     Transmission(
         displayName = "Transmission",
@@ -54,5 +58,23 @@ enum class DownloadClientType(
         tabIcon = MR.images.transmission_tab,
         github = "https://github.com/transmission/transmission",
         website = "https://transmissionbt.com/",
+        supportsUpload = true,
     ),
+    NZBGet(
+        displayName = "NZBGet",
+        description = MR.strings.nzbget_description,
+        defaultPort = 6789,
+        icon = MR.images.nzbget,
+        tabIcon = MR.images.nzbget_tab,
+        github = "https://github.com/nzbget-ng/nzbget",
+        website = "https://nzbget.com/",
+        supportsUpload = false,
+    ),
+    ;
+
+    val isUsenet: Boolean
+        get() = !supportsUpload
+
+    val isTorrent: Boolean
+        get() = supportsUpload
 }
