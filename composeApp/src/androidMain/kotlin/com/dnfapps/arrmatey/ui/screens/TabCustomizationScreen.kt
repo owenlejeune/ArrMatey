@@ -237,7 +237,6 @@ fun TabCustomizationContent(
                     text = mokoString(MR.strings.navigation_items_selected),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.animateItem(),
                 )
             }
 
@@ -304,7 +303,6 @@ fun TabCustomizationContent(
                     text = mokoString(MR.strings.navigation_items_drawer),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.animateItem(),
                 )
             }
 
@@ -381,7 +379,6 @@ fun TabCustomizationContent(
                     text = mokoString(MR.strings.navigation_items_hidden),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.animateItem(),
                 )
             }
 
