@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.downloadclient.model
 import com.dnfapps.arrmatey.downloadclient.api.model.DelugeTorrentState
 import com.dnfapps.arrmatey.downloadclient.api.model.NzbgetGroupStatus
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTorrentState
+import com.dnfapps.arrmatey.downloadclient.api.model.RTorrentTorrent
 import com.dnfapps.arrmatey.downloadclient.api.model.SABnzbdQueueSlotStatus
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
@@ -41,23 +42,29 @@ enum class DownloadItemStatus(
             QBittorrentTorrentState.Uploading,
             QBittorrentTorrentState.UploadingStalled,
             -> Uploading
+
             QBittorrentTorrentState.UploadingPaused,
             QBittorrentTorrentState.UploadingStopped,
             -> UploadingPaused
+
             QBittorrentTorrentState.UploadingQueued,
             QBittorrentTorrentState.DownloadingQueued,
             -> Queued
+
             QBittorrentTorrentState.UploadingChecking,
             QBittorrentTorrentState.DownloadingChecking,
             -> Checking
+
             QBittorrentTorrentState.UploadingForced -> UploadingForced
             QBittorrentTorrentState.Downloading -> Downloading
             QBittorrentTorrentState.DownloadingMetadata,
             QBittorrentTorrentState.DownloadingMetadataForced,
             -> DownloadingMetadataForced
+
             QBittorrentTorrentState.DownloadingPaused,
             QBittorrentTorrentState.DownloadingStopped,
             -> DownloadingPaused
+
             QBittorrentTorrentState.DownloadingStalled -> DownloadingStalled
             QBittorrentTorrentState.DownloadingForced -> DownloadingForced
             QBittorrentTorrentState.CheckingResumeData -> CheckingResumeData
@@ -111,6 +118,18 @@ enum class DownloadItemStatus(
                 NzbgetGroupStatus.Failure -> Error
                 NzbgetGroupStatus.Paused -> DownloadingPaused
                 NzbgetGroupStatus.Unknown -> Unknown
+            }
+        }
+
+        fun from(torrent: RTorrentTorrent): DownloadItemStatus {
+            if (torrent.hasError) return Error
+            if (torrent.hashing > 0) return Checking
+            if (torrent.state == 0) return if (torrent.isComplete) UploadingPaused else DownloadingPaused
+            if (!torrent.isOpen) return if (torrent.isComplete) UploadingPaused else DownloadingPaused
+            return if (torrent.isComplete) {
+                if (torrent.isActive) Uploading else Queued
+            } else {
+                if (torrent.isActive) Downloading else Queued
             }
         }
     }

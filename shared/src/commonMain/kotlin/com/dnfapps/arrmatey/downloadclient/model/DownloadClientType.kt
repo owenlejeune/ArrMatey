@@ -70,6 +70,15 @@ enum class DownloadClientType(
         website = "https://nzbget.com/",
         supportsUpload = false,
     ),
+    RTorrent(
+        displayName = "rTorrent",
+        description = MR.strings.rtorrent_description,
+        defaultPort = 8000,
+        icon = MR.images.rtorrent,
+        tabIcon = MR.images.rtorrent_tab,
+        github = "https://github.com/rakshasa/rtorrent",
+        website = "https://rakshasa.github.io/rtorrent/",
+    ),
     ;
 
     val isUsenet: Boolean

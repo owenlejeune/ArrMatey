@@ -177,7 +177,9 @@ class DownloadClientSettingsViewModel(
         val isValid =
             url.isNotEmpty() &&
                 (
-                    noApiKeyRequired ||
+                    selectedType == DownloadClientType.RTorrent ||
+                        selectedType == DownloadClientType.Transmission ||
+                        noApiKeyRequired ||
                         apiKey.isNotEmpty() ||
                         (username.isNotEmpty() && password.isNotEmpty())
                     )

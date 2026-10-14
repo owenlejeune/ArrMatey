@@ -150,7 +150,9 @@ open class HttpClientFactory(
                     // qBittorrent >= 5.2 only accepts API keys via Authorization: Bearer.
                     DownloadClientType.QBittorrent ->
                         header(HttpHeaders.Authorization, "Bearer ${downloadClient.apiKey.value}")
-                    DownloadClientType.NZBGet -> Unit
+                    DownloadClientType.NZBGet,
+                    DownloadClientType.RTorrent,
+                    -> Unit
                     else ->
                         header(HEADER_X_API_KEY, downloadClient.apiKey.value)
                 }

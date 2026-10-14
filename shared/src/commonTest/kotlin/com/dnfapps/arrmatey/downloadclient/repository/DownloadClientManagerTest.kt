@@ -60,6 +60,20 @@ class DownloadClientManagerTest {
     }
 
     @Test
+    fun testRTorrentApiCreation(): Unit = runBlocking {
+        val manager = DownloadClientManager(repository, httpClientFactory)
+        val rtorrentClient = DownloadClient(
+            id = 5,
+            type = DownloadClientType.RTorrent,
+            label = "rtorrent",
+            url = "http://localhost:8080/RPC2",
+        )
+        fakeDao.emit(listOf(rtorrentClient))
+        val apis = manager.awaitApis { 5L in it.keys }
+        assertTrue(apis[5] is com.dnfapps.arrmatey.downloadclient.api.RTorrentClient)
+    }
+
+    @Test
     fun testRemovingClientRemovesItsApi(): Unit = runBlocking {
         val manager = DownloadClientManager(repository, httpClientFactory)
         fakeDao.emit(listOf(client(1), client(2)))

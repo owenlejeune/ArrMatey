@@ -156,6 +156,7 @@ extension DownloadClientType {
         case .deluge: return Color(hex: 0x3B7BBF)
         case .transmission: return Color(hex: 0xC92A2A)
         case .nzbget: return Color(hex: 0x4ABC96)
+        case .rtorrent: return Color(hex: 0x3535CC)
         default: return .accentColor
         }
     }

@@ -31,6 +31,7 @@ val SABnzbdColor = Color(0xFFFFB300)
 val DelugeColor = Color(0xFF3B7BBF)
 val TransmissionColor = Color(0xFFC92A2A)
 val NZBGetColor = Color(0xFF4ABC96)
+val RTorrentColor = Color(0xFF3535CC)
 
 val DownloadClientType.associatedColor: Color
     get() =
@@ -40,6 +41,7 @@ val DownloadClientType.associatedColor: Color
             DownloadClientType.Deluge -> DelugeColor
             DownloadClientType.Transmission -> TransmissionColor
             DownloadClientType.NZBGet -> NZBGetColor
+            DownloadClientType.RTorrent -> RTorrentColor
         }
 
 val TracearrServerType?.brandColor: Color
