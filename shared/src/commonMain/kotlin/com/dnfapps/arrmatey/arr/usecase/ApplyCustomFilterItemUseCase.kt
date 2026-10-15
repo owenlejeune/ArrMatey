@@ -35,6 +35,8 @@ class ApplyCustomFilterItemUseCase {
             "greaterThanOrEqual" -> compareNumber(itemValue, filterValue) { it >= 0 }
             "lessThan" -> compareNumber(itemValue, filterValue) { it < 0 }
             "lessThanOrEqual" -> compareNumber(itemValue, filterValue) { it <= 0 }
+            "between" -> compareBetween(itemValue, filterValue, inclusive = true)
+            "notBetween" -> compareBetween(itemValue, filterValue, inclusive = false)
             "inLast", "notInLast", "inNext", "notInNext" -> compareDate(itemValue, filterValue, filter.type)
             else -> true
         }
@@ -109,6 +111,23 @@ class ApplyCustomFilterItemUseCase {
         return predicate(itemNum - filterNum)
     }
 
+    private fun compareBetween(
+        itemValue: Any?,
+        filterValue: JsonElement,
+        inclusive: Boolean,
+    ): Boolean {
+        val itemNum = (itemValue as? Number)?.toDouble() ?: return false
+        val array = filterValue as? JsonArray ?: return false
+        if (array.size < 2) return false
+        val min = array[0].asDouble() ?: return false
+        val max = array[1].asDouble() ?: return false
+        return if (inclusive) {
+            itemNum in min..max
+        } else {
+            itemNum !in min..max
+        }
+    }
+
     private fun compareDate(
         itemValue: Any?,
         filterValue: JsonElement,
@@ -123,7 +142,12 @@ class ApplyCustomFilterItemUseCase {
 
         val now = Clock.System.now()
 
-        val filterObj = filterValue as? JsonObject ?: return false
+        val unwrappedFilter =
+            when (filterValue) {
+                is JsonArray -> filterValue.firstOrNull() ?: filterValue
+                else -> filterValue
+            }
+        val filterObj = unwrappedFilter as? JsonObject ?: return false
         val value = filterObj["value"]?.jsonPrimitive?.doubleOrNull ?: return false
         val timeUnit = filterObj["time"]?.jsonPrimitive?.content ?: "days"
 
@@ -147,7 +171,15 @@ class ApplyCustomFilterItemUseCase {
         }
     }
 
-    private fun JsonElement.asString(): String = (this as? JsonPrimitive)?.content ?: ""
+    private fun JsonElement.asString(): String = when (this) {
+        is JsonPrimitive -> this.content
+        is JsonArray -> this.firstOrNull()?.asString() ?: ""
+        else -> ""
+    }
 
-    private fun JsonElement.asDouble(): Double? = (this as? JsonPrimitive)?.doubleOrNull
+    private fun JsonElement.asDouble(): Double? = when (this) {
+        is JsonPrimitive -> this.doubleOrNull
+        is JsonArray -> this.firstOrNull()?.asDouble()
+        else -> null
+    }
 }

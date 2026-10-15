@@ -66,7 +66,16 @@ fun LibraryFilterMenu(
     val libraryFilters =
         remember(customFilters) {
             customFilters.filter {
-                it.type == "series" || it.type == "movies" || it.type == "artist" || it.type == "books"
+                it.type == "series" ||
+                    it.type == "movies" ||
+                    it.type == "artist" ||
+                    it.type == "books" ||
+                    it.type == "seriesIndex" ||
+                    it.type == "movieIndex" ||
+                    it.type == "artistIndex" ||
+                    it.type == "bookIndex" ||
+                    it.type == "movie" ||
+                    it.type == "book"
             }
         }
     val filterOptions = remember(type) { FilterBy.typeEntries(type) }

@@ -12,12 +12,12 @@ struct FilterByPickerMenu: View {
     private let type: InstanceType
     private let customFilters: [CustomFilter]
     private let selectedCustomFilterId: Int64?
-    
+
     private let changeFilterBy: (FilterBy) -> Void
     private let changeCustomFilter: (Int64?) -> Void
-    
+
     let filterBy: FilterBy
-    
+
     init(
         type: InstanceType,
         filterBy: FilterBy,
@@ -33,10 +33,14 @@ struct FilterByPickerMenu: View {
         self.changeFilterBy = changeFilterBy
         self.changeCustomFilter = changeCustomFilter
     }
-    
+
     var body: some View {
-        let libraryFilters = customFilters.filter { $0.type == "series" || $0.type == "movies" || $0.type == "artist" || $0.type == "books" }
-        
+        let libraryFilters = customFilters.filter {
+            $0.type == "series" || $0.type == "movies" || $0.type == "artist" || $0.type == "books" ||
+            $0.type == "seriesIndex" || $0.type == "movieIndex" || $0.type == "artistIndex" || $0.type == "bookIndex" ||
+            $0.type == "movie" || $0.type == "book"
+        }
+
         Menu {
             Picker(MR.strings().filter_by.localized(), selection: Binding(get: { filterBy }, set: { changeFilterBy($0) })) {
                 ForEach(FilterBy.companion.typeEntries(type: type), id: \.self) { filterOption in
@@ -51,10 +55,10 @@ struct FilterByPickerMenu: View {
                 }
             }
             .pickerStyle(.inline)
-            
+
             if !libraryFilters.isEmpty {
                 Divider()
-                
+
                 ForEach(libraryFilters, id: \.id) { filter in
                     Button {
                         if selectedCustomFilterId == filter.id {
