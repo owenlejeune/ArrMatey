@@ -3,15 +3,20 @@ package com.dnfapps.arrmatey.arr.api.client
 import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
+import com.dnfapps.arrmatey.arr.api.model.BlocklistPage
+import com.dnfapps.arrmatey.arr.api.model.BookshelfBlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.LidarrBlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueuePage
+import com.dnfapps.arrmatey.arr.api.model.RadarrBlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
+import com.dnfapps.arrmatey.arr.api.model.SonarrBlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -68,6 +73,66 @@ abstract class BaseArrClient(
             "includeAuthor" to true,
         ),
     ).map { it.setInstance(instance.id, instance.label, instance.type) }
+
+    override suspend fun getBlocklist(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<BlocklistPage> = get<BlocklistPage>(
+        "blocklist",
+        mapOf(
+            "page" to page,
+            "pageSize" to pageSize,
+            "includeMovie" to true,
+            "includeSeries" to true,
+            "includeEpisode" to true,
+            "includeAlbum" to true,
+            "includeArtist" to true,
+            "includeBook" to true,
+            "includeAuthor" to true,
+        ),
+    ).map { pageResult ->
+        pageResult.copy(
+            records =
+                pageResult.records.map { r ->
+                    when (r) {
+                        is SonarrBlocklistItem ->
+                            r.copy(
+                                instanceId = instance.id,
+                                instanceName = instance.label,
+                                instanceType = instance.type,
+                                series = r.series?.withLocalImages(instance),
+                                episode = r.episode?.copy(series = r.series)?.withLocalImages(instance),
+                            )
+                        is RadarrBlocklistItem ->
+                            r.copy(
+                                instanceId = instance.id,
+                                instanceName = instance.label,
+                                instanceType = instance.type,
+                                movie = r.movie?.withLocalImages(instance),
+                            )
+                        is LidarrBlocklistItem ->
+                            r.copy(
+                                instanceId = instance.id,
+                                instanceName = instance.label,
+                                instanceType = instance.type,
+                                album = r.album?.withLocalImages(instance),
+                                artist = r.artist?.withLocalImages(instance),
+                            )
+                        is BookshelfBlocklistItem ->
+                            r.copy(
+                                instanceId = instance.id,
+                                instanceName = instance.label,
+                                instanceType = instance.type,
+                                author = r.author?.withLocalImages(instance),
+                                book = r.book?.withLocalImages(instance),
+                            )
+                        else -> r
+                    }
+                },
+        )
+    }
+
+    override suspend fun deleteBlocklistItem(id: Long): NetworkResult<Unit> = delete("blocklist/$id")
 
     override suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> = post("release", payload)
 

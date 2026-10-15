@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.service
 
+import com.dnfapps.arrmatey.arr.api.model.BlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.groupByTask
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class ActivityQueueService(
     private val instanceManager: InstanceManager,
@@ -48,6 +50,15 @@ class ActivityQueueService(
     private val _hasHistoryLoaded = MutableStateFlow(false)
     val hasHistoryLoaded: StateFlow<Boolean> = _hasHistoryLoaded.asStateFlow()
 
+    private val _allBlocklist = MutableStateFlow<List<BlocklistItem>>(emptyList())
+    val allBlocklist: StateFlow<List<BlocklistItem>> = _allBlocklist.asStateFlow()
+
+    private val _isBlocklistLoading = MutableStateFlow(false)
+    val isBlocklistLoading: StateFlow<Boolean> = _isBlocklistLoading.asStateFlow()
+
+    private val _hasBlocklistLoaded = MutableStateFlow(false)
+    val hasBlocklistLoaded: StateFlow<Boolean> = _hasBlocklistLoaded.asStateFlow()
+
     fun startPolling() {
         if (pollingJob?.isActive == true) return
 
@@ -57,9 +68,10 @@ class ActivityQueueService(
                     try {
                         pollActivityTasks()
                         pollHistory()
+                        pollBlocklist()
                     } catch (_: Exception) {
                     }
-                    delay(pollingDelay)
+                    delay(pollingDelay.milliseconds)
                 }
             }
     }
@@ -150,8 +162,43 @@ class ActivityQueueService(
         scope.cancel()
     }
 
+    private suspend fun pollBlocklist() {
+        _isBlocklistLoading.value = true
+        try {
+            val repositories =
+                instanceManager
+                    .getAllArrRepositories()
+                    .filter { it.instance.type.supportsActivityQueue }
+
+            val allBlocklistList =
+                coroutineScope {
+                    repositories
+                        .map { repo ->
+                            async {
+                                try {
+                                    repo.refreshBlocklist()
+                                    repo.blocklist.value
+                                } catch (_: Exception) {
+                                    repo.blocklist.value
+                                }
+                            }
+                        }.awaitAll()
+                        .flatten()
+                        .sortedByDescending { it.date }
+                }
+
+            _allBlocklist.value = allBlocklistList
+            if (repositories.isNotEmpty()) {
+                _hasBlocklistLoaded.value = true
+            }
+        } finally {
+            _isBlocklistLoading.value = false
+        }
+    }
+
     suspend fun manualRefresh() {
         pollActivityTasks()
         pollHistory()
+        pollBlocklist()
     }
 }

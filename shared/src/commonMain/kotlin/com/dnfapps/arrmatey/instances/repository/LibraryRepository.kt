@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.BlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
@@ -59,6 +60,15 @@ class LibraryRepository(
 
     private val _history = MutableStateFlow<List<HistoryItem>>(emptyList())
     val history: StateFlow<List<HistoryItem>> = _history.asStateFlow()
+
+    private val _blocklist = MutableStateFlow<List<BlocklistItem>>(emptyList())
+    val blocklist: StateFlow<List<BlocklistItem>> = _blocklist.asStateFlow()
+
+    private val _isBlocklistLoading = MutableStateFlow(false)
+    val isBlocklistLoading: StateFlow<Boolean> = _isBlocklistLoading.asStateFlow()
+
+    private val _hasBlocklistLoaded = MutableStateFlow(false)
+    val hasBlocklistLoaded: StateFlow<Boolean> = _hasBlocklistLoaded.asStateFlow()
 
     private val _mediaDetailsCache = MutableStateFlow<Map<Long, ArrMedia>>(emptyMap())
     val mediaDetailsCache: StateFlow<Map<Long, ArrMedia>> = _mediaDetailsCache.asStateFlow()
@@ -319,6 +329,19 @@ class LibraryRepository(
     ): NetworkResult<List<HistoryItem>> = client.getHistory(page, pageSize).onSuccess {
         _history.value = it
     }
+
+    suspend fun refreshBlocklist(
+        page: Int = 1,
+        pageSize: Int = 100,
+    ): NetworkResult<List<BlocklistItem>> = client.getBlocklist(page, pageSize).onSuccess {
+        _blocklist.value = it.records
+    }.map { it.records }
+
+    suspend fun deleteBlocklistItem(id: Long): NetworkResult<Unit> = client
+        .deleteBlocklistItem(id)
+        .onSuccess {
+            _blocklist.value = _blocklist.value.filter { it.id != id }
+        }
 
     suspend fun editMediaItem(
         item: ArrMedia,

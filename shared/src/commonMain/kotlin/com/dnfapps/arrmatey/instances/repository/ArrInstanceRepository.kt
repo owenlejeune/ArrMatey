@@ -22,6 +22,7 @@ import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookEdition
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
+import com.dnfapps.arrmatey.arr.api.model.BlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
@@ -67,6 +68,9 @@ open class ArrInstanceRepository(
     val releases: StateFlow<NetworkResult<List<ArrRelease>>?> = libraryRepository.releases
     val historyCache: StateFlow<Map<Long, List<HistoryItem>>> = libraryRepository.historyCache
     val history: StateFlow<List<HistoryItem>> = libraryRepository.history
+    val blocklist: StateFlow<List<BlocklistItem>> = libraryRepository.blocklist
+    val isBlocklistLoading: StateFlow<Boolean> = libraryRepository.isBlocklistLoading
+    val hasBlocklistLoaded: StateFlow<Boolean> = libraryRepository.hasBlocklistLoaded
     val mediaDetailsCache: StateFlow<Map<Long, ArrMedia>> = libraryRepository.mediaDetailsCache
     val activityTasks: StateFlow<List<QueueItem>> = libraryRepository.activityTasks
     val addItemStatus: StateFlow<OperationStatus> = libraryRepository.addItemStatus
@@ -263,6 +267,13 @@ open class ArrInstanceRepository(
         page: Int = 1,
         pageSize: Int = 100,
     ): NetworkResult<List<HistoryItem>> = libraryRepository.refreshHistory(page, pageSize)
+
+    open suspend fun refreshBlocklist(
+        page: Int = 1,
+        pageSize: Int = 100,
+    ): NetworkResult<List<BlocklistItem>> = libraryRepository.refreshBlocklist(page, pageSize)
+
+    open suspend fun deleteBlocklistItem(id: Long): NetworkResult<Unit> = libraryRepository.deleteBlocklistItem(id)
 
     open suspend fun editMediaItem(
         item: ArrMedia,

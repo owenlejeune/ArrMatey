@@ -1148,6 +1148,9 @@
     <string name="no_ebook_root_folder_selected">No eBook root folder selected for this author.</string>
     <string name="audiobooks_not_configured">Audiobooks are not configured</string>
     <string name="ebooks_not_configured">E-Books are not configured</string>
+    <string name="blocklist">Blocklist</string>
+    <string name="no_blocklist">No blocklist items</string>
+    <string name="remove_from_blocklist">Remove from blocklist</string>
     <string name="audiobooks_not_configured_desc">Audiobooks are not currently configured for this author. Enable audiobooks to assign a root folder and quality profile.</string>
     <string name="ebooks_not_configured_desc">E-Books are not currently configured for this author. Enable e-books to assign a root folder and quality profile.</string>
     <string name="configure_audiobooks">Configure Audiobooks</string>

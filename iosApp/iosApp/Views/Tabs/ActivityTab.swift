@@ -34,6 +34,9 @@ struct ActivityTabContent: View {
         case .downloaded:
             guard !viewModel.downloadedItems.isEmpty else { return MR.strings().recently_downloaded.localized() }
             return "\(MR.strings().recently_downloaded.localized()) (\(viewModel.downloadedItems.count))"
+        case .blocklist:
+            guard !viewModel.blocklistItems.isEmpty else { return MR.strings().blocklist.localized() }
+            return "\(MR.strings().blocklist.localized()) (\(viewModel.blocklistItems.count))"
         default:
             return MR.strings().activity.localized()
         }
@@ -95,6 +98,10 @@ struct ActivityTabContent: View {
                         get: { viewModel.uiState.downloadedInstanceId?.int64Value },
                         set: { viewModel.setDownloadedInstanceId($0) }
                     ),
+                    blocklistInstanceId: Binding(
+                        get: { viewModel.uiState.blocklistInstanceId?.int64Value },
+                        set: { viewModel.setBlocklistInstanceId($0) }
+                    ),
                     instances: viewModel.instances,
                     onOpenViewCustomization: {
                         showActivityCustomizationSheet = true
@@ -132,6 +139,8 @@ struct ActivityTabContent: View {
             historyContent
         case .downloaded:
             downloadedContent
+        case .blocklist:
+            blocklistContent
         default:
             queueItemContent
         }
@@ -230,6 +239,39 @@ struct ActivityTabContent: View {
                 }
                 .listStyle(.plain)
                 .onChange(of: viewModel.uiState.downloadedInstanceId) { _, _ in
+                    var transaction = Transaction()
+                    transaction.disablesAnimations = true
+                    withTransaction(transaction) {
+                        proxy.scrollTo(0, anchor: .top)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var blocklistContent: some View {
+        if viewModel.blocklistItems.isEmpty {
+            ContentUnavailableView(
+                MR.strings().no_blocklist.localized(),
+                systemImage: "hand.raised.fill"
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            ScrollViewReader { proxy in
+                List {
+                    ForEach(Array(viewModel.blocklistItems.enumerated()), id: \.offset) { index, item in
+                        BlocklistItemView(item: item, onDelete: {
+                            viewModel.deleteBlocklistItem(item)
+                        })
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                        .id(index)
+                    }
+                }
+                .listStyle(.plain)
+                .onChange(of: viewModel.uiState.blocklistInstanceId) { _, _ in
                     var transaction = Transaction()
                     transaction.disablesAnimations = true
                     withTransaction(transaction) {

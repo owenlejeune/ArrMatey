@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.BlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.DownloadedMediaItem
@@ -90,6 +91,16 @@ class ActivityQueueViewModel(
             )
 
     val hasHistoryLoaded: StateFlow<Boolean> = activityQueueService.hasHistoryLoaded
+
+    val isBlocklistLoading =
+        activityQueueService.isBlocklistLoading
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
+    val hasBlocklistLoaded: StateFlow<Boolean> = activityQueueService.hasBlocklistLoaded
 
     val instances =
         instanceRepository
@@ -352,6 +363,22 @@ class ActivityQueueViewModel(
     val hasDownloadedLoaded: StateFlow<Boolean> =
         activityQueueService.hasHistoryLoaded
 
+    val blocklistItems: StateFlow<List<BlocklistItem>> =
+        combine(
+            activityQueueService.allBlocklist,
+            _activityQueueUiState,
+        ) { blocklist, uiState ->
+            if (uiState.blocklistInstanceId != null) {
+                blocklist.filter { it.instanceId == uiState.blocklistInstanceId }
+            } else {
+                blocklist
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
+
     init {
         startPolling()
     }
@@ -405,6 +432,20 @@ class ActivityQueueViewModel(
     fun setDownloadedInstanceId(id: Long?) {
         val currentState = _activityQueueUiState.value
         _activityQueueUiState.value = currentState.copy(downloadedInstanceId = id)
+    }
+
+    fun setBlocklistInstanceId(id: Long?) {
+        val currentState = _activityQueueUiState.value
+        _activityQueueUiState.value = currentState.copy(blocklistInstanceId = id)
+    }
+
+    fun deleteBlocklistItem(item: BlocklistItem) {
+        viewModelScope.launch {
+            val instanceId = item.instanceId ?: return@launch
+            val repo = instanceManager.getAllArrRepositories().firstOrNull { it.instance.id == instanceId } ?: return@launch
+            repo.deleteBlocklistItem(item.id)
+            activityQueueService.manualRefresh()
+        }
     }
 
     fun getQueueItemForEpisode(episode: Episode): SonarrQueueItem? {

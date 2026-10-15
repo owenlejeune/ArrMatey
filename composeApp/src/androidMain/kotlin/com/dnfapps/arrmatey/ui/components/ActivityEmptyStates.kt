@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -73,6 +74,26 @@ fun EmptyDownloadedState(modifier: Modifier = Modifier) {
         )
         Text(
             text = mokoString(MR.strings.no_downloaded_media),
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
+}
+
+@Composable
+fun EmptyBlocklistState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+    ) {
+        Icon(
+            imageVector = Icons.Default.Block,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = mokoString(MR.strings.no_blocklist),
             style = MaterialTheme.typography.titleMedium,
         )
     }

@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
+import com.dnfapps.arrmatey.arr.api.model.BlocklistPage
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
@@ -76,12 +77,19 @@ interface ArrClient {
         pageSize: Int,
     ): NetworkResult<QueuePage>
 
+    suspend fun getBlocklist(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<BlocklistPage>
+
     suspend fun deleteActivityTask(
         id: Int,
         removeFromClient: Boolean,
         blocklist: Boolean,
         skipRedownload: Boolean,
     ): NetworkResult<Unit>
+
+    suspend fun deleteBlocklistItem(id: Long): NetworkResult<Unit>
 
     suspend fun getItemHistory(
         id: Long,

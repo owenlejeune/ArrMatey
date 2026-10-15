@@ -40,6 +40,7 @@ import com.dnfapps.arrmatey.ui.sheets.ActivityCardCustomizationSheet
 import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
 import com.dnfapps.arrmatey.ui.tabs.activity.ActiveQueueTabContent
+import com.dnfapps.arrmatey.ui.tabs.activity.BlocklistTabContent
 import com.dnfapps.arrmatey.ui.tabs.activity.DownloadedTabContent
 import com.dnfapps.arrmatey.ui.tabs.activity.HistoryTabContent
 import com.dnfapps.arrmatey.utils.mokoString
@@ -57,6 +58,7 @@ fun ActivityTab(
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val historyItems by viewModel.historyItems.collectAsStateWithLifecycle()
     val downloadedItems by viewModel.downloadedItems.collectAsStateWithLifecycle()
+    val blocklistItems by viewModel.blocklistItems.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
     val uiState by viewModel.activityQueueUiState.collectAsStateWithLifecycle()
     val removeItemStatus by viewModel.removeItemState.collectAsStateWithLifecycle()
@@ -66,10 +68,13 @@ fun ActivityTab(
     val hasHistoryLoaded by viewModel.hasHistoryLoaded.collectAsStateWithLifecycle()
     val isDownloadedLoading by viewModel.isDownloadedLoading.collectAsStateWithLifecycle()
     val hasDownloadedLoaded by viewModel.hasDownloadedLoaded.collectAsStateWithLifecycle()
+    val isBlocklistLoading by viewModel.isBlocklistLoading.collectAsStateWithLifecycle()
+    val hasBlocklistLoaded by viewModel.hasBlocklistLoaded.collectAsStateWithLifecycle()
     val useColoredCards by preferences.useColoredActivityCards.collectAsStateWithLifecycle(false)
 
     val historyListState = rememberLazyListState()
     val downloadedListState = rememberLazyListState()
+    val blocklistListState = rememberLazyListState()
 
     LaunchedEffect(uiState.historyStateFilter, uiState.historyInstanceId) {
         historyListState.scrollToItem(0)
@@ -77,6 +82,10 @@ fun ActivityTab(
 
     LaunchedEffect(uiState.downloadedInstanceId) {
         downloadedListState.scrollToItem(0)
+    }
+
+    LaunchedEffect(uiState.blocklistInstanceId) {
+        blocklistListState.scrollToItem(0)
     }
 
     var showConfirmRemove by remember { mutableStateOf(false) }
@@ -96,7 +105,34 @@ fun ActivityTab(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(mokoString(MR.strings.activity))
+                    val titleText =
+                        when (uiState.selectedTab) {
+                            ActivityTabSegment.Activity ->
+                                if (queueItems.isEmpty()) {
+                                    mokoString(MR.strings.activity)
+                                } else {
+                                    "${mokoString(MR.strings.activity)} (${queueItems.size})"
+                                }
+                            ActivityTabSegment.History ->
+                                if (historyItems.isEmpty()) {
+                                    mokoString(MR.strings.history)
+                                } else {
+                                    "${mokoString(MR.strings.history)} (${historyItems.size})"
+                                }
+                            ActivityTabSegment.Downloaded ->
+                                if (downloadedItems.isEmpty()) {
+                                    mokoString(MR.strings.recently_downloaded)
+                                } else {
+                                    "${mokoString(MR.strings.recently_downloaded)} (${downloadedItems.size})"
+                                }
+                            ActivityTabSegment.Blocklist ->
+                                if (blocklistItems.isEmpty()) {
+                                    mokoString(MR.strings.blocklist)
+                                } else {
+                                    "${mokoString(MR.strings.blocklist)} (${blocklistItems.size})"
+                                }
+                        }
+                    Text(titleText)
                 },
                 actions = {
                     ActivityFilterMenu(
@@ -114,6 +150,8 @@ fun ActivityTab(
                         onHistoryStateFilterChanged = { viewModel.setHistoryStateFilter(it) },
                         selectedDownloadedInstanceId = uiState.downloadedInstanceId,
                         onDownloadedInstanceChange = { viewModel.setDownloadedInstanceId(it) },
+                        selectedBlocklistInstanceId = uiState.blocklistInstanceId,
+                        onBlocklistInstanceChange = { viewModel.setBlocklistInstanceId(it) },
                         onOpenViewCustomization = { showActivityCustomizationSheet = true },
                     )
                 },
@@ -191,6 +229,18 @@ fun ActivityTab(
                             hasDownloadedLoaded = hasDownloadedLoaded,
                             listState = downloadedListState,
                             onRefresh = { viewModel.refresh() },
+                        )
+                    }
+
+                    ActivityTabSegment.Blocklist -> {
+                        BlocklistTabContent(
+                            blocklistItems = blocklistItems,
+                            instances = instances,
+                            isBlocklistLoading = isBlocklistLoading,
+                            hasBlocklistLoaded = hasBlocklistLoaded,
+                            listState = blocklistListState,
+                            onRefresh = { viewModel.refresh() },
+                            onDeleteItem = { viewModel.deleteBlocklistItem(it) },
                         )
                     }
                 }

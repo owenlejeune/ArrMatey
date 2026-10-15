@@ -12,31 +12,34 @@ import SwiftUI
 class ActivityQueueViewModelS: ObservableObject {
     private let viewModel: ActivityQueueViewModel
     private let preferencesStore: PreferencesStore
-    
+
     @Published private(set) var queueItems: [QueueItem] = []
     @Published private(set) var historyItems: [HistoryItem] = []
     @Published private(set) var downloadedItems: [DownloadedMediaItem] = []
+    @Published private(set) var blocklistItems: [BlocklistItem] = []
     @Published private(set) var tasksWithIssues: Int = 0
     @Published private(set) var isPolling: Bool = false
     @Published private(set) var isHistoryLoading: Bool = false
     @Published private(set) var isDownloadedLoading: Bool = false
+    @Published private(set) var isBlocklistLoading: Bool = false
     @Published private(set) var instances: [Instance] = []
     @Published private(set) var uiState: ActivityQueueUiState = ActivityQueueUiState()
     @Published private(set) var removeItemStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var removeInProgress: Bool = false
     @Published private(set) var removeSuccesss: Bool = false
     @Published private(set) var useColoredCards: Bool = false
-    
+
     init() {
         self.viewModel = KoinBridge.shared.getActivityQueueViewModel()
         self.preferencesStore = KoinBridge.shared.getPreferencesStore()
         startObserving()
     }
-    
+
     private func startObserving() {
         viewModel.queueItems.observeAsync(on: self, to: \.queueItems)
         viewModel.historyItems.observeAsync(on: self, to: \.historyItems)
         viewModel.downloadedItems.observeAsync(on: self, to: \.downloadedItems)
+        viewModel.blocklistItems.observeAsync(on: self, to: \.blocklistItems)
         viewModel.tasksWithIssues.observeAsync(on: self) { owner, tasks in
             owner.tasksWithIssues = tasks.intValue
         }
@@ -49,6 +52,9 @@ class ActivityQueueViewModelS: ObservableObject {
         viewModel.isDownloadedLoading.observeAsync(on: self) { owner, isDownloadedLoading in
             owner.isDownloadedLoading = isDownloadedLoading.boolValue
         }
+        viewModel.isBlocklistLoading.observeAsync(on: self) { owner, isBlocklistLoading in
+            owner.isBlocklistLoading = isBlocklistLoading.boolValue
+        }
         viewModel.instances.observeAsync(on: self, to: \.instances)
         viewModel.activityQueueUiState.observeAsync(on: self, to: \.uiState)
         viewModel.removeItemState.observeAsync(on: self) { owner, status in
@@ -60,53 +66,61 @@ class ActivityQueueViewModelS: ObservableObject {
             owner.useColoredCards = val.boolValue
         }
     }
-    
+
     func startPolling() {
         viewModel.startPolling()
     }
-    
+
     func stopPolling() {
         viewModel.stopPolling()
     }
-    
+
     func setSelectedTab(_ tab: ActivityTabSegment) {
         viewModel.setSelectedTab(tab: tab)
     }
-    
+
     func setInstanceId(_ id: Int64?) {
         viewModel.setInstanceId(id: id?.asKotlinLong)
     }
-    
+
     func setSortBy(_ sortBy: QueueSortBy) {
         viewModel.setSortBy(sortBy: sortBy)
     }
-    
+
     func setSortOrder(_ order: Shared.SortOrder) {
         viewModel.setSortOrder(order: order)
     }
-    
+
     func setHistoryStateFilter(_ filter: HistoryStateFilter) {
         viewModel.setHistoryStateFilter(filter: filter)
     }
-    
+
     func setHistoryInstanceId(_ id: Int64?) {
         viewModel.setHistoryInstanceId(id: id?.asKotlinLong)
     }
-    
+
     func setDownloadedInstanceId(_ id: Int64?) {
         viewModel.setDownloadedInstanceId(id: id?.asKotlinLong)
     }
-    
+
+    func setBlocklistInstanceId(_ id: Int64?) {
+        viewModel.setBlocklistInstanceId(id: id?.asKotlinLong)
+    }
+
+    func deleteBlocklistItem(_ item: BlocklistItem) {
+        viewModel.deleteBlocklistItem(item: item)
+    }
+
     func getQueueItemForEpisode(_ episode: Episode) -> SonarrQueueItem? {
         return viewModel.getQueueItemForEpisode(episode: episode)
     }
-    
+
     func removeQueueItem(_ item: QueueItem, _ removeFromClient: Bool, _ addToBlocklist: Bool, _ skipRedownload: Bool) {
         viewModel.removeQueueItem(item: item, removeFromClient: removeFromClient, addToBlocklist: addToBlocklist, skipRedownload: skipRedownload)
     }
-    
+
     func refresh() {
         viewModel.refresh()
     }
-    
+
 }
