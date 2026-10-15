@@ -97,6 +97,10 @@ fun List<ArrMedia>.mergeWithLibrary(library: List<ArrMedia>): List<ArrMedia> = t
                 library.filterIsInstance<Audiobook>().firstOrNull {
                     !it.asin.isNullOrBlank() && !item.asin.isNullOrBlank() && it.asin == item.asin
                 }
+            is SearchAudiobook ->
+                library.filterIsInstance<Audiobook>().firstOrNull {
+                    !it.asin.isNullOrBlank() && item.asin.isNotBlank() && it.asin == item.asin
+                }
             is Author ->
                 library.filterIsInstance<Author>().firstOrNull {
                     (!it.foreignAuthorId.isNullOrBlank() && !item.foreignAuthorId.isNullOrBlank() && it.foreignAuthorId == item.foreignAuthorId) ||

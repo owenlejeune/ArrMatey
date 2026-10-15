@@ -3,8 +3,6 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetLibraryUseCase
@@ -98,22 +96,7 @@ class ArrSearchViewModel(
                                 mergedItems.orderedSortedWith(sortOrder, comparator)
                             } ?: mergedItems
 
-                        val finalList =
-                            if (
-                                instanceType == InstanceType.Listenarr && library is ArrLibrary.Success
-                            ) {
-                                val existingAsins =
-                                    library.items
-                                        .filterIsInstance<Audiobook>()
-                                        .mapTo(HashSet()) { it.asin }
-                                sortedList.filterNot { item ->
-                                    item is SearchAudiobook && item.asin in existingAsins
-                                }
-                            } else {
-                                sortedList
-                            }
-
-                        ArrLibrary.Success(items = finalList, preferences = state.preferences)
+                        ArrLibrary.Success(items = sortedList, preferences = state.preferences)
                     }
 
                     else -> state

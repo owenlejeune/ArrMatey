@@ -87,7 +87,7 @@ class ListenarrRepository(
             item.rootFolderPath
                 ?.trimEnd('/')
                 ?.plus("/")
-                ?.plus(item.path?.trimStart('/')) ?: ""
+                ?.plus(item.relativePath?.trimStart('/') ?: "") ?: ""
         val body =
             AddAudiobookBody(
                 autoSearch = searchOnAdd,

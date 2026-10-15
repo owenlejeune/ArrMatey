@@ -2,9 +2,11 @@ package com.dnfapps.arrmatey.extensions
 
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Language
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -37,6 +39,20 @@ class MediaExtensionsTest {
 
         assertEquals(1, merged.size)
         assertEquals(99L, merged[0].id)
+    }
+
+    @Test
+    fun testMergeWithLibrary_MatchesAudiobookByAsin() {
+        val libraryBook = Audiobook(id = 42L, asin = "B072FDFF1K", title = "Dark Tower II")
+        val searchBook = SearchAudiobook(asin = "B072FDFF1K", title = "Dark Tower II Search")
+
+        val searchResults: List<ArrMedia> = listOf(searchBook)
+        val library: List<ArrMedia> = listOf(libraryBook)
+        val merged = searchResults.mergeWithLibrary(library)
+
+        assertEquals(1, merged.size)
+        assertEquals(42L, merged[0].id)
+        assertEquals(true, merged[0] is Audiobook)
     }
 
     private fun createSeries(

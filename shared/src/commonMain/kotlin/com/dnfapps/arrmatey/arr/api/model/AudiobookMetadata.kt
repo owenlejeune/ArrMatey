@@ -48,7 +48,7 @@ data class AudiobookMetadata(
             publishYear =
             publishDate?.toLocalDateTime(TimeZone.UTC)?.year?.toString()
                 ?: releaseDate?.take(4).orEmpty(),
-            publishDate = releaseDate.orEmpty(),
+            publishedDate = publishDate?.toString() ?: releaseDate.orEmpty(),
             publisher = publisher.orEmpty(),
             runtime = lengthMinutes ?: 0,
             series = primarySeries?.name.orEmpty(),
@@ -57,6 +57,7 @@ data class AudiobookMetadata(
                 SeriesMembership(
                     seriesName = s.name,
                     seriesNumber = s.position.orEmpty(),
+                    seriesAsin = s.asin,
                     isPrimary = index == 0,
                     sortOrder = index,
                 )
@@ -65,6 +66,8 @@ data class AudiobookMetadata(
             source = source,
             tags = emptyList(),
             title = title,
+            subtitle = subtitle.orEmpty(),
+            region = region.orEmpty(),
         )
     }
 }

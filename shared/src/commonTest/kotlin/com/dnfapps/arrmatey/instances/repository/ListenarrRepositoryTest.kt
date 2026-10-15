@@ -1,5 +1,7 @@
 package com.dnfapps.arrmatey.instances.repository
 
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadata
+import com.dnfapps.arrmatey.arr.api.model.SearchSeries
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -69,5 +71,21 @@ class ListenarrRepositoryTest {
 
         assertNotNull(repository.audiobookFiles.value[3])
         assertEquals(1, repository.audiobookFiles.value[3]?.size)
+    }
+
+    @Test
+    fun testAudiobookMetadataToBody() {
+        val metadata = AudiobookMetadata(
+            asin = "B072FDFF1K",
+            title = "Dark Tower II",
+            subtitle = "The Drawing of the Three",
+            region = "ca",
+            series = listOf(SearchSeries(asin = "B071VQV8VY", name = "The Dark Tower", position = "2")),
+        )
+        val body = metadata.toBody("Audible")
+        assertEquals("The Drawing of the Three", body.subtitle)
+        assertEquals("ca", body.region)
+        assertEquals(1, body.seriesMemberships.size)
+        assertEquals("B071VQV8VY", body.seriesMemberships[0].seriesAsin)
     }
 }
