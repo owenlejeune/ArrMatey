@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.PrimaryScrollableTabRow
@@ -33,6 +34,7 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
@@ -92,6 +94,12 @@ fun ActivityTab(
     var selectedItem by remember { mutableStateOf<QueueItem?>(null) }
     var showActivityCustomizationSheet by remember { mutableStateOf(false) }
 
+    val textFieldState = rememberTextFieldState()
+
+    LaunchedEffect(textFieldState.text) {
+        viewModel.setSearchQuery(textFieldState.text.toString())
+    }
+
     LaunchedEffect(removeItemStatus) {
         if (removeItemStatus is OperationStatus.Success) {
             selectedItem = null
@@ -103,36 +111,23 @@ fun ActivityTab(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = {
-                    val titleText =
-                        when (uiState.selectedTab) {
-                            ActivityTabSegment.Activity ->
-                                if (queueItems.isEmpty()) {
-                                    mokoString(MR.strings.activity)
-                                } else {
-                                    "${mokoString(MR.strings.activity)} (${queueItems.size})"
-                                }
-                            ActivityTabSegment.History ->
-                                if (historyItems.isEmpty()) {
-                                    mokoString(MR.strings.history)
-                                } else {
-                                    "${mokoString(MR.strings.history)} (${historyItems.size})"
-                                }
-                            ActivityTabSegment.Downloaded ->
-                                if (downloadedItems.isEmpty()) {
-                                    mokoString(MR.strings.recently_downloaded)
-                                } else {
-                                    "${mokoString(MR.strings.recently_downloaded)} (${downloadedItems.size})"
-                                }
-                            ActivityTabSegment.Blocklist ->
-                                if (blocklistItems.isEmpty()) {
-                                    mokoString(MR.strings.blocklist)
-                                } else {
-                                    "${mokoString(MR.strings.blocklist)} (${blocklistItems.size})"
-                                }
-                        }
-                    Text(titleText)
+            val searchPlaceholder =
+                when (uiState.selectedTab) {
+                    ActivityTabSegment.Activity -> mokoString(MR.strings.activity)
+                    ActivityTabSegment.History -> mokoString(MR.strings.history)
+                    ActivityTabSegment.Downloaded -> mokoString(MR.strings.recently_downloaded)
+                    ActivityTabSegment.Blocklist -> mokoString(MR.strings.blocklist)
+                }
+
+            ArrAppBarWithSearch(
+                textFieldState = textFieldState,
+                searchPlaceholder = searchPlaceholder,
+                navigationIcon = {
+                    if (onBack != null) {
+                        BackButton(onClick = onBack)
+                    } else if (!wideRailIsVisible) {
+                        NavigationDrawerButton()
+                    }
                 },
                 actions = {
                     ActivityFilterMenu(
@@ -154,13 +149,6 @@ fun ActivityTab(
                         onBlocklistInstanceChange = { viewModel.setBlocklistInstanceId(it) },
                         onOpenViewCustomization = { showActivityCustomizationSheet = true },
                     )
-                },
-                navigationIcon = {
-                    if (onBack != null) {
-                        BackButton(onClick = onBack)
-                    } else if (!wideRailIsVisible) {
-                        NavigationDrawerButton()
-                    }
                 },
             )
         },

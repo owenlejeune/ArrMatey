@@ -107,6 +107,10 @@ class ActivityQueueViewModelS: ObservableObject {
         viewModel.setBlocklistInstanceId(id: id?.asKotlinLong)
     }
 
+    func setSearchQuery(_ query: String) {
+        viewModel.setSearchQuery(query: query)
+    }
+
     func deleteBlocklistItem(_ item: BlocklistItem) {
         viewModel.deleteBlocklistItem(item: item)
     }

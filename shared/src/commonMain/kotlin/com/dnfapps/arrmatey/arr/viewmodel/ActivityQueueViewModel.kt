@@ -125,7 +125,18 @@ class ActivityQueueViewModel(
             _activityQueueUiState,
         ) { tasks, uiState ->
             val grouped = tasks.groupByTask()
-            val filtered = filterByInstance(grouped, uiState.instanceId)
+            val filteredByInstance = filterByInstance(grouped, uiState.instanceId)
+            val filtered =
+                if (uiState.searchQuery.isBlank()) {
+                    filteredByInstance
+                } else {
+                    val q = uiState.searchQuery.lowercase()
+                    filteredByInstance.filter {
+                        (it.title?.lowercase()?.contains(q) == true) ||
+                            (it.titleLabel.lowercase().contains(q)) ||
+                            (it.indexer?.lowercase()?.contains(q) == true)
+                    }
+                }
             applySorting(filtered, uiState.sortBy, uiState.sortOrder)
         }.stateIn(
             scope = viewModelScope,
@@ -144,10 +155,21 @@ class ActivityQueueViewModel(
                 } else {
                     history
                 }
-            if (uiState.historyStateFilter != HistoryStateFilter.All) {
-                byInstance.filter { uiState.historyStateFilter.matches(it.eventType) }
+            val byState =
+                if (uiState.historyStateFilter != HistoryStateFilter.All) {
+                    byInstance.filter { uiState.historyStateFilter.matches(it.eventType) }
+                } else {
+                    byInstance
+                }
+            if (uiState.searchQuery.isBlank()) {
+                byState
             } else {
-                byInstance
+                val q = uiState.searchQuery.lowercase()
+                byState.filter {
+                    (it.displayTitle?.lowercase()?.contains(q) == true) ||
+                        (it.sourceTitle?.lowercase()?.contains(q) == true) ||
+                        (it.indexerLabel?.lowercase()?.contains(q) == true)
+                }
             }
         }.stateIn(
             scope = viewModelScope,
@@ -350,7 +372,17 @@ class ActivityQueueViewModel(
                     }
                 }
 
-            historyItemsList.sortedByDescending { it.date }
+            val sortedList = historyItemsList.sortedByDescending { it.date }
+            if (uiState.searchQuery.isBlank()) {
+                sortedList
+            } else {
+                val q = uiState.searchQuery.lowercase()
+                sortedList.filter {
+                    (it.title.lowercase().contains(q)) ||
+                        (it.subtitle?.lowercase()?.contains(q) == true) ||
+                        (it.indexer?.lowercase()?.contains(q) == true)
+                }
+            }
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -368,10 +400,22 @@ class ActivityQueueViewModel(
             activityQueueService.allBlocklist,
             _activityQueueUiState,
         ) { blocklist, uiState ->
-            if (uiState.blocklistInstanceId != null) {
-                blocklist.filter { it.instanceId == uiState.blocklistInstanceId }
+            val byInstance =
+                if (uiState.blocklistInstanceId != null) {
+                    blocklist.filter { it.instanceId == uiState.blocklistInstanceId }
+                } else {
+                    blocklist
+                }
+            if (uiState.searchQuery.isBlank()) {
+                byInstance
             } else {
-                blocklist
+                val q = uiState.searchQuery.lowercase()
+                byInstance.filter {
+                    (it.displayTitle?.lowercase()?.contains(q) == true) ||
+                        (it.sourceTitle?.lowercase()?.contains(q) == true) ||
+                        (it.message?.lowercase()?.contains(q) == true) ||
+                        (it.indexerLabel?.lowercase()?.contains(q) == true)
+                }
             }
         }.stateIn(
             scope = viewModelScope,
@@ -437,6 +481,11 @@ class ActivityQueueViewModel(
     fun setBlocklistInstanceId(id: Long?) {
         val currentState = _activityQueueUiState.value
         _activityQueueUiState.value = currentState.copy(blocklistInstanceId = id)
+    }
+
+    fun setSearchQuery(query: String) {
+        val currentState = _activityQueueUiState.value
+        _activityQueueUiState.value = currentState.copy(searchQuery = query)
     }
 
     fun deleteBlocklistItem(item: BlocklistItem) {

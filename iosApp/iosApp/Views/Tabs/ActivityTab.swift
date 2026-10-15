@@ -60,6 +60,13 @@ struct ActivityTabContent: View {
         }
         .navigationTitle(titleText)
         .navigationBarTitleDisplayMode(.inline)
+        .searchable(
+            text: Binding(
+                get: { viewModel.uiState.searchQuery },
+                set: { viewModel.setSearchQuery($0) }
+            ),
+            prompt: MR.strings().search.localized()
+        )
         .toolbar {
             if navigationManager.shouldShowDrawerButton(for: TabItemStandard.activity.key) {
                 ToolbarItem(placement: .topBarLeading) {

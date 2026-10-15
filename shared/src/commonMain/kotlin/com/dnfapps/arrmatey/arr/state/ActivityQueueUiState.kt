@@ -13,6 +13,7 @@ data class ActivityQueueUiState(
     val historyInstanceId: Long? = null,
     val downloadedInstanceId: Long? = null,
     val blocklistInstanceId: Long? = null,
+    val searchQuery: String = "",
 ) {
     constructor() : this(
         null,
@@ -23,5 +24,6 @@ data class ActivityQueueUiState(
         null,
         null,
         null,
+        "",
     )
 }
