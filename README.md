@@ -101,8 +101,6 @@
 
 ## Screenshots
 
-> **Note for Release 0.10.0**: Screenshots marked below with `[Needs Replacement]` or `[Needs Addition]` should be updated with new assets representing 0.10.0 features (Discover Dashboard Cards, Tracearr Active Streams, Floating Navigation Bar, and Onboarding).
-
 ### Dashboard
 <table>
   <tr>
