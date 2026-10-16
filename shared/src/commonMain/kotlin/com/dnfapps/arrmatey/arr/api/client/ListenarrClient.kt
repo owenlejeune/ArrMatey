@@ -95,6 +95,7 @@ class ListenarrClient(
     override suspend fun lookup(params: LookupParams): NetworkResult<List<SearchAudiobook>> = post(
         "search",
         buildJsonObject {
+            put("query", params.query)
             put("title", params.query)
             put("language", params.language ?: "english")
             put("region", params.region ?: "us")
@@ -204,7 +205,7 @@ class ListenarrClient(
         "library/$id/move",
         buildJsonObject {
             put("moveFiles", moveFiles)
-            put("deleteEmptySources", true)
+            put("deleteEmptySource", true)
             put("sourcePath", sourcePath)
             put("destinationPath", destinationPath)
         },

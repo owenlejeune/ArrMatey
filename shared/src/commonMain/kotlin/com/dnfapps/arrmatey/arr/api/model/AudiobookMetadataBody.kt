@@ -15,7 +15,7 @@ data class AudiobookMetadataBody(
     val language: String,
     val narrators: List<String>,
     val publishYear: String,
-    val publishDate: String,
+    val publishedDate: String,
     val publisher: String,
     val runtime: Int,
     val series: String,
@@ -24,4 +24,6 @@ data class AudiobookMetadataBody(
     val source: String,
     val tags: List<String>,
     val title: String,
+    val subtitle: String = "",
+    val region: String = "",
 )
