@@ -1,10 +1,3 @@
-//
-//  InstanceOptionsMenu.swift
-//  iosApp
-//
-//  Created by Owen LeJeune on 2026-08-25.
-//
-
 import SwiftUI
 import Shared
 
@@ -13,6 +6,7 @@ struct InstanceOptionsMenu<Label: View>: View {
     let onRunRssSync: () -> Void
     let onSearchAllMissing: () -> Void
     let onSearchFiltered: (() -> Void)?
+    let onManualImport: (() -> Void)?
     let onUpdateLibrary: () -> Void
     let onBackupDatabase: () -> Void
     @ViewBuilder let label: () -> Label
@@ -24,6 +18,7 @@ struct InstanceOptionsMenu<Label: View>: View {
         onRunRssSync: @escaping () -> Void,
         onSearchAllMissing: @escaping () -> Void,
         onSearchFiltered: (() -> Void)? = nil,
+        onManualImport: (() -> Void)? = nil,
         onUpdateLibrary: @escaping () -> Void,
         onBackupDatabase: @escaping () -> Void,
         @ViewBuilder label: @escaping () -> Label
@@ -32,6 +27,7 @@ struct InstanceOptionsMenu<Label: View>: View {
         self.onRunRssSync = onRunRssSync
         self.onSearchAllMissing = onSearchAllMissing
         self.onSearchFiltered = onSearchFiltered
+        self.onManualImport = onManualImport
         self.onUpdateLibrary = onUpdateLibrary
         self.onBackupDatabase = onBackupDatabase
         self.label = label
@@ -64,6 +60,14 @@ struct InstanceOptionsMenu<Label: View>: View {
                     onSearchFiltered()
                 } label: {
                     SwiftUI.Label(MR.strings().search_filtered.localized(), systemImage: "line.3.horizontal.decrease.circle")
+                }
+            }
+
+            if let onManualImport = onManualImport {
+                Button {
+                    onManualImport()
+                } label: {
+                    SwiftUI.Label(MR.strings().manual_import.localized(), systemImage: "folder.badge.plus")
                 }
             }
 

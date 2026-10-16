@@ -10,9 +10,11 @@ import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataResponse
 import com.dnfapps.arrmatey.arr.api.model.AudiobookPreviewPaths
 import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
+import com.dnfapps.arrmatey.arr.api.model.WantedMediaItem
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.asSuccess
 import com.dnfapps.networking.onSuccess
 import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
@@ -127,4 +129,26 @@ class ListenarrRepository(
         audiobookId: Long,
         fileIds: List<Long>,
     ): NetworkResult<Unit> = listenarrClient.deleteAudiobookFiles(audiobookId, fileIds)
+
+    override suspend fun refreshMissing(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<List<WantedMediaItem>> {
+        val mediaList = libraryRepository.library.value?.asSuccess()?.data ?: emptyList()
+        val missingMedia = mediaList.filter { it.isMissing }
+        val wantedItems = missingMedia.map { WantedMediaItem(it, instance.id, instance.label, instance.type) }
+        libraryRepository.updateMissingCache(wantedItems)
+        return NetworkResult.Success(wantedItems)
+    }
+
+    override suspend fun refreshCutoff(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<List<WantedMediaItem>> {
+        val empty = emptyList<WantedMediaItem>()
+        libraryRepository.updateCutoffCache(empty)
+        return NetworkResult.Success(empty)
+    }
+
+    override suspend fun deleteBlocklistItem(id: Long): NetworkResult<Unit> = NetworkResult.Success(Unit)
 }

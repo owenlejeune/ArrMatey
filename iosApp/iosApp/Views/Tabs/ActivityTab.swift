@@ -22,6 +22,7 @@ struct ActivityTabContent: View {
 
     @State private var selectedItem: IdentifiableQueueItem? = nil
     @State private var showActivityCustomizationSheet = false
+    @State private var showManualImportSheet = false
 
     private var titleText: String {
         switch viewModel.uiState.selectedTab {
@@ -37,24 +38,78 @@ struct ActivityTabContent: View {
         case .blocklist:
             guard !viewModel.blocklistItems.isEmpty else { return MR.strings().blocklist.localized() }
             return "\(MR.strings().blocklist.localized()) (\(viewModel.blocklistItems.count))"
-        default:
+        case .missing:
+            guard !viewModel.missingItems.isEmpty else { return MR.strings().missing.localized() }
+            return "\(MR.strings().missing.localized()) (\(viewModel.missingItems.count))"
+        case .cutoffUnmet:
+            guard !viewModel.cutoffUnmetItems.isEmpty else { return MR.strings().cutoff_unmet.localized() }
+            return "\(MR.strings().cutoff_unmet.localized()) (\(viewModel.cutoffUnmetItems.count))"
+        }
+    }
+
+    private let segments: [ActivityTabSegment] = [
+        .activity,
+        .history,
+        .downloaded,
+        .blocklist,
+        .missing,
+        .cutoffUnmet
+    ]
+
+    private var topTabsRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(segments, id: \.self) { segment in
+                    let isSelected = viewModel.uiState.selectedTab == segment
+                    tabPill(segment: segment, isSelected: isSelected)
+                        .onTapGesture {
+                            viewModel.setSelectedTab(segment)
+                        }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 6)
+        }
+        .frame(height: 48)
+        .background(Color(UIColor.systemBackground))
+    }
+
+    @ViewBuilder
+    private func tabPill(segment: ActivityTabSegment, isSelected: Bool) -> some View {
+        HStack(spacing: 6) {
+            Text(segmentLabel(segment))
+                .font(.subheadline.weight(isSelected ? .semibold : .regular))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(isSelected ? Color.themePrimary : Color(UIColor.secondarySystemFill))
+        .foregroundColor(isSelected ? Color.white : Color.primary)
+        .clipShape(Capsule())
+        .contentShape(Capsule())
+    }
+
+    private func segmentLabel(_ segment: ActivityTabSegment) -> String {
+        switch segment {
+        case .activity:
             return MR.strings().activity.localized()
+        case .history:
+            return MR.strings().history.localized()
+        case .downloaded:
+            return MR.strings().recently_downloaded.localized()
+        case .blocklist:
+            return MR.strings().blocklist.localized()
+        case .missing:
+            return MR.strings().missing.localized()
+        case .cutoffUnmet:
+            return MR.strings().cutoff_unmet.localized()
+        default:
+            return segment.resource.localized()
         }
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("", selection: Binding(
-                get: { viewModel.uiState.selectedTab },
-                set: { viewModel.setSelectedTab($0) }
-            )) {
-                ForEach(ActivityTabSegment.allCases, id: \.self) { segment in
-                    Text(segment.resource.localized()).tag(segment)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            topTabsRow
 
             tabContent
         }
@@ -109,6 +164,14 @@ struct ActivityTabContent: View {
                         get: { viewModel.uiState.blocklistInstanceId?.int64Value },
                         set: { viewModel.setBlocklistInstanceId($0) }
                     ),
+                    missingInstanceId: Binding(
+                        get: { viewModel.uiState.missingInstanceId?.int64Value },
+                        set: { viewModel.setMissingInstanceId($0) }
+                    ),
+                    cutoffInstanceId: Binding(
+                        get: { viewModel.uiState.cutoffInstanceId?.int64Value },
+                        set: { viewModel.setCutoffInstanceId($0) }
+                    ),
                     instances: viewModel.instances,
                     onOpenViewCustomization: {
                         showActivityCustomizationSheet = true
@@ -118,6 +181,23 @@ struct ActivityTabContent: View {
         }
         .sheet(isPresented: $showActivityCustomizationSheet) {
             ActivityCardCustomizationSheet(viewModel: moreViewModel)
+        }
+        .sheet(isPresented: $showManualImportSheet) {
+            let supportedInstances = viewModel.instances.filter {
+                $0.supportsManualImport
+            }
+            let initialId = (viewModel.uiState.missingInstanceId?.int64Value
+                ?? viewModel.uiState.cutoffInstanceId?.int64Value
+                ?? viewModel.uiState.instanceId?.int64Value)
+                .flatMap { id in supportedInstances.contains(where: { $0.id == id }) ? id : nil }
+
+            DirectoryManualImportSheet(
+                viewModel: viewModel,
+                instances: supportedInstances,
+                initialInstanceId: initialId,
+                onDismiss: { showManualImportSheet = false },
+                onSuccess: { viewModel.refresh() }
+            )
         }
         .sheet(item: $selectedItem) { wrapper in
             QueueItemInfoSheet(item: wrapper.item, deleteInProgress: viewModel.removeInProgress, onDelete: { remove, block, skip in
@@ -148,6 +228,22 @@ struct ActivityTabContent: View {
             downloadedContent
         case .blocklist:
             blocklistContent
+        case .missing:
+            wantedContent(
+                items: viewModel.missingItems,
+                isLoading: viewModel.isMissingLoading,
+                hasLoaded: viewModel.hasMissingLoaded,
+                selectedInstanceId: viewModel.uiState.missingInstanceId?.int64Value,
+                onRefresh: { viewModel.refreshMissing() }
+            )
+        case .cutoffUnmet:
+            wantedContent(
+                items: viewModel.cutoffUnmetItems,
+                isLoading: viewModel.isCutoffLoading,
+                hasLoaded: viewModel.hasCutoffLoaded,
+                selectedInstanceId: viewModel.uiState.cutoffInstanceId?.int64Value,
+                onRefresh: { viewModel.refreshCutoff() }
+            )
         default:
             queueItemContent
         }
@@ -286,6 +382,124 @@ struct ActivityTabContent: View {
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func wantedContent(
+        items: [WantedMediaItem],
+        isLoading: Bool,
+        hasLoaded: Bool,
+        selectedInstanceId: Int64?,
+        onRefresh: @escaping () -> Void
+    ) -> some View {
+        let selectedInstance = viewModel.instances.first(where: { $0.id == selectedInstanceId })
+        let isManualImportEnabled = selectedInstance?.type != .kapowarr && selectedInstance?.type != .listenarr
+
+        if !hasLoaded && isLoading && !viewModel.instances.isEmpty {
+            ProgressView()
+                .progressViewStyle(.circular)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if items.isEmpty {
+            ContentUnavailableView(
+                MR.strings().no_wanted_items.localized(),
+                systemImage: "magnifyingglass"
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            List {
+                Section {
+                    HStack(spacing: 12) {
+                        Button {
+                            viewModel.searchAllMissing()
+                        } label: {
+                            Label(MR.strings().search_all.localized(), systemImage: "magnifyingglass")
+                                .font(.system(size: 14, weight: .semibold))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.borderedProminent)
+
+                        Button {
+                            showManualImportSheet = true
+                        } label: {
+                            Label(MR.strings().manual_import.localized(), systemImage: "folder.badge.plus")
+                                .font(.system(size: 14, weight: .semibold))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(!isManualImportEnabled)
+                    }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
+
+                Section {
+                    ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                        WantedMediaItemView(item: item)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                            .id(index)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                onNavigateToInteractiveSearch(item: item)
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button {
+                                    viewModel.executeAutomaticSearch(item: item)
+                                } label: {
+                                    Label(MR.strings().search.localized(), systemImage: "magnifyingglass")
+                                }
+                                .tint(.blue)
+
+                                Button {
+                                    onNavigateToInteractiveSearch(item: item)
+                                } label: {
+                                    Label(MR.strings().interactive.localized(), systemImage: "person.fill")
+                                }
+                                .tint(.indigo)
+                            }
+                            .contextMenu {
+                                Button {
+                                    viewModel.executeAutomaticSearch(item: item)
+                                } label: {
+                                    Label(MR.strings().search.localized(), systemImage: "magnifyingglass")
+                                }
+
+                                Button {
+                                    onNavigateToInteractiveSearch(item: item)
+                                } label: {
+                                    Label(MR.strings().interactive.localized(), systemImage: "person.fill")
+                                }
+                            }
+                    }
+                }
+            }
+            .listStyle(.plain)
+        }
+    }
+
+    private func onNavigateToInteractiveSearch(item: WantedMediaItem) {
+        guard let id = item.id?.int64Value, let instanceType = item.instanceType else { return }
+        let instanceId = item.instanceId?.int64Value
+        switch instanceType {
+        case .radarr:
+            navigationManager.push(MediaRoute.movieRelease(movieId: id, instanceId: instanceId))
+        case .sonarr:
+            navigationManager.push(MediaRoute.seriesReleases(seriesId: nil, seasonNumber: nil, episodeId: id, instanceId: instanceId))
+        case .lidarr:
+            navigationManager.push(MediaRoute.albumReleases(albumId: id, artistId: nil, instanceId: instanceId))
+        case .bookshelf, .chaptarr:
+            navigationManager.push(MediaRoute.bookReleases(bookId: id, instanceId: instanceId))
+        case .listenarr:
+            navigationManager.push(MediaRoute.audiobookReleases(id: id, query: item.title ?? "", instanceId: instanceId))
+        case .kapowarr:
+            navigationManager.push(MediaRoute.comicReleases(mediaId: id, isVolume: true, instanceId: instanceId))
+        default:
+            break
         }
     }
 }

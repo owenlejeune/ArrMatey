@@ -116,6 +116,10 @@ sealed interface CalendarScreen : NavKey {
     data object Home : CalendarScreen
 }
 
+sealed interface ActivityScreen : NavKey {
+    data object Home : ActivityScreen
+}
+
 sealed interface SettingsScreen : NavKey {
     data object Landing : SettingsScreen
 

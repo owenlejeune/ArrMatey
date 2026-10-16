@@ -2,9 +2,7 @@ package com.dnfapps.arrmatey.ui.tabs.activity
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -51,9 +49,9 @@ fun BlocklistTabContent(
             if (blocklistItems.isEmpty()) {
                 EmptyBlocklistState(
                     modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
                 )
             } else {
                 LazyColumn(
@@ -61,12 +59,12 @@ fun BlocklistTabContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding =
-                        PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = 16.dp + LocalFloatingBarBottomPadding.current,
-                        ),
+                    PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 16.dp,
+                        bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+                    ),
                 ) {
                     items(
                         items = blocklistItems,
@@ -76,9 +74,6 @@ fun BlocklistTabContent(
                             item = item,
                             onDelete = { onDeleteItem(item) },
                         )
-                    }
-                    item {
-                        Spacer(Modifier.height(LocalFloatingBarBottomPadding.current + 16.dp))
                     }
                 }
             }

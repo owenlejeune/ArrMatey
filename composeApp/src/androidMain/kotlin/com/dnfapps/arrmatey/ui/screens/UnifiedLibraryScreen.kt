@@ -80,6 +80,7 @@ import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
+import com.dnfapps.arrmatey.ui.sheets.DirectoryManualImportSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
 import com.skydoves.flexible.core.FlexibleSheetSize
@@ -127,6 +128,7 @@ fun UnifiedLibraryScreen(
     var moveFilesItem by remember { mutableStateOf<ArrMedia?>(null) }
     var confirmBulkDelete by remember { mutableStateOf(false) }
     var showMonitorOptionsSheet by remember { mutableStateOf(false) }
+    var showManualImportSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(errorMessage) {
         errorMessage?.takeUnless { it.isEmpty() }?.let { message ->
@@ -290,6 +292,11 @@ fun UnifiedLibraryScreen(
                                     onSearchFiltered = { unifiedLibraryViewModel.searchFiltered() },
                                     onUpdateLibrary = { unifiedLibraryViewModel.updateLibrary() },
                                     onBackupDatabase = { unifiedLibraryViewModel.backupDatabase() },
+                                    onManualImport = if (currentInstance.supportsManualImport) {
+                                        { showManualImportSheet = true }
+                                    } else {
+                                        null
+                                    },
                                     trigger = { onClick ->
                                         IconButton(onClick = onClick) {
                                             Image(
@@ -589,9 +596,17 @@ fun UnifiedLibraryScreen(
                     type = currentType,
                     onDismissRequest = { showMonitorOptionsSheet = false },
                     onOptionSelected = {
-                        // Monitor option selected
                         showMonitorOptionsSheet = false
                     },
+                )
+            }
+
+            if (showManualImportSheet) {
+                DirectoryManualImportSheet(
+                    instances = listOf(currentInstance),
+                    initialInstanceId = currentInstance.id,
+                    onDismiss = { showManualImportSheet = false },
+                    onSuccess = { unifiedLibraryViewModel.refreshSelected() },
                 )
             }
         }

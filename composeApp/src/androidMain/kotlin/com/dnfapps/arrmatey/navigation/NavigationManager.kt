@@ -22,6 +22,7 @@ class NavigationManager(
     val requests: RequestsTabNavigator,
     val discover: DiscoverTabNavigator,
     val calendar: CalendarTabNavigator,
+    val activity: ActivityTabNavigator,
     val dashboard: DashboardTabNavigator,
     val bazarr: BazarrTabNavigator,
     val tracearr: TracearrTabNavigator,

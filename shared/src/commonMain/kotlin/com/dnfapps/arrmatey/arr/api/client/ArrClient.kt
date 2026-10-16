@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
+import com.dnfapps.arrmatey.arr.api.model.FilesystemItem
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
@@ -18,6 +19,7 @@ import com.dnfapps.arrmatey.arr.api.model.QueuePage
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.api.model.WantedPage
 import com.dnfapps.networking.NetworkResult
 import kotlinx.datetime.LocalDate
 
@@ -81,6 +83,18 @@ interface ArrClient {
         page: Int,
         pageSize: Int,
     ): NetworkResult<BlocklistPage>
+
+    suspend fun getWantedMissing(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<WantedPage>
+
+    suspend fun getWantedCutoff(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<WantedPage>
+
+    suspend fun getFilesystem(path: String? = null): NetworkResult<List<FilesystemItem>>
 
     suspend fun deleteActivityTask(
         id: Int,

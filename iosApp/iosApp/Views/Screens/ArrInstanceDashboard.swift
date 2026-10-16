@@ -1,10 +1,3 @@
-//
-//  ArrInstanceDashboard.swift
-//  iosApp
-//
-//  Created by Owen LeJeune on 2026-02-20.
-//
-
 import Shared
 import SwiftUI
 
@@ -12,6 +5,8 @@ struct ArrInstanceDashboard: View {
     private let id: Int64
 
     @StateObject private var viewModel: ArrInstanceDashboardViewModelS
+    @StateObject private var activityQueueViewModel = ActivityQueueViewModelS()
+    @State private var showManualImportSheet: Bool = false
 
     @EnvironmentObject private var navigationManager: NavigationManager
 
@@ -33,11 +28,25 @@ struct ArrInstanceDashboard: View {
                         instanceUrl: viewModel.instance?.url,
                         onRunRssSync: { viewModel.runRssSync() },
                         onSearchAllMissing: { viewModel.searchAllMissing() },
+                        onManualImport: (viewModel.instance?.supportsManualImport == true) ? {
+                            showManualImportSheet = true
+                        } : nil,
                         onUpdateLibrary: { viewModel.updateLibrary() },
                         onBackupDatabase: { viewModel.backupDatabase() }
                     ) {
                         Image(systemName: "ellipsis")
                     }
+                }
+            }
+            .sheet(isPresented: $showManualImportSheet) {
+                if let instance = viewModel.instance {
+                    DirectoryManualImportSheet(
+                        viewModel: activityQueueViewModel,
+                        instances: [instance],
+                        initialInstanceId: instance.id,
+                        onDismiss: { showManualImportSheet = false },
+                        onSuccess: { viewModel.refresh() }
+                    )
                 }
             }
     }

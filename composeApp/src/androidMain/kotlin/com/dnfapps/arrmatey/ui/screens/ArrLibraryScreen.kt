@@ -115,6 +115,7 @@ import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
+import com.dnfapps.arrmatey.ui.sheets.DirectoryManualImportSheet
 import com.dnfapps.arrmatey.ui.sheets.EditArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAuthorSheet
@@ -178,6 +179,7 @@ fun ArrLibraryScreen(
     var moveFilesItem by remember { mutableStateOf<ArrMedia?>(null) }
     var confirmBulkDelete by remember { mutableStateOf(false) }
     var showMonitorOptionsSheet by remember { mutableStateOf(false) }
+    var showManualImportSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(errorMessage) {
         errorMessage?.takeUnless { it.isEmpty() }?.let { message ->
@@ -297,6 +299,11 @@ fun ArrLibraryScreen(
                                 onSearchFiltered = { arrMediaViewModel.searchFiltered() },
                                 onUpdateLibrary = { arrMediaViewModel.updateLibrary() },
                                 onBackupDatabase = { arrMediaViewModel.backupDatabase() },
+                                onManualImport = if (instancesState.selectedInstance?.supportsManualImport == true) {
+                                    { showManualImportSheet = true }
+                                } else {
+                                    null
+                                },
                                 trigger = { onClick ->
                                     IconButton(onClick = onClick) {
                                         Image(
@@ -561,6 +568,15 @@ fun ArrLibraryScreen(
                     arrMediaViewModel.updateMonitoringSelected(it)
                     showMonitorOptionsSheet = false
                 },
+            )
+        }
+
+        if (showManualImportSheet && instancesState.selectedInstance != null) {
+            DirectoryManualImportSheet(
+                instances = listOf(instancesState.selectedInstance!!),
+                initialInstanceId = instancesState.selectedInstance!!.id,
+                onDismiss = { showManualImportSheet = false },
+                onSuccess = { arrMediaViewModel.refresh() },
             )
         }
     }

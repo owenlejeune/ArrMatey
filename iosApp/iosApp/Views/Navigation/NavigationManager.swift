@@ -689,6 +689,7 @@ enum MediaRoute: Hashable {
     )
     case bookReleases(bookId: Int64, instanceId: Int64? = nil)
     case audiobookReleases(id: Int64?, query: String, instanceId: Int64? = nil)
+    case comicReleases(mediaId: Int64, isVolume: Bool = true, instanceId: Int64? = nil)
 
     case bookDetails(bookJson: String, authorJson: String, instanceId: Int64? = nil)
     case episodeDetails(String, String, instanceId: Int64? = nil)

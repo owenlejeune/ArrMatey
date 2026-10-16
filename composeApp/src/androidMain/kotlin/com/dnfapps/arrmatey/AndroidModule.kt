@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey
 import coil3.ImageLoader
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.datastore.AndroidPreferencesStore
+import com.dnfapps.arrmatey.navigation.ActivityTabNavigator
 import com.dnfapps.arrmatey.navigation.AppState
 import com.dnfapps.arrmatey.navigation.AudiobooksTabNavigator
 import com.dnfapps.arrmatey.navigation.BazarrTabNavigator
@@ -50,6 +51,7 @@ val androidModule =
         single { BazarrTabNavigator() }
         single { TracearrTabNavigator() }
         single { ComicsTabNavigator() }
+        single { ActivityTabNavigator() }
 
         // Navigation Manager
         single {
@@ -62,6 +64,7 @@ val androidModule =
                     TabItem.Standard.REQUESTS to get<RequestsTabNavigator>(),
                     TabItem.Standard.DISCOVER to get<DiscoverTabNavigator>(),
                     TabItem.Standard.CALENDAR to get<CalendarTabNavigator>(),
+                    TabItem.Standard.ACTIVITY to get<ActivityTabNavigator>(),
                     TabItem.Standard.BOOKS to get<BooksTabNavigator>(),
                     TabItem.Standard.AUDIOBOOKS to get<AudiobooksTabNavigator>(),
                     TabItem.Standard.COMICS to get<ComicsTabNavigator>(),
@@ -70,7 +73,7 @@ val androidModule =
                     TabItem.Standard.MONITORING to get<TracearrTabNavigator>(),
                     TabItem.Settings to get<SettingsTabNavigator>(),
                 )
-            NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+            NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
         }
 
         // Others

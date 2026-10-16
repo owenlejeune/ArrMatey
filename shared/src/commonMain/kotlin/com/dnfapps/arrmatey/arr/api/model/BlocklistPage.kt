@@ -16,10 +16,10 @@ data class BlocklistPage(
         type: InstanceType? = null,
     ) = copy(
         records =
-            records.apply {
-                forEach { r ->
-                    // records instance setting if needed
-                }
-            },
+        records.apply {
+            forEach { r ->
+                // records instance setting if needed
+            }
+        },
     )
 }

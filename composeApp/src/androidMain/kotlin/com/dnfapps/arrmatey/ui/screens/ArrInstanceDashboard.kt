@@ -54,6 +54,7 @@ import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.sheets.DirectoryManualImportSheet
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
@@ -82,6 +83,7 @@ fun ArrInstanceDashboard(
     val lastCommandResult by viewModel.lastCommandResult.collectAsStateWithLifecycle()
 
     var confirmDelete by remember { mutableStateOf(false) }
+    var showManualImportSheet by remember { mutableStateOf(false) }
 
     val commandQueuedMessage = mokoString(MR.strings.command_queued)
     val commandErrorMessage = mokoString(MR.strings.error_generic_title)
@@ -128,6 +130,11 @@ fun ArrInstanceDashboard(
                         onSearchAllMissing = { viewModel.searchAllMissing() },
                         onUpdateLibrary = { viewModel.updateLibrary() },
                         onBackupDatabase = { viewModel.backupDatabase() },
+                        onManualImport = if (instance?.supportsManualImport == true) {
+                            { showManualImportSheet = true }
+                        } else {
+                            null
+                        },
                         onDelete = { confirmDelete = true },
                     )
                 },
@@ -159,6 +166,15 @@ fun ArrInstanceDashboard(
                 text = {
                     Text(mokoString(MR.strings.confirm_delete_instance, instance?.label ?: ""))
                 },
+            )
+        }
+
+        if (showManualImportSheet && instance != null) {
+            DirectoryManualImportSheet(
+                instances = listOf(instance!!),
+                initialInstanceId = instance!!.id,
+                onDismiss = { showManualImportSheet = false },
+                onSuccess = { viewModel.refresh() },
             )
         }
         PullToRefreshBox(

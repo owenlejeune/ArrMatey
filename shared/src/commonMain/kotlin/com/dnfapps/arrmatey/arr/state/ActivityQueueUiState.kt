@@ -13,17 +13,9 @@ data class ActivityQueueUiState(
     val historyInstanceId: Long? = null,
     val downloadedInstanceId: Long? = null,
     val blocklistInstanceId: Long? = null,
+    val missingInstanceId: Long? = null,
+    val cutoffInstanceId: Long? = null,
     val searchQuery: String = "",
 ) {
-    constructor() : this(
-        null,
-        QueueSortBy.Added,
-        SortOrder.Asc,
-        ActivityTabSegment.Activity,
-        HistoryStateFilter.All,
-        null,
-        null,
-        null,
-        "",
-    )
+    constructor() : this(null)
 }

@@ -66,7 +66,9 @@ struct MediaRouteDestination: View {
             let releaseParams = ReleaseParamsAudiobook(mediaId: id?.asKotlinLong, query: query)
             InteractiveSearchScreen(type: .listenarr, releaseParams: releaseParams, instanceId: instanceId)
 
-
+        case .comicReleases(let mediaId, let isVolume, let instanceId):
+            let releaseParams: ReleaseParams = isVolume ? ReleaseParamsComicVolume(mediaId: mediaId) : ReleaseParamsComicIssue(mediaId: mediaId)
+            InteractiveSearchScreen(type: .kapowarr, releaseParams: releaseParams, instanceId: instanceId)
 
         case .bookDetails(let bookJson, let authorJson, let instanceId):
             BookDetailsScreen(bookJson: bookJson, authorJson: authorJson, instanceId: instanceId)

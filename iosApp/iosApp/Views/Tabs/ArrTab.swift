@@ -21,6 +21,8 @@ struct ArrTab: View {
     
     @State private var searchPresented: Bool = false
     @State private var customizationSheetPresented: Bool = false
+    @StateObject private var activityQueueViewModel = ActivityQueueViewModelS()
+    @State private var showManualImportSheet: Bool = false
     
     private var uiState: ArrLibrary {
         arrMediaViewModel.uiState
@@ -64,6 +66,17 @@ struct ArrTab: View {
             }
             .sheet(isPresented: $customizationSheetPresented) {
                 ArrViewCustomizationSheet(type: type, viewModel: arrMediaViewModel)
+            }
+            .sheet(isPresented: $showManualImportSheet) {
+                if let instance = instanceState.selectedInstance {
+                    DirectoryManualImportSheet(
+                        viewModel: activityQueueViewModel,
+                        instances: [instance],
+                        initialInstanceId: instance.id,
+                        onDismiss: { showManualImportSheet = false },
+                        onSuccess: { arrMediaViewModel.refresh() }
+                    )
+                }
             }
     }
     
@@ -190,6 +203,9 @@ struct ArrTab: View {
                     onRunRssSync: { arrMediaViewModel.runRssSync() },
                     onSearchAllMissing: { arrMediaViewModel.searchAllMissing() },
                     onSearchFiltered: { arrMediaViewModel.searchFiltered() },
+                    onManualImport: instance.supportsManualImport ? {
+                        showManualImportSheet = true
+                    } : nil,
                     onUpdateLibrary: { arrMediaViewModel.updateLibrary() },
                     onBackupDatabase: { arrMediaViewModel.backupDatabase() }
                 ) {

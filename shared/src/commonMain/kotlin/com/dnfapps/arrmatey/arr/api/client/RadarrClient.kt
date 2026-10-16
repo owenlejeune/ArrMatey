@@ -12,7 +12,9 @@ import com.dnfapps.arrmatey.arr.api.model.MovieEditorBody
 import com.dnfapps.arrmatey.arr.api.model.MovieRelease
 import com.dnfapps.arrmatey.arr.api.model.RadarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.RadarrHistoryResponse
+import com.dnfapps.arrmatey.arr.api.model.RadarrWantedPage
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
+import com.dnfapps.arrmatey.arr.api.model.WantedPage
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
 import io.ktor.client.HttpClient
@@ -156,4 +158,44 @@ class RadarrClient(
     suspend fun getMovieExtraFile(id: Long): NetworkResult<List<ExtraFile>> = get("extrafile", mapOf("movieId" to id))
 
     suspend fun deleteMovieFile(id: Long): NetworkResult<Unit> = delete("movieFile/$id")
+
+    override suspend fun getWantedMissing(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<WantedPage> = get<RadarrWantedPage>(
+        "wanted/missing",
+        mapOf(
+            "page" to page,
+            "pageSize" to pageSize,
+        ),
+    ).map { pageRes ->
+        WantedPage(
+            page = pageRes.page,
+            pageSize = pageRes.pageSize,
+            totalRecords = pageRes.totalRecords,
+            records = pageRes.records.map { movie ->
+                movie.withLocalImages(instance).copy(instanceId = instance.id)
+            },
+        )
+    }
+
+    override suspend fun getWantedCutoff(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<WantedPage> = get<RadarrWantedPage>(
+        "wanted/cutoff",
+        mapOf(
+            "page" to page,
+            "pageSize" to pageSize,
+        ),
+    ).map { pageRes ->
+        WantedPage(
+            page = pageRes.page,
+            pageSize = pageRes.pageSize,
+            totalRecords = pageRes.totalRecords,
+            records = pageRes.records.map { movie ->
+                movie.withLocalImages(instance).copy(instanceId = instance.id)
+            },
+        )
+    }
 }

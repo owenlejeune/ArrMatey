@@ -28,9 +28,7 @@ import com.dnfapps.arrmatey.arr.api.model.BlocklistItem
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.compose.utils.singleLanguageLabel
 import com.dnfapps.arrmatey.entensions.bullet
-import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
-import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -54,21 +52,21 @@ fun BlocklistItemView(
                 ) {
                     Box(
                         modifier =
-                            Modifier
-                                .width(6.dp)
-                                .fillMaxHeight()
-                                .background(color)
-                                .align(Alignment.CenterStart),
+                        Modifier
+                            .width(6.dp)
+                            .fillMaxHeight()
+                            .background(color)
+                            .align(Alignment.CenterStart),
                     )
                 }
             }
 
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(start = if (item.instanceType != null) 6.dp else 0.dp)
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = if (item.instanceType != null) 6.dp else 0.dp)
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Row(

@@ -9,15 +9,19 @@ import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
+import com.dnfapps.arrmatey.arr.api.model.FilesystemItem
+import com.dnfapps.arrmatey.arr.api.model.FilesystemResponse
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrBlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueuePage
 import com.dnfapps.arrmatey.arr.api.model.RadarrBlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SonarrBlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.api.model.WantedPage
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.networking.NetworkResult
@@ -45,7 +49,7 @@ abstract class BaseArrClient(
 
     override suspend fun getQualityProfiles(): NetworkResult<List<QualityProfile>> = get("qualityprofile")
 
-    override suspend fun getMetadataProfiles(): NetworkResult<List<com.dnfapps.arrmatey.arr.api.model.MetadataProfile>> = get("metadataprofile")
+    override suspend fun getMetadataProfiles(): NetworkResult<List<MetadataProfile>> = get("metadataprofile")
 
     override suspend fun getRootFolders(): NetworkResult<List<RootFolder>> = get("rootfolder")
 
@@ -93,46 +97,99 @@ abstract class BaseArrClient(
     ).map { pageResult ->
         pageResult.copy(
             records =
-                pageResult.records.map { r ->
-                    when (r) {
-                        is SonarrBlocklistItem ->
-                            r.copy(
-                                instanceId = instance.id,
-                                instanceName = instance.label,
-                                instanceType = instance.type,
-                                series = r.series?.withLocalImages(instance),
-                                episode = r.episode?.copy(series = r.series)?.withLocalImages(instance),
-                            )
-                        is RadarrBlocklistItem ->
-                            r.copy(
-                                instanceId = instance.id,
-                                instanceName = instance.label,
-                                instanceType = instance.type,
-                                movie = r.movie?.withLocalImages(instance),
-                            )
-                        is LidarrBlocklistItem ->
-                            r.copy(
-                                instanceId = instance.id,
-                                instanceName = instance.label,
-                                instanceType = instance.type,
-                                album = r.album?.withLocalImages(instance),
-                                artist = r.artist?.withLocalImages(instance),
-                            )
-                        is BookshelfBlocklistItem ->
-                            r.copy(
-                                instanceId = instance.id,
-                                instanceName = instance.label,
-                                instanceType = instance.type,
-                                author = r.author?.withLocalImages(instance),
-                                book = r.book?.withLocalImages(instance),
-                            )
-                        else -> r
-                    }
-                },
+            pageResult.records.map { r ->
+                when (r) {
+                    is SonarrBlocklistItem ->
+                        r.copy(
+                            instanceId = instance.id,
+                            instanceName = instance.label,
+                            instanceType = instance.type,
+                            series = r.series?.withLocalImages(instance),
+                            episode = r.episode?.copy(series = r.series)?.withLocalImages(instance),
+                        )
+                    is RadarrBlocklistItem ->
+                        r.copy(
+                            instanceId = instance.id,
+                            instanceName = instance.label,
+                            instanceType = instance.type,
+                            movie = r.movie?.withLocalImages(instance),
+                        )
+                    is LidarrBlocklistItem ->
+                        r.copy(
+                            instanceId = instance.id,
+                            instanceName = instance.label,
+                            instanceType = instance.type,
+                            album = r.album?.withLocalImages(instance),
+                            artist = r.artist?.withLocalImages(instance),
+                        )
+                    is BookshelfBlocklistItem ->
+                        r.copy(
+                            instanceId = instance.id,
+                            instanceName = instance.label,
+                            instanceType = instance.type,
+                            author = r.author?.withLocalImages(instance),
+                            book = r.book?.withLocalImages(instance),
+                        )
+                }
+            },
         )
     }
 
     override suspend fun deleteBlocklistItem(id: Long): NetworkResult<Unit> = delete("blocklist/$id")
+
+    override suspend fun getWantedMissing(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<WantedPage> = get<WantedPage>(
+        "wanted/missing",
+        mapOf(
+            "page" to page,
+            "pageSize" to pageSize,
+            "includeSeries" to true,
+            "includeMovie" to true,
+            "includeAlbum" to true,
+            "includeArtist" to true,
+            "includeBook" to true,
+            "includeAuthor" to true,
+        ),
+    ).rebuild()
+
+    override suspend fun getWantedCutoff(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<WantedPage> = get<WantedPage>(
+        "wanted/cutoff",
+        mapOf(
+            "page" to page,
+            "pageSize" to pageSize,
+            "includeSeries" to true,
+            "includeMovie" to true,
+            "includeAlbum" to true,
+            "includeArtist" to true,
+            "includeBook" to true,
+            "includeAuthor" to true,
+        ),
+    ).rebuild()
+
+    override suspend fun getFilesystem(path: String?): NetworkResult<List<FilesystemItem>> {
+        val params = buildMap {
+            path?.let { put("path", it) }
+        }
+        val response = get<FilesystemResponse>("filesystem", params)
+        if (response is NetworkResult.Success) {
+            val parent = response.data.parent
+            val dirs = response.data.directories.map { it.toFilesystemItem(parent, isDir = true) }
+            val files = response.data.files.map { it.toFilesystemItem(parent, isDir = false) }
+            return NetworkResult.Success(dirs + files)
+        }
+        if (response is NetworkResult.Error) {
+            val listResponse = get<List<FilesystemItem>>("filesystem", params)
+            if (listResponse is NetworkResult.Success) {
+                return listResponse
+            }
+        }
+        return response.map { emptyList() }
+    }
 
     override suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> = post("release", payload)
 

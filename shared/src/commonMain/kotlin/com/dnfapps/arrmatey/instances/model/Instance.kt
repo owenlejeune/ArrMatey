@@ -80,6 +80,9 @@ data class Instance(
     } catch (e: Exception) {
         false
     }
+
+    val supportsManualImport: Boolean
+        get() = type.supportsManualImport
 }
 
 @Serializable
@@ -324,4 +327,10 @@ enum class InstanceType(
 
     val isReadarrFamily: Boolean
         get() = this == Bookshelf || this == Listenarr || this == Chaptarr
+
+    val supportsManualImport: Boolean
+        get() = when (this) {
+            Sonarr, Radarr, Lidarr, Chaptarr, Bookshelf -> true
+            else -> false
+        }
 }

@@ -2,9 +2,7 @@ package com.dnfapps.arrmatey.ui.tabs.activity
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -72,9 +70,6 @@ fun HistoryTabContent(
                         key = { "${it.instanceId}_${it.id}_${it.eventType}_${it.date}" },
                     ) { item ->
                         HistoryItemView(item = item)
-                    }
-                    item {
-                        Spacer(Modifier.height(LocalFloatingBarBottomPadding.current + 16.dp))
                     }
                 }
             }

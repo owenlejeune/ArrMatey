@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MoreVert
@@ -40,6 +41,7 @@ fun InstanceOptionsMenu(
     onSearchFiltered: (() -> Unit)? = null,
     onUpdateLibrary: () -> Unit,
     onBackupDatabase: () -> Unit,
+    onManualImport: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
     trigger: @Composable (onClick: () -> Unit) -> Unit = { onClick ->
         IconButton(onClick = onClick) {
@@ -126,6 +128,24 @@ fun InstanceOptionsMenu(
                         onClick = {
                             expanded = false
                             onSearchFiltered()
+                        },
+                    )
+                }
+
+                if (onManualImport != null) {
+                    DropdownMenuItem(
+                        text = { Text(mokoString(MR.strings.manual_import)) },
+                        shapes = MenuDefaults.itemShape(0, 1),
+                        selected = false,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Download,
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            expanded = false
+                            onManualImport()
                         },
                     )
                 }

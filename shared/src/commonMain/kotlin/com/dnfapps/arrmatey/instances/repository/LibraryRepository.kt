@@ -14,14 +14,18 @@ import com.dnfapps.arrmatey.arr.api.model.BlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
+import com.dnfapps.arrmatey.arr.api.model.FilesystemItem
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
+import com.dnfapps.arrmatey.arr.api.model.WantedMediaItem
 import com.dnfapps.arrmatey.arr.state.DownloadState
 import com.dnfapps.arrmatey.extensions.mergeWithLibrary
+import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.asSuccess
@@ -70,8 +74,36 @@ class LibraryRepository(
     private val _hasBlocklistLoaded = MutableStateFlow(false)
     val hasBlocklistLoaded: StateFlow<Boolean> = _hasBlocklistLoaded.asStateFlow()
 
+    private val _missing = MutableStateFlow<List<WantedMediaItem>>(emptyList())
+    val missing: StateFlow<List<WantedMediaItem>> = _missing.asStateFlow()
+
+    private val _isMissingLoading = MutableStateFlow(false)
+    val isMissingLoading: StateFlow<Boolean> = _isMissingLoading.asStateFlow()
+
+    private val _hasMissingLoaded = MutableStateFlow(false)
+    val hasMissingLoaded: StateFlow<Boolean> = _hasMissingLoaded.asStateFlow()
+
+    private val _cutoffUnmet = MutableStateFlow<List<WantedMediaItem>>(emptyList())
+    val cutoffUnmet: StateFlow<List<WantedMediaItem>> = _cutoffUnmet.asStateFlow()
+
+    private val _isCutoffLoading = MutableStateFlow(false)
+    val isCutoffLoading: StateFlow<Boolean> = _isCutoffLoading.asStateFlow()
+
+    private val _hasCutoffLoaded = MutableStateFlow(false)
+    val hasCutoffLoaded: StateFlow<Boolean> = _hasCutoffLoaded.asStateFlow()
+
     private val _mediaDetailsCache = MutableStateFlow<Map<Long, ArrMedia>>(emptyMap())
     val mediaDetailsCache: StateFlow<Map<Long, ArrMedia>> = _mediaDetailsCache.asStateFlow()
+
+    fun updateMissingCache(items: List<WantedMediaItem>) {
+        _missing.value = items
+        _hasMissingLoaded.value = true
+    }
+
+    fun updateCutoffCache(items: List<WantedMediaItem>) {
+        _cutoffUnmet.value = items
+        _hasCutoffLoaded.value = true
+    }
 
     private val _activityTasks = MutableStateFlow<List<QueueItem>>(emptyList())
     val activityTasks: StateFlow<List<QueueItem>> = _activityTasks.asStateFlow()
@@ -333,9 +365,86 @@ class LibraryRepository(
     suspend fun refreshBlocklist(
         page: Int = 1,
         pageSize: Int = 100,
-    ): NetworkResult<List<BlocklistItem>> = client.getBlocklist(page, pageSize).onSuccess {
-        _blocklist.value = it.records
-    }.map { it.records }
+    ): NetworkResult<List<BlocklistItem>> {
+        val remoteResult = client.getBlocklist(page, pageSize)
+        if (remoteResult is NetworkResult.Success) {
+            _blocklist.value = remoteResult.data.records
+            _hasBlocklistLoaded.value = true
+            return NetworkResult.Success(remoteResult.data.records)
+        }
+        val empty = emptyList<BlocklistItem>()
+        _blocklist.value = empty
+        _hasBlocklistLoaded.value = true
+        return NetworkResult.Success(empty)
+    }
+
+    suspend fun refreshMissing(
+        instance: Instance,
+        page: Int = 1,
+        pageSize: Int = 100,
+    ): NetworkResult<List<WantedMediaItem>> {
+        val useLibraryFilter = instance.type in listOf(
+            InstanceType.Lidarr,
+            InstanceType.Bookshelf,
+            InstanceType.Chaptarr,
+            InstanceType.Listenarr,
+            InstanceType.Kapowarr,
+        )
+
+        if (!useLibraryFilter) {
+            val remoteResult = client.getWantedMissing(page, pageSize)
+            if (remoteResult is NetworkResult.Success) {
+                val items = remoteResult.data.records.map { WantedMediaItem(it, instance.id, instance.label, instance.type) }
+                _missing.value = items
+                _hasMissingLoaded.value = true
+                return NetworkResult.Success(items)
+            }
+        }
+
+        val libResult = client.getLibrary()
+        return when (libResult) {
+            is NetworkResult.Success -> {
+                val missingMedia = libResult.data.filter { it.isMissing }
+                val wantedItems = missingMedia.map { WantedMediaItem(it, instance.id, instance.label, instance.type) }
+                _missing.value = wantedItems
+                _hasMissingLoaded.value = true
+                NetworkResult.Success(wantedItems)
+            }
+            is NetworkResult.Error -> NetworkResult.Error(libResult.code, libResult.message, libResult.cause)
+            else -> NetworkResult.Error(message = "Unknown error")
+        }
+    }
+
+    suspend fun refreshCutoff(
+        instance: Instance,
+        page: Int = 1,
+        pageSize: Int = 100,
+    ): NetworkResult<List<WantedMediaItem>> {
+        val useLibraryFilter = instance.type in listOf(
+            InstanceType.Lidarr,
+            InstanceType.Bookshelf,
+            InstanceType.Chaptarr,
+            InstanceType.Listenarr,
+            InstanceType.Kapowarr,
+        )
+
+        if (!useLibraryFilter) {
+            val remoteResult = client.getWantedCutoff(page, pageSize)
+            if (remoteResult is NetworkResult.Success) {
+                val items = remoteResult.data.records.map { WantedMediaItem(it, instance.id, instance.label, instance.type) }
+                _cutoffUnmet.value = items
+                _hasCutoffLoaded.value = true
+                return NetworkResult.Success(items)
+            }
+        }
+
+        val empty = emptyList<WantedMediaItem>()
+        _cutoffUnmet.value = empty
+        _hasCutoffLoaded.value = true
+        return NetworkResult.Success(empty)
+    }
+
+    suspend fun getFilesystem(path: String?): NetworkResult<List<FilesystemItem>> = client.getFilesystem(path)
 
     suspend fun deleteBlocklistItem(id: Long): NetworkResult<Unit> = client
         .deleteBlocklistItem(id)

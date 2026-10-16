@@ -9,6 +9,9 @@ import com.dnfapps.arrmatey.arr.api.model.DeleteEpisodeBody
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.IdWrapper
+import com.dnfapps.arrmatey.arr.api.model.Language
+import com.dnfapps.arrmatey.arr.api.model.MediaStatus
+import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.SeriesEditorBody
@@ -16,8 +19,11 @@ import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorOption
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitoringBody
 import com.dnfapps.arrmatey.arr.api.model.SeriesRelease
+import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryResponse
+import com.dnfapps.arrmatey.arr.api.model.SonarrWantedPage
+import com.dnfapps.arrmatey.arr.api.model.WantedPage
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
 import io.ktor.client.HttpClient
@@ -230,4 +236,88 @@ class SonarrClient(
     )
 
     suspend fun deleteEpisode(id: Long): NetworkResult<Unit> = delete("episodefile/$id")
+
+    override suspend fun getWantedMissing(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<WantedPage> = get<SonarrWantedPage>(
+        "wanted/missing",
+        mapOf(
+            "page" to page,
+            "pageSize" to pageSize,
+            "includeSeries" to true,
+            "includeEpisode" to true,
+        ),
+    ).map { pageRes ->
+        WantedPage(
+            page = pageRes.page,
+            pageSize = pageRes.pageSize,
+            totalRecords = pageRes.totalRecords,
+            records = pageRes.records.map { ep ->
+                val series = ep.series?.withLocalImages(instance)
+                val episodeTitle = "${series?.title ?: "Series"} - S${ep.seasonNumber.toString().padStart(2, '0')}E${ep.episodeNumber.toString().padStart(2, '0')}${ep.title?.let { " - $it" } ?: ""}"
+                ArrSeries(
+                    id = ep.id,
+                    title = episodeTitle,
+                    originalLanguage = series?.originalLanguage ?: Language(1, "English"),
+                    year = ep.airDate?.year ?: series?.year ?: 2026,
+                    qualityProfileId = series?.qualityProfileId ?: 1,
+                    monitored = ep.monitored,
+                    runtime = ep.runtime ?: series?.runtime ?: 30,
+                    status = series?.status ?: MediaStatus.Continuing,
+                    overview = ep.overview ?: series?.overview,
+                    images = ep.images.ifEmpty { series?.images ?: emptyList() },
+                    tvdbId = ep.tvdbId ?: series?.tvdbId ?: 0L,
+                    ended = series?.ended ?: false,
+                    seasonFolder = series?.seasonFolder ?: true,
+                    monitorNewItems = series?.monitorNewItems ?: MonitorNewItems.All,
+                    useSceneNumbering = series?.useSceneNumbering ?: false,
+                    seriesType = series?.seriesType ?: SeriesType.Standard,
+                    instanceId = instance.id,
+                )
+            },
+        )
+    }
+
+    override suspend fun getWantedCutoff(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<WantedPage> = get<SonarrWantedPage>(
+        "wanted/cutoff",
+        mapOf(
+            "page" to page,
+            "pageSize" to pageSize,
+            "includeSeries" to true,
+            "includeEpisode" to true,
+        ),
+    ).map { pageRes ->
+        WantedPage(
+            page = pageRes.page,
+            pageSize = pageRes.pageSize,
+            totalRecords = pageRes.totalRecords,
+            records = pageRes.records.map { ep ->
+                val series = ep.series?.withLocalImages(instance)
+                val episodeTitle = "${series?.title ?: "Series"} - S${ep.seasonNumber.toString().padStart(2, '0')}E${ep.episodeNumber.toString().padStart(2, '0')}${ep.title?.let { " - $it" } ?: ""}"
+                ArrSeries(
+                    id = ep.id,
+                    title = episodeTitle,
+                    originalLanguage = series?.originalLanguage ?: Language(1, "English"),
+                    year = ep.airDate?.year ?: series?.year ?: 2026,
+                    qualityProfileId = series?.qualityProfileId ?: 1,
+                    monitored = ep.monitored,
+                    runtime = ep.runtime ?: series?.runtime ?: 30,
+                    status = series?.status ?: MediaStatus.Continuing,
+                    overview = ep.overview ?: series?.overview,
+                    images = ep.images.ifEmpty { series?.images ?: emptyList() },
+                    tvdbId = ep.tvdbId ?: series?.tvdbId ?: 0L,
+                    ended = series?.ended ?: false,
+                    seasonFolder = series?.seasonFolder ?: true,
+                    monitorNewItems = series?.monitorNewItems ?: MonitorNewItems.All,
+                    useSceneNumbering = series?.useSceneNumbering ?: false,
+                    seriesType = series?.seriesType ?: SeriesType.Standard,
+                    instanceId = instance.id,
+                )
+            },
+        )
+    }
 }

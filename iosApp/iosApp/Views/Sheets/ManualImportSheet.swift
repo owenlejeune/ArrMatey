@@ -1,8 +1,3 @@
-//
-//  ManualImportSheet.swift
-//  iosApp
-//
-
 import Shared
 import SwiftUI
 
@@ -96,7 +91,7 @@ struct ManualImportSheetContent: View {
                 set: { if !$0 { onClearError() } }
             )
         ) {
-            Button("OK", action: onClearError)
+            Button(MR.strings().ok.localized(), action: onClearError)
         } message: {
             if let error = error {
                 Text(error)
@@ -179,7 +174,11 @@ private struct ManualImportRow: View {
                     rejections: [],
                     seriesId: nil,
                     episodeIds: [],
+                    seasonNumber: nil,
+                    series: nil,
+                    episodes: [],
                     movieId: 1,
+                    movie: nil,
                     artistId: nil,
                     albumId: nil,
                     authorId: nil,
@@ -204,7 +203,11 @@ private struct ManualImportRow: View {
                     rejections: [ManualImportRejection(reason: "Sample file detected", type: "permanent")],
                     seriesId: nil,
                     episodeIds: [],
+                    seasonNumber: nil,
+                    series: nil,
+                    episodes: [],
                     movieId: 1,
+                    movie: nil,
                     artistId: nil,
                     albumId: nil,
                     authorId: nil,

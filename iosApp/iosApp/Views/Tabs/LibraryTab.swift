@@ -28,6 +28,9 @@ struct LibraryTabContent: View {
     @State private var selectedItemForEdit: ArrMedia? = nil
     @State private var selectedItemForAction: ArrMedia? = nil
     @State private var showMonitorOptions: Bool = false
+    @StateObject private var activityQueueViewModel = ActivityQueueViewModelS()
+    @State private var showManualImportSheet: Bool = false
+    @State private var manualImportInstance: Instance? = nil
 
     private var selectedInstance: Instance? {
         libraryViewModel.selectedInstance
@@ -103,6 +106,20 @@ struct LibraryTabContent: View {
                 editSheet(for: item)
             }
         }
+        .sheet(isPresented: $showManualImportSheet) {
+            if let instance = manualImportInstance ?? selectedInstance {
+                DirectoryManualImportSheet(
+                    viewModel: activityQueueViewModel,
+                    instances: [instance],
+                    initialInstanceId: instance.id,
+                    onDismiss: {
+                        showManualImportSheet = false
+                        manualImportInstance = nil
+                    },
+                    onSuccess: { libraryViewModel.refreshSelected() }
+                )
+            }
+        }
         .navigationDestination(for: MediaRoute.self) { value in
             MediaRouteDestination(route: value)
         }
@@ -120,6 +137,10 @@ struct LibraryTabContent: View {
                             onRunRssSync: { libraryViewModel.runRssSync() },
                             onSearchAllMissing: { libraryViewModel.searchAllMissing() },
                             onSearchFiltered: { libraryViewModel.searchFiltered() },
+                            onManualImport: tabInstance.supportsManualImport ? {
+                                manualImportInstance = tabInstance
+                                showManualImportSheet = true
+                            } : nil,
                             onUpdateLibrary: { libraryViewModel.updateLibrary() },
                             onBackupDatabase: { libraryViewModel.backupDatabase() }
                         ) {

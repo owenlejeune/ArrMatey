@@ -93,6 +93,8 @@ class DiscoverTabNavigator : BaseNavigator<NavKey>(DiscoverScreen.Home)
 
 class CalendarTabNavigator : BaseNavigator<NavKey>(CalendarScreen.Home)
 
+class ActivityTabNavigator : BaseNavigator<NavKey>(ActivityScreen.Home)
+
 class BooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 
 class AudiobooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)

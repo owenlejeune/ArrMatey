@@ -3,7 +3,6 @@ package com.dnfapps.arrmatey.arr.api.model
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
