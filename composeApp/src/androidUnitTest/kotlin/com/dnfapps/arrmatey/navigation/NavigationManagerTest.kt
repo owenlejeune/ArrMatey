@@ -35,6 +35,7 @@ class NavigationManagerTest {
             appState = appState,
             tabManager = tabManager,
             instanceRepository = instanceRepository,
+            activity = mockk(),
         )
 
     @Test
@@ -73,6 +74,7 @@ class NavigationManagerTest {
                 appState = appState,
                 tabManager = tabManager,
                 instanceRepository = instanceRepository,
+                activity = mockk(),
             )
 
         kotlin.test.assertTrue(navManager.isCurrentScreenRoot(TabItem.Standard.SHOWS))
