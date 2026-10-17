@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -60,6 +61,13 @@ fun AddEditCustomWebpageScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var confirmDelete by remember { mutableStateOf(false) }
+
+    // Add mode reuses one ViewModel (key = null): clear the last attempt on a new visit, not on a config change.
+    var formCleared by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (webpageId == null && !formCleared) viewModel.reset()
+        formCleared = true
+    }
 
     LaunchedEffect(uiState.saveResult) {
         when (val state = uiState.saveResult) {

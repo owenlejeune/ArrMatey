@@ -50,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -102,7 +103,12 @@ fun AddEditDownloadClientScreen(
     var confirmDelete by remember { mutableStateOf(false) }
     var conflictFields by remember { mutableStateOf<List<DownloadClientConflictField>>(emptyList()) }
 
+    // Add mode reuses one ViewModel (key = null), so clear the last attempt on each new visit. rememberSaveable
+    // keeps a config change (rotation, fold/unfold) from wiping a half-filled form.
+    var formCleared by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
+        if (clientId == null && !formCleared) viewModel.reset()
+        formCleared = true
         viewModel.resetMutationState()
     }
 

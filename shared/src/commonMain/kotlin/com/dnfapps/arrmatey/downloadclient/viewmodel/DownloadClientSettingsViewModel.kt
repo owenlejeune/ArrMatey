@@ -416,6 +416,14 @@ class DownloadClientSettingsViewModel(
         }
     }
 
+    /** Clears the form. Add screens share one ViewModel instance (null key), so they call this on entry. */
+    fun reset() {
+        cancelActiveTesting() // also deletes a client created by an unfinished submit
+        originalClient = null
+        _downloadClient.value = null
+        _uiState.value = DownloadClientConfigurationUiState()
+    }
+
     fun resetMutationState() {
         _uiState.update {
             it.copy(mutationState = DownloadClientMutationState.Initial)

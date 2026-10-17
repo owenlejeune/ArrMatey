@@ -209,6 +209,7 @@ class ActivityQueueViewModel(
                     HistoryEventType.Added,
                     HistoryEventType.DownloadImported,
                     HistoryEventType.AlbumImportIncomplete,
+                    HistoryEventType.BookImportIncomplete,
                 )
 
             val filteredHistory =

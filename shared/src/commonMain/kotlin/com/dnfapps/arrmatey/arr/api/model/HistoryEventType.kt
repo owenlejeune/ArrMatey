@@ -23,6 +23,7 @@ enum class HistoryEventType(
     DownloadIgnored(MR.strings.download_ignored),
     DownloadImported(MR.strings.download_imported),
     AlbumImportIncomplete(MR.strings.album_import_incomplete),
+    BookImportIncomplete(MR.strings.book_import_incomplete),
 
     // Movie Events (Radarr)
     MovieFileImported(MR.strings.movie_file_imported),
@@ -78,6 +79,7 @@ object HistoryEventTypeSerializer : KSerializer<HistoryEventType> {
             "downloadignored" -> HistoryEventType.DownloadIgnored
             "downloadimported" -> HistoryEventType.DownloadImported
             "albumimportincomplete" -> HistoryEventType.AlbumImportIncomplete
+            "bookimportincomplete" -> HistoryEventType.BookImportIncomplete
             "moviefileimported" -> HistoryEventType.MovieFileImported
             "moviefileadded" -> HistoryEventType.MovieFileAdded
             "moviefilerenamed" -> HistoryEventType.MovieFileRenamed
