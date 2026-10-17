@@ -122,7 +122,7 @@ fun AddInstanceScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AnimatedVisibility(
-                visible = uiState.infoCardMaps[selectedInstanceType] ?: false,
+                visible = uiState.shouldShowInfoCard(selectedInstanceType),
             ) {
                 InstanceInfoCard(selectedInstanceType) {
                     viewModel.dismissInfoCard(selectedInstanceType)
@@ -152,13 +152,22 @@ fun AddInstanceScreen(
                 onInstanceLabelChanged = { viewModel.setInstanceLabel(it) },
                 onIsSlowInstanceChanged = { viewModel.setIsSlowInstance(it) },
                 onCustomTimeoutChanged = { viewModel.setCustomTimeout(it) },
-                onTestConnection = { viewModel.testConnection(selectedInstanceType) },
                 onHeadersChanged = { viewModel.updateHeaders(it) },
                 onLocalNetworkEnabledChanged = { viewModel.setLocalNetworkEnabled(it) },
                 onLocalNetworkUrlChanged = { viewModel.setLocalNetworkUrl(it) },
                 onLocalNetworkSsidChanged = { viewModel.setLocalNetworkSsid(it) },
                 onTestLocalConnection = { viewModel.testLocalConnection(selectedInstanceType) },
                 onToggleNotificationsEnabled = { viewModel.toggleNotificationsEnabled() },
+                onSeerrAuthTypeChanged = { viewModel.setSeerrAuthType(it) },
+                onLoginLocal = { email, pass -> viewModel.loginLocal(email, pass) },
+                onLoginPlex = { token -> viewModel.loginPlex(token) },
+                onLoginJellyfin = { user, pass -> viewModel.loginJellyfin(user, pass) },
+                onStartQuickConnect = { viewModel.startJellyfinQuickConnect() },
+                onCancelQuickConnect = { viewModel.cancelJellyfinQuickConnect() },
+                onPlexTokenChange = { viewModel.setPlexToken(it) },
+                onStartPlexSignIn = { onOpenUrl -> viewModel.startPlexSignIn(onOpenUrl) },
+                onCancelPlexSignIn = { viewModel.cancelPlexSignIn() },
+                onClearAuthSession = { viewModel.clearAuthSession() },
             )
         }
     }

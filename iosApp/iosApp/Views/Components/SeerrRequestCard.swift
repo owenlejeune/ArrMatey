@@ -17,6 +17,8 @@ struct SeerrRequestCard: View {
     let onRemoveFromService: () -> Void
     let onClick: () -> Void
     var onViewRequest: (() -> Void)? = nil
+    var canManage: Bool? = nil
+    var canDelete: Bool? = nil
 
     private var request: MediaRequest { mediaPackage.request }
     private var details: RequestMediaDetails? { mediaPackage.details }
@@ -32,8 +34,13 @@ struct SeerrRequestCard: View {
 
                 Spacer().frame(height: 8)
 
+                let canManage = self.canManage ?? SeerrPermissionPolicy.shared.canApproveOrDecline(user: user)
+                let canDelete = self.canDelete ?? SeerrPermissionPolicy.shared.canCancelOrDeleteRequest(user: user, request: request)
+
                 RequestActionButtons(
                     isAdmin: user?.hasPermission(permission: .admin) ?? false,
+                    canManage: canManage,
+                    canDelete: canDelete,
                     request: request,
                     operationsState: operationsState,
                     onApprove: onApprove,
@@ -292,7 +299,9 @@ struct UserInfoLabel: View {
 // MARK: - Action Buttons
 
 struct RequestActionButtons: View {
-    let isAdmin: Bool
+    var isAdmin: Bool = false
+    var canManage: Bool = false
+    var canDelete: Bool = false
     let request: MediaRequest
     let operationsState: RequestOperationsState
     let onApprove: () -> Void
@@ -316,7 +325,7 @@ struct RequestActionButtons: View {
                 pendingButtons
             }
 
-            if isAdmin && (isApproved || isDeclined) && !isPendingApproval {
+            if canDelete && (isApproved || isDeclined) && !isPendingApproval {
                 adminButtons
             }
         }
@@ -325,7 +334,7 @@ struct RequestActionButtons: View {
     private var pendingButtons: some View {
         VStack(spacing: 6) {
             HStack(spacing: 6) {
-                if isAdmin {
+                if canManage {
                     Button(action: onApprove) {
                         HStack(spacing: 4) {
                             if operationsState.approvalStates[request.id.asKotlinLong] is OperationStatusInProgress {
@@ -345,35 +354,37 @@ struct RequestActionButtons: View {
                     .disabled(operationsState.approvalStates[request.id.asKotlinLong] is OperationStatusInProgress)
                 }
 
-                Button(action: {
-                    if showDeclineConfirm {
-                        onDecline()
-                        showDeclineConfirm = false
-                    } else {
-                        showDeclineConfirm = true
-                        resetConfirmAfterDelay { showDeclineConfirm = false }
-                    }
-                }) {
-                    HStack(spacing: 4) {
-                        if operationsState.cancelStates[request.id.asKotlinLong] is OperationStatusInProgress {
-                            ProgressView().tint(.white)
+                if canDelete {
+                    Button(action: {
+                        if showDeclineConfirm {
+                            onDecline()
+                            showDeclineConfirm = false
                         } else {
-                            Image(systemName: "xmark")
-                            Text(showDeclineConfirm
-                                 ? MR.strings().confirm.localized()
-                                 : (isAdmin ? MR.strings().decline.localized() : MR.strings().cancel_request.localized()))
+                            showDeclineConfirm = true
+                            resetConfirmAfterDelay { showDeclineConfirm = false }
                         }
+                    }) {
+                        HStack(spacing: 4) {
+                            if operationsState.cancelStates[request.id.asKotlinLong] is OperationStatusInProgress {
+                                ProgressView().tint(.white)
+                            } else {
+                                Image(systemName: "xmark")
+                                Text(showDeclineConfirm
+                                     ? MR.strings().confirm.localized()
+                                     : (canManage ? MR.strings().decline.localized() : MR.strings().cancel_request.localized()))
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .font(.subheadline.bold())
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .font(.subheadline.bold())
+                    .disabled(operationsState.cancelStates[request.id.asKotlinLong] is OperationStatusInProgress)
                 }
-                .disabled(operationsState.cancelStates[request.id.asKotlinLong] is OperationStatusInProgress)
 
-                if let onViewRequest {
+                if canManage, let onViewRequest {
                     Button(action: onViewRequest) {
                         Image(systemName: "eye")
                             .font(.subheadline.bold())
@@ -386,7 +397,7 @@ struct RequestActionButtons: View {
             }
 
             if isDebug() {
-                if isAdmin || request.type == .tv {
+                if canManage || request.type == .tv {
                     Button(action: onEdit) {
                         HStack(spacing: 4) {
                             Image(systemName: "pencil")

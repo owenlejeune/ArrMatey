@@ -64,6 +64,8 @@ fun RequestsScreen(
     val pendingRequestsCount by viewModel.pendingRequestsCount.collectAsStateWithLifecycle()
     val openIssuesCount by viewModel.openIssuesCount.collectAsStateWithLifecycle()
     val requestOperationsState by viewModel.operationsState.collectAsStateWithLifecycle()
+    val canManageRequests by viewModel.canManageRequests.collectAsStateWithLifecycle()
+    val canViewIssues by viewModel.canViewIssues.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val requestActionStatus by viewModel.requestActionStatus.collectAsStateWithLifecycle()
 
@@ -120,46 +122,50 @@ fun RequestsScreen(
             } else {
                 Column(modifier = Modifier.fillMaxSize()) {
                     if (!isExpanded) {
-                        SecondaryTabRow(
-                            selectedTabIndex = SeerrTab.entries.indexOf(selectedTab),
-                        ) {
-                            Tab(
-                                selected = selectedTab == SeerrTab.Requests,
-                                onClick = { viewModel.setSelectedTab(SeerrTab.Requests) },
-                                text = {
-                                    Text(
-                                        text =
-                                        buildString {
-                                            append(mokoString(MR.strings.requests))
-                                            if (pendingRequestsCount > 0) {
-                                                append(" ($pendingRequestsCount)")
-                                            }
-                                        },
-                                    )
-                                },
-                            )
-                            Tab(
-                                selected = selectedTab == SeerrTab.Issues,
-                                onClick = { viewModel.setSelectedTab(SeerrTab.Issues) },
-                                text = {
-                                    Text(
-                                        text =
-                                        buildString {
-                                            append(mokoString(MR.strings.issues))
-                                            if (openIssuesCount > 0) {
-                                                append(" ($openIssuesCount)")
-                                            }
-                                        },
-                                    )
-                                },
-                            )
+                        if (canViewIssues) {
+                            SecondaryTabRow(
+                                selectedTabIndex = SeerrTab.entries.indexOf(selectedTab),
+                            ) {
+                                Tab(
+                                    selected = selectedTab == SeerrTab.Requests,
+                                    onClick = { viewModel.setSelectedTab(SeerrTab.Requests) },
+                                    text = {
+                                        Text(
+                                            text =
+                                            buildString {
+                                                append(mokoString(MR.strings.requests))
+                                                if (pendingRequestsCount > 0) {
+                                                    append(" ($pendingRequestsCount)")
+                                                }
+                                            },
+                                        )
+                                    },
+                                )
+                                Tab(
+                                    selected = selectedTab == SeerrTab.Issues,
+                                    onClick = { viewModel.setSelectedTab(SeerrTab.Issues) },
+                                    text = {
+                                        Text(
+                                            text =
+                                            buildString {
+                                                append(mokoString(MR.strings.issues))
+                                                if (openIssuesCount > 0) {
+                                                    append(" ($openIssuesCount)")
+                                                }
+                                            },
+                                        )
+                                    },
+                                )
+                            }
                         }
 
-                        if (selectedTab == SeerrTab.Requests) {
+                        if (!canViewIssues || selectedTab == SeerrTab.Requests) {
                             RequestsContent(
                                 pagedData = pagedData,
                                 userState = userState,
                                 operationsState = requestOperationsState,
+                                canManage = canManageRequests,
+                                canDeleteRequest = { viewModel.canDeleteRequest(it) },
                                 selectedFilter = selectedFilter,
                                 onFilterSelected = { viewModel.setFilter(it) },
                                 onApprove = { viewModel.approveRequest(it) },
@@ -187,52 +193,78 @@ fun RequestsScreen(
                             )
                         }
                     } else {
-                        Column {
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                Text(
-                                    text = mokoString(MR.strings.requests),
-                                    style = MaterialTheme.typography.titleMediumEmphasized,
-                                    modifier = Modifier.weight(1f).padding(horizontal = 24.dp),
-                                )
-                                Text(
-                                    text = mokoString(MR.strings.issues),
-                                    style = MaterialTheme.typography.titleMediumEmphasized,
-                                    modifier = Modifier.weight(1f).padding(horizontal = 24.dp),
-                                )
-                            }
-                            Row(modifier = Modifier.fillMaxSize()) {
-                                Box(modifier = Modifier.weight(1f)) {
-                                    RequestsContent(
-                                        pagedData = pagedData,
-                                        userState = userState,
-                                        operationsState = requestOperationsState,
-                                        selectedFilter = selectedFilter,
-                                        onFilterSelected = { viewModel.setFilter(it) },
-                                        onApprove = { viewModel.approveRequest(it) },
-                                        onApproveWithDetails = { id, profileId, rootFolder, lang, seasons ->
-                                            viewModel.approveRequest(id, profileId, rootFolder, lang, seasons)
-                                        },
-                                        onDecline = { viewModel.declineRequest(it) },
-                                        onEdit = { },
-                                        onDelete = { viewModel.cancelRequest(it) },
-                                        onRemoveFromService = { viewModel.deleteMediaFile(it) },
-                                        onNavigateToDetails = onNavigateToDetails,
-                                        onLoadMore = { viewModel.loadNextRequestsPage() },
-                                        onRetry = { viewModel.retryRequests() },
-                                        onClearError = { viewModel.clearRequestsError() },
+                        if (!canViewIssues) {
+                            RequestsContent(
+                                pagedData = pagedData,
+                                userState = userState,
+                                operationsState = requestOperationsState,
+                                canManage = canManageRequests,
+                                canDeleteRequest = { viewModel.canDeleteRequest(it) },
+                                selectedFilter = selectedFilter,
+                                onFilterSelected = { viewModel.setFilter(it) },
+                                onApprove = { viewModel.approveRequest(it) },
+                                onApproveWithDetails = { id, profileId, rootFolder, lang, seasons ->
+                                    viewModel.approveRequest(id, profileId, rootFolder, lang, seasons)
+                                },
+                                onDecline = { viewModel.declineRequest(it) },
+                                onEdit = { },
+                                onDelete = { viewModel.cancelRequest(it) },
+                                onRemoveFromService = { viewModel.deleteMediaFile(it) },
+                                onNavigateToDetails = onNavigateToDetails,
+                                onLoadMore = { viewModel.loadNextRequestsPage() },
+                                onRetry = { viewModel.retryRequests() },
+                                onClearError = { viewModel.clearRequestsError() },
+                            )
+                        } else {
+                            Column {
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = mokoString(MR.strings.requests),
+                                        style = MaterialTheme.typography.titleMediumEmphasized,
+                                        modifier = Modifier.weight(1f).padding(horizontal = 24.dp),
+                                    )
+                                    Text(
+                                        text = mokoString(MR.strings.issues),
+                                        style = MaterialTheme.typography.titleMediumEmphasized,
+                                        modifier = Modifier.weight(1f).padding(horizontal = 24.dp),
                                     )
                                 }
-                                VerticalDivider(modifier = Modifier.padding(vertical = 24.dp))
-                                Box(modifier = Modifier.weight(1f)) {
-                                    IssuesContent(
-                                        pagedData = issuesData,
-                                        selectedFilter = selectedIssueFilter,
-                                        onFilterSelected = { viewModel.setIssueFilter(it) },
-                                        onLoadMore = { viewModel.loadNextIssuesPage() },
-                                        onRetry = { viewModel.retryIssues() },
-                                        onClearError = { viewModel.clearIssuesError() },
-                                        onRefresh = { viewModel.refresh() },
-                                    )
+                                Row(modifier = Modifier.fillMaxSize()) {
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        RequestsContent(
+                                            pagedData = pagedData,
+                                            userState = userState,
+                                            operationsState = requestOperationsState,
+                                            canManage = canManageRequests,
+                                            canDeleteRequest = { viewModel.canDeleteRequest(it) },
+                                            selectedFilter = selectedFilter,
+                                            onFilterSelected = { viewModel.setFilter(it) },
+                                            onApprove = { viewModel.approveRequest(it) },
+                                            onApproveWithDetails = { id, profileId, rootFolder, lang, seasons ->
+                                                viewModel.approveRequest(id, profileId, rootFolder, lang, seasons)
+                                            },
+                                            onDecline = { viewModel.declineRequest(it) },
+                                            onEdit = { },
+                                            onDelete = { viewModel.cancelRequest(it) },
+                                            onRemoveFromService = { viewModel.deleteMediaFile(it) },
+                                            onNavigateToDetails = onNavigateToDetails,
+                                            onLoadMore = { viewModel.loadNextRequestsPage() },
+                                            onRetry = { viewModel.retryRequests() },
+                                            onClearError = { viewModel.clearRequestsError() },
+                                        )
+                                    }
+                                    VerticalDivider(modifier = Modifier.padding(vertical = 24.dp))
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        IssuesContent(
+                                            pagedData = issuesData,
+                                            selectedFilter = selectedIssueFilter,
+                                            onFilterSelected = { viewModel.setIssueFilter(it) },
+                                            onLoadMore = { viewModel.loadNextIssuesPage() },
+                                            onRetry = { viewModel.retryIssues() },
+                                            onClearError = { viewModel.clearIssuesError() },
+                                            onRefresh = { viewModel.refresh() },
+                                        )
+                                    }
                                 }
                             }
                         }

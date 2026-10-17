@@ -29,7 +29,7 @@ struct NewInstanceView: View {
     }
     
     private var showInfoCard: Bool {
-        uiState.infoCardMaps[instanceType]?.boolValue ?? false
+        uiState.shouldShowInfoCard(type: instanceType)
     }
     
     var body: some View {
@@ -57,7 +57,6 @@ struct NewInstanceView: View {
             onIsSlowInstanceChanged: { viewModel.setIsSlowInstance($0) },
             onCustomTimeoutChanged: { viewModel.setCustomTimeout($0) },
             onHeadersChanged: { viewModel.updateHeaders($0) },
-            onTestConnection: { viewModel.testConnection(instanceType) },
             onLocalNetworkEnabledChanged: { viewModel.setLocalNetworkEnabled($0) },
             onLocalNetworkUrlChanged: { viewModel.setLocalNetworkUrl($0) },
             onLocalNetworkSsidsChanged: { viewModel.setLocalNetworkSsids($0) },
@@ -67,7 +66,17 @@ struct NewInstanceView: View {
             showInfoCard: showInfoCard,
             showInstancePicker: true,
             instanceType: $instanceType,
-            showError: $viewModel.showError
+            showError: $viewModel.showError,
+            onSeerrAuthTypeChanged: { viewModel.setSeerrAuthType($0) },
+            onLoginLocal: { email, pass in viewModel.loginLocal(email: email, pass: pass) },
+            onLoginPlex: { token in viewModel.loginPlex(token: token) },
+            onLoginJellyfin: { user, pass in viewModel.loginJellyfin(username: user, pass: pass) },
+            onStartQuickConnect: { viewModel.startJellyfinQuickConnect() },
+            onCancelQuickConnect: { viewModel.cancelJellyfinQuickConnect() },
+            onPlexTokenChange: { viewModel.setPlexToken(token: $0) },
+            onStartPlexSignIn: { onOpenUrl in viewModel.startPlexSignIn(onOpenUrl: onOpenUrl) },
+            onCancelPlexSignIn: { viewModel.cancelPlexSignIn() },
+            onClearAuthSession: { viewModel.clearAuthSession() }
         )
     }
     
@@ -79,10 +88,14 @@ struct NewInstanceView: View {
             }
         }
         ToolbarItem(placement: .primaryAction) {
-            Button(MR.strings().save.localized()) {
-                viewModel.createInstance(instanceType)
+            if uiState.testing {
+                ProgressView()
+            } else {
+                Button(MR.strings().save.localized()) {
+                    viewModel.createInstance(instanceType)
+                }
+                .disabled(!uiState.saveButtonEnabled)
             }
-            .disabled(!uiState.saveButtonEnabled)
         }
     }
 }

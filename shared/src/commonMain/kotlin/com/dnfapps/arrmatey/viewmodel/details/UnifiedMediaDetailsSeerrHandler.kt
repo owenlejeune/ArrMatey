@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.ClearSeerrMediaDataUseCase
 import com.dnfapps.arrmatey.seerr.usecase.MarkSeerrMediaAsAvailableUseCase
@@ -78,6 +79,13 @@ class UnifiedMediaDetailsSeerrHandler(
                 val repository = repositoryProvider() ?: return@launch
                 val mediaType = resolvedRequestType ?: return@launch
                 val mediaId = tmdbId ?: return@launch
+                val loggedInUser = repository.loggedInUser.value
+                val effectiveUserId =
+                    if (SeerrPermissionPolicy.canRequestForOtherUsers(loggedInUser) && userId != loggedInUser?.id) {
+                        userId
+                    } else {
+                        null
+                    }
                 val body =
                     RequestMediaBody(
                         mediaType = mediaType,
@@ -88,7 +96,7 @@ class UnifiedMediaDetailsSeerrHandler(
                         rootFolder = rootFolder,
                         languageProfileId = languageProfileId,
                         seasons = seasons,
-                        userId = userId,
+                        userId = effectiveUserId,
                     )
                 _requestStatus.value = OperationStatus.InProgress
                 submitRequestUseCase(body, repository)

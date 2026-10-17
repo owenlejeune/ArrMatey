@@ -178,6 +178,14 @@ private val MIGRATION_14_15 =
         }
     }
 
+private val MIGRATION_15_16 =
+    object : Migration(15, 16) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("ALTER TABLE instances ADD COLUMN seerrAuthType TEXT NOT NULL DEFAULT 'ApiKey'")
+            connection.execSQL("ALTER TABLE instances ADD COLUMN sessionToken TEXT NOT NULL DEFAULT ''")
+        }
+    }
+
 val migrations =
     arrayOf(
         MIGRATION_1_2,
@@ -194,4 +202,5 @@ val migrations =
         MIGRATION_12_13,
         MIGRATION_13_14,
         MIGRATION_14_15,
+        MIGRATION_15_16,
     )

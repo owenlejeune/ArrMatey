@@ -184,12 +184,9 @@ class CombinedDashboardViewModel(
                     val flows =
                         seerrRepos.map { repo ->
                             combine(
-                                repo.pendingRequestsCount,
-                                repo.openIssuesCount,
-                                repo.requests,
-                                repo.openIssues,
-                                repo.isOnline,
-                            ) { pendingCount, issuesCount, requests, issues, isOnline ->
+                                combine(repo.pendingRequestsCount, repo.openIssuesCount, repo.requests) { p, i, r -> Triple(p, i, r) },
+                                combine(repo.openIssues, repo.isOnline, repo.loggedInUser) { issues, online, user -> Triple(issues, online, user) },
+                            ) { (pendingCount, issuesCount, requests), (issues, isOnline, user) ->
                                 SeerrDashboardState(
                                     instance = repo.instance,
                                     pendingRequestsCount = pendingCount,
@@ -197,6 +194,7 @@ class CombinedDashboardViewModel(
                                     requests = requests,
                                     issues = issues,
                                     isOnline = isOnline,
+                                    user = user,
                                 )
                             }
                         }

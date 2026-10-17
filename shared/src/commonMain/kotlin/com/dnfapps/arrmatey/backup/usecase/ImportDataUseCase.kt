@@ -80,6 +80,8 @@ class ImportDataUseCase(
                         localNetworkEnabled = export.localNetworkEnabled,
                         localNetworkSsids = export.localNetworkSsids,
                         localNetworkEndpoint = export.localNetworkEndpoint,
+                        seerrAuthType = export.seerrAuthType,
+                        sessionToken = EncryptedString(export.sessionToken),
                     )
 
                 val id =

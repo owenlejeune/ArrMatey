@@ -154,10 +154,12 @@ struct DashboardTabContent: View {
             set: { selectedRequestForSheet = $0?.package }
         )) { wrapper in
             if let details = wrapper.package.details {
+                let canManage = (viewModel.state as? CombinedDashboardStateSuccess)?.canManageRequests ?? false
                 SeerrViewRequestSheet(
                     details: details,
                     request: wrapper.package.request,
                     serviceDetails: wrapper.package.serviceDetails,
+                    canManage: canManage,
                     onDismissRequest: { selectedRequestForSheet = nil },
                     onApproveRequest: { requestId, profileId, rootFolder, languageProfileId, seasons in
                         viewModel.approveRequest(requestId: requestId, profileId: profileId, rootFolder: rootFolder, languageProfileId: languageProfileId, seasons: seasons)
@@ -467,8 +469,22 @@ struct DashboardCardView: View {
             switch card {
             case .arrOverview: DashboardOverviewSection(state: state, isEditing: isEditing, onHealthClick: onHealthClick)
             case .seerrOverview: DashboardSeerrSection(state: state, isEditing: isEditing, onRequestClick: onSeerrRequestsStatClick, onIssueClick: onSeerrIssuesStatClick)
-            case .pendingRequests: DashboardPendingRequestsSection(state: state, isEditing: isEditing, onRequestClick: onRequestClick)
-            case .pendingIssues: DashboardPendingIssuesSection(state: state, isEditing: isEditing, onIssueClick: onIssueClick)
+            case .pendingRequests:
+                DashboardPendingRequestsSection(
+                    state: state,
+                    isEditing: isEditing,
+                    onRequestClick: { pkg in
+                        if state.canManageRequests {
+                            onRequestClick?(pkg)
+                        } else {
+                            navigationManager.goToSeerrDetailsOnDashboard(tmdbId: pkg.request.media.tmdbId, requestType: pkg.request.type)
+                        }
+                    }
+                )
+            case .pendingIssues:
+                if state.canViewIssues {
+                    DashboardPendingIssuesSection(state: state, isEditing: isEditing, onIssueClick: onIssueClick)
+                }
             case .prowlarrOverview: DashboardProwlarrSection(state: state, isEditing: isEditing)
             case .network: DashboardNetworkSection(state: state, isEditing: isEditing)
             case .recentlyAdded: DashboardRecentlyAddedSection(state: state)
@@ -640,7 +656,9 @@ struct DashboardSeerrSection: View {
 
             HStack(spacing: 12) {
                 StatCard(icon: "tray", label: MR.strings().dashboard_pending_requests.localized(), value: "\(totalRequests)", color: .purple, onClick: isEditing ? nil : onRequestClick)
-                StatCard(icon: "ladybug", label: MR.strings().dashboard_pending_issues.localized(), value: "\(totalIssues)", color: totalIssues > 0 ? .red : .secondary, onClick: isEditing ? nil : onIssueClick)
+                if state.canViewIssues {
+                    StatCard(icon: "ladybug", label: MR.strings().dashboard_pending_issues.localized(), value: "\(totalIssues)", color: totalIssues > 0 ? .red : .secondary, onClick: isEditing ? nil : onIssueClick)
+                }
             }
         }
     }

@@ -9,16 +9,23 @@ import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssueCount
 import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.IssuesResponse
+import com.dnfapps.arrmatey.seerr.api.model.JellyfinAuthBody
+import com.dnfapps.arrmatey.seerr.api.model.JellyfinQuickConnectAuthBody
+import com.dnfapps.arrmatey.seerr.api.model.LocalAuthBody
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
+import com.dnfapps.arrmatey.seerr.api.model.PlexAuthBody
+import com.dnfapps.arrmatey.seerr.api.model.QuickConnectCheckResponse
+import com.dnfapps.arrmatey.seerr.api.model.QuickConnectInitiateResponse
 import com.dnfapps.arrmatey.seerr.api.model.RequestCount
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
+import com.dnfapps.arrmatey.seerr.api.model.SeerrAuthResult
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
@@ -30,8 +37,10 @@ import com.dnfapps.networking.safeGet
 import com.dnfapps.networking.safePost
 import com.dnfapps.networking.safePut
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.cookies.cookies
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLQueryComponent
 import kotlinx.serialization.json.JsonArray
@@ -44,6 +53,32 @@ interface SeerrClient {
     suspend fun testConnection(): NetworkResult<Unit>
 
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
+
+    suspend fun loginLocal(
+        email: String,
+        password: String,
+    ): NetworkResult<SeerrAuthResult>
+
+    suspend fun loginPlex(
+        authToken: String,
+    ): NetworkResult<SeerrAuthResult>
+
+    suspend fun loginJellyfin(
+        username: String,
+        password: String,
+    ): NetworkResult<SeerrAuthResult>
+
+    suspend fun initiateJellyfinQuickConnect(): NetworkResult<QuickConnectInitiateResponse>
+
+    suspend fun checkJellyfinQuickConnect(
+        secret: String,
+    ): NetworkResult<QuickConnectCheckResponse>
+
+    suspend fun authenticateJellyfinQuickConnect(
+        secret: String,
+    ): NetworkResult<SeerrAuthResult>
+
+    suspend fun logout(): NetworkResult<Unit>
 
     suspend fun getUsers(
         take: Int = 100,
@@ -75,6 +110,7 @@ interface SeerrClient {
         page: Int = 1,
         pageSize: Int = 100,
         filter: RequestState = RequestState.All,
+        requestedBy: Long? = null,
     ): NetworkResult<RequestResponse>
 
     suspend fun getRequestCount(): NetworkResult<RequestCount>
@@ -181,6 +217,66 @@ class SeerrClientImpl(
 
     override suspend fun getUserInfo(): NetworkResult<SeerrUser> = get("auth/me")
 
+    override suspend fun loginLocal(
+        email: String,
+        password: String,
+    ): NetworkResult<SeerrAuthResult> = when (val result: NetworkResult<SeerrUser> = post("auth/local", LocalAuthBody(email, password))) {
+        is NetworkResult.Success -> NetworkResult.Success(resolveAuthResult(result.data))
+        is NetworkResult.Error -> result
+        is NetworkResult.Loading -> result
+    }
+
+    override suspend fun loginPlex(
+        authToken: String,
+    ): NetworkResult<SeerrAuthResult> = when (val result: NetworkResult<SeerrUser> = post("auth/plex", PlexAuthBody(authToken))) {
+        is NetworkResult.Success -> NetworkResult.Success(resolveAuthResult(result.data))
+        is NetworkResult.Error -> result
+        is NetworkResult.Loading -> result
+    }
+
+    override suspend fun loginJellyfin(
+        username: String,
+        password: String,
+    ): NetworkResult<SeerrAuthResult> = when (val result: NetworkResult<SeerrUser> = post("auth/jellyfin", JellyfinAuthBody(username, password))) {
+        is NetworkResult.Success -> NetworkResult.Success(resolveAuthResult(result.data))
+        is NetworkResult.Error -> result
+        is NetworkResult.Loading -> result
+    }
+
+    override suspend fun initiateJellyfinQuickConnect(): NetworkResult<QuickConnectInitiateResponse> = post("auth/jellyfin/quickconnect/initiate")
+
+    override suspend fun checkJellyfinQuickConnect(
+        secret: String,
+    ): NetworkResult<QuickConnectCheckResponse> = get("auth/jellyfin/quickconnect/check", mapOf("secret" to secret))
+
+    override suspend fun authenticateJellyfinQuickConnect(
+        secret: String,
+    ): NetworkResult<SeerrAuthResult> = when (
+        val result: NetworkResult<SeerrUser> = post(
+            "auth/jellyfin/quickconnect/authenticate",
+            JellyfinQuickConnectAuthBody(secret),
+        )
+    ) {
+        is NetworkResult.Success -> NetworkResult.Success(resolveAuthResult(result.data))
+        is NetworkResult.Error -> result
+        is NetworkResult.Loading -> result
+    }
+
+    private suspend fun resolveAuthResult(loginUser: SeerrUser): SeerrAuthResult {
+        val sessionToken = getSessionCookie()
+        val fullUser = (getUserInfo() as? NetworkResult.Success)?.data ?: loginUser
+        return SeerrAuthResult(user = fullUser, sessionToken = sessionToken)
+    }
+
+    override suspend fun logout(): NetworkResult<Unit> = post("auth/logout")
+
+    private suspend fun getSessionCookie(): String? = try {
+        httpClient.cookies(Url(baseUrl)).firstOrNull { it.name == "connect.sid" }?.value
+            ?: httpClient.cookies(Url(instance.getEffectiveBaseUrl())).firstOrNull { it.name == "connect.sid" }?.value
+    } catch (e: Exception) {
+        null
+    }
+
     override suspend fun getUsers(
         take: Int,
         skip: Int,
@@ -211,13 +307,15 @@ class SeerrClientImpl(
         page: Int,
         pageSize: Int,
         filter: RequestState,
+        requestedBy: Long?,
     ): NetworkResult<RequestResponse> = get(
         "request",
-        mapOf(
-            "take" to pageSize,
-            "skip" to (page - 1) * pageSize,
-            "filter" to filter.value,
-        ),
+        buildMap {
+            put("take", pageSize)
+            put("skip", (page - 1) * pageSize)
+            put("filter", filter.value)
+            requestedBy?.let { put("requestedBy", it) }
+        },
     )
 
     override suspend fun getRequestCount(): NetworkResult<RequestCount> = get("request/count")

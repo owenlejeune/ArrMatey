@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.instances.model.SeerrAuthType
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ClientRequestException
@@ -71,7 +72,11 @@ fun createInstanceClient(
         }
 
         instance?.let { instance ->
-            if (!instance.noApiKeyRequired && instance.apiKey.value.isNotEmpty()) {
+            if (instance.type == InstanceType.Seerr && instance.seerrAuthType != SeerrAuthType.ApiKey) {
+                if (instance.sessionToken.value.isNotEmpty()) {
+                    header(HttpHeaders.Cookie, "connect.sid=${instance.sessionToken.value}")
+                }
+            } else if (!instance.noApiKeyRequired && instance.apiKey.value.isNotEmpty()) {
                 when (instance.type) {
                     InstanceType.Tracearr ->
                         header(HttpHeaders.Authorization, "Bearer ${instance.apiKey.value}")

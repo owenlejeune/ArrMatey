@@ -18,7 +18,6 @@ struct ArrConfigurationView: View {
     let onIsSlowInstanceChanged: (Bool) -> Void
     let onCustomTimeoutChanged: (Int64?) -> Void
     let onHeadersChanged: ([InstanceHeader]) -> Void
-    let onTestConnection: () -> Void
     let onLocalNetworkEnabledChanged: (Bool) -> Void
     let onLocalNetworkUrlChanged: (String) -> Void
     let onLocalNetworkSsidsChanged: ([String]) -> Void
@@ -29,11 +28,26 @@ struct ArrConfigurationView: View {
     let showInstancePicker: Bool
     @Binding var instanceType: InstanceType
     @Binding var showError: Bool
+    var onSeerrAuthTypeChanged: ((SeerrAuthType) -> Void)? = nil
+    var onLoginLocal: ((String, String) -> Void)? = nil
+    var onLoginPlex: ((String) -> Void)? = nil
+    var onLoginJellyfin: ((String, String) -> Void)? = nil
+    var onStartQuickConnect: (() -> Void)? = nil
+    var onCancelQuickConnect: (() -> Void)? = nil
+    var onPlexTokenChange: ((String) -> Void)? = nil
+    var onStartPlexSignIn: (((@escaping (String) -> Void)) -> Void)? = nil
+    var onCancelPlexSignIn: (() -> Void)? = nil
+    var onClearAuthSession: (() -> Void)? = nil
     
     @State private var apiEndpoint: String = ""
     @State private var instanceLabel: String = ""
     @State private var customTimeoutText: String = ""
     @State private var headers: [InstanceHeader] = []
+    @State private var localEmail: String = ""
+    @State private var localPassword: String = ""
+    @State private var jellyfinUsername: String = ""
+    @State private var jellyfinPassword: String = ""
+    @State private var copiedPlexLink: Bool = false
     
     @StateObject private var permissionHandler = LocationPermissionHandler()
     @State private var showRationale = false
@@ -42,20 +56,6 @@ struct ArrConfigurationView: View {
     
     private var urlPlaceholder: String {
         "https://example.com:\(instanceType.defaultPort)"
-    }
-    
-    private var hasLabelConflict: Bool {
-        if let result = uiState.createResult as? InsertResultConflict {
-            return result.fields.contains(.instanceLabel)
-        }
-        return false
-    }
-    
-    private var hasUrlConflict: Bool {
-        if let result = uiState.createResult as? InsertResultConflict {
-            return result.fields.contains(.instanceUrl)
-        }
-        return false
     }
     
     var body: some View {
@@ -71,7 +71,6 @@ struct ArrConfigurationView: View {
             localNetworkArea
             slowInstanceSection
             headersSection
-            testSection
         }
         .onChange(of: instanceType, initial: true) { _, newValue in
             instanceLabel = newValue.name
@@ -87,10 +86,10 @@ struct ArrConfigurationView: View {
                 if let error = uiState.createResult as? InsertResultError {
                     Text(error.message)
                 } else {
-                    if hasLabelConflict {
+                    if uiState.hasLabelConflict {
                         Text(MR.strings().instance_label_exists.localized())
                     }
-                    if hasUrlConflict {
+                    if uiState.hasUrlConflict {
                         Text(MR.strings().instance_url_exists.localized())
                     }
                 }
@@ -169,7 +168,7 @@ struct ArrConfigurationView: View {
                         .multilineTextAlignment(.trailing)
                 }
                 
-                if hasLabelConflict {
+                if uiState.hasLabelConflict {
                     Text(MR.strings().instance_label_exists.localized())
                         .font(.caption)
                         .foregroundColor(.red)
@@ -199,85 +198,319 @@ struct ArrConfigurationView: View {
                     Text(MR.strings().invalid_host.localized())
                         .font(.caption)
                         .foregroundColor(.red)
-                } else if hasUrlConflict {
+                } else if uiState.hasUrlConflict {
                     Text(MR.strings().instance_url_exists.localized())
                         .font(.caption)
                         .foregroundColor(.red)
                 }
             }
-            
-            Toggle(MR.strings().no_api_key.localized(), isOn: Binding(
-                get: { uiState.noApiKeyRequired },
-                set: { onNoApiKeyRequiredChanged($0) }
-            ))
-            
-            HStack(spacing: 24) {
-                Text(MR.strings().api_key.localized())
-                    .foregroundStyle(!uiState.noApiKeyRequired ? Color.primary.opacity(1.0) : Color.primary.opacity(0.3))
-                TextField(
-                    text: Binding(
-                        get: { uiState.apiKey },
-                        set: { newValue in
-                            onApiKeyChanged(newValue)
-                        }
-                    ),
-                    prompt: Text(MR.strings().api_key_placeholder.localized())
-                ) {
-                    EmptyView()
+
+            if instanceType == .seerr {
+                Picker(MR.strings().auth_type.localized(), selection: Binding(
+                    get: { uiState.seerrAuthType },
+                    set: { onSeerrAuthTypeChanged?($0) }
+                )) {
+                    Text(MR.strings().auth_type_api_key.localized()).tag(SeerrAuthType.apiKey)
+                    Text(MR.strings().auth_type_local.localized()).tag(SeerrAuthType.local)
+                    Text(MR.strings().auth_type_plex.localized()).tag(SeerrAuthType.plex)
+                    Text(MR.strings().auth_type_jellyfin.localized()).tag(SeerrAuthType.jellyfin)
+                    Text(MR.strings().auth_type_quick_connect.localized()).tag(SeerrAuthType.jellyfinQuickConnect)
                 }
-                .disabled(uiState.noApiKeyRequired)
-                .multilineTextAlignment(.trailing)
-                .textInputAutocapitalization(.never)
+                .tint(.primary)
             }
             
-            if let getApiKey = instanceType.getApiKeyEndpoint {
-                let enabled = uiState.apiEndpoint.isValidUrl()
-                Button(action: {
-                    if let url = URL(string: "\(uiState.apiEndpoint)/\(getApiKey)") {
-                        openURL(url)
+            if instanceType != .seerr || uiState.seerrAuthType == .apiKey {
+                Toggle(MR.strings().no_api_key.localized(), isOn: Binding(
+                    get: { uiState.noApiKeyRequired },
+                    set: { onNoApiKeyRequiredChanged($0) }
+                ))
+                
+                HStack(spacing: 24) {
+                    Text(MR.strings().api_key.localized())
+                        .foregroundStyle(!uiState.noApiKeyRequired ? Color.primary.opacity(1.0) : Color.primary.opacity(0.3))
+                    TextField(
+                        text: Binding(
+                            get: { uiState.apiKey },
+                            set: { newValue in
+                                onApiKeyChanged(newValue)
+                            }
+                        ),
+                        prompt: Text(MR.strings().api_key_placeholder.localized())
+                    ) {
+                        EmptyView()
                     }
-                }) {
-                    HStack(spacing: 4) {
-                        Text(MR.strings().api_key_in_browser.localized())
-                            .underline()
-                            .font(.caption)
-                        Image(systemName: "safari")
-                            .font(.caption)
-                    }
-                    .foregroundStyle(enabled ? Color.accentColor : Color.secondary)
+                    .disabled(uiState.noApiKeyRequired)
+                    .multilineTextAlignment(.trailing)
+                    .textInputAutocapitalization(.never)
                 }
-                .disabled(!enabled)
-                .buttonStyle(.plain)
+                
+                if let getApiKey = instanceType.getApiKeyEndpoint {
+                    let enabled = uiState.apiEndpoint.isValidUrl()
+                    Button(action: {
+                        if let url = URL(string: "\(uiState.apiEndpoint)/\(getApiKey)") {
+                            openURL(url)
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            Text(MR.strings().api_key_in_browser.localized())
+                                .underline()
+                                .font(.caption)
+                            Image(systemName: "safari")
+                                .font(.caption)
+                        }
+                        .foregroundStyle(enabled ? Color.accentColor : Color.secondary)
+                    }
+                    .disabled(!enabled)
+                    .buttonStyle(.plain)
+                }
+            } else {
+                seerrAuthSection
             }
         } footer: {
             Text(MR.strings().host_description.formatted(args: [instanceType.name]))
         }
     }
-    
+
     @ViewBuilder
-    private var testSection: some View {
-        HStack {
-            Button(action: onTestConnection) {
-                if uiState.testing {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                } else {
-                    Text(MR.strings().test.localized())
+    private var seerrAuthSection: some View {
+        if !uiState.sessionToken.isEmpty {
+            HStack {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                Text(uiState.authenticatedUserDisplayName.map { MR.strings().signed_in_as.formatted(args: [$0]) } ?? MR.strings().authenticated_session.localized())
+                    .font(.subheadline)
+                Spacer()
+                Button(MR.strings().sign_out.localized()) {
+                    onClearAuthSession?()
                 }
+                .buttonStyle(.bordered)
+                .font(.caption)
             }
-            .disabled(uiState.testing || uiState.apiEndpoint.isEmpty || (!uiState.noApiKeyRequired && uiState.apiKey.isEmpty))
+        } else {
+            if let authError = uiState.authError {
+                Text(authError)
+                    .font(.caption)
+                    .foregroundColor(.red)
+            }
             
-            Spacer()
-            
-            if let testResult = uiState.testResult {
-                HStack(spacing: 4) {
-                    Text(testResult.boolValue ? MR.strings().success.localized() : MR.strings().failure.localized())
-                        .foregroundColor(testResult.boolValue ? .green : .red)
-                        .multilineTextAlignment(.trailing)
+            switch uiState.seerrAuthType {
+            case .local:
+                TextField(
+                    MR.strings().email.localized(),
+                    text: $localEmail
+                )
+                .textContentType(.emailAddress)
+                .keyboardType(.emailAddress)
+                .textInputAutocapitalization(.never)
+                
+                SecureField(
+                    MR.strings().password.localized(),
+                    text: $localPassword
+                )
+                .textContentType(.password)
+                
+                Button(action: {
+                    onLoginLocal?(localEmail, localPassword)
+                }) {
+                    HStack {
+                        Spacer()
+                        if uiState.isAuthenticating {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                        } else {
+                            Text(MR.strings().sign_in.localized())
+                        }
+                        Spacer()
+                    }
                 }
+                .disabled(uiState.isAuthenticating || localEmail.trimmingCharacters(in: .whitespaces).isEmpty || localPassword.isEmpty || !uiState.apiEndpoint.isValidUrl())
+                
+            case .plex:
+                if uiState.isPlexWaiting {
+                    VStack(alignment: .center, spacing: 12) {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                            Text(MR.strings().waiting_for_plex.localized())
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        Text(MR.strings().plex_sign_in_instructions.localized())
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                        
+                        if let authUrl = uiState.plexAuthUrl, let url = URL(string: authUrl) {
+                            Button(action: { openURL(url) }) {
+                                HStack {
+                                    Spacer()
+                                    Image(systemName: "safari")
+                                    Text(MR.strings().open_page_again.localized())
+                                    Spacer()
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .font(.subheadline)
+                            
+                            HStack(spacing: 12) {
+                                Button(action: {
+                                    UIPasteboard.general.string = authUrl
+                                    copiedPlexLink = true
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "link")
+                                        Text(copiedPlexLink ? MR.strings().copied_to_clipboard.localized() : MR.strings().copy_link.localized())
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                                .font(.caption)
+                                
+                                Button(MR.strings().cancel.localized()) {
+                                    onCancelPlexSignIn?()
+                                }
+                                .buttonStyle(.bordered)
+                                .font(.caption)
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                } else {
+                    Button(action: {
+                        onStartPlexSignIn? { urlString in
+                            if let url = URL(string: urlString) {
+                                openURL(url)
+                            }
+                        }
+                    }) {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "arrow.right.to.line")
+                            Text(MR.strings().sign_in_with_plex.localized())
+                            Spacer()
+                        }
+                    }
+                    .disabled(uiState.isAuthenticating)
+                }
+                
+                HStack {
+                    VStack { Divider() }
+                    Text(MR.strings().or.localized())
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    VStack { Divider() }
+                }
+                .padding(.vertical, 4)
+                
+                TextField(
+                    MR.strings().plex_auth_token.localized(),
+                    text: Binding(
+                        get: { uiState.plexToken },
+                        set: { onPlexTokenChange?($0) }
+                    )
+                )
+                .textInputAutocapitalization(.never)
+                
+                Button(action: {
+                    onLoginPlex?(uiState.plexToken)
+                }) {
+                    HStack {
+                        Spacer()
+                        if uiState.isAuthenticating {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                        } else {
+                            Text(MR.strings().sign_in.localized())
+                        }
+                        Spacer()
+                    }
+                }
+                .disabled(uiState.isAuthenticating || uiState.plexToken.trimmingCharacters(in: .whitespaces).isEmpty || !uiState.apiEndpoint.isValidUrl())
+                
+            case .jellyfin:
+                TextField(
+                    MR.strings().username.localized(),
+                    text: $jellyfinUsername
+                )
+                .textInputAutocapitalization(.never)
+                
+                SecureField(
+                    MR.strings().password.localized(),
+                    text: $jellyfinPassword
+                )
+                .textContentType(.password)
+                
+                Button(action: {
+                    onLoginJellyfin?(jellyfinUsername, jellyfinPassword)
+                }) {
+                    HStack {
+                        Spacer()
+                        if uiState.isAuthenticating {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                        } else {
+                            Text(MR.strings().sign_in.localized())
+                        }
+                        Spacer()
+                    }
+                }
+                .disabled(uiState.isAuthenticating || jellyfinUsername.trimmingCharacters(in: .whitespaces).isEmpty || jellyfinPassword.isEmpty || !uiState.apiEndpoint.isValidUrl())
+                
+            case .jellyfinQuickConnect:
+                if let code = uiState.quickConnectCode {
+                    VStack(alignment: .center, spacing: 12) {
+                        Text(MR.strings().quick_connect_instructions.localized())
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                        
+                        Text(code)
+                            .font(.system(size: 32, weight: .bold, design: .monospaced))
+                            .foregroundColor(.accentColor)
+                        
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                            Text(MR.strings().quick_connect_waiting.localized())
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        Button(MR.strings().cancel.localized()) {
+                            onCancelQuickConnect?()
+                        }
+                        .buttonStyle(.bordered)
+                        .font(.caption)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                } else {
+                    Button(action: {
+                        onStartQuickConnect?()
+                    }) {
+                        HStack {
+                            Spacer()
+                            if uiState.isAuthenticating {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                            } else {
+                                Text(MR.strings().quick_connect_start.localized())
+                            }
+                            Spacer()
+                        }
+                    }
+                    .disabled(uiState.isAuthenticating || !uiState.apiEndpoint.isValidUrl())
+                }
+                
+            default:
+                EmptyView()
             }
         }
     }
+    
+
 
     @ViewBuilder
     private var notificationSection: some View {

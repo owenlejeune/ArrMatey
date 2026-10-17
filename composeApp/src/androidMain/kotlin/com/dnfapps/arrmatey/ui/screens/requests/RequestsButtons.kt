@@ -28,7 +28,9 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun RequestButtons(
-    isAdmin: Boolean,
+    isAdmin: Boolean = false,
+    canManage: Boolean = isAdmin,
+    canDelete: Boolean = isAdmin,
     request: MediaRequest,
     operationsState: RequestOperationsState,
     onApproveClicked: () -> Unit,
@@ -76,7 +78,8 @@ fun RequestButtons(
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         if (isPendingApproval && !isApproved) {
             PendingApprovalButtons(
-                isAdmin = isAdmin,
+                canManage = canManage,
+                canDelete = canDelete,
                 request = request,
                 operationsState = operationsState,
                 showDeclineConfirm = showDeclineConfirm,
@@ -94,7 +97,7 @@ fun RequestButtons(
             )
         }
 
-        if (isAdmin && (isApproved || isDeclined) && !isPendingApproval) {
+        if (canDelete && (isApproved || isDeclined) && !isPendingApproval) {
             AdminActionButtons(
                 request = request,
                 isApproved = isApproved,
@@ -124,7 +127,8 @@ fun RequestButtons(
 
 @Composable
 private fun PendingApprovalButtons(
-    isAdmin: Boolean,
+    canManage: Boolean,
+    canDelete: Boolean,
     request: MediaRequest,
     operationsState: RequestOperationsState,
     showDeclineConfirm: Boolean,
@@ -153,7 +157,7 @@ private fun PendingApprovalButtons(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
     ) {
-        if (isAdmin) {
+        if (canManage) {
             Button(
                 onClick = onApprove,
                 modifier = Modifier.weight(1f),
@@ -170,46 +174,50 @@ private fun PendingApprovalButtons(
             }
         }
 
-        ConfirmableButton(
-            isConfirming = showDeclineConfirm,
-            onClick = onDecline,
-            modifier = Modifier.weight(1f),
-            colors = declineColors,
-            enabled = operationsState.cancelStates[request.id] != OperationStatus.InProgress,
-            content = {
-                if (operationsState.cancelStates[request.id] is OperationStatus.InProgress) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onError,
-                    )
-                } else {
-                    Icon(Icons.Default.Close, null)
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        if (isAdmin) {
-                            mokoString(MR.strings.decline)
-                        } else {
-                            mokoString(MR.strings.cancel_request)
-                        },
+        if (canDelete) {
+            ConfirmableButton(
+                isConfirming = showDeclineConfirm,
+                onClick = onDecline,
+                modifier = Modifier.weight(1f),
+                colors = declineColors,
+                enabled = operationsState.cancelStates[request.id] != OperationStatus.InProgress,
+                content = {
+                    if (operationsState.cancelStates[request.id] is OperationStatus.InProgress) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onError,
+                        )
+                    } else {
+                        Icon(Icons.Default.Close, null)
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            if (canManage) {
+                                mokoString(MR.strings.decline)
+                            } else {
+                                mokoString(MR.strings.cancel_request)
+                            },
+                        )
+                    }
+                },
+            )
+        }
+
+        if (canManage) {
+            onViewRequest?.let { onView ->
+                FilledTonalIconButton(
+                    onClick = onView,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Visibility,
+                        contentDescription = mokoString(MR.strings.view_request),
                     )
                 }
-            },
-        )
-
-        onViewRequest?.let { onView ->
-            FilledTonalIconButton(
-                onClick = onView,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Visibility,
-                    contentDescription = mokoString(MR.strings.view_request),
-                )
             }
         }
     }
 
     if (isDebug()) {
-        if (isAdmin || request.type == RequestType.Tv) {
+        if (canManage || request.type == RequestType.Tv) {
             Button(
                 onClick = onEdit,
                 modifier = Modifier.fillMaxWidth(),

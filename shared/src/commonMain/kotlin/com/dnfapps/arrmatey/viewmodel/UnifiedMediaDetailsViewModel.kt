@@ -54,6 +54,9 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
+import com.dnfapps.arrmatey.seerr.api.model.TvDetails
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
+import com.dnfapps.arrmatey.seerr.policy.SeerrRequestPermissions
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
 import com.dnfapps.arrmatey.seerr.state.ReportIssueUiState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
@@ -77,8 +80,11 @@ import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -286,6 +292,16 @@ class UnifiedMediaDetailsViewModel(
     val buttonState: StateFlow<MediaButtonState> = seerrServiceHandler.buttonState
     val addSheetUiState: StateFlow<AddSheetUiState> = instanceHandler.addSheetUiState
     val preferences: StateFlow<InstancePreferences> = instanceHandler.preferences
+    val requestPermissions: StateFlow<SeerrRequestPermissions> =
+        combine(currentUser, isRequest4k, _uiState) { user, is4k, state ->
+            val media = (state as? UnifiedMediaDetailsUiState.Success)?.seerrMedia
+            val type = (media as? TvDetails)?.let { RequestType.Tv } ?: (resolvedRequestType ?: RequestType.Movie)
+            SeerrPermissionPolicy.getRequestPermissions(user, type, is4k)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = SeerrRequestPermissions(),
+        )
 
     private val navigatedInitialEpisodeIds = mutableSetOf<Long>()
 

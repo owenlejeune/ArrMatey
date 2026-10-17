@@ -58,6 +58,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var addSheetUiState: AddSheetUiState = AddSheetUiState()
     @Published private(set) var recommendationsState: PagedData<DiscoverResult> = PagedData()
     @Published private(set) var similarState: PagedData<DiscoverResult> = PagedData()
+    @Published private(set) var requestPermissions: SeerrRequestPermissions = SeerrRequestPermissions()
 
     var resolvedInstanceType: InstanceType? {
         return viewModel.resolvedInstanceType
@@ -123,6 +124,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.currentUser.observeAsync(on: self, to: \.currentUser)
         viewModel.users.observeAsync(on: self, to: \.users)
         viewModel.serviceDetails.observeAsync(on: self, to: \.serviceDetails)
+        viewModel.requestPermissions.observeAsync(on: self, to: \.requestPermissions)
 
         viewModel.qualityProfiles.observeAsync(on: self, to: \.qualityProfiles)
         viewModel.metadataProfiles.observeAsync(on: self, to: \.metadataProfiles)

@@ -16,7 +16,6 @@ struct EditInstanceScreen: View {
     @StateObject private var viewModel: EditInstanceViewModelS
     
     @State private var showDeleteConfirmation: Bool = false
-    @State private var saveClicked: Bool = false
     private let onSaveSuccess: () -> Void
     private let onDelete: (() -> Void)?
     
@@ -43,14 +42,8 @@ struct EditInstanceScreen: View {
         uiState.editResult is InsertResultSuccess
     }
     
-    
     var body: some View {
         content
-            .onChange(of: viewModel.uiState.testResult) { _, newValue in
-                if newValue?.boolValue == true && saveClicked {
-                    viewModel.updateInstance()
-                }
-            }
             .onChange(of: editSuccess) { _, newValue in
                 if newValue {
                     dismiss()
@@ -70,7 +63,6 @@ struct EditInstanceScreen: View {
             onIsSlowInstanceChanged: { viewModel.setIsSlowInstance($0) },
             onCustomTimeoutChanged: { viewModel.setCustomTimeout($0) },
             onHeadersChanged: { viewModel.updateHeaders($0) },
-            onTestConnection: { viewModel.testConnection() },
             onLocalNetworkEnabledChanged: { viewModel.setLocalNetworkEnabled($0) },
             onLocalNetworkUrlChanged: { viewModel.setLocalNetworkUrl($0) },
             onLocalNetworkSsidsChanged: { viewModel.setLocalNetworkSsids($0) },
@@ -80,7 +72,17 @@ struct EditInstanceScreen: View {
             showInfoCard: false,
             showInstancePicker: false,
             instanceType: .constant(instance?.type ?? .sonarr),
-            showError: $viewModel.showError
+            showError: $viewModel.showError,
+            onSeerrAuthTypeChanged: { viewModel.setSeerrAuthType($0) },
+            onLoginLocal: { email, pass in viewModel.loginLocal(email: email, pass: pass) },
+            onLoginPlex: { token in viewModel.loginPlex(token: token) },
+            onLoginJellyfin: { user, pass in viewModel.loginJellyfin(username: user, pass: pass) },
+            onStartQuickConnect: { viewModel.startJellyfinQuickConnect() },
+            onCancelQuickConnect: { viewModel.cancelJellyfinQuickConnect() },
+            onPlexTokenChange: { viewModel.setPlexToken(token: $0) },
+            onStartPlexSignIn: { onOpenUrl in viewModel.startPlexSignIn(onOpenUrl: onOpenUrl) },
+            onCancelPlexSignIn: { viewModel.cancelPlexSignIn() },
+            onClearAuthSession: { viewModel.clearAuthSession() }
         )
         .toolbar { toolbarContent }
         .alert(MR.strings().confirm.localized(), isPresented: $showDeleteConfirmation, presenting: viewModel.instance) { instance in
@@ -117,14 +119,15 @@ struct EditInstanceScreen: View {
                     }
             }
             ToolbarItem(placement: .primaryAction) {
-                Button(MR.strings().save.localized()) {
-                    Task {
-                        saveClicked = true
-                        viewModel.testConnection()
+                if uiState.testing {
+                    ProgressView()
+                } else {
+                    Button(MR.strings().save.localized()) {
+                        viewModel.updateInstance()
                     }
+                    .disabled(!uiState.saveButtonEnabled)
                 }
             }
         }
     }
-
 }

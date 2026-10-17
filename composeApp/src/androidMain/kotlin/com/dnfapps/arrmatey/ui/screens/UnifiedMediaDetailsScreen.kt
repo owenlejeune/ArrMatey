@@ -381,6 +381,7 @@ fun UnifiedMediaDetailsScreen(
                             onViewRequestClicked = { viewModel.showViewRequestSheet() },
                             onApproveRequestClicked = { viewModel.showViewRequestSheet() },
                             onDeclineRequestClicked = { viewModel.declineRequest(it) },
+                            onCancelRequestClicked = { viewModel.cancelRequest(it) },
                             onAddClicked = {
                                 val currentSelectedId = success.selectedInstanceId ?: selectedInstanceId
                                 val currentInst = success.availableInstances.find { it.id == currentSelectedId }
@@ -836,6 +837,7 @@ fun UnifiedMediaDetailsScreen(
                         viewModel.declineRequest(requestId)
                     },
                     onDismiss = { viewModel.hideViewRequestSheet() },
+                    canManage = buttonState.showApproveRequestButton,
                 )
 
                 EditMediaSheetsHost(

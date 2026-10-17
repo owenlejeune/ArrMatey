@@ -29,6 +29,7 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
@@ -53,6 +54,8 @@ fun RequestsContent(
     onRetry: () -> Unit,
     onClearError: () -> Unit,
     onApproveWithDetails: (Long, Long?, String?, Long?, List<Int>?) -> Unit = { id, _, _, _, _ -> onApprove(id) },
+    canManage: Boolean = userState != null && SeerrPermissionPolicy.canApproveOrDecline(userState),
+    canDeleteRequest: (MediaRequest) -> Boolean = { req -> userState != null && SeerrPermissionPolicy.canCancelOrDeleteRequest(userState, req) },
 ) {
     var selectedRequestPackageForSheet by remember { mutableStateOf<MediaRequestPackage?>(null) }
 
@@ -91,6 +94,8 @@ fun RequestsContent(
                         isLoadingMore = pagedData.isLoadingMore,
                         userState = userState,
                         operationsState = operationsState,
+                        canManage = canManage,
+                        canDeleteRequest = canDeleteRequest,
                         selectedFilter = selectedFilter,
                         onApprove = onApprove,
                         onDecline = onDecline,
@@ -135,6 +140,7 @@ fun RequestsContent(
                     onDecline(id)
                     selectedRequestPackageForSheet = null
                 },
+                canManage = canManage,
             )
         }
     }

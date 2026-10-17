@@ -2,7 +2,10 @@ package com.dnfapps.arrmatey.seerr.state
 
 import com.dnfapps.arrmatey.seerr.api.model.MediaInfo
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.api.model.UserPermission
 import com.dnfapps.arrmatey.seerr.api.model.Video
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
@@ -24,6 +27,7 @@ data class MediaButtonState(
     val showViewRequestButton: Boolean = false,
     val showApproveRequestButton: Boolean = false,
     val showDeclineRequestButton: Boolean = false,
+    val showCancelRequestButton: Boolean = false,
     val pendingRequestId: Long? = null,
     val showReportIssueButton: Boolean = false,
     val showManageMenu: Boolean = false,
@@ -49,11 +53,17 @@ fun MediaInfo?.toButtonState(
     totalSeasonCount: Int = 0, // NEW: Pass from TV details API
     currentUserId: Long? = null,
     isAdmin: Boolean = false,
+    currentUser: SeerrUser? = null,
+    mediaType: RequestType? = null,
 ): MediaButtonState {
+    val resolvedType = mediaType ?: this?.mediaType
+    val canRequest = currentUser == null || SeerrPermissionPolicy.canRequestMedia(currentUser, type = resolvedType, is4k = false)
+    val canRequest4k = currentUser == null || SeerrPermissionPolicy.canRequestMedia(currentUser, type = resolvedType, is4k = true)
+
     if (this == null) {
         return MediaButtonState(
-            showRequestButton = true,
-            showRequest4kButton = true,
+            showRequestButton = canRequest,
+            showRequest4kButton = canRequest4k,
             showWatchTrailerOption = getTrailerUrl(relatedVideos) != null,
             trailerUrl = getTrailerUrl(relatedVideos),
         )
@@ -67,7 +77,7 @@ fun MediaInfo?.toButtonState(
     val hasSeerrMedia = status != 1
 
     // For TV shows, check if we have all seasons or just some
-    val isTvShow = mediaType == RequestType.Tv
+    val isTvShow = resolvedType == RequestType.Tv
     val availableSeasonNumbers =
         seasons
             .filter { it.status == 5 || it.status == 4 }
@@ -91,7 +101,7 @@ fun MediaInfo?.toButtonState(
             !jellyfinMediaId.isNullOrEmpty() -> {
                 Triple(
                     MediaProvider.Jellyfin,
-                    buildJellyfinUrl(jellyfinMediaId, mediaType),
+                    buildJellyfinUrl(jellyfinMediaId, resolvedType),
                     MR.strings.watch_on_jellyfin,
                 )
             }
@@ -107,12 +117,17 @@ fun MediaInfo?.toButtonState(
             serviceUrl?.contains("sonarr", ignoreCase = true) == true -> "Sonarr"
             serviceUrl?.contains("radarr", ignoreCase = true) == true -> "Radarr"
             serviceUrl?.contains("lidarr", ignoreCase = true) == true -> "Lidarr"
-            mediaType == RequestType.Movie -> "Radarr"
-            mediaType == RequestType.Tv -> "Sonarr"
+            resolvedType == RequestType.Movie -> "Radarr"
+            resolvedType == RequestType.Tv -> "Sonarr"
             else -> null
         }
 
     val trailerUrl = getTrailerUrl(relatedVideos)
+
+    val canManage = isAdmin || (currentUser != null && SeerrPermissionPolicy.canApproveOrDecline(currentUser))
+    val canCancelOrDecline = pendingRequest != null && (isAdmin || (currentUser != null && SeerrPermissionPolicy.canCancelOrDeleteRequest(currentUser, pendingRequest)) || userHasPendingRequest)
+    val canManageMedia = isAdmin || (currentUser != null && SeerrPermissionPolicy.canManageMedia(currentUser))
+    val canCreateIssues = currentUser == null || isAdmin || SeerrPermissionPolicy.canCreateIssues(currentUser)
 
     return MediaButtonState(
         // Watch button
@@ -122,26 +137,27 @@ fun MediaInfo?.toButtonState(
         showWatchTrailerOption = trailerUrl != null,
         trailerUrl = trailerUrl,
         // Request buttons
-        showRequestButton = status == 1, // Only if standard not requested yet
-        showRequestMoreButton = hasPartialContent, // Show for partial TV content
-        showRequest4kButton = status4k == null || status4k == 1, // Only if 4k not requested yet
+        showRequestButton = status == 1 && canRequest, // Only if standard not requested yet
+        showRequestMoreButton = hasPartialContent && canRequest, // Show for partial TV content
+        showRequest4kButton = (status4k == null || status4k == 1) && canRequest4k, // Only if 4k not requested yet
         availableSeasons = availableSeasonNumbers,
         totalSeasons = totalSeasonCount,
         // Request management
-        showViewRequestButton = pendingRequest != null,
-        showApproveRequestButton = isAdmin && pendingRequest != null,
-        showDeclineRequestButton = (isAdmin || userHasPendingRequest) && pendingRequest != null,
+        showViewRequestButton = canManage && pendingRequest != null,
+        showApproveRequestButton = canManage && pendingRequest != null,
+        showDeclineRequestButton = canManage && pendingRequest != null,
+        showCancelRequestButton = !canManage && canCancelOrDecline,
         pendingRequestId = pendingRequest?.id,
         // Report Issue
-        showReportIssueButton = hasContent,
+        showReportIssueButton = hasContent && canCreateIssues,
         // Manage menu
-        showManageMenu = hasSeerrMedia,
-        showOpenInServiceButton = !serviceUrl.isNullOrEmpty(),
+        showManageMenu = hasSeerrMedia && canManageMedia,
+        showOpenInServiceButton = canManageMedia && !serviceUrl.isNullOrEmpty(),
         serviceUrl = serviceUrl,
         serviceName = serviceName,
-        showRemoveFromServiceButton = hasSeerrMedia,
-        showClearDataButton = hasSeerrMedia && isAdmin,
-        showMarkAsAvailableButton = hasSeerrMedia && !isAvailable,
+        showRemoveFromServiceButton = hasSeerrMedia && canManageMedia,
+        showClearDataButton = hasSeerrMedia && (isAdmin || currentUser?.hasPermission(UserPermission.ADMIN) == true),
+        showMarkAsAvailableButton = hasSeerrMedia && !isAvailable && canManageMedia,
         mediaProvider = mediaProvider,
     )
 }

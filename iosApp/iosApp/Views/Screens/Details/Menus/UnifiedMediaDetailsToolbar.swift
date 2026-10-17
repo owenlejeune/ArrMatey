@@ -98,6 +98,14 @@ struct UnifiedMediaDetailsToolbarTrailingView: View {
             } label: {
                 Image(systemName: "clock")
             }
+        } else if buttonState.showCancelRequestButton {
+            Button(role: .destructive, action: {
+                if let reqId = buttonState.pendingRequestId?.int64Value {
+                    viewModel.cancelRequest(requestId: reqId)
+                }
+            }) {
+                Image(systemName: "xmark.circle")
+            }
         }
     }
 

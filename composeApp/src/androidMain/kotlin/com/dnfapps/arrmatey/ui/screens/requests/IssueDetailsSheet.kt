@@ -206,16 +206,18 @@ fun IssueDetailsSheet(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(
-                    onClick = { confirmCloseIssue = true },
-                    modifier = Modifier.size(48.dp),
-                    colors =
-                    IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    ),
-                ) {
-                    Icon(Icons.Default.CheckCircleOutline, null)
+                if (uiState.canManageIssues) {
+                    IconButton(
+                        onClick = { confirmCloseIssue = true },
+                        modifier = Modifier.size(48.dp),
+                        colors =
+                        IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        ),
+                    ) {
+                        Icon(Icons.Default.CheckCircleOutline, null)
+                    }
                 }
                 OutlinedTextField(
                     value = newComment,

@@ -3,7 +3,10 @@ package com.dnfapps.arrmatey.viewmodel.details
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.api.model.UserPermission
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.ClearSeerrMediaDataUseCase
 import com.dnfapps.arrmatey.seerr.usecase.MarkSeerrMediaAsAvailableUseCase
@@ -13,8 +16,11 @@ import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
 import com.dnfapps.networking.NetworkResult
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -63,6 +69,7 @@ class UnifiedMediaDetailsSeerrHandlerTest {
     @Test
     fun testSubmitRequestSuccess() = runTest(UnconfinedTestDispatcher()) {
         val mockRepo = mockk<SeerrInstanceRepository>()
+        every { mockRepo.loggedInUser } returns MutableStateFlow(null)
         coEvery { submitRequestUseCase(any(), mockRepo) } returns NetworkResult.Success(mockk())
 
         var refreshed = false
@@ -79,6 +86,66 @@ class UnifiedMediaDetailsSeerrHandlerTest {
         assertTrue(handler.requestStatus.value is OperationStatus.Success)
         assertFalse(handler.isRequestSheetVisible.value)
         assertTrue(refreshed)
+    }
+
+    @Test
+    fun testSubmitRequestFiltersSelfUserId() = runTest(UnconfinedTestDispatcher()) {
+        val user = SeerrUser(id = 2, displayName = "Test", permissions = UserPermission.ADMIN.bit)
+        val mockRepo = mockk<SeerrInstanceRepository>()
+        every { mockRepo.loggedInUser } returns MutableStateFlow(user)
+        val bodySlot = slot<RequestMediaBody>()
+        coEvery { submitRequestUseCase(capture(bodySlot), mockRepo) } returns NetworkResult.Success(mockk())
+
+        handler.submitRequest(
+            scope = TestScope(UnconfinedTestDispatcher()),
+            repositoryProvider = { mockRepo },
+            resolvedRequestType = RequestType.Movie,
+            tmdbId = 12345L,
+            userId = 2L,
+            onSuccessRefresh = {},
+        )
+
+        kotlin.test.assertNull(bodySlot.captured.userId)
+    }
+
+    @Test
+    fun testSubmitRequestFiltersUserIdWithoutPermission() = runTest(UnconfinedTestDispatcher()) {
+        val user = SeerrUser(id = 2, displayName = "Test", permissions = 0)
+        val mockRepo = mockk<SeerrInstanceRepository>()
+        every { mockRepo.loggedInUser } returns MutableStateFlow(user)
+        val bodySlot = slot<RequestMediaBody>()
+        coEvery { submitRequestUseCase(capture(bodySlot), mockRepo) } returns NetworkResult.Success(mockk())
+
+        handler.submitRequest(
+            scope = TestScope(UnconfinedTestDispatcher()),
+            repositoryProvider = { mockRepo },
+            resolvedRequestType = RequestType.Movie,
+            tmdbId = 12345L,
+            userId = 3L,
+            onSuccessRefresh = {},
+        )
+
+        kotlin.test.assertNull(bodySlot.captured.userId)
+    }
+
+    @Test
+    fun testSubmitRequestIncludesUserIdWithPermission() = runTest(UnconfinedTestDispatcher()) {
+        val user = SeerrUser(id = 2, displayName = "Test", permissions = UserPermission.MANAGE_USERS.bit)
+        val mockRepo = mockk<SeerrInstanceRepository>()
+        every { mockRepo.loggedInUser } returns MutableStateFlow(user)
+        val bodySlot = slot<RequestMediaBody>()
+        coEvery { submitRequestUseCase(capture(bodySlot), mockRepo) } returns NetworkResult.Success(mockk())
+
+        handler.submitRequest(
+            scope = TestScope(UnconfinedTestDispatcher()),
+            repositoryProvider = { mockRepo },
+            resolvedRequestType = RequestType.Movie,
+            tmdbId = 12345L,
+            userId = 3L,
+            onSuccessRefresh = {},
+        )
+
+        kotlin.test.assertEquals(3L, bodySlot.captured.userId)
     }
 
     @Test

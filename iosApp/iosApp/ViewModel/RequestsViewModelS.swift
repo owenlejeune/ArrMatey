@@ -16,6 +16,9 @@ class RequestsViewModelS: ObservableObject {
     @Published private(set) var selectedIssueFilter: IssueState = .open
     @Published private(set) var operationsState: RequestOperationsState = RequestOperationsState()
     @Published private(set) var userState: SeerrUser? = nil
+    @Published private(set) var canManageRequests: Bool = false
+    @Published private(set) var canViewIssues: Bool = false
+    @Published private(set) var canViewAllRequests: Bool = false
     @Published private(set) var pendingRequestsCount: Int32 = 0
     @Published private(set) var openIssuesCount: Int32 = 0
     @Published private(set) var selectedTab: SeerrTab = .requests
@@ -33,6 +36,15 @@ class RequestsViewModelS: ObservableObject {
         viewModel.selectedIssueFilter.observeAsync(on: self, to: \.selectedIssueFilter)
         viewModel.operationsState.observeAsync(on: self, to: \.operationsState)
         viewModel.userState.observeAsync(on: self, to: \.userState)
+        viewModel.canManageRequests.observeAsync(on: self) { owner, canManage in
+            owner.canManageRequests = canManage.boolValue
+        }
+        viewModel.canViewIssues.observeAsync(on: self) { owner, canView in
+            owner.canViewIssues = canView.boolValue
+        }
+        viewModel.canViewAllRequests.observeAsync(on: self) { owner, canView in
+            owner.canViewAllRequests = canView.boolValue
+        }
         viewModel.pendingRequestsCount.observeAsync(on: self) { owner, count in
             owner.pendingRequestsCount = count.int32Value
         }
@@ -114,5 +126,13 @@ class RequestsViewModelS: ObservableObject {
 
     func deleteMediaFile(_ request: MediaRequest) {
         viewModel.deleteMediaFile(request: request)
+    }
+
+    func canManageRequests(user: SeerrUser? = nil) -> Bool {
+        viewModel.canManageRequests(user: user ?? userState)
+    }
+
+    func canDeleteRequest(_ request: MediaRequest, user: SeerrUser? = nil) -> Bool {
+        viewModel.canDeleteRequest(request: request, user: user ?? userState)
     }
 }

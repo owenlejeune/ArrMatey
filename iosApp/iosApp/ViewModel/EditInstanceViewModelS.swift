@@ -95,4 +95,44 @@ class EditInstanceViewModelS: ObservableObject {
     func delete(_ instance: Instance) {
         viewModel.deleteInstance(instance: instance)
     }
+
+    func setSeerrAuthType(_ type: SeerrAuthType) {
+        viewModel.setSeerrAuthType(type: type)
+    }
+
+    func loginLocal(email: String, pass: String) {
+        viewModel.loginLocal(email: email, pass: pass)
+    }
+
+    func loginPlex(token: String) {
+        viewModel.loginPlex(token: token)
+    }
+
+    func loginJellyfin(username: String, pass: String) {
+        viewModel.loginJellyfin(username: username, pass: pass)
+    }
+
+    func startJellyfinQuickConnect() {
+        viewModel.startJellyfinQuickConnect()
+    }
+
+    func cancelJellyfinQuickConnect() {
+        viewModel.cancelJellyfinQuickConnect()
+    }
+
+    func setPlexToken(token: String) {
+        viewModel.setPlexToken(token: token)
+    }
+
+    func startPlexSignIn(onOpenUrl: ((String) -> Void)? = nil) {
+        viewModel.startPlexSignIn(onOpenUrl: onOpenUrl)
+    }
+
+    func cancelPlexSignIn() {
+        viewModel.cancelPlexSignIn()
+    }
+
+    func clearAuthSession() {
+        viewModel.clearAuthSession()
+    }
 }

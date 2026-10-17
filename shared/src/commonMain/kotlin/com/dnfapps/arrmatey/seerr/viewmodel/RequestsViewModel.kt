@@ -15,6 +15,7 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -50,57 +52,6 @@ class RequestsViewModel(
     private var issuesPagingController: PagingController<MediaIssuePackage>? = null
 
     private val _rawRequestsState = MutableStateFlow<PagedData<MediaRequestPackage>>(PagedData())
-
-    private val _selectedFilter = MutableStateFlow(RequestState.Pending)
-    val selectedFilter: StateFlow<RequestState> = _selectedFilter.asStateFlow()
-
-    val requestsState: StateFlow<PagedData<MediaRequestPackage>> =
-        combine(_rawRequestsState, _selectedFilter) { data, filter ->
-            if (filter == RequestState.All) {
-                data
-            } else {
-                val filteredItems = data.items.filter { it.request.matchesFilter(filter) }
-                data.copy(
-                    items = filteredItems,
-                    totalItemCount = filteredItems.size,
-                )
-            }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = PagedData(),
-        )
-
-    private val _rawIssuesState = MutableStateFlow<PagedData<MediaIssuePackage>>(PagedData())
-
-    private val _selectedIssueFilter = MutableStateFlow(IssueState.Open)
-    val selectedIssueFilter: StateFlow<IssueState> = _selectedIssueFilter.asStateFlow()
-
-    val issuesState: StateFlow<PagedData<MediaIssuePackage>> =
-        combine(_rawIssuesState, _selectedIssueFilter) { data, filter ->
-            if (filter == IssueState.All) {
-                data
-            } else {
-                val filteredItems = data.items.filter { it.issue.matchesFilter(filter) }
-                data.copy(
-                    items = filteredItems,
-                    totalItemCount = filteredItems.size,
-                )
-            }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = PagedData(),
-        )
-
-    private val _operationsState = MutableStateFlow(RequestOperationsState())
-    val operationsState: StateFlow<RequestOperationsState> = _operationsState.asStateFlow()
-
-    private val _selectedTab = MutableStateFlow(SeerrTab.Requests)
-    val selectedTab: StateFlow<SeerrTab> = _selectedTab.asStateFlow()
-
-    private val _requestActionStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
-    val requestActionStatus: StateFlow<OperationStatus> = _requestActionStatus.asStateFlow()
 
     private val selectedRepository =
         getSeerrInstanceRepositoryUseCase
@@ -125,27 +76,129 @@ class RequestsViewModel(
                 initialValue = null,
             )
 
-    val pendingRequestsCount: StateFlow<Int> =
-        selectedRepository
-            .filterNotNull()
-            .flatMapLatest { repo ->
-                repo.pendingRequestsCount
-            }.stateIn(
+    private val _selectedFilter = MutableStateFlow(RequestState.Pending)
+    val selectedFilter: StateFlow<RequestState> = _selectedFilter.asStateFlow()
+
+    val requestsState: StateFlow<PagedData<MediaRequestPackage>> =
+        combine(_rawRequestsState, _selectedFilter, userState) { data, filter, user ->
+            val canViewAll = user == null || SeerrPermissionPolicy.canViewAllRequests(user)
+            val userFiltered = if (canViewAll) {
+                data.items
+            } else {
+                data.items.filter { it.request.requestedBy?.id == user.id }
+            }
+            if (filter == RequestState.All) {
+                data.copy(items = userFiltered, totalItemCount = if (canViewAll) data.totalItemCount else userFiltered.size)
+            } else {
+                val filteredItems = userFiltered.filter { it.request.matchesFilter(filter) }
+                data.copy(
+                    items = filteredItems,
+                    totalItemCount = filteredItems.size,
+                )
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PagedData(),
+        )
+
+    private val _rawIssuesState = MutableStateFlow<PagedData<MediaIssuePackage>>(PagedData())
+
+    private val _selectedIssueFilter = MutableStateFlow(IssueState.Open)
+    val selectedIssueFilter: StateFlow<IssueState> = _selectedIssueFilter.asStateFlow()
+
+    val issuesState: StateFlow<PagedData<MediaIssuePackage>> =
+        combine(_rawIssuesState, _selectedIssueFilter, userState) { data, filter, user ->
+            val canView = user == null || SeerrPermissionPolicy.canViewIssues(user)
+            if (!canView) {
+                PagedData()
+            } else if (filter == IssueState.All) {
+                data
+            } else {
+                val filteredItems = data.items.filter { it.issue.matchesFilter(filter) }
+                data.copy(
+                    items = filteredItems,
+                    totalItemCount = filteredItems.size,
+                )
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PagedData(),
+        )
+
+    private val _operationsState = MutableStateFlow(RequestOperationsState())
+    val operationsState: StateFlow<RequestOperationsState> = _operationsState.asStateFlow()
+
+    private val _selectedTab = MutableStateFlow(SeerrTab.Requests)
+    val selectedTab: StateFlow<SeerrTab> = _selectedTab.asStateFlow()
+
+    private val _requestActionStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val requestActionStatus: StateFlow<OperationStatus> = _requestActionStatus.asStateFlow()
+
+    val canManageRequests: StateFlow<Boolean> =
+        userState
+            .map { it != null && SeerrPermissionPolicy.canApproveOrDecline(it) }
+            .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = 0,
+                initialValue = false,
             )
 
-    val openIssuesCount: StateFlow<Int> =
-        selectedRepository
-            .filterNotNull()
-            .flatMapLatest { repo ->
-                repo.openIssuesCount
-            }.stateIn(
+    val canViewIssues: StateFlow<Boolean> =
+        userState
+            .map { it == null || SeerrPermissionPolicy.canViewIssues(it) }
+            .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = 0,
+                initialValue = false,
             )
+
+    val canViewAllRequests: StateFlow<Boolean> =
+        userState
+            .map { it == null || SeerrPermissionPolicy.canViewAllRequests(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
+    fun canManageRequests(user: SeerrUser? = userState.value): Boolean = user?.let { SeerrPermissionPolicy.canApproveOrDecline(it) } ?: false
+
+    fun canDeleteRequest(request: MediaRequest, user: SeerrUser? = userState.value): Boolean = user?.let { SeerrPermissionPolicy.canCancelOrDeleteRequest(it, request) } ?: false
+
+    val pendingRequestsCount: StateFlow<Int> =
+        combine(
+            selectedRepository.filterNotNull().flatMapLatest { it.pendingRequestsCount },
+            userState,
+            _rawRequestsState,
+        ) { totalPending, user, rawRequests ->
+            val canViewAll = user == null || SeerrPermissionPolicy.canViewAllRequests(user)
+            if (canViewAll) {
+                totalPending
+            } else {
+                rawRequests.items
+                    .filter { it.request.requestedBy?.id == user?.id }
+                    .count { it.request.matchesFilter(RequestState.Pending) }
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0,
+        )
+
+    val openIssuesCount: StateFlow<Int> =
+        combine(
+            selectedRepository.filterNotNull().flatMapLatest { it.openIssuesCount },
+            userState,
+        ) { totalIssues, user ->
+            val canView = user == null || SeerrPermissionPolicy.canViewIssues(user)
+            if (canView) totalIssues else 0
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0,
+        )
 
     init {
         initializePagingController()

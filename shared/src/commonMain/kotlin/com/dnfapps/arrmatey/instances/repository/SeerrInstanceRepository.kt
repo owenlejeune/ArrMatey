@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.client.paging.BasePagingSource
+import com.dnfapps.arrmatey.client.paging.PageInfo
 import com.dnfapps.arrmatey.client.paging.PageResult
 import com.dnfapps.arrmatey.client.paging.PagingSource
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -13,11 +14,14 @@ import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssueState
+import com.dnfapps.arrmatey.seerr.api.model.IssuesResponse
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
+import com.dnfapps.arrmatey.seerr.api.model.QuickConnectCheckResponse
+import com.dnfapps.arrmatey.seerr.api.model.QuickConnectInitiateResponse
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
@@ -25,9 +29,11 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
+import com.dnfapps.arrmatey.seerr.api.model.SeerrAuthResult
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.seerr.service.MediaIssuePackageService
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
@@ -99,6 +105,30 @@ class SeerrInstanceRepository(
             .onSuccess { _loggedInUser.value = it }
     }
 
+    suspend fun loginLocal(email: String, password: String): NetworkResult<SeerrAuthResult> = client.loginLocal(email, password).onSuccess { authResult ->
+        _loggedInUser.value = authResult.user
+    }
+
+    suspend fun loginPlex(authToken: String): NetworkResult<SeerrAuthResult> = client.loginPlex(authToken).onSuccess { authResult ->
+        _loggedInUser.value = authResult.user
+    }
+
+    suspend fun loginJellyfin(username: String, password: String): NetworkResult<SeerrAuthResult> = client.loginJellyfin(username, password).onSuccess { authResult ->
+        _loggedInUser.value = authResult.user
+    }
+
+    suspend fun initiateJellyfinQuickConnect(): NetworkResult<QuickConnectInitiateResponse> = client.initiateJellyfinQuickConnect()
+
+    suspend fun checkJellyfinQuickConnect(secret: String): NetworkResult<QuickConnectCheckResponse> = client.checkJellyfinQuickConnect(secret)
+
+    suspend fun authenticateJellyfinQuickConnect(secret: String): NetworkResult<SeerrAuthResult> = client.authenticateJellyfinQuickConnect(secret).onSuccess { authResult ->
+        _loggedInUser.value = authResult.user
+    }
+
+    suspend fun logout(): NetworkResult<Unit> = client.logout().onSuccess {
+        _loggedInUser.value = null
+    }
+
     suspend fun getUsers() {
         client
             .getUsers()
@@ -106,53 +136,89 @@ class SeerrInstanceRepository(
     }
 
     suspend fun refreshCounts() = coroutineScope {
+        if (_loggedInUser.value == null) {
+            getLoggedInUser()
+        }
+        val user = _loggedInUser.value
+        val canViewAll = user == null || SeerrPermissionPolicy.canViewAllRequests(user)
+        val canViewIssues = user == null || SeerrPermissionPolicy.canViewIssues(user)
+
         launch {
+            val requestedBy = if (canViewAll) null else user?.id
             client
-                .getRequests(page = 1, pageSize = 50, filter = RequestState.All)
+                .getRequests(page = 1, pageSize = 50, filter = RequestState.All, requestedBy = requestedBy)
                 .onSuccess { response ->
                     _isOnline.value = true
-                    val enrichedRequests = mediaPackageService.enrichRequests(response.results)
+                    val filtered = if (canViewAll) {
+                        response.results
+                    } else {
+                        response.results.filter { it.requestedBy?.id == user?.id }
+                    }
+                    val enrichedRequests = mediaPackageService.enrichRequests(filtered)
                     _requests.value = enrichedRequests
+                    if (!canViewAll) {
+                        _pendingRequestsCount.value = enrichedRequests.count { it.request.matchesFilter(RequestState.Pending) }
+                    }
                 }.onError { _, _, _ ->
                     _isOnline.value = false
                     _requests.value = emptyList()
+                    if (!canViewAll) {
+                        _pendingRequestsCount.value = 0
+                    }
                 }
         }
-        launch {
-            client
-                .getRequestCount()
-                .onSuccess { count ->
-                    _pendingRequestsCount.value = count.pending
-                }
+        if (canViewAll) {
+            launch {
+                client
+                    .getRequestCount()
+                    .onSuccess { count ->
+                        _pendingRequestsCount.value = count.pending
+                    }
+            }
         }
-        launch {
-            client
-                .getIssueCount()
-                .onSuccess { count ->
-                    _openIssuesCount.value = count.open
-                }
-        }
-        launch {
-            client
-                .getIssues(page = 1, pageSize = 50, filter = IssueState.All)
-                .onSuccess { response ->
-                    val enrichedIssues = issuePackageService.enrichIssues(response.results)
-                    _openIssues.value = enrichedIssues
-                }.onError { _, _, _ ->
-                    _openIssues.value = emptyList()
-                }
+        if (canViewIssues) {
+            launch {
+                client
+                    .getIssueCount()
+                    .onSuccess { count ->
+                        _openIssuesCount.value = count.open
+                    }
+            }
+            launch {
+                client
+                    .getIssues(page = 1, pageSize = 50, filter = IssueState.All)
+                    .onSuccess { response ->
+                        val enrichedIssues = issuePackageService.enrichIssues(response.results)
+                        _openIssues.value = enrichedIssues
+                    }.onError { _, _, _ ->
+                        _openIssues.value = emptyList()
+                    }
+            }
+        } else {
+            _openIssuesCount.value = 0
+            _openIssues.value = emptyList()
         }
     }
 
     fun getRequestsPaging(filter: RequestState = RequestState.All): PagingSource<MediaRequestPackage> = BasePagingSource(
         fetcher = { page ->
-            client.getRequests(page = page, filter = filter)
+            val user = _loggedInUser.value
+            val canViewAll = user == null || SeerrPermissionPolicy.canViewAllRequests(user)
+            val requestedBy = if (canViewAll) null else user?.id
+            client.getRequests(page = page, filter = filter, requestedBy = requestedBy)
         },
         processor = { response ->
-            val enrichedRequests = mediaPackageService.enrichRequests(response.results)
+            val user = _loggedInUser.value
+            val canViewAll = user == null || SeerrPermissionPolicy.canViewAllRequests(user)
+            val filtered = if (canViewAll) {
+                response.results
+            } else {
+                response.results.filter { it.requestedBy?.id == user?.id }
+            }
+            val enrichedRequests = mediaPackageService.enrichRequests(filtered)
             PageResult(
                 items = enrichedRequests,
-                totalItemCount = response.pageInfo.results,
+                totalItemCount = if (canViewAll) response.pageInfo.results else filtered.size,
                 hasNextPage = response.pageInfo.page < response.pageInfo.pages,
             )
         },
@@ -308,7 +374,8 @@ class SeerrInstanceRepository(
         page: Int = 1,
         pageSize: Int = 10,
         filter: RequestState = RequestState.All,
-    ): NetworkResult<RequestResponse> = client.getRequests(page = page, pageSize = pageSize, filter = filter)
+        requestedBy: Long? = null,
+    ): NetworkResult<RequestResponse> = client.getRequests(page = page, pageSize = pageSize, filter = filter, requestedBy = requestedBy)
 
     suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest> = client.createRequest(request)
 
@@ -473,7 +540,18 @@ class SeerrInstanceRepository(
 
     fun getIssuesPaging(filter: IssueState = IssueState.All): PagingSource<MediaIssuePackage> = BasePagingSource(
         fetcher = { page ->
-            client.getIssues(page = page, filter = filter)
+            val user = _loggedInUser.value
+            val canViewIssues = user == null || SeerrPermissionPolicy.canViewIssues(user)
+            if (!canViewIssues) {
+                NetworkResult.Success(
+                    IssuesResponse(
+                        pageInfo = PageInfo(page = 1, pages = 0, results = 0),
+                        results = emptyList(),
+                    ),
+                )
+            } else {
+                client.getIssues(page = page, filter = filter)
+            }
         },
         processor = { response ->
             val enrichedIssues = issuePackageService.enrichIssues(response.results)

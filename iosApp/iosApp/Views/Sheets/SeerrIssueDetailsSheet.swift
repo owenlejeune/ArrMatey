@@ -99,13 +99,15 @@ struct SeerrIssueDetailsSheet: View {
     
     private var commentInputBar: some View {
         HStack(spacing: 12) {
-            Button(action: { showCloseConfirmation = true }) {
-                Image(systemName: "checkmark.circle")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.red)
-                    .clipShape(Circle())
+            if viewModel.uiState.canManageIssues {
+                Button(action: { showCloseConfirmation = true }) {
+                    Image(systemName: "checkmark.circle")
+                        .font(.title2)
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.red)
+                        .clipShape(Circle())
+                }
             }
             
             HStack {

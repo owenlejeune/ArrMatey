@@ -64,6 +64,8 @@ class ExportDataUseCase(
                     localNetworkEnabled = instance.localNetworkEnabled,
                     localNetworkSsids = instance.localNetworkSsids,
                     localNetworkEndpoint = instance.localNetworkEndpoint,
+                    seerrAuthType = instance.seerrAuthType,
+                    sessionToken = instance.sessionToken.value,
                     preferences = preferences,
                 )
             }

@@ -18,11 +18,14 @@ class GenericClient(
         type: InstanceType,
         headers: List<InstanceHeader> = emptyList(),
         noApiKeyRequired: Boolean = false,
+        sessionToken: String = "",
     ): Boolean {
         try {
             val response =
                 httpClient.safeGet<Any>("${endpoint.trimEnd('/')}/${type.apiBase}/${type.testEndpoint}") {
-                    if (!noApiKeyRequired && apiKey.isNotEmpty()) {
+                    if (type == InstanceType.Seerr && sessionToken.isNotEmpty()) {
+                        header("Cookie", "connect.sid=$sessionToken")
+                    } else if (!noApiKeyRequired && apiKey.isNotEmpty()) {
                         when (type) {
                             InstanceType.Tracearr ->
                                 header("Authorization", "Bearer $apiKey")
