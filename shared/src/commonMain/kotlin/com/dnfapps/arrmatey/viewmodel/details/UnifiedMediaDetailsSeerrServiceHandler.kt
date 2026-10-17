@@ -66,6 +66,8 @@ class UnifiedMediaDetailsSeerrServiceHandler(
                                 totalSeasonCount,
                                 user?.id,
                                 isAdmin,
+                                currentUser = user,
+                                mediaType = resolvedRequestType,
                             )
                         val has4kServer =
                             when (resolvedRequestType) {

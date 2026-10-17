@@ -85,7 +85,7 @@ suspend inline fun <reified T> HttpClient.safeCall(crossinline block: suspend Ht
     } else if (e.isNoConnectionError()) {
         NetworkResult.Error(message = e.cause?.message ?: e.message, cause = e, errorType = ErrorType.Network)
     } else {
-        NetworkResult.Error(cause = e, errorType = ErrorType.Unexpected)
+        NetworkResult.Error(message = e.message, cause = e, errorType = ErrorType.Unexpected)
     }
 }
 

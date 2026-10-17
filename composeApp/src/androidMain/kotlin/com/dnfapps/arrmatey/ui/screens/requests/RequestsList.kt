@@ -27,6 +27,7 @@ import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
@@ -50,6 +51,8 @@ fun RequestsList(
     selectedFilter: RequestState? = null,
     loadMoreFailed: Boolean = false,
     onViewRequest: ((MediaRequestPackage) -> Unit)? = null,
+    canManage: Boolean = userState != null && SeerrPermissionPolicy.canApproveOrDecline(userState),
+    canDeleteRequest: (MediaRequest) -> Boolean = { req -> userState != null && SeerrPermissionPolicy.canCancelOrDeleteRequest(userState, req) },
 ) {
     val listState = rememberLazyListState()
 
@@ -93,6 +96,8 @@ fun RequestsList(
                 mediaPackage = rPackage,
                 user = userState,
                 requestOperationsState = operationsState,
+                canManage = canManage,
+                canDelete = canDeleteRequest(rPackage.request),
                 onApproveClicked = { onApprove(rPackage.request.id) },
                 onDeclineClicked = { onDecline(rPackage.request.id) },
                 onEditClicked = { onEdit(rPackage.request.id) },

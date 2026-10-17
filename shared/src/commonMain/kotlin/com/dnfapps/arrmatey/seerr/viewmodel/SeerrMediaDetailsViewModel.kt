@@ -19,6 +19,7 @@ import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
 import com.dnfapps.arrmatey.seerr.state.ReportIssueUiState
 import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
@@ -146,7 +147,14 @@ class SeerrMediaDetailsViewModel(
                 is SeerrDetailsState.Success -> {
                     val isAdmin = user?.hasPermission(UserPermission.ADMIN) == true
                     val totalSeasonCount = (state.item as? TvDetails)?.numberOfSeasons ?: 0
-                    state.item.mediaInfo.toButtonState(state.item.relatedVideos, totalSeasonCount, user?.id, isAdmin)
+                    state.item.mediaInfo.toButtonState(
+                        state.item.relatedVideos,
+                        totalSeasonCount,
+                        user?.id,
+                        isAdmin,
+                        currentUser = user,
+                        mediaType = mediaType,
+                    )
                 }
                 else -> MediaButtonState()
             }
@@ -324,6 +332,13 @@ class SeerrMediaDetailsViewModel(
     ) {
         val repository = currentRepository ?: return
         viewModelScope.launch {
+            val loggedInUser = _currentUser.value
+            val effectiveUserId =
+                if (SeerrPermissionPolicy.canRequestForOtherUsers(loggedInUser) && userId != loggedInUser?.id) {
+                    userId
+                } else {
+                    null
+                }
             val body =
                 RequestMediaBody(
                     mediaType = mediaType,
@@ -334,7 +349,7 @@ class SeerrMediaDetailsViewModel(
                     rootFolder = rootFolder,
                     languageProfileId = languageProfileId,
                     seasons = seasons,
-                    userId = userId,
+                    userId = effectiveUserId,
                 )
             submitRequestUseCase(body, repository).onSuccess {
                 hideRequestSheet()

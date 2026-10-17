@@ -250,18 +250,29 @@ fun DashboardCardContent(
                 state = currentState,
                 enabled = !isEditing && enabled,
                 onRequestClick = { mediaPackage ->
-                    if (!isEditing && enabled) onRequestClick(mediaPackage)
+                    if (!isEditing && enabled) {
+                        if (currentState.canManageRequests) {
+                            onRequestClick(mediaPackage)
+                        } else {
+                            onNavigateToSeerrMediaDetails(
+                                mediaPackage.request.media.tmdbId,
+                                mediaPackage.request.type,
+                            )
+                        }
+                    }
                 },
             )
 
         DashboardCards.PendingIssues ->
-            DashboardPendingIssuesSection(
-                state = currentState,
-                enabled = !isEditing && enabled,
-                onIssueClick = { mediaPackage ->
-                    if (!isEditing && enabled) onIssueClick(mediaPackage)
-                },
-            )
+            if (currentState.canViewIssues) {
+                DashboardPendingIssuesSection(
+                    state = currentState,
+                    enabled = !isEditing && enabled,
+                    onIssueClick = { mediaPackage ->
+                        if (!isEditing && enabled) onIssueClick(mediaPackage)
+                    },
+                )
+            }
 
         DashboardCards.InstanceDashboard ->
             InstanceDashboardSection(
@@ -903,6 +914,7 @@ fun CombinedDashboard(
                             serviceDetails = pkg.serviceDetails,
                             requestInProgress = false,
                             requestOverride = pkg.request,
+                            canManage = (state as? CombinedDashboardState.Success)?.canManageRequests == true,
                             onDismissRequest = { selectedRequestForSheet = null },
                             onApproveRequest = { id, profileId, rootFolder, lang, seasons ->
                                 viewModel.approveRequest(id, profileId, rootFolder, lang, seasons)

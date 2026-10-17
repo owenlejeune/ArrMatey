@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,7 +54,6 @@ import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
-import com.dnfapps.arrmatey.seerr.api.model.UserPermission
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
@@ -110,6 +111,7 @@ fun MediaRequestOrAddSheet(
     val rootFolders by viewModel.rootFolders.collectAsStateWithLifecycle()
     val tags by viewModel.tags.collectAsStateWithLifecycle()
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
+    val requestPermissions by viewModel.requestPermissions.collectAsStateWithLifecycle()
 
     val state = uiState as? UnifiedMediaDetailsUiState.Success
     val seerrMedia = state?.seerrMedia
@@ -201,7 +203,10 @@ fun MediaRequestOrAddSheet(
         }
     }
 
-    val isAdmin = currentUser?.hasPermission(UserPermission.ADMIN) == true
+    val canConfigureAdvanced = requestPermissions.canConfigureAdvanced
+    val canRequestForOtherUsers = requestPermissions.canRequestForOtherUsers
+    val canRequestThis = requestPermissions.canRequestThis
+    val willAutoApprove = requestPermissions.willAutoApprove
 
     // Add Movie state
     val targetInstanceId = addSheetUiState.targetInstance?.id
@@ -270,7 +275,7 @@ fun MediaRequestOrAddSheet(
 
     val isActionEnabled =
         if (showMode == SheetMode.Request) {
-            !isBusy && seerrMedia != null && (seerrMedia !is TvDetails || selectedSeasons.isNotEmpty())
+            !isBusy && seerrMedia != null && canRequestThis && (seerrMedia !is TvDetails || selectedSeasons.isNotEmpty())
         } else {
             when (arrMedia) {
                 is ArrSeries -> !isBusy && seriesQualityProfile != null && seriesRootFolder != null
@@ -383,7 +388,8 @@ fun MediaRequestOrAddSheet(
                                 SeerrRequestConfigurationContent(
                                     details = seerrMedia,
                                     serviceDetails = serviceDetails,
-                                    isAdmin = isAdmin,
+                                    canConfigureAdvanced = canConfigureAdvanced,
+                                    canRequestForOtherUsers = canRequestForOtherUsers,
                                     users = users,
                                     selectedProfileId = selectedProfileId,
                                     onSelectedProfileIdChange = { selectedProfileId = it },
@@ -398,6 +404,15 @@ fun MediaRequestOrAddSheet(
                                     onIs4kChange = { is4k = it },
                                     enabled = !isBusy,
                                 )
+
+                                if (!canRequestThis) {
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        text = mokoString(MR.strings.request_no_permission),
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
                             }
                         } else {
                             if (arrMedia == null) {
@@ -488,6 +503,33 @@ fun MediaRequestOrAddSheet(
                     }
                 }
 
+                if (showMode == SheetMode.Request && currentUser != null && canRequestThis) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = if (willAutoApprove) Icons.Default.Bolt else Icons.Default.Schedule,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = if (willAutoApprove) {
+                                mokoString(MR.strings.request_will_auto_approve)
+                            } else {
+                                mokoString(MR.strings.request_will_require_approval)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
                 // Static Footer: Action Buttons
                 Row(
                     modifier =
@@ -508,13 +550,14 @@ fun MediaRequestOrAddSheet(
                         onClick = {
                             if (showMode == SheetMode.Request) {
                                 val seasons = if (seerrMedia is TvDetails) selectedSeasons.toList() else null
+                                val effectiveUserId = if (canRequestForOtherUsers && selectedUserId != currentUser?.id) selectedUserId else null
                                 viewModel.submitRequest(
                                     profileId = selectedProfileId,
                                     rootFolder = selectedRootFolder,
                                     languageProfileId = null,
                                     seasons = seasons,
                                     is4k = is4k,
-                                    userId = selectedUserId,
+                                    userId = effectiveUserId,
                                 )
                             } else {
                                 when (arrMedia) {
@@ -613,11 +656,13 @@ fun MediaRequestOrAddSheet(
                                 ) {
                                     if (targetMode == SheetMode.Request) {
                                         Text(
-                                            if (is4kMode) {
-                                                mokoString(MR.strings.request_in_4k)
-                                            } else {
-                                                mokoString(MR.strings.request)
+                                            text = when {
+                                                !canRequestThis -> mokoString(MR.strings.request)
+                                                is4kMode -> mokoString(MR.strings.request_in_4k)
+                                                else -> mokoString(MR.strings.submit_request)
                                             },
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
                                         )
                                     } else {
                                         Icon(

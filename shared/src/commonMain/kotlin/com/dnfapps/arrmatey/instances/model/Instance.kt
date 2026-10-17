@@ -51,6 +51,8 @@ data class Instance(
     val localNetworkEnabled: Boolean = false,
     val localNetworkSsids: List<String> = emptyList(),
     val localNetworkEndpoint: String? = null,
+    val seerrAuthType: SeerrAuthType = SeerrAuthType.ApiKey,
+    val sessionToken: EncryptedString = EncryptedString(""),
 ) {
     fun getEffectiveBaseUrl(): String {
         if (!localNetworkEnabled ||

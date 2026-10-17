@@ -152,12 +152,21 @@ fun EditInstanceScreen(
                     onIsSlowInstanceChanged = { viewModel.setIsSlowInstance(it) },
                     onCustomTimeoutChanged = { viewModel.setCustomTimeout(it) },
                     onHeadersChanged = { viewModel.updateHeaders(it) },
-                    onTestConnection = { viewModel.testConnection() },
                     onLocalNetworkEnabledChanged = { viewModel.setLocalNetworkEnabled(it) },
                     onLocalNetworkUrlChanged = { viewModel.setLocalNetworkUrl(it) },
                     onLocalNetworkSsidChanged = { viewModel.setLocalNetworkSsids(it) },
                     onTestLocalConnection = { viewModel.testLocalConnection() },
                     onToggleNotificationsEnabled = { viewModel.toggleNotificationsEnabled() },
+                    onSeerrAuthTypeChanged = { viewModel.setSeerrAuthType(it) },
+                    onLoginLocal = { email, pass -> viewModel.loginLocal(email, pass) },
+                    onLoginPlex = { token -> viewModel.loginPlex(token) },
+                    onLoginJellyfin = { user, pass -> viewModel.loginJellyfin(user, pass) },
+                    onStartQuickConnect = { viewModel.startJellyfinQuickConnect() },
+                    onCancelQuickConnect = { viewModel.cancelJellyfinQuickConnect() },
+                    onPlexTokenChange = { viewModel.setPlexToken(it) },
+                    onStartPlexSignIn = { onOpenUrl -> viewModel.startPlexSignIn(onOpenUrl) },
+                    onCancelPlexSignIn = { viewModel.cancelPlexSignIn() },
+                    onClearAuthSession = { viewModel.clearAuthSession() },
                 )
             }
 

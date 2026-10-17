@@ -20,7 +20,7 @@ import kotlinx.coroutines.IO
 
 @Database(
     entities = [Instance::class, DownloadClient::class, CustomWebpage::class, WolDevice::class],
-    version = 15,
+    version = 16,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

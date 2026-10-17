@@ -524,4 +524,38 @@ class SeerrModelNullabilityTest {
         assertEquals(1, response.results[0].comments.size)
         assertEquals("test specific episode", response.results[0].comments[0].message)
     }
+
+    @Test
+    fun testSeerrUserLocalAuthPayload() {
+        val payload =
+            """
+            {
+              "permissions": 0,
+              "warnings": [],
+              "id": 2,
+              "requestCount": 3,
+              "displayName": "test@local.com"
+            }
+            """.trimIndent()
+
+        val user = json.decodeFromString<SeerrUser>(payload)
+        assertEquals(2L, user.id)
+        assertEquals(0, user.permissions)
+        assertEquals(0, user.userType)
+        assertEquals("test@local.com", user.displayName)
+        assertEquals("test@local.com", user.effectiveDisplayName)
+        assertEquals(3, user.requestCount)
+        assertEquals(emptyList(), user.warnings)
+    }
+
+    @Test
+    fun testSeerrUserEmptyPayload() {
+        val payload = "{}"
+        val user = json.decodeFromString<SeerrUser>(payload)
+        assertEquals(0L, user.id)
+        assertEquals(0, user.permissions)
+        assertEquals(0, user.userType)
+        assertEquals("", user.displayName)
+        assertEquals("User", user.effectiveDisplayName)
+    }
 }

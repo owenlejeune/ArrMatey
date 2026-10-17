@@ -9,10 +9,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -32,10 +36,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
-import com.dnfapps.arrmatey.seerr.api.model.UserPermission
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
@@ -134,7 +139,12 @@ fun SeerrRequestSheetContent(
         )
     }
 
-    val isAdmin = currentUser?.hasPermission(UserPermission.ADMIN) == true
+    val requestType = if (details is TvDetails) RequestType.Tv else RequestType.Movie
+    val permissions = SeerrPermissionPolicy.getRequestPermissions(currentUser, requestType, is4k)
+    val canConfigureAdvanced = permissions.canConfigureAdvanced
+    val canRequestForOtherUsers = permissions.canRequestForOtherUsers
+    val canRequestThis = permissions.canRequestThis
+    val willAutoApprove = permissions.willAutoApprove
 
     Column(
         modifier =
@@ -187,7 +197,8 @@ fun SeerrRequestSheetContent(
         SeerrRequestConfigurationContent(
             details = details,
             serviceDetails = serviceDetails,
-            isAdmin = isAdmin,
+            canConfigureAdvanced = canConfigureAdvanced,
+            canRequestForOtherUsers = canRequestForOtherUsers,
             users = users,
             selectedProfileId = selectedProfileId,
             onSelectedProfileIdChange = { selectedProfileId = it },
@@ -203,6 +214,36 @@ fun SeerrRequestSheetContent(
             enabled = !requestInProgress,
         )
 
+        if (!canRequestThis) {
+            Text(
+                text = mokoString(MR.strings.request_no_permission),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    imageVector = if (willAutoApprove) Icons.Default.Bolt else Icons.Default.Schedule,
+                    contentDescription = null,
+                    tint = if (willAutoApprove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp),
+                )
+                Text(
+                    text = if (willAutoApprove) {
+                        mokoString(MR.strings.request_will_auto_approve)
+                    } else {
+                        mokoString(MR.strings.request_will_require_approval)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -217,26 +258,29 @@ fun SeerrRequestSheetContent(
             Button(
                 onClick = {
                     val seasons = if (details is TvDetails) selectedSeasons.toList() else null
+                    val effectiveUserId = if (canRequestForOtherUsers && selectedUserId != currentUser?.id) selectedUserId else null
                     onSubmitRequest(
                         selectedProfileId,
                         selectedRootFolder,
                         null, // languageProfileId
                         seasons,
-                        selectedUserId,
+                        effectiveUserId,
                     )
                 },
                 modifier = Modifier.weight(1f),
-                enabled = !requestInProgress && if (details is TvDetails) selectedSeasons.isNotEmpty() else true,
+                enabled = !requestInProgress && canRequestThis && if (details is TvDetails) selectedSeasons.isNotEmpty() else true,
             ) {
                 if (requestInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Text(
-                        if (is4k) {
-                            mokoString(MR.strings.request_in_4k)
-                        } else {
-                            mokoString(MR.strings.request)
+                        text = when {
+                            !canRequestThis -> mokoString(MR.strings.request)
+                            is4k -> mokoString(MR.strings.request_in_4k)
+                            else -> mokoString(MR.strings.submit_request)
                         },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
@@ -248,7 +292,9 @@ fun SeerrRequestSheetContent(
 fun SeerrRequestConfigurationContent(
     details: RequestMediaDetails,
     serviceDetails: ServiceDetails?,
-    isAdmin: Boolean,
+    isAdmin: Boolean = false,
+    canConfigureAdvanced: Boolean = isAdmin,
+    canRequestForOtherUsers: Boolean = isAdmin,
     users: List<SeerrUser>,
     selectedProfileId: Long?,
     onSelectedProfileIdChange: (Long?) -> Unit,
@@ -286,47 +332,52 @@ fun SeerrRequestConfigurationContent(
             )
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(
-                text = mokoString(MR.strings.advanced).uppercase(),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-            )
-
-            val profiles = serviceDetails?.profiles ?: emptyList()
-            val rootFolders = serviceDetails?.rootFolders ?: emptyList()
-
-            DropdownPicker(
-                label = { Text(mokoString(MR.strings.quality_profile)) },
-                options = profiles.map { it.id }.ifEmpty { listOfNotNull(selectedProfileId) },
-                selectedOption = selectedProfileId,
-                onOptionSelected = onSelectedProfileIdChange,
-                getOptionLabel = { profileId ->
-                    profiles.find { it.id == profileId }?.name ?: profileId.toString()
-                },
-                enabled = enabled,
-            )
-
-            DropdownPicker(
-                label = { Text(mokoString(MR.strings.root_folder)) },
-                options = rootFolders.map { it.path }.ifEmpty { listOfNotNull(selectedRootFolder) },
-                selectedOption = selectedRootFolder,
-                onOptionSelected = onSelectedRootFolderChange,
-                getOptionLabel = { it },
-                enabled = enabled,
-            )
-
-            if (isAdmin && users.isNotEmpty()) {
-                DropdownPicker(
-                    label = { Text(mokoString(MR.strings.request_as)) },
-                    options = users.map { it.id },
-                    selectedOption = selectedUserId,
-                    onOptionSelected = onSelectedUserIdChange,
-                    getOptionLabel = { userId ->
-                        users.find { it.id == userId }?.displayName ?: userId.toString()
-                    },
-                    enabled = enabled,
+        val showAdvanced = canConfigureAdvanced || (canRequestForOtherUsers && users.isNotEmpty())
+        if (showAdvanced) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = mokoString(MR.strings.advanced).uppercase(),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
                 )
+
+                if (canConfigureAdvanced) {
+                    val profiles = serviceDetails?.profiles ?: emptyList()
+                    val rootFolders = serviceDetails?.rootFolders ?: emptyList()
+
+                    DropdownPicker(
+                        label = { Text(mokoString(MR.strings.quality_profile)) },
+                        options = profiles.map { it.id }.ifEmpty { listOfNotNull(selectedProfileId) },
+                        selectedOption = selectedProfileId,
+                        onOptionSelected = onSelectedProfileIdChange,
+                        getOptionLabel = { profileId ->
+                            profiles.find { it.id == profileId }?.name ?: profileId.toString()
+                        },
+                        enabled = enabled,
+                    )
+
+                    DropdownPicker(
+                        label = { Text(mokoString(MR.strings.root_folder)) },
+                        options = rootFolders.map { it.path }.ifEmpty { listOfNotNull(selectedRootFolder) },
+                        selectedOption = selectedRootFolder,
+                        onOptionSelected = onSelectedRootFolderChange,
+                        getOptionLabel = { it },
+                        enabled = enabled,
+                    )
+                }
+
+                if (canRequestForOtherUsers && users.isNotEmpty()) {
+                    DropdownPicker(
+                        label = { Text(mokoString(MR.strings.request_as)) },
+                        options = users.map { it.id },
+                        selectedOption = selectedUserId,
+                        onOptionSelected = onSelectedUserIdChange,
+                        getOptionLabel = { userId ->
+                            users.find { it.id == userId }?.displayName ?: userId.toString()
+                        },
+                        enabled = enabled,
+                    )
+                }
             }
         }
     }

@@ -49,6 +49,7 @@ fun MediaActionsToolbarMenus(
     onViewRequestClicked: (Long) -> Unit,
     onApproveRequestClicked: (Long) -> Unit,
     onDeclineRequestClicked: (Long) -> Unit,
+    onCancelRequestClicked: (Long) -> Unit = onDeclineRequestClicked,
     onAddClicked: () -> Unit,
     isAddOrRequestInProgress: Boolean = false,
 ) {
@@ -178,6 +179,18 @@ fun MediaActionsToolbarMenus(
                     }
                 }
             }
+        }
+    }
+
+    // Dismiss Request Action for regular users
+    if (buttonState.showCancelRequestButton) {
+        IconButton(
+            onClick = {
+                buttonState.pendingRequestId?.let(onCancelRequestClicked)
+            },
+            colors = IconButtonDefaults.headerBarColors(),
+        ) {
+            Icon(Icons.Default.Close, mokoString(MR.strings.dismiss_request))
         }
     }
 

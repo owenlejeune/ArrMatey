@@ -47,6 +47,8 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RequestUser
 import com.dnfapps.arrmatey.seerr.api.model.SeerrMediaStatus
+import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrMediaType
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
@@ -88,16 +90,30 @@ sealed interface CombinedDashboardState {
         val isLoadingMoreDiscover: Map<DiscoverCategory, Boolean> = emptyMap(),
     ) : CombinedDashboardState {
         val allRequests: List<MediaRequestPackage>
-            get() = seerrInstances.flatMap { it.requests }
+            get() = seerrInstances.flatMap { inst ->
+                if (inst.canViewAllRequests) {
+                    inst.requests
+                } else {
+                    inst.requests.filter { it.request.requestedBy?.id == inst.user?.id }
+                }
+            }
 
         val pendingRequests: List<MediaRequestPackage>
-            get() = seerrInstances.flatMap { it.pendingRequests }
+            get() = allRequests.filter { it.request.matchesFilter(RequestState.Pending) }
 
         val allIssues: List<MediaIssuePackage>
-            get() = seerrInstances.flatMap { it.issues }
+            get() = seerrInstances.flatMap { inst ->
+                if (inst.canViewIssues) inst.issues else emptyList()
+            }
 
         val openIssues: List<MediaIssuePackage>
-            get() = seerrInstances.flatMap { it.openIssues }
+            get() = allIssues.filter { it.issue.matchesFilter(IssueState.Open) }
+
+        val canManageRequests: Boolean
+            get() = seerrInstances.any { it.canManageRequests }
+
+        val canViewIssues: Boolean
+            get() = seerrInstances.any { it.canViewIssues }
 
         val activeStreams: List<TracearrStreamSession>
             get() = tracearrStats.flatMap { it.activeStreams }
@@ -640,12 +656,22 @@ data class SeerrDashboardState(
     val requests: List<MediaRequestPackage> = emptyList(),
     val issues: List<MediaIssuePackage> = emptyList(),
     val isOnline: Boolean = true,
+    val user: SeerrUser? = null,
 ) {
+    val canManageRequests: Boolean
+        get() = user != null && SeerrPermissionPolicy.canApproveOrDecline(user)
+
+    val canViewIssues: Boolean
+        get() = user == null || SeerrPermissionPolicy.canViewIssues(user)
+
+    val canViewAllRequests: Boolean
+        get() = user == null || SeerrPermissionPolicy.canViewAllRequests(user)
+
     val pendingRequests: List<MediaRequestPackage>
         get() = requests.filter { it.request.matchesFilter(RequestState.Pending) }
 
     val openIssues: List<MediaIssuePackage>
-        get() = issues.filter { it.issue.matchesFilter(IssueState.Open) }
+        get() = if (canViewIssues) issues.filter { it.issue.matchesFilter(IssueState.Open) } else emptyList()
 }
 
 data class DownloadClientDashboardState(

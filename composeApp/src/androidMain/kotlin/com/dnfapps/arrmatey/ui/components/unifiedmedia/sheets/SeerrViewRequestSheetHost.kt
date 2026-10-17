@@ -14,6 +14,7 @@ fun SeerrViewRequestSheetHost(
     onApproveRequest: (requestId: Long, profileId: Long?, rootFolder: String?, langId: Long?, seasons: List<Int>?) -> Unit,
     onDeclineRequest: (requestId: Long) -> Unit,
     onDismiss: () -> Unit,
+    canManage: Boolean = true,
 ) {
     if (visible && details != null) {
         SeerrViewRequestSheet(
@@ -23,6 +24,7 @@ fun SeerrViewRequestSheetHost(
             onDismissRequest = onDismiss,
             onApproveRequest = onApproveRequest,
             onDeclineRequest = onDeclineRequest,
+            canManage = canManage,
         )
     }
 }

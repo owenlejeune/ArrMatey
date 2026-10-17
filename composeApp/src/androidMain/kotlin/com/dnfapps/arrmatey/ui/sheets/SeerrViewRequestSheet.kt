@@ -63,6 +63,7 @@ fun SeerrViewRequestSheet(
     onDeclineRequest: (Long) -> Unit,
     requestOverride: MediaRequest? = null,
     onViewMedia: ((Long, RequestType) -> Unit)? = null,
+    canManage: Boolean = true,
 ) {
     val request =
         requestOverride
@@ -161,6 +162,7 @@ fun SeerrViewRequestSheet(
                         onDismissRequest()
                     }
                 },
+                canManage = canManage,
             )
         }
     }
@@ -252,45 +254,48 @@ private fun AdvancedSection(
     onApproveRequest: () -> Unit,
     onDeclineRequest: () -> Unit,
     onViewMedia: (() -> Unit)? = null,
+    canManage: Boolean = true,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         val profiles = serviceDetails?.profiles ?: emptyList()
         val rootFolders = serviceDetails?.rootFolders ?: emptyList()
 
-        DropdownPicker(
-            label = { Text(mokoString(MR.strings.quality_profile)) },
-            options = profiles.map { it.id }.ifEmpty { listOfNotNull(selectedProfileId) },
-            selectedOption = selectedProfileId,
-            onOptionSelected = { onProfileSelected(it) },
-            getOptionLabel = { profileId ->
-                profiles.find { it.id == profileId }?.name ?: profileId.toString()
-            },
-            enabled = !requestInProgress,
-        )
+        if (canManage) {
+            DropdownPicker(
+                label = { Text(mokoString(MR.strings.quality_profile)) },
+                options = profiles.map { it.id }.ifEmpty { listOfNotNull(selectedProfileId) },
+                selectedOption = selectedProfileId,
+                onOptionSelected = { onProfileSelected(it) },
+                getOptionLabel = { profileId ->
+                    profiles.find { it.id == profileId }?.name ?: profileId.toString()
+                },
+                enabled = !requestInProgress,
+            )
 
-        DropdownPicker(
-            label = { Text(mokoString(MR.strings.root_folder)) },
-            options = rootFolders.map { it.path }.ifEmpty { listOfNotNull(selectedRootFolder) },
-            selectedOption = selectedRootFolder,
-            onOptionSelected = { onRootFolderSelected(it) },
-            getOptionLabel = { it },
-            enabled = !requestInProgress,
-        )
+            DropdownPicker(
+                label = { Text(mokoString(MR.strings.root_folder)) },
+                options = rootFolders.map { it.path }.ifEmpty { listOfNotNull(selectedRootFolder) },
+                selectedOption = selectedRootFolder,
+                onOptionSelected = { onRootFolderSelected(it) },
+                getOptionLabel = { it },
+                enabled = !requestInProgress,
+            )
 
-        Button(
-            onClick = onApproveRequest,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !requestInProgress,
-            colors =
-            ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4CAF50),
-                contentColor = Color.White,
-            ),
-        ) {
-            if (requestInProgress) {
-                androidx.compose.material3.CircularProgressIndicator(Modifier.size(24.dp))
-            } else {
-                Text(mokoString(MR.strings.approve_request))
+            Button(
+                onClick = onApproveRequest,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !requestInProgress,
+                colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4CAF50),
+                    contentColor = Color.White,
+                ),
+            ) {
+                if (requestInProgress) {
+                    androidx.compose.material3.CircularProgressIndicator(Modifier.size(24.dp))
+                } else {
+                    Text(mokoString(MR.strings.approve_request))
+                }
             }
         }
 
@@ -303,7 +308,7 @@ private fun AdvancedSection(
                 contentColor = MaterialTheme.colorScheme.error,
             ),
         ) {
-            Text(mokoString(MR.strings.decline_request))
+            Text(if (canManage) mokoString(MR.strings.decline_request) else mokoString(MR.strings.dismiss_request))
         }
 
         onViewMedia?.let { viewMedia ->

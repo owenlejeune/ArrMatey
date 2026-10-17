@@ -1,5 +1,8 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -22,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -30,6 +34,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.ExpandCircleDown
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.WifiFind
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -59,16 +64,17 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.client.DEFAULT_SLOW_TIMEOUT
-import com.dnfapps.arrmatey.database.dao.ConflictField
-import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.entensions.openAppSettings
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.instances.model.SeerrAuthType
 import com.dnfapps.arrmatey.instances.state.AddInstanceUiState
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.permissions.rememberLocationPermissionHandler
@@ -76,6 +82,7 @@ import com.dnfapps.arrmatey.permissions.rememberNotificationPermissionHandler
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
+import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledCheckbox
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.utils.MokoStrings
@@ -97,14 +104,28 @@ fun ArrConfigurationScreen(
     onIsSlowInstanceChanged: (Boolean) -> Unit,
     onCustomTimeoutChanged: (Long?) -> Unit,
     onHeadersChanged: (List<InstanceHeader>) -> Unit,
-    onTestConnection: (() -> Unit)? = null,
     onLocalNetworkEnabledChanged: (Boolean) -> Unit,
     onLocalNetworkUrlChanged: (String) -> Unit,
     onLocalNetworkSsidChanged: (List<String>) -> Unit,
     onTestLocalConnection: () -> Unit,
     onToggleNotificationsEnabled: () -> Unit,
+    onSeerrAuthTypeChanged: (SeerrAuthType) -> Unit = {},
+    onLoginLocal: ((String, String) -> Unit)? = null,
+    onLoginPlex: ((String) -> Unit)? = null,
+    onLoginJellyfin: ((String, String) -> Unit)? = null,
+    onStartQuickConnect: (() -> Unit)? = null,
+    onCancelQuickConnect: (() -> Unit)? = null,
+    onPlexTokenChange: ((String) -> Unit)? = null,
+    onStartPlexSignIn: ((onOpenUrl: (String) -> Unit) -> Unit)? = null,
+    onCancelPlexSignIn: (() -> Unit)? = null,
+    onClearAuthSession: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
+
+    var localEmail by remember { mutableStateOf("") }
+    var localPassword by remember { mutableStateOf("") }
+    var jellyfinUsername by remember { mutableStateOf("") }
+    var jellyfinPassword by remember { mutableStateOf("") }
 
     val apiEndpoint = uiState.apiEndpoint
     val apiKey = uiState.apiKey
@@ -120,19 +141,8 @@ fun ArrConfigurationScreen(
 
     val createResult = uiState.createResult
 
-    val hasLabelConflict =
-        remember(createResult) {
-            (createResult as? InsertResult.Conflict)
-                ?.fields
-                ?.contains(ConflictField.InstanceLabel) == true
-        }
-
-    val hasUrlConflict =
-        remember(createResult) {
-            (createResult as? InsertResult.Conflict)
-                ?.fields
-                ?.contains(ConflictField.InstanceUrl) == true
-        }
+    val hasLabelConflict = uiState.hasLabelConflict
+    val hasUrlConflict = uiState.hasUrlConflict
 
     val notificationPermissionHandler =
         rememberNotificationPermissionHandler(
@@ -203,49 +213,369 @@ fun ArrConfigurationScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
         )
 
-        LabelledCheckbox(
-            label = mokoString(MR.strings.no_api_key),
-            checked = uiState.noApiKeyRequired,
-            onCheckedChange = onNoApiKeyRequiredChanged,
-        )
-
-        AMOutlinedTextField(
-            label = mokoString(MR.strings.api_key),
-            required = !uiState.noApiKeyRequired,
-            value = apiKey,
-            onValueChange = onApiKeyChanged,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = mokoString(MR.strings.api_key_placeholder),
-            singleLine = true,
-            enabled = !uiState.noApiKeyRequired,
-        )
-
-        instanceType.getApiKeyEndpoint?.let { getApiKey ->
-            val enabled = uiState.apiEndpoint.isValidUrl()
-            val color = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier =
-                Modifier.clickable(
-                    enabled = enabled,
-                ) {
-                    val fullUrl = "${uiState.apiEndpoint}/$getApiKey"
-                    context.openLink(fullUrl)
+        if (instanceType == InstanceType.Seerr) {
+            DropdownPicker(
+                modifier = Modifier.fillMaxWidth(),
+                options = SeerrAuthType.entries,
+                selectedOption = uiState.seerrAuthType,
+                onOptionSelected = onSeerrAuthTypeChanged,
+                label = { Text(mokoString(MR.strings.auth_type)) },
+                getOptionLabel = { type ->
+                    when (type) {
+                        SeerrAuthType.ApiKey -> mokoString(MR.strings.auth_type_api_key)
+                        SeerrAuthType.Local -> mokoString(MR.strings.auth_type_local)
+                        SeerrAuthType.Plex -> mokoString(MR.strings.auth_type_plex)
+                        SeerrAuthType.Jellyfin -> mokoString(MR.strings.auth_type_jellyfin)
+                        SeerrAuthType.JellyfinQuickConnect -> mokoString(MR.strings.auth_type_quick_connect)
+                    }
                 },
-            ) {
-                Text(
-                    text = mokoString(MR.strings.api_key_in_browser),
-                    textDecoration = TextDecoration.Underline,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = color,
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                    tint = color,
-                )
+            )
+        }
+
+        if (instanceType != InstanceType.Seerr || uiState.seerrAuthType == SeerrAuthType.ApiKey) {
+            LabelledCheckbox(
+                label = mokoString(MR.strings.no_api_key),
+                checked = uiState.noApiKeyRequired,
+                onCheckedChange = onNoApiKeyRequiredChanged,
+            )
+
+            AMOutlinedTextField(
+                label = mokoString(MR.strings.api_key),
+                required = !uiState.noApiKeyRequired,
+                value = apiKey,
+                onValueChange = onApiKeyChanged,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = mokoString(MR.strings.api_key_placeholder),
+                singleLine = true,
+                enabled = !uiState.noApiKeyRequired,
+            )
+
+            instanceType.getApiKeyEndpoint?.let { getApiKey ->
+                val enabled = uiState.apiEndpoint.isValidUrl()
+                val color = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier =
+                    Modifier.clickable(
+                        enabled = enabled,
+                    ) {
+                        val fullUrl = "${uiState.apiEndpoint}/$getApiKey"
+                        context.openLink(fullUrl)
+                    },
+                ) {
+                    Text(
+                        text = mokoString(MR.strings.api_key_in_browser),
+                        textDecoration = TextDecoration.Underline,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = color,
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = color,
+                    )
+                }
+            }
+        } else {
+            if (uiState.sessionToken.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                                Text(
+                                    text = uiState.authenticatedUserDisplayName?.let {
+                                        mokoString(MR.strings.signed_in_as, it)
+                                    } ?: mokoString(MR.strings.authenticated_session),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium,
+                                )
+                            }
+                        }
+                        OutlinedButton(
+                            onClick = { onClearAuthSession?.invoke() },
+                        ) {
+                            Text(mokoString(MR.strings.sign_out))
+                        }
+                    }
+                }
+            } else {
+                uiState.authError?.let { err ->
+                    Text(
+                        text = err,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+
+                when (uiState.seerrAuthType) {
+                    SeerrAuthType.Local -> {
+                        AMOutlinedTextField(
+                            label = mokoString(MR.strings.email),
+                            value = localEmail,
+                            onValueChange = { localEmail = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        )
+                        AMOutlinedTextField(
+                            label = mokoString(MR.strings.password),
+                            value = localPassword,
+                            onValueChange = { localPassword = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        )
+                        Button(
+                            onClick = { onLoginLocal?.invoke(localEmail, localPassword) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !uiState.isAuthenticating && localEmail.isNotBlank() && localPassword.isNotBlank() && uiState.apiEndpoint.isValidUrl(),
+                        ) {
+                            if (uiState.isAuthenticating) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            } else {
+                                Text(mokoString(MR.strings.sign_in))
+                            }
+                        }
+                    }
+                    SeerrAuthType.Plex -> {
+                        val copiedMessage = mokoString(MR.strings.copied_to_clipboard)
+
+                        if (uiState.isPlexWaiting) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                        Text(
+                                            text = mokoString(MR.strings.waiting_for_plex),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Medium,
+                                        )
+                                    }
+
+                                    Text(
+                                        text = mokoString(MR.strings.plex_sign_in_instructions),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center,
+                                    )
+
+                                    uiState.plexAuthUrl?.let { url ->
+                                        FilledTonalButton(
+                                            onClick = { context.openLink(url) },
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp),
+                                            )
+                                            Spacer(Modifier.width(8.dp))
+                                            Text(mokoString(MR.strings.open_page_again))
+                                        }
+
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            OutlinedButton(
+                                                onClick = {
+                                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                                    clipboard.setPrimaryClip(ClipData.newPlainText("Plex Sign-in Link", url))
+                                                    Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
+                                                },
+                                                modifier = Modifier.weight(1f),
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Link,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp),
+                                                )
+                                                Spacer(Modifier.width(6.dp))
+                                                Text(
+                                                    text = mokoString(MR.strings.copy_link),
+                                                    maxLines = 1,
+                                                )
+                                            }
+
+                                            OutlinedButton(
+                                                onClick = { onCancelPlexSignIn?.invoke() },
+                                                modifier = Modifier.weight(1f),
+                                            ) {
+                                                Text(
+                                                    text = mokoString(MR.strings.cancel),
+                                                    maxLines = 1,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    onStartPlexSignIn?.invoke { url ->
+                                        context.openLink(url)
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !uiState.isAuthenticating,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Login,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(mokoString(MR.strings.sign_in_with_plex))
+                            }
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        ) {
+                            HorizontalDivider(Modifier.weight(1f))
+                            Text(
+                                text = mokoString(MR.strings.or),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            HorizontalDivider(Modifier.weight(1f))
+                        }
+
+                        AMOutlinedTextField(
+                            label = mokoString(MR.strings.plex_auth_token),
+                            value = uiState.plexToken,
+                            onValueChange = { onPlexTokenChange?.invoke(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                        )
+                        Button(
+                            onClick = { onLoginPlex?.invoke(uiState.plexToken) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !uiState.isAuthenticating && uiState.plexToken.isNotBlank() && uiState.apiEndpoint.isValidUrl(),
+                        ) {
+                            if (uiState.isAuthenticating) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            } else {
+                                Text(mokoString(MR.strings.sign_in))
+                            }
+                        }
+                    }
+                    SeerrAuthType.Jellyfin -> {
+                        AMOutlinedTextField(
+                            label = mokoString(MR.strings.username),
+                            value = jellyfinUsername,
+                            onValueChange = { jellyfinUsername = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                        )
+                        AMOutlinedTextField(
+                            label = mokoString(MR.strings.password),
+                            value = jellyfinPassword,
+                            onValueChange = { jellyfinPassword = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        )
+                        Button(
+                            onClick = { onLoginJellyfin?.invoke(jellyfinUsername, jellyfinPassword) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !uiState.isAuthenticating && jellyfinUsername.isNotBlank() && jellyfinPassword.isNotBlank() && uiState.apiEndpoint.isValidUrl(),
+                        ) {
+                            if (uiState.isAuthenticating) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            } else {
+                                Text(mokoString(MR.strings.sign_in))
+                            }
+                        }
+                    }
+                    SeerrAuthType.JellyfinQuickConnect -> {
+                        val qcCode = uiState.quickConnectCode
+                        if (qcCode != null) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    Text(
+                                        text = mokoString(MR.strings.quick_connect_instructions),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                    )
+                                    Text(
+                                        text = qcCode,
+                                        style = MaterialTheme.typography.headlineLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                        Text(
+                                            text = mokoString(MR.strings.quick_connect_waiting),
+                                            style = MaterialTheme.typography.bodySmall,
+                                        )
+                                    }
+                                    OutlinedButton(
+                                        onClick = { onCancelQuickConnect?.invoke() },
+                                    ) {
+                                        Text(mokoString(MR.strings.cancel))
+                                    }
+                                }
+                            }
+                        } else {
+                            Button(
+                                onClick = { onStartQuickConnect?.invoke() },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !uiState.isAuthenticating && uiState.apiEndpoint.isValidUrl(),
+                            ) {
+                                if (uiState.isAuthenticating) {
+                                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                } else {
+                                    Text(mokoString(MR.strings.quick_connect_start))
+                                }
+                            }
+                        }
+                    }
+                    SeerrAuthType.ApiKey -> Unit
+                }
             }
         }
 
@@ -487,92 +817,6 @@ private fun HeaderItem(
                                 null
                             },
                         )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun TestConnectionSection(
-    isTesting: Boolean,
-    testButtonEnabled: Boolean,
-    testResult: Boolean?,
-    onTestConnection: () -> Unit,
-) {
-    Card(
-        shape = MaterialTheme.shapes.large,
-        colors =
-        CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        ) {
-            Button(
-                onClick = onTestConnection,
-                enabled = testButtonEnabled,
-            ) {
-                if (isTesting) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.padding(end = 8.dp).size(20.dp),
-                        strokeWidth = 2.dp,
-                    )
-                }
-                Text(text = mokoString(MR.strings.test))
-            }
-
-            testResult?.let { result ->
-                Surface(
-                    shape = CircleShape,
-                    color =
-                    if (result) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.errorContainer
-                    },
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        if (result) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp),
-                            )
-                            Text(
-                                text = mokoString(MR.strings.success),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(16.dp),
-                            )
-                            Text(
-                                text = mokoString(MR.strings.failure),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        }
                     }
                 }
             }

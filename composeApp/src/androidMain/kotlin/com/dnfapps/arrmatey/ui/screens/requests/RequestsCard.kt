@@ -21,6 +21,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestSeason
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.UserPermission
+import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
@@ -46,6 +47,8 @@ fun RequestCard(
     onRemoveFromServiceClicked: () -> Unit,
     onClick: () -> Unit,
     onViewRequestClicked: (() -> Unit)? = null,
+    canManage: Boolean = user != null && SeerrPermissionPolicy.canApproveOrDecline(user),
+    canDelete: Boolean = user != null && SeerrPermissionPolicy.canCancelOrDeleteRequest(user, mediaPackage.request),
 ) {
     val request = mediaPackage.request
     val details = mediaPackage.details
@@ -85,6 +88,8 @@ fun RequestCard(
 
                 RequestButtons(
                     isAdmin = user?.hasPermission(UserPermission.ADMIN) == true,
+                    canManage = canManage,
+                    canDelete = canDelete,
                     request = request,
                     operationsState = requestOperationsState,
                     onApproveClicked = onApproveClicked,

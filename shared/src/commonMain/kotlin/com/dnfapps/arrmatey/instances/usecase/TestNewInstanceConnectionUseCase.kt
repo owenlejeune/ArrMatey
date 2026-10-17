@@ -13,5 +13,6 @@ class TestNewInstanceConnectionUseCase(
         type: InstanceType,
         headers: List<InstanceHeader> = emptyList(),
         noApiKeyRequired: Boolean = false,
-    ): Boolean = client.test(url.trim(), apiKey.trim(), type, headers, noApiKeyRequired)
+        sessionToken: String = "",
+    ): Boolean = client.test(url.trim(), apiKey.trim(), type, headers, noApiKeyRequired, sessionToken)
 }

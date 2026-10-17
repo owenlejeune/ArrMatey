@@ -15,6 +15,7 @@ struct UnifiedMediaDetailsActions: View {
     let onViewRequest: () -> Void
     let onApproveRequest: () -> Void
     let onDeclineRequest: () -> Void
+    var onCancelRequest: (() -> Void)? = nil
     let onManage: () -> Void
 
     var body: some View {
@@ -126,6 +127,18 @@ struct UnifiedMediaDetailsActions: View {
                         .cornerRadius(8)
                     }
                 }
+            } else if buttonState.showCancelRequestButton {
+                Button(role: .destructive, action: { onCancelRequest?() ?? onDeclineRequest() }) {
+                    HStack {
+                        Image(systemName: "xmark.circle")
+                        Text(MR.strings().dismiss_request.localized())
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                }
+                .background(Color(.secondarySystemBackground))
+                .foregroundColor(.red)
+                .cornerRadius(8)
             }
 
             // Request More Button

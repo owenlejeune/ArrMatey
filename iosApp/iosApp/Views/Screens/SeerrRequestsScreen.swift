@@ -21,22 +21,26 @@ struct SeerrTabContent: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     VStack(spacing: 0) {
-                        Picker("", selection: Binding(
-                            get: { viewModel.selectedTab == .requests ? 0 : 1 },
-                            set: { viewModel.setSelectedTab($0 == 0 ? .requests : .issues) }
-                        )) {
-                            requestsTabLabel.tag(0)
-                            issuesTabLabel.tag(1)
+                        if viewModel.canViewIssues {
+                            Picker("", selection: Binding(
+                                get: { viewModel.selectedTab == .requests ? 0 : 1 },
+                                set: { viewModel.setSelectedTab($0 == 0 ? .requests : .issues) }
+                            )) {
+                                requestsTabLabel.tag(0)
+                                issuesTabLabel.tag(1)
+                            }
+                            .pickerStyle(.segmented)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
                         }
-                        .pickerStyle(.segmented)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
 
-                        if viewModel.selectedTab == .requests {
+                        if !viewModel.canViewIssues || viewModel.selectedTab == .requests {
                             RequestsContentView(
                                 pagedData: viewModel.requestsState,
                                 userState: viewModel.userState,
                                 operationsState: viewModel.operationsState,
+                                canManage: viewModel.canManageRequests,
+                                canDeleteRequest: { viewModel.canDeleteRequest($0) },
                                 selectedFilter: viewModel.selectedFilter,
                                 onFilterSelected: { viewModel.setFilter($0) },
                                 onApprove: { viewModel.approveRequest($0) },
@@ -163,6 +167,8 @@ struct RequestsContentView: View {
     let pagedData: PagedData<MediaRequestPackage>
     let userState: SeerrUser?
     let operationsState: RequestOperationsState
+    var canManage: Bool = false
+    var canDeleteRequest: ((MediaRequest) -> Bool)? = nil
     let selectedFilter: RequestState
     let onFilterSelected: (RequestState) -> Void
     let onApprove: (Int64) -> Void
@@ -178,31 +184,35 @@ struct RequestsContentView: View {
 
     @State private var selectedPackageForSheet: MediaRequestPackage? = nil
 
+    private var filterBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(RequestState.allCases, id: \.self) { state in
+                    let isSelected = selectedFilter == state
+                    Button(action: { onFilterSelected(state) }) {
+                        Text(state.resource.localized())
+                            .font(.subheadline)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+                            .foregroundColor(isSelected ? .white : .primary)
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.primary.opacity(0.1), lineWidth: isSelected ? 0 : 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(RequestState.allCases, id: \.self) { state in
-                        let isSelected = selectedFilter == state
-                        Button(action: { onFilterSelected(state) }) {
-                            Text(state.resource.localized())
-                                .font(.subheadline)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
-                                .foregroundColor(isSelected ? .white : .primary)
-                                .clipShape(Capsule())
-                                .overlay(
-                                    Capsule()
-                                        .stroke(Color.primary.opacity(0.1), lineWidth: isSelected ? 0 : 1)
-                                )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-            }
+            filterBar
 
             ZStack {
                 if pagedData.isLoading && pagedData.items.isEmpty {
@@ -226,6 +236,8 @@ struct RequestsContentView: View {
                     loadMoreFailed: pagedData.loadMoreFailed,
                     userState: userState,
                     operationsState: operationsState,
+                    canManage: canManage,
+                    canDeleteRequest: canDeleteRequest,
                     onApprove: onApprove,
                     onDecline: onDecline,
                     onEdit: onEdit,
@@ -259,6 +271,7 @@ struct RequestsContentView: View {
                     details: details,
                     request: wrapper.package.request,
                     serviceDetails: wrapper.package.serviceDetails,
+                    canManage: canManage,
                     onDismissRequest: { selectedPackageForSheet = nil },
                     onApproveRequest: { requestId, profileId, rootFolder, languageProfileId, seasons in
                         if let onApproveWithDetails {
@@ -295,31 +308,35 @@ struct IssuesContentView: View {
 
     @State private var selectedIssue: MediaIssuePackage? = nil
 
+    private var filterBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(IssueState.allCases, id: \.self) { state in
+                    let isSelected = selectedFilter == state
+                    Button(action: { onFilterSelected(state) }) {
+                        Text(state.resource.localized())
+                            .font(.subheadline)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+                            .foregroundColor(isSelected ? .white : .primary)
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.primary.opacity(0.1), lineWidth: isSelected ? 0 : 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(IssueState.allCases, id: \.self) { state in
-                        let isSelected = selectedFilter == state
-                        Button(action: { onFilterSelected(state) }) {
-                            Text(state.resource.localized())
-                                .font(.subheadline)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
-                                .foregroundColor(isSelected ? .white : .primary)
-                                .clipShape(Capsule())
-                                .overlay(
-                                    Capsule()
-                                        .stroke(Color.primary.opacity(0.1), lineWidth: isSelected ? 0 : 1)
-                                )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-            }
+            filterBar
 
             ZStack {
                 if pagedData.isLoading && pagedData.items.isEmpty {
@@ -385,6 +402,8 @@ private struct RequestsListView: View {
     var loadMoreFailed: Bool = false
     let userState: SeerrUser?
     let operationsState: RequestOperationsState
+    var canManage: Bool = false
+    var canDeleteRequest: ((MediaRequest) -> Bool)? = nil
     let onApprove: (Int64) -> Void
     let onDecline: (Int64) -> Void
     let onEdit: (Int64) -> Void
@@ -418,7 +437,9 @@ private struct RequestsListView: View {
                                 rPackage.request.type
                             )
                         },
-                        onViewRequest: { onViewRequest?(rPackage) }
+                        onViewRequest: { onViewRequest?(rPackage) },
+                        canManage: canManage,
+                        canDelete: canDeleteRequest?(rPackage.request)
                     )
                     .onAppear {
                         if rPackage.request.id == items.last?.request.id && hasMore && !isLoadingMore {
@@ -572,6 +593,8 @@ struct SeerrSheetView: View {
                         pagedData: viewModel.requestsState,
                         userState: viewModel.userState,
                         operationsState: viewModel.operationsState,
+                        canManage: viewModel.canManageRequests,
+                        canDeleteRequest: { viewModel.canDeleteRequest($0) },
                         selectedFilter: viewModel.selectedFilter,
                         onFilterSelected: { viewModel.setFilter($0) },
                         onApprove: { viewModel.approveRequest($0) },

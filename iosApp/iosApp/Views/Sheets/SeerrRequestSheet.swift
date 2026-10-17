@@ -47,6 +47,19 @@ struct SeerrRequestSheet: View {
         }
     }
     
+    private var requestType: RequestType {
+        (details is TvDetails) ? .tv : .movie
+    }
+    
+    private var permissions: SeerrRequestPermissions {
+        SeerrPermissionPolicy.shared.getRequestPermissions(user: currentUser, type: requestType, is4k: is4k)
+    }
+    
+    private var canConfigureAdvanced: Bool { permissions.canConfigureAdvanced }
+    private var canRequestForOtherUsers: Bool { permissions.canRequestForOtherUsers }
+    private var canRequestThis: Bool { permissions.canRequestThis }
+    private var willAutoApprove: Bool { permissions.willAutoApprove }
+    
     var body: some View {
         NavigationView {
             Form {
@@ -102,27 +115,55 @@ struct SeerrRequestSheet: View {
                         }
                     }
                 }
-                
-                Section(header: Text(MR.strings().advanced.localized())) {
-                    Picker(MR.strings().quality_profile.localized(), selection: $selectedProfileId) {
-                        Text(MR.strings().unknown.localized()).tag(nil as Int64?)
-                        ForEach(serviceDetails?.profiles ?? [], id: \.id) { profile in
-                            Text(profile.name).tag(profile.id as Int64?)
-                        }
+
+                if !canRequestThis {
+                    Section {
+                        Text(MR.strings().request_no_permission.localized())
+                            .foregroundColor(.red)
+                            .font(.caption)
                     }
-                    
-                    Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolder) {
-                        Text(MR.strings().unknown.localized()).tag(nil as String?)
-                        ForEach(serviceDetails?.rootFolders ?? [], id: \.path) { folder in
-                            Text(folder.path).tag(folder.path as String?)
-                        }
-                    }
-                    
-                    if currentUser?.hasPermission(permission: .admin) == true && !users.isEmpty {
-                        Picker(MR.strings().request_as.localized(), selection: $selectedUserId) {
-                            ForEach(users, id: \.id) { user in
-                                Text(user.displayName).tag(user.id as Int64?)
+                }
+
+                if canConfigureAdvanced || (canRequestForOtherUsers && !users.isEmpty) {
+                    Section(header: Text(MR.strings().advanced.localized())) {
+                        if canConfigureAdvanced {
+                            Picker(MR.strings().quality_profile.localized(), selection: $selectedProfileId) {
+                                Text(MR.strings().unknown.localized()).tag(nil as Int64?)
+                                ForEach(serviceDetails?.profiles ?? [], id: \.id) { profile in
+                                    Text(profile.name).tag(profile.id as Int64?)
+                                }
                             }
+                            
+                            Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolder) {
+                                Text(MR.strings().unknown.localized()).tag(nil as String?)
+                                ForEach(serviceDetails?.rootFolders ?? [], id: \.path) { folder in
+                                    Text(folder.path).tag(folder.path as String?)
+                                }
+                            }
+                        }
+                        
+                        if canRequestForOtherUsers && !users.isEmpty {
+                            Picker(MR.strings().request_as.localized(), selection: $selectedUserId) {
+                                ForEach(users, id: \.id) { user in
+                                    Text(user.displayName).tag(user.id as Int64?)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Section {
+                    if !canRequestThis {
+                        Text(MR.strings().request_no_permission.localized())
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    } else {
+                        HStack(spacing: 8) {
+                            Image(systemName: willAutoApprove ? "bolt.fill" : "clock")
+                                .foregroundColor(willAutoApprove ? .accentColor : .secondary)
+                            Text(willAutoApprove ? MR.strings().request_will_auto_approve.localized() : MR.strings().request_will_require_approval.localized())
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -136,11 +177,14 @@ struct SeerrRequestSheet: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(MR.strings().request.localized()) {
+                    Button(
+                        !canRequestThis ? MR.strings().request.localized() : (is4k ? MR.strings().request_in_4k.localized() : MR.strings().submit_request.localized())
+                    ) {
                         let seasons = details is TvDetails ? selectedSeasons.map { KotlinInt(value: $0) } : nil
-                        onSubmit(selectedProfileId, selectedRootFolder, nil, seasons, is4k, selectedUserId)
+                        let effectiveUserId = (canRequestForOtherUsers && selectedUserId != currentUser?.id) ? selectedUserId : nil
+                        onSubmit(selectedProfileId, selectedRootFolder, nil, seasons, is4k, effectiveUserId)
                     }
-                    .disabled(details is TvDetails && selectedSeasons.isEmpty)
+                    .disabled(!canRequestThis || (details is TvDetails && selectedSeasons.isEmpty))
                 }
             }
         }

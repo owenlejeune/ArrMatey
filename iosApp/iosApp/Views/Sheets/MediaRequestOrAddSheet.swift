@@ -160,10 +160,26 @@ private struct MediaRequestOrAddSheetContent: View {
         effectiveRootFolders.first { $0.id == selectedComicRootFolderId }?.path
     }
 
+    private var canConfigureAdvanced: Bool {
+        viewModel.requestPermissions.canConfigureAdvanced
+    }
+
+    private var canRequestForOtherUsers: Bool {
+        viewModel.requestPermissions.canRequestForOtherUsers
+    }
+
+    private var canRequestThis: Bool {
+        viewModel.requestPermissions.canRequestThis
+    }
+
+    private var willAutoApprove: Bool {
+        viewModel.requestPermissions.willAutoApprove
+    }
+
     private var isActionEnabled: Bool {
         if isBusy { return false }
         if selectedMode == .request {
-            return true
+            return canRequestThis
         } else {
             if arrMedia is ArrSeries {
                 return selectedSeriesQualityProfileId != nil && selectedSeriesRootFolderPath != nil
@@ -403,6 +419,12 @@ private struct MediaRequestOrAddSheetContent: View {
                 seasonsSelectionView(tv: tv)
             }
 
+            if !canRequestThis {
+                Text(MR.strings().request_no_permission.localized())
+                    .foregroundColor(.red)
+                    .font(.caption)
+            }
+
             requestAdvancedSettingsView
         }
     }
@@ -450,33 +472,37 @@ private struct MediaRequestOrAddSheetContent: View {
 
     @ViewBuilder
     private var requestAdvancedSettingsView: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(MR.strings().advanced.localized())
-                .font(.headline)
+        if canConfigureAdvanced || (canRequestForOtherUsers && !viewModel.users.isEmpty) {
+            VStack(alignment: .leading, spacing: 14) {
+                Text(MR.strings().advanced.localized())
+                    .font(.headline)
 
-            Picker(MR.strings().quality_profile.localized(), selection: $selectedProfileId) {
-                Text(MR.strings().unknown.localized()).tag(nil as Int64?)
-                ForEach(viewModel.serviceDetails?.profiles ?? [], id: \.id) { profile in
-                    Text(profile.name).tag(Int64(profile.id) as Int64?)
-                }
-            }
-            .disabled(isBusy)
-
-            Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolder) {
-                Text(MR.strings().unknown.localized()).tag(nil as String?)
-                ForEach(viewModel.serviceDetails?.rootFolders ?? [], id: \.path) { folder in
-                    Text(folder.path).tag(folder.path as String?)
-                }
-            }
-            .disabled(isBusy)
-
-            if viewModel.currentUser?.hasPermission(permission: .admin) == true && !viewModel.users.isEmpty {
-                Picker(MR.strings().request_as.localized(), selection: $selectedUserId) {
-                    ForEach(viewModel.users, id: \.id) { user in
-                        Text(user.displayName).tag(user.id as Int64?)
+                if canConfigureAdvanced {
+                    Picker(MR.strings().quality_profile.localized(), selection: $selectedProfileId) {
+                        Text(MR.strings().unknown.localized()).tag(nil as Int64?)
+                        ForEach(viewModel.serviceDetails?.profiles ?? [], id: \.id) { profile in
+                            Text(profile.name).tag(Int64(profile.id) as Int64?)
+                        }
                     }
+                    .disabled(isBusy)
+
+                    Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolder) {
+                        Text(MR.strings().unknown.localized()).tag(nil as String?)
+                        ForEach(viewModel.serviceDetails?.rootFolders ?? [], id: \.path) { folder in
+                            Text(folder.path).tag(folder.path as String?)
+                        }
+                    }
+                    .disabled(isBusy)
                 }
-                .disabled(isBusy)
+
+                if canRequestForOtherUsers && !viewModel.users.isEmpty {
+                    Picker(MR.strings().request_as.localized(), selection: $selectedUserId) {
+                        ForEach(viewModel.users, id: \.id) { user in
+                            Text(user.displayName).tag(user.id as Int64?)
+                        }
+                    }
+                    .disabled(isBusy)
+                }
             }
         }
     }
@@ -670,44 +696,70 @@ private struct MediaRequestOrAddSheetContent: View {
     // MARK: - Footer
     @ViewBuilder
     private var footerView: some View {
-        HStack(spacing: 12) {
-            Button(action: onDismiss) {
-                Text(MR.strings().cancel.localized())
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .disabled(isBusy)
-
-            Button(action: handleAction) {
+        VStack(spacing: 10) {
+            if selectedMode == .request && viewModel.currentUser != nil && canRequestThis {
                 HStack(spacing: 6) {
-                    if isBusy {
-                        ProgressView()
-                    } else if selectedMode == .request {
-                        Text(is4k ? MR.strings().request_in_4k.localized() : MR.strings().request.localized())
-                            .bold()
-                    } else {
-                        Image(systemName: "checkmark")
-                        Text(MR.strings().save.localized())
-                            .bold()
-                    }
+                    Image(systemName: willAutoApprove ? "bolt.fill" : "clock")
+                        .font(.caption2)
+                    Text(willAutoApprove ? MR.strings().request_will_auto_approve.localized() : MR.strings().request_will_require_approval.localized())
+                        .font(.caption)
                 }
-                .frame(maxWidth: .infinity)
+                .foregroundColor(.secondary)
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(!isActionEnabled)
+
+            HStack(spacing: 12) {
+                Button(action: onDismiss) {
+                    Text(MR.strings().cancel.localized())
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .disabled(isBusy)
+
+                Button(action: handleAction) {
+                    HStack(spacing: 6) {
+                        if isBusy {
+                            ProgressView()
+                        } else if selectedMode == .request {
+                            let requestText: String = {
+                                if !canRequestThis {
+                                    return MR.strings().request.localized()
+                                }
+                                if is4k {
+                                    return MR.strings().request_in_4k.localized()
+                                }
+                                return MR.strings().submit_request.localized()
+                            }()
+                            Text(requestText)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
+                                .bold()
+                        } else {
+                            Image(systemName: "checkmark")
+                            Text(MR.strings().save.localized())
+                                .lineLimit(1)
+                                .bold()
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(!isActionEnabled)
+            }
         }
     }
 
     private func handleAction() {
         if selectedMode == .request {
             let seasons = seerrMedia is TvDetails ? Array(selectedSeasons).map { KotlinInt(value: $0) } : nil
+            let effectiveUserId = (canRequestForOtherUsers && selectedUserId != viewModel.currentUser?.id) ? selectedUserId : nil
             viewModel.submitRequest(
                 profileId: selectedProfileId,
                 rootFolder: selectedRootFolder,
                 languageProfileId: nil,
                 seasons: seasons,
                 is4k: is4k,
-                userId: selectedUserId
+                userId: effectiveUserId
             )
         } else {
             let prefs = viewModel.preferences

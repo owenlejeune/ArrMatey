@@ -121,25 +121,27 @@ fun SeerrSection(
                         iconColor = ArrPurple,
                         onClick = if (!isEditing) onRequestClick else null,
                     )
-                    CountStatItem(
-                        modifier = Modifier.weight(1f),
-                        icon = Icons.Default.BugReport,
-                        label = mokoString(MR.strings.dashboard_pending_issues),
-                        count = totalIssues,
-                        iconColor =
-                        if (totalIssues > 0) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.secondary
-                        },
-                        containerColor =
-                        if (totalIssues > 0) {
-                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                        },
-                        onClick = if (!isEditing) onIssueClick else null,
-                    )
+                    if (state.canViewIssues) {
+                        CountStatItem(
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Default.BugReport,
+                            label = mokoString(MR.strings.dashboard_pending_issues),
+                            count = totalIssues,
+                            iconColor =
+                            if (totalIssues > 0) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.secondary
+                            },
+                            containerColor =
+                            if (totalIssues > 0) {
+                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            },
+                            onClick = if (!isEditing) onIssueClick else null,
+                        )
+                    }
                 }
             }
         }

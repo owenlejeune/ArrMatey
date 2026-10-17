@@ -10,6 +10,7 @@ struct SeerrViewRequestSheet: View {
     let details: RequestMediaDetails
     let requestOverride: MediaRequest?
     let serviceDetails: ServiceDetails?
+    let canManage: Bool
     let onDismissRequest: () -> Void
     let onApproveRequest: (Int64, Int64?, String?, Int64?, [Int32]?) -> Void
     let onDeclineRequest: (Int64) -> Void
@@ -27,6 +28,7 @@ struct SeerrViewRequestSheet: View {
         details: RequestMediaDetails,
         request: MediaRequest? = nil,
         serviceDetails: ServiceDetails? = nil,
+        canManage: Bool = true,
         onDismissRequest: @escaping () -> Void,
         onApproveRequest: @escaping (Int64, Int64?, String?, Int64?, [Int32]?) -> Void,
         onDeclineRequest: @escaping (Int64) -> Void,
@@ -35,6 +37,7 @@ struct SeerrViewRequestSheet: View {
         self.details = details
         self.requestOverride = request
         self.serviceDetails = serviceDetails
+        self.canManage = canManage
         self.onDismissRequest = onDismissRequest
         self.onApproveRequest = onApproveRequest
         self.onDeclineRequest = onDeclineRequest
@@ -54,6 +57,7 @@ struct SeerrViewRequestSheet: View {
             details: details,
             request: nil,
             serviceDetails: viewModel.serviceDetails,
+            canManage: viewModel.buttonState.showApproveRequestButton,
             onDismissRequest: onDismissRequest,
             onApproveRequest: { requestId, profileId, rootFolder, languageProfileId, seasons in
                 let seasonsKotlin = seasons?.map { KotlinInt(value: $0) }
@@ -155,18 +159,20 @@ struct SeerrViewRequestSheet: View {
                         }
                     }
 
-                    Section(header: Text(MR.strings().advanced.localized())) {
-                        Picker(MR.strings().quality_profile.localized(), selection: $selectedProfileId) {
-                            Text(MR.strings().unknown.localized()).tag(nil as Int64?)
-                            ForEach(serviceDetails?.profiles ?? [], id: \.id) { profile in
-                                Text(profile.name).tag(profile.id as Int64?)
+                    if canManage {
+                        Section(header: Text(MR.strings().advanced.localized())) {
+                            Picker(MR.strings().quality_profile.localized(), selection: $selectedProfileId) {
+                                Text(MR.strings().unknown.localized()).tag(nil as Int64?)
+                                ForEach(serviceDetails?.profiles ?? [], id: \.id) { profile in
+                                    Text(profile.name).tag(profile.id as Int64?)
+                                }
                             }
-                        }
 
-                        Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolder) {
-                            Text(MR.strings().unknown.localized()).tag(nil as String?)
-                            ForEach(serviceDetails?.rootFolders ?? [], id: \.path) { folder in
-                                Text(folder.path).tag(folder.path as String?)
+                            Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolder) {
+                                Text(MR.strings().unknown.localized()).tag(nil as String?)
+                                ForEach(serviceDetails?.rootFolders ?? [], id: \.path) { folder in
+                                    Text(folder.path).tag(folder.path as String?)
+                                }
                             }
                         }
                     }
@@ -185,28 +191,30 @@ struct SeerrViewRequestSheet: View {
                             }
                         }
 
-                        Button(action: {
-                            let seasonsArray = details is TvDetails ? Array(selectedSeasons) : nil
-                            onApproveRequest(
-                                request.id,
-                                selectedProfileId,
-                                selectedRootFolder,
-                                request.languageProfileId?.int64Value,
-                                seasonsArray
-                            )
-                            onDismissRequest()
-                        }) {
-                            Text(MR.strings().approve_request.localized())
-                                .frame(maxWidth: .infinity)
-                                .foregroundColor(.white)
+                        if canManage {
+                            Button(action: {
+                                let seasonsArray = details is TvDetails ? Array(selectedSeasons) : nil
+                                onApproveRequest(
+                                    request.id,
+                                    selectedProfileId,
+                                    selectedRootFolder,
+                                    request.languageProfileId?.int64Value,
+                                    seasonsArray
+                                )
+                                onDismissRequest()
+                            }) {
+                                Text(MR.strings().approve_request.localized())
+                                    .frame(maxWidth: .infinity)
+                                    .foregroundColor(.white)
+                            }
+                            .listRowBackground(Color.green)
                         }
-                        .listRowBackground(Color.green)
 
                         Button(role: .destructive, action: {
                             onDeclineRequest(request.id)
                             onDismissRequest()
                         }) {
-                            Text(MR.strings().decline_request.localized())
+                            Text(canManage ? MR.strings().decline_request.localized() : MR.strings().dismiss_request.localized())
                                 .frame(maxWidth: .infinity)
                         }
                     }

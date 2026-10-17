@@ -137,6 +137,8 @@ import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceScopedRepoUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
+import com.dnfapps.arrmatey.instances.usecase.PlexAuthUseCase
+import com.dnfapps.arrmatey.instances.usecase.SeerrAuthUseCase
 import com.dnfapps.arrmatey.instances.usecase.SetInstanceActiveUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestInstanceConnectionUseCase
 import com.dnfapps.arrmatey.instances.usecase.TestNewInstanceConnectionUseCase
@@ -331,6 +333,8 @@ val useCaseModule =
         factory { GetMovieFilesUseCase(get()) }
         factory { TestInstanceConnectionUseCase(get()) }
         factory { TestNewInstanceConnectionUseCase(get()) }
+        factory { SeerrAuthUseCase(get()) }
+        factory { PlexAuthUseCase(get()) }
         factory { CreateInstanceUseCase(get(), get()) }
         factory { UpdateInstanceUseCase(get()) }
         factory { DismissInfoCardUseCase(get()) }
@@ -544,7 +548,7 @@ val viewModelModule =
         viewModelOf(::MoreScreenViewModel)
         viewModelOf(::AddInstanceViewModel)
         viewModel { (instanceId: Long) ->
-            EditInstanceViewModel(instanceId, get(), get(), get(), get(), get())
+            EditInstanceViewModel(instanceId, get(), get(), get(), get(), get(), get(), get())
         }
         viewModel { (instanceId: Long) ->
             ArrInstanceDashboardViewModel(instanceId, get(), get(), get(), get())
@@ -578,7 +582,14 @@ val viewModelModule =
             CustomWebpageViewerViewModel(webpageId, get(), get())
         }
         viewModel { (issuePackage: MediaIssuePackage) ->
-            IssueDetailsViewModel(issuePackage, get(), get(), get())
+            IssueDetailsViewModel(
+                issuePackage,
+                get(),
+                get(),
+                get(),
+                get<GetSeerrInstanceRepositoryUseCase>(),
+                get<GetCurrentSeerrUserUseCase>(),
+            )
         }
         viewModel { (authorId: Long, book: Book) ->
             BookDetailsViewModel(authorId, book, get(), get(), get(), get(), get(), get())

@@ -57,6 +57,7 @@ fun MediaDetailsActions(
     onViewRequestClicked: (Long) -> Unit,
     onApproveRequestClicked: (Long) -> Unit,
     onDeclineRequestClicked: (Long) -> Unit,
+    onCancelRequestClicked: (Long) -> Unit = onDeclineRequestClicked,
     onRequestClicked: () -> Unit,
     onRequest4kClicked: () -> Unit,
     modifier: Modifier = Modifier,
@@ -65,6 +66,7 @@ fun MediaDetailsActions(
         buttonState.showWatchButton ||
         buttonState.showWatchTrailerOption ||
         buttonState.showViewRequestButton ||
+        buttonState.showCancelRequestButton ||
         buttonState.showRequestMoreButton ||
         buttonState.showRequestButton ||
         buttonState.showRequest4kButton
@@ -83,6 +85,23 @@ fun MediaDetailsActions(
                     onApproveRequestClicked,
                     onDeclineRequestClicked,
                 )
+            } else if (buttonState.showCancelRequestButton) {
+                Button(
+                    onClick = {
+                        buttonState.pendingRequestId?.let(onCancelRequestClicked)
+                    },
+                    colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Close, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(mokoString(MR.strings.dismiss_request))
+                    }
+                }
             }
             if (buttonState.showRequestMoreButton) {
                 RequestButton(
