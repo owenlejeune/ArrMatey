@@ -73,7 +73,22 @@ val androidModule =
                     TabItem.Standard.MONITORING to get<TracearrTabNavigator>(),
                     TabItem.Settings to get<SettingsTabNavigator>(),
                 )
-            NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+            NavigationManager(
+                tabNavigators = registry,
+                settings = get(),
+                requests = get(),
+                discover = get(),
+                calendar = get(),
+                activity = get(),
+                dashboard = get(),
+                bazarr = get(),
+                tracearr = get(),
+                appState = get(),
+                tabManager = get(),
+                instanceRepository = get(),
+                shortcutManager = get(),
+                context = get(),
+            )
         }
 
         // Others

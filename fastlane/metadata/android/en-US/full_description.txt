@@ -1,56 +1,61 @@
 ArrMatey is an all-in-one mobile companion for your home server media stack. Support for Sonarr, Radarr, Lidarr, Bookshelf, Listenarr, Prowlarr, Seerr, Bazarr, and Tracearr is included, along with download clients (qBittorrent, SABnzbd, Deluge, and Transmission) with many more coming!
 
 <b>Combined Dashboard</b>
-<li>
-<ul>Centralized overview of all instances, download clients, and requests</ul>
-<ul>Customizable layout: add, remove, and reorder cards to fit your workflow</ul>
-<ul>Real-time network status and detailed disk space monitoring</ul>
-<ul>Quick-access shortcuts to your recently added media and upcoming schedule</ul>
-</li>
+<ul>
+<li>Centralized overview of all instances, download clients, and requests</li>
+<li>Customizable layout: add, remove, and reorder cards to fit your workflow</li>
+<li>Real-time network status and detailed disk space monitoring</li>
+<li>Quick-access shortcuts to your recently added media and upcoming schedule</li>
+</ul>
 
 <b>Multi-Instance Support</b>
-<li>
-<ul>Manage multiple Sonarr, Radarr, Lidarr, Bookshelf, and Listenarr instances</ul>
-<ul>Seamless integration with Prowlarr for indexer management, Seerr for requests, Bazarr for subtitles, and Tracearr for stream monitoring</ul>
-<ul>Quick instance switching and custom instance labels</ul>
-</li>
+<ul>
+<li>Manage multiple Sonarr, Radarr, Lidarr, Bookshelf, and Listenarr instances</li>
+<li>Seamless integration with Prowlarr for indexer management, Seerr for requests, Bazarr for subtitles, and Tracearr for stream monitoring</li>
+<li>Quick instance switching and custom instance labels</li>
+</ul>
 
 <b>Library Management</b>
-<li>
-<ul>Browse your entire media library with list and grid views</ul>
-<ul>Search and filter by title, quality, and monitored status</ul>
-<ul>Sort by name, date added, size, and more</ul>
-<ul>View detailed media information, including episode lists, season management, and file status</ul>
-<ul>Dedicated management for Audiobooks with metadata and file tracking</ul>
-</li>
+<ul>
+<li>Browse your entire media library with list and grid views</li>
+<li>Search and filter by title, quality, and monitored status</li>
+<li>Sort by name, date added, size, and more</li>
+<li>View detailed media information, including episode lists, season management, and file status</li>
+<li>Dedicated management for Audiobooks with metadata and file tracking</li>
+</ul>
 
 <b>Interactive Search</b>
-<li>
-<ul>Manual search for releases via Arr instances or Prowlarr</ul>
-<ul>Filter by quality, language, indexer, and protocol</ul>
-<ul>View seeders, size, age, and custom format scores</ul>
-<ul>One-tap download with confirmation for rejected releases</ul>
-</li>
+<ul>
+<li>Manual search for releases via Arr instances or Prowlarr</li>
+<li>Filter by quality, language, indexer, and protocol</li>
+<li>View seeders, size, age, and custom format scores</li>
+<li>One-tap download with confirmation for rejected releases</li>
+</ul>
 
 <b>Calendar View</b>
-<li>
-<ul>View upcoming episodes, movies, albums, and books</ul>
-<ul>Switch between list and month views</ul>
-<ul>Filter by content type, monitored status, and premieres/finales</ul>
-<ul>Scroll-to-today for easy navigation</ul>
-</li>
+<ul>
+<li>View upcoming episodes, movies, albums, and books</li>
+<li>Switch between list and month views</li>
+<li>Filter by content type, monitored status, and premieres/finales</li>
+<li>Scroll-to-today for easy navigation</li>
+</ul>
 
 <b>Activity Queue</b>
-<li>
-<ul>Real-time download monitoring across all download clients</ul>
-<ul>View progress, ETA, and detailed status</ul>
-<ul>Manage downloads with options to remove, blocklist, or skip redownload</ul>
-</li>
+<ul>
+<li>Real-time download monitoring across all download clients</li>
+<li>View progress, ETA, and detailed status</li>
+<li>Manage downloads with options to remove, blocklist, or skip redownload</li>
+</ul>
 
 <b>Advanced Features</b>
-<li>
-<ul><b>Android App Shortcuts:</b> Jump to services or search directly from your home screen</ul>
-<ul><b>Custom Headers:</b> Add custom HTTP headers per instance</ul>
-<ul><b>Local Network Switching:</b> Automatically use local URLs when connected to home Wi-Fi</ul>
-<ul><b>Slow Instance Mode:</b> Configurable timeout for remote or slower instances</ul>
-</li>
+<ul>
+<li><b>Android App Shortcuts:</b> Jump to services or search directly from your home screen</li>
+<li><b>Custom Headers:</b> Add custom HTTP headers per instance</li>
+<li><b>Local Network Switching:</b> Automatically use local URLs when connected to home Wi-Fi</li>
+<li><b>Slow Instance Mode:</b> Configurable timeout for remote or slower instances</li>
+</ul>
+
+<b>External Metadata</b>
+<ul>
+<li>Media artwork and metadata may be loaded directly from external services such as The Movie Database (TMDB) and TheTVDB.</li>
+</ul>

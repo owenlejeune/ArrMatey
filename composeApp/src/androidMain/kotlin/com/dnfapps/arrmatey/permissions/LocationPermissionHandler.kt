@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -25,14 +26,18 @@ fun rememberLocationPermissionHandler(
     onCancelled: () -> Unit = {},
 ): LocationPermissionHandler {
     val context = LocalContext.current
+    val currentOnGranted by rememberUpdatedState(onGranted)
+    val currentOnDenied by rememberUpdatedState(onDenied)
+    val currentOnCancelled by rememberUpdatedState(onCancelled)
+
     val permissionLauncher =
         rememberLauncherForActivityResult(
             ActivityResultContracts.RequestPermission(),
         ) { isGranted ->
             if (isGranted) {
-                onGranted()
+                currentOnGranted()
             } else {
-                onDenied()
+                currentOnDenied()
             }
         }
 
@@ -43,10 +48,10 @@ fun rememberLocationPermissionHandler(
             object : LocationPermissionHandler {
                 override fun checkAndPerformAction() {
                     val checkPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                    when (checkPermission) {
-                        PackageManager.PERMISSION_GRANTED -> onGranted()
-                        PackageManager.PERMISSION_DENIED -> onDenied()
-                        else -> showRationale = true
+                    if (checkPermission == PackageManager.PERMISSION_GRANTED) {
+                        currentOnGranted()
+                    } else {
+                        showRationale = true
                     }
                 }
 
@@ -73,7 +78,7 @@ fun rememberLocationPermissionHandler(
             dismissButton = {
                 TextButton(onClick = {
                     showRationale = false
-                    onCancelled()
+                    currentOnCancelled()
                 }) {
                     Text(mokoString(MR.strings.cancel))
                 }

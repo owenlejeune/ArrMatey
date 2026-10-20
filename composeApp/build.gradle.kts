@@ -102,8 +102,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            val releaseSigning = signingConfigs.getByName("release")
-            if (releaseSigning.storeFile != null) {
+            val releaseSigning = signingConfigs.findByName("release")
+            if (releaseSigning?.storeFile != null) {
                 signingConfig = releaseSigning
             }
             manifestPlaceholders["appLabel"] = "@string/app_name"
@@ -169,7 +169,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.compose.material3.alpha)
     implementation(libs.kotlinx.datetime)
-    implementation(libs.cloudy)
 
     implementation(libs.moko.resources)
     implementation(libs.moko.resources.compose)
