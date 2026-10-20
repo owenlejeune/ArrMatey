@@ -462,7 +462,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.10.3;
+				MARKETING_VERSION = 0.10.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.owenlejeune.arrmatey;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -496,7 +496,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.10.3;
+				MARKETING_VERSION = 0.10.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.owenlejeune.arrmatey.dev;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
