@@ -1,9 +1,11 @@
 package com.dnfapps.arrmatey.navigation
 
+import android.content.Context
 import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.database.InstanceRepository
+import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shortcuts.AppShortcutManager
@@ -27,6 +29,7 @@ class NavigationManager(
     private val tabManager: TabManager,
     private val instanceRepository: InstanceRepository,
     private val shortcutManager: AppShortcutManager? = null,
+    private val context: Context? = null,
 ) {
     // Reactive UI state properties
     val drawerExpandedState: StateFlow<Boolean> = appState.drawerExpanded
@@ -215,10 +218,13 @@ class NavigationManager(
 
     fun navigateToPersonDetails(personId: Long) {
         val hasSeerr = runBlocking { instanceRepository.getInstancesByType(InstanceType.Seerr).isNotEmpty() }
-        navigateToTab(TabItem.Standard.DISCOVER)
         if (hasSeerr) {
+            navigateToTab(TabItem.Standard.DISCOVER)
             discover.toPersonDetails(personId)
+        } else if (context != null) {
+            context.openLink("https://www.themoviedb.org/person/$personId")
         } else {
+            navigateToTab(TabItem.Standard.DISCOVER)
             discover.toPersonWebView("https://www.themoviedb.org/person/$personId")
         }
     }

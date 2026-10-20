@@ -30,7 +30,6 @@ navigation3 = "1.1.7"
 m3Alpha = "1.5.0-alpha14"
 coil = "3.6.2"
 datastore = "1.2.1"
-cloudy = "0.7.1"
 moko = "0.27.1"
 windowSize = "1.4.0"
 aboutLibraries = "15.2.0"
@@ -89,7 +88,6 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" 
 coil-network = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
-cloudy = { module = "com.github.skydoves:cloudy", version.ref = "cloudy" }
 moko-resources = { module = "dev.icerock.moko:resources", version.ref = "moko" }
 moko-resources-compose = { module = "dev.icerock.moko:resources-compose", version.ref = "moko" }
 resources-generator = { module = "dev.icerock.moko:resources-generator", version.ref = "moko" }

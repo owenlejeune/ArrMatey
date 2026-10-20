@@ -16,9 +16,13 @@ fun Context.openLink(url: String) {
                 .setShowTitle(true)
                 .setInstantAppsEnabled(true)
                 .build()
+        customTabIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         customTabIntent.launchUrl(this, uri)
     } catch (e: Exception) {
-        val intent = Intent(Intent.ACTION_VIEW, uri)
+        val intent =
+            Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
         startActivity(intent)
     }
 }
