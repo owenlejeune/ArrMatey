@@ -65,7 +65,7 @@ class ListenarrRepositoryTest {
                     )
                 }
             }
-        val repository = ListenarrRepository(fakeInstance, httpClient, fakeLogger)
+        val repository = ListenarrRepository(fakeInstance, httpClient, fakeLogger, com.dnfapps.arrmatey.utils.fakeMokoStrings)
 
         repository.getAudiobookFiles(audiobookId = 3)
 

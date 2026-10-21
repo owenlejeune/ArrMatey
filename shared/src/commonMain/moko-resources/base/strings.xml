@@ -133,6 +133,11 @@
     <string name="error_editing_item">Error editing item</string>
     <string name="item_deleted_successfully">Item deleted successfully</string>
     <string name="error_deleting_item">Error deleting item</string>
+    <string name="item_updated_successfully">Item updated successfully</string>
+    <string name="monitoring_updated_successfully">Monitoring updated successfully</string>
+    <string name="search_initiated">Search initiated</string>
+    <string name="not_a_sonarr_instance">Not a Sonarr instance</string>
+    <string name="media_not_found_in_cache">Media not found in cache</string>
     <string name="remove">Remove</string>
     <string name="manual_import">Manual Import</string>
     <string name="import_action">Import</string>

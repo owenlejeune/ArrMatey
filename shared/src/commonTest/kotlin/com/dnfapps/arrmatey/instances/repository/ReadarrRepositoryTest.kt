@@ -53,7 +53,7 @@ class ReadarrRepositoryTest {
                     )
                 }
             }
-        val repository = ReadarrRepository(fakeInstance, httpClient, fakeLogger)
+        val repository = ReadarrRepository(fakeInstance, httpClient, fakeLogger, com.dnfapps.arrmatey.utils.fakeMokoStrings)
 
         repository.getAuthorSeries(authorId = 10)
 
@@ -97,7 +97,7 @@ class ReadarrRepositoryTest {
                     )
                 }
             }
-        val repository = ReadarrRepository(fakeChaptarrInstance, httpClient, fakeLogger)
+        val repository = ReadarrRepository(fakeChaptarrInstance, httpClient, fakeLogger, com.dnfapps.arrmatey.utils.fakeMokoStrings)
 
         assertEquals(InstanceType.Chaptarr, repository.instance.type)
         assertEquals("http://localhost:8789", repository.instance.url)
@@ -124,7 +124,7 @@ class ReadarrRepositoryTest {
                     )
                 }
             }
-        val repository = ReadarrRepository(fakeInstance, httpClient, fakeLogger)
+        val repository = ReadarrRepository(fakeInstance, httpClient, fakeLogger, com.dnfapps.arrmatey.utils.fakeMokoStrings)
 
         val result = repository.getAuthorBooks(authorId = 10)
 

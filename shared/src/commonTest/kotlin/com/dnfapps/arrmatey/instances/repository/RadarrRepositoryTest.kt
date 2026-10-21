@@ -61,7 +61,7 @@ class RadarrRepositoryTest {
                     )
                 }
             }
-        val repository = RadarrRepository(fakeInstance, httpClient, fakeLogger)
+        val repository = RadarrRepository(fakeInstance, httpClient, fakeLogger, com.dnfapps.arrmatey.utils.fakeMokoStrings)
 
         repository.getMovieExtraFiles(movieId = 5)
 

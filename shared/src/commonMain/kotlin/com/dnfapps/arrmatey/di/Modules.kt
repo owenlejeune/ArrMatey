@@ -290,7 +290,7 @@ val repositoryModule =
     module {
         single { InstanceRepository(get()) }
         single { InstancePreferenceStoreRepository(get()) }
-        single { InstanceManager(get(), get(), get(), get()) }
+        single { InstanceManager(get(), get(), get(), get(), get()) }
 
         single { DownloadClientRepository(get()) }
         single { DownloadClientManager(get(), get()) }

@@ -17,6 +17,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,9 +42,17 @@ fun ConfirmDeleteItemSheet(
     preferencesStore: PreferencesStore = koinInject(),
 ) {
     val savedChoices by preferencesStore.queueRemovalPreferences.collectAsStateWithLifecycle(QueueRemovalPreferences())
-    var removeFromClient by remember(savedChoices) { mutableStateOf(savedChoices.removeFromClient) }
-    var blocklistRelease by remember(savedChoices) { mutableStateOf(savedChoices.addToBlocklist) }
-    var skipRedownload by remember(savedChoices) { mutableStateOf(savedChoices.skipRedownload) }
+    var removeFromClient by remember { mutableStateOf(savedChoices.removeFromClient) }
+    var blocklistRelease by remember { mutableStateOf(savedChoices.addToBlocklist) }
+    var skipRedownload by remember { mutableStateOf(savedChoices.skipRedownload) }
+
+    LaunchedEffect(savedChoices) {
+        if (!deleteInProgress) {
+            removeFromClient = savedChoices.removeFromClient
+            blocklistRelease = savedChoices.addToBlocklist
+            skipRedownload = savedChoices.skipRedownload
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = {

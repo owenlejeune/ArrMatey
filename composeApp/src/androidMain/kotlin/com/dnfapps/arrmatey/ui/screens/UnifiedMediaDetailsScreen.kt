@@ -954,17 +954,22 @@ fun UnifiedMediaDetailsScreen(
                     )
                 }
 
-                selectedQueueItem?.let { item ->
-                    QueueItemInfoSheet(
-                        item = item,
-                        onDismiss = { selectedQueueItem = null },
-                        onRemove = { showConfirmRemoveQueueItem = true },
-                    )
+                if (!showConfirmRemoveQueueItem) {
+                    selectedQueueItem?.let { item ->
+                        QueueItemInfoSheet(
+                            item = item,
+                            onDismiss = { selectedQueueItem = null },
+                            onRemove = { showConfirmRemoveQueueItem = true },
+                        )
+                    }
                 }
 
                 if (showConfirmRemoveQueueItem && selectedQueueItem != null) {
                     ConfirmDeleteItemSheet(
-                        onDismiss = { showConfirmRemoveQueueItem = false },
+                        onDismiss = {
+                            showConfirmRemoveQueueItem = false
+                            selectedQueueItem = null
+                        },
                         deleteInProgress = removeQueueItemStatus is OperationStatus.InProgress,
                         onDelete = { clientRemove, blocklist, skipRedownload ->
                             viewModel.removeQueueItem(

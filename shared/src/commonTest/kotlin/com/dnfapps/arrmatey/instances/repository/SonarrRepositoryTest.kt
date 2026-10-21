@@ -75,7 +75,7 @@ class SonarrRepositoryTest {
                     )
                 }
             }
-        val repository = SonarrRepository(fakeInstance, httpClient, fakeLogger)
+        val repository = SonarrRepository(fakeInstance, httpClient, fakeLogger, com.dnfapps.arrmatey.utils.fakeMokoStrings)
 
         repository.getEpisodes(seriesId = 1)
 
@@ -129,7 +129,7 @@ class SonarrRepositoryTest {
     @Test
     fun testGetSeriesHistoryIsScopedToSeries() = runTest {
         val requests = mutableListOf<Url>()
-        val repository = SonarrRepository(fakeInstance, historyHttpClient(requests), fakeLogger)
+        val repository = SonarrRepository(fakeInstance, historyHttpClient(requests), fakeLogger, com.dnfapps.arrmatey.utils.fakeMokoStrings)
 
         repository.getSeriesHistory(seriesId = 7)
 
@@ -142,7 +142,7 @@ class SonarrRepositoryTest {
     @Test
     fun testEpisodeHistoryDoesNotOverwriteSeriesHistory() = runTest {
         val requests = mutableListOf<Url>()
-        val repository = SonarrRepository(fakeInstance, historyHttpClient(requests), fakeLogger)
+        val repository = SonarrRepository(fakeInstance, historyHttpClient(requests), fakeLogger, com.dnfapps.arrmatey.utils.fakeMokoStrings)
 
         repository.getSeriesHistory(seriesId = 7)
         // Episode id equal to the series id must not clobber the series entry.

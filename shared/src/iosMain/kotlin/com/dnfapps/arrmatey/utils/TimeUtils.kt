@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.utils
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import platform.Foundation.NSCalendar
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateComponents
@@ -59,8 +60,8 @@ actual fun formatLocalDateTime(
     val comps =
         NSDateComponents().apply {
             year = localDateTime.year.toLong()
-            month = localDateTime.monthNumber.toLong()
-            day = localDateTime.dayOfMonth.toLong()
+            month = localDateTime.month.number.toLong()
+            day = localDateTime.day.toLong()
             hour = localDateTime.hour.toLong()
             minute = localDateTime.minute.toLong()
             second = localDateTime.second.toLong()

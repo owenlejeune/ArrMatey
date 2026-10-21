@@ -20,6 +20,7 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.arrmatey.utils.fakeMokoStrings
 import dev.shivathapaa.logger.api.LoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -221,7 +222,7 @@ class GlobalSearchUseCaseTest {
         val fakeDao = FakeInstanceDao()
         val instanceRepo = InstanceRepository(fakeDao)
         val mockFactory = MockHttpClientFactory(json) { MockEngine { respond("[]", HttpStatusCode.OK) } }
-        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger)
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings)
 
         val useCase = GlobalSearchUseCase(manager)
         val results = useCase("").toList()
@@ -320,7 +321,7 @@ class GlobalSearchUseCaseTest {
                 }
             }
 
-        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger)
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings)
         manager.awaitRepos(3)
 
         val useCase = GlobalSearchUseCase(manager)
@@ -407,7 +408,7 @@ class GlobalSearchUseCaseTest {
                 }
             }
 
-        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger)
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings)
         manager.awaitRepos(2)
 
         val useCase = GlobalSearchUseCase(manager)
@@ -454,7 +455,7 @@ class GlobalSearchUseCaseTest {
                 }
             }
 
-        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger)
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings)
         manager.awaitRepos(1)
 
         val useCase = GlobalSearchUseCase(manager)
@@ -504,7 +505,7 @@ class GlobalSearchUseCaseTest {
                 }
             }
 
-        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger)
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings)
         manager.awaitRepos(1)
 
         val useCase = GlobalSearchUseCase(manager)

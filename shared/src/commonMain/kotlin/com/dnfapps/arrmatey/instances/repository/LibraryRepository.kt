@@ -27,12 +27,26 @@ import com.dnfapps.arrmatey.extensions.mergeWithLibrary
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.shared.item_added_successfully
+import com.dnfapps.arrmatey.shared.item_edited_successfully
+import com.dnfapps.arrmatey.shared.item_updated_successfully
+import com.dnfapps.arrmatey.shared.media_not_found_in_cache
+import com.dnfapps.arrmatey.shared.monitoring_updated_successfully
+import com.dnfapps.arrmatey.shared.not_a_sonarr_instance
+import com.dnfapps.arrmatey.shared.search_initiated
+import com.dnfapps.arrmatey.shared.unknown_error
+import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.asSuccess
 import com.dnfapps.networking.mapValues
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import dev.shivathapaa.logger.api.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,12 +55,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
 class LibraryRepository(
     private val client: ArrClient,
     private val logger: Logger,
+    private val mokoStrings: MokoStrings,
 ) {
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val _library = MutableStateFlow<NetworkResult<List<ArrMedia>>?>(null)
     val library: StateFlow<NetworkResult<List<ArrMedia>>?> = _library.asStateFlow()
 
@@ -130,8 +148,11 @@ class LibraryRepository(
         onBookLibraryUpdate: (suspend () -> Unit)? = null,
         onListenarrConfigUpdate: (suspend () -> Unit)? = null,
     ) {
-        _library.value = NetworkResult.Loading
-        _library.value = client.getLibrary()
+        if (_library.value == null) {
+            _library.value = NetworkResult.Loading
+        }
+        val result = withContext(Dispatchers.IO) { client.getLibrary() }
+        _library.value = result
         onBookLibraryUpdate?.invoke()
         onListenarrConfigUpdate?.invoke()
     }
@@ -210,7 +231,7 @@ class LibraryRepository(
         _addItemStatus.value = OperationStatus.InProgress
         delay(100.milliseconds)
 
-        val result = client.addItemToLibrary(item)
+        val result = withContext(Dispatchers.IO) { client.addItemToLibrary(item) }
         processAddResult(result, searchOnAdd)
     }
 
@@ -220,19 +241,31 @@ class LibraryRepository(
     ) {
         result
             .onSuccess { addedItem ->
-                _addItemStatus.value = OperationStatus.Success("Item added successfully")
+                _addItemStatus.value = OperationStatus.Success(mokoStrings.getString(MR.strings.item_added_successfully))
                 addedItem.id?.let {
                     val newMap = _mediaDetailsCache.value.toMutableMap()
                     newMap[it] = addedItem
                     _mediaDetailsCache.value = newMap
-
-                    if (searchOnAdd) {
-                        executeAutomaticSearch(it)
-                    }
                 }
                 _lastAddedItemId.value = addedItem.id
-                refreshLibrary()
-                delay(1500.milliseconds)
+
+                val currentLibrary = (_library.value as? NetworkResult.Success)?.data
+                if (currentLibrary != null) {
+                    _library.value = NetworkResult.Success(listOf(addedItem) + currentLibrary)
+                }
+
+                val itemId = addedItem.id
+                if (searchOnAdd && itemId != null) {
+                    scope.launch {
+                        executeAutomaticSearch(itemId)
+                    }
+                }
+
+                scope.launch {
+                    refreshLibrary()
+                }
+
+                delay(200.milliseconds)
                 _addItemStatus.value = OperationStatus.Idle
                 _lastAddedItemId.value = null
             }.onError { code, error, cause ->
@@ -294,7 +327,7 @@ class LibraryRepository(
             .performAutomaticSearch(itemId)
             .onSuccess {
                 logger.info { "Search initiated: $it" }
-                _searchStatus.value = OperationStatus.Success("Search initiated")
+                _searchStatus.value = OperationStatus.Success(mokoStrings.getString(MR.strings.search_initiated))
             }.onError { code, error, cause ->
                 logger.error(cause) { "Search error: $error" }
                 _searchStatus.value = OperationStatus.Error(code, error, cause)
@@ -352,7 +385,7 @@ class LibraryRepository(
                 _historyStatus.value = OperationStatus.Error(code, message, cause)
             }?.also {
                 _historyStatus.value = OperationStatus.Idle
-            } ?: NetworkResult.Error(message = "Not a Sonarr instance")
+            } ?: NetworkResult.Error(message = mokoStrings.getString(MR.strings.not_a_sonarr_instance))
     }
 
     suspend fun refreshHistory(
@@ -411,7 +444,7 @@ class LibraryRepository(
                 NetworkResult.Success(wantedItems)
             }
             is NetworkResult.Error -> NetworkResult.Error(libResult.code, libResult.message, libResult.cause)
-            else -> NetworkResult.Error(message = "Unknown error")
+            else -> NetworkResult.Error(message = mokoStrings.getString(MR.strings.unknown_error))
         }
     }
 
@@ -466,7 +499,7 @@ class LibraryRepository(
                 _mediaDetailsCache.value = currentCache
 
                 updateItemInLibraryCache(item)
-                _editItemStatus.value = OperationStatus.Success("Item edited successfully")
+                _editItemStatus.value = OperationStatus.Success(mokoStrings.getString(MR.strings.item_edited_successfully))
             }.onError { code, message, cause ->
                 _editItemStatus.value = OperationStatus.Error(code, message, cause)
             }
@@ -478,7 +511,7 @@ class LibraryRepository(
         return client
             .update(item)
             .onSuccess { updateItem ->
-                _monitorStatus.value = OperationStatus.Success("Item updated successfully")
+                _monitorStatus.value = OperationStatus.Success(mokoStrings.getString(MR.strings.item_updated_successfully))
 
                 val id = updateItem.id ?: return@onSuccess
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
@@ -540,7 +573,7 @@ class LibraryRepository(
         return client
             .updateMonitoring(ids, monitor)
             .onSuccess {
-                _monitorStatus.value = OperationStatus.Success("Monitoring updated successfully")
+                _monitorStatus.value = OperationStatus.Success(mokoStrings.getString(MR.strings.monitoring_updated_successfully))
             }.onError { code, message, cause ->
                 _monitorStatus.value = OperationStatus.Error(code, message, cause)
             }.also {
@@ -631,7 +664,7 @@ class LibraryRepository(
             .collect { cached ->
                 emit(
                     cached?.let { NetworkResult.Success(it) }
-                        ?: NetworkResult.Error(message = "Media not found in cache"),
+                        ?: NetworkResult.Error(message = mokoStrings.getString(MR.strings.media_not_found_in_cache)),
                 )
             }
     }

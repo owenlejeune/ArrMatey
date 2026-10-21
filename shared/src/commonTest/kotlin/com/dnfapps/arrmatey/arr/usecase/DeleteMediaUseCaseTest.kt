@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.utils.fakeMokoStrings
 import dev.shivathapaa.logger.api.LoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -34,7 +35,7 @@ class DeleteMediaUseCaseTest {
                 respond("", HttpStatusCode.OK)
             }
         val httpClient = HttpClient(mockEngine)
-        val repository = ArrInstanceRepository(fakeInstance, httpClient, fakeLogger)
+        val repository = ArrInstanceRepository(fakeInstance, httpClient, fakeLogger, fakeMokoStrings)
         val useCase = DeleteMediaUseCase()
 
         useCase(123, true, false, repository).test {

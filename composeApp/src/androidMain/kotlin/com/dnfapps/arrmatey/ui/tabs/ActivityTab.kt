@@ -225,7 +225,6 @@ fun ActivityHomeScreen(
         if (removeItemStatus is OperationStatus.Success) {
             selectedItem = null
             showConfirmRemove = false
-            viewModel.refresh()
         }
     }
 
@@ -396,17 +395,22 @@ fun ActivityHomeScreen(
                     }
                 }
 
-                selectedItem?.let { item ->
-                    QueueItemInfoSheet(
-                        item = item,
-                        onDismiss = { selectedItem = null },
-                        onRemove = { showConfirmRemove = true },
-                    )
+                if (!showConfirmRemove) {
+                    selectedItem?.let { item ->
+                        QueueItemInfoSheet(
+                            item = item,
+                            onDismiss = { selectedItem = null },
+                            onRemove = { showConfirmRemove = true },
+                        )
+                    }
                 }
 
                 if (showConfirmRemove && selectedItem != null) {
                     ConfirmDeleteItemSheet(
-                        onDismiss = { showConfirmRemove = false },
+                        onDismiss = {
+                            showConfirmRemove = false
+                            selectedItem = null
+                        },
                         deleteInProgress = removeItemStatus is OperationStatus.InProgress,
                         onDelete = { clientRemove, blocklist, skipRedownload ->
                             viewModel.removeQueueItem(selectedItem!!, clientRemove, blocklist, skipRedownload)

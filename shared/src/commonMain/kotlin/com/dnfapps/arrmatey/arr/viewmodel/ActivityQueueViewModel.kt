@@ -198,6 +198,9 @@ class ActivityQueueViewModel(
         ) { history, repos, uiState ->
             val arrRepos = repos.values.filterIsInstance<ArrInstanceRepository>()
             val repoMap = arrRepos.associateBy { it.instance.id }
+            val libraryByRepo = repoMap.mapValues { (_, repo) ->
+                (repo.library.value?.asSuccess()?.data ?: emptyList()).associateBy { it.id }
+            }
 
             val downloadedEvents =
                 setOf(
@@ -226,12 +229,7 @@ class ActivityQueueViewModel(
             val historyItemsList =
                 filteredHistory.map { hist ->
                     val repo = hist.instanceId?.let { repoMap[it] }
-                    val library =
-                        repo
-                            ?.library
-                            ?.value
-                            ?.asSuccess()
-                            ?.data ?: emptyList()
+                    val library = hist.instanceId?.let { libraryByRepo[it] } ?: emptyMap()
                     val instType = hist.instanceType ?: repo?.instance?.type ?: InstanceType.Radarr
                     val instName = hist.instanceName ?: repo?.instance?.label ?: ""
                     val instId = hist.instanceId ?: repo?.instance?.id ?: 0L
@@ -240,7 +238,7 @@ class ActivityQueueViewModel(
 
                     when (hist) {
                         is SonarrHistoryItem -> {
-                            val rawSeries = hist.series ?: (library.firstOrNull { it.id == hist.seriesId } as? ArrSeries)
+                            val rawSeries = hist.series ?: (library[hist.seriesId] as? ArrSeries)
                             val series = if (repoInstance != null) rawSeries?.withLocalImages(repoInstance) else rawSeries
                             val episode = hist.episode
                             val epLabel = episode?.seasonEpLabel
@@ -272,7 +270,7 @@ class ActivityQueueViewModel(
                         }
 
                         is RadarrHistoryItem -> {
-                            val rawMovie = hist.movie ?: (library.firstOrNull { it.id == hist.movieId } as? ArrMovie)
+                            val rawMovie = hist.movie ?: (library[hist.movieId] as? ArrMovie)
                             val movie = if (repoInstance != null) rawMovie?.withLocalImages(repoInstance) else rawMovie
                             DownloadedMediaItem(
                                 id = "history_${instId}_${hist.id}",
@@ -292,7 +290,7 @@ class ActivityQueueViewModel(
                         }
 
                         is LidarrHistoryItem -> {
-                            val rawArtist = hist.artist ?: (library.firstOrNull { it.id == hist.artistId } as? Arrtist)
+                            val rawArtist = hist.artist ?: (library[hist.artistId] as? Arrtist)
                             val artist = if (repoInstance != null) rawArtist?.withLocalImages(repoInstance) else rawArtist
                             val title =
                                 when {
@@ -316,7 +314,7 @@ class ActivityQueueViewModel(
                         }
 
                         is BookshelfHistoryItem -> {
-                            val rawAuthor = hist.author ?: (library.firstOrNull { it.id == hist.authorId } as? Author)
+                            val rawAuthor = hist.author ?: (library[hist.authorId] as? Author)
                             val author = if (repoInstance != null) rawAuthor?.withLocalImages(repoInstance) else rawAuthor
                             DownloadedMediaItem(
                                 id = "history_${instId}_${hist.id}",
@@ -334,7 +332,7 @@ class ActivityQueueViewModel(
                         }
 
                         is ListenarrHistoryItem -> {
-                            val audiobook = library.firstOrNull { it.id == hist.audiobookId } as? Audiobook
+                            val audiobook = library[hist.audiobookId] as? Audiobook
                             DownloadedMediaItem(
                                 id = "history_${instId}_${hist.id}",
                                 title = audiobook?.title ?: hist.audiobookTitle ?: hist.displayTitle ?: "Unknown Audiobook",
@@ -350,7 +348,7 @@ class ActivityQueueViewModel(
                         }
 
                         is KapowarrHistoryItem -> {
-                            val volume = library.firstOrNull { it.id == hist.volumeId } as? ComicVolume
+                            val volume = library[hist.volumeId] as? ComicVolume
                             val issue = volume?.issues?.firstOrNull { it.id == hist.issueId }
                             val issueSubtitle = when {
                                 issue != null -> {
@@ -850,6 +848,10 @@ class ActivityQueueViewModel(
                     _removeItemState.value = state
                     if (state is OperationStatus.Success) {
                         activityQueueService.removeTaskLocally(item.id)
+                        if (addToBlocklist) {
+                            launch { activityQueueService.refreshBlocklist() }
+                        }
+                        launch { activityQueueService.refreshActivity() }
                     }
                 }
         }
@@ -858,10 +860,6 @@ class ActivityQueueViewModel(
     fun refresh() {
         viewModelScope.launch {
             activityQueueService.manualRefresh()
-            val arrRepos = instanceManager.getAllArrRepositories()
-            arrRepos.forEach { repo ->
-                launch { repo.refreshLibrary() }
-            }
         }
     }
 

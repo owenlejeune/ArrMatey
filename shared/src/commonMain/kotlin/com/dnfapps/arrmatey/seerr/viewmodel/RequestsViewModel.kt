@@ -178,7 +178,7 @@ class RequestsViewModel(
                 totalPending
             } else {
                 rawRequests.items
-                    .filter { it.request.requestedBy?.id == user?.id }
+                    .filter { it.request.requestedBy?.id == user.id }
                     .count { it.request.matchesFilter(RequestState.Pending) }
             }
         }.stateIn(

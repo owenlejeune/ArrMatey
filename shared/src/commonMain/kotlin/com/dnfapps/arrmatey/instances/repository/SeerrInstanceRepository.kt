@@ -144,7 +144,7 @@ class SeerrInstanceRepository(
         val canViewIssues = user == null || SeerrPermissionPolicy.canViewIssues(user)
 
         launch {
-            val requestedBy = if (canViewAll) null else user?.id
+            val requestedBy = if (canViewAll) null else user.id
             client
                 .getRequests(page = 1, pageSize = 50, filter = RequestState.All, requestedBy = requestedBy)
                 .onSuccess { response ->
@@ -152,7 +152,7 @@ class SeerrInstanceRepository(
                     val filtered = if (canViewAll) {
                         response.results
                     } else {
-                        response.results.filter { it.requestedBy?.id == user?.id }
+                        response.results.filter { it.requestedBy?.id == user.id }
                     }
                     val enrichedRequests = mediaPackageService.enrichRequests(filtered)
                     _requests.value = enrichedRequests
@@ -204,7 +204,7 @@ class SeerrInstanceRepository(
         fetcher = { page ->
             val user = _loggedInUser.value
             val canViewAll = user == null || SeerrPermissionPolicy.canViewAllRequests(user)
-            val requestedBy = if (canViewAll) null else user?.id
+            val requestedBy = if (canViewAll) null else user.id
             client.getRequests(page = page, filter = filter, requestedBy = requestedBy)
         },
         processor = { response ->
@@ -213,7 +213,7 @@ class SeerrInstanceRepository(
             val filtered = if (canViewAll) {
                 response.results
             } else {
-                response.results.filter { it.requestedBy?.id == user?.id }
+                response.results.filter { it.requestedBy?.id == user.id }
             }
             val enrichedRequests = mediaPackageService.enrichRequests(filtered)
             PageResult(

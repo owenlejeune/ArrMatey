@@ -46,6 +46,7 @@ import com.dnfapps.arrmatey.arr.state.DownloadState
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
@@ -58,10 +59,11 @@ open class ArrInstanceRepository(
     override val instance: Instance,
     protected val httpClient: HttpClient,
     protected val logger: Logger,
+    protected val mokoStrings: MokoStrings,
 ) : InstanceScopedRepository {
     val client: ArrClient = createClient()
 
-    protected val libraryRepository = LibraryRepository(client, logger)
+    protected val libraryRepository = LibraryRepository(client, logger, mokoStrings)
     protected val metadataRepository = MetadataRepository(client, logger)
 
     val library: StateFlow<NetworkResult<List<ArrMedia>>?> = libraryRepository.library

@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.utils.fakeMokoStrings
 import dev.shivathapaa.logger.api.LoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -31,7 +32,7 @@ class DeleteSeasonFilesUseCaseTest {
     @Test
     fun testWrongInstanceTypeEmitsError() = runTest {
         val mockEngine = MockEngine { respond("", HttpStatusCode.OK) }
-        val repository = ArrInstanceRepository(instance(InstanceType.Radarr), HttpClient(mockEngine), logger)
+        val repository = ArrInstanceRepository(instance(InstanceType.Radarr), HttpClient(mockEngine), logger, fakeMokoStrings)
         val useCase = DeleteSeasonFilesUseCase()
 
         useCase(seriesId = 7, seasonNumber = 1, repository = repository).test {

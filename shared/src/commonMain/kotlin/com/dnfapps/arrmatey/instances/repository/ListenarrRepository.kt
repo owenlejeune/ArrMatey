@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.WantedMediaItem
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.asSuccess
 import com.dnfapps.networking.onSuccess
@@ -28,7 +29,8 @@ class ListenarrRepository(
     instance: Instance,
     httpClient: HttpClient,
     logger: Logger,
-) : ArrInstanceRepository(instance, httpClient, logger) {
+    mokoStrings: MokoStrings,
+) : ArrInstanceRepository(instance, httpClient, logger, mokoStrings) {
     val listenarrClient: ListenarrClient = client as? ListenarrClient ?: ListenarrClient(instance, httpClient)
 
     private val _audiobookFiles = MutableStateFlow<Map<Long, List<AudiobookFile>>>(emptyMap())

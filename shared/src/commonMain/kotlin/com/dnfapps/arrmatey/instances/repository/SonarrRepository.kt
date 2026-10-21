@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
@@ -20,7 +21,8 @@ class SonarrRepository(
     instance: Instance,
     httpClient: HttpClient,
     logger: Logger,
-) : ArrInstanceRepository(instance, httpClient, logger) {
+    mokoStrings: MokoStrings,
+) : ArrInstanceRepository(instance, httpClient, logger, mokoStrings) {
     val sonarrClient: SonarrClient = client as? SonarrClient ?: SonarrClient(instance, httpClient)
 
     private val _episodes = MutableStateFlow<Map<Long, List<Episode>>>(emptyMap())

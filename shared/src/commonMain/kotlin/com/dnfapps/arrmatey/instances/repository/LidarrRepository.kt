@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
@@ -20,7 +21,8 @@ class LidarrRepository(
     instance: Instance,
     httpClient: HttpClient,
     logger: Logger,
-) : ArrInstanceRepository(instance, httpClient, logger) {
+    mokoStrings: MokoStrings,
+) : ArrInstanceRepository(instance, httpClient, logger, mokoStrings) {
     val lidarrClient: LidarrClient = client as? LidarrClient ?: LidarrClient(instance, httpClient)
 
     private val _artistAlbums = MutableStateFlow<Map<Long, List<ArrAlbum>>>(emptyMap())

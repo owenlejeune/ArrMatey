@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.database.CredentialMigrationUseCase
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.networking.asSuccess
 import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
@@ -30,6 +31,7 @@ class InstanceManager(
     private val httpClientFactory: HttpClientFactory,
     private val credentialMigrationUseCase: CredentialMigrationUseCase,
     private val logger: Logger,
+    private val mokoStrings: MokoStrings,
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -144,19 +146,19 @@ class InstanceManager(
         InstanceType.Tracearr -> TracearrRepository(instance, httpClient)
         InstanceType.Tautulli -> TautulliRepository(instance, httpClient)
 
-        InstanceType.Sonarr -> SonarrRepository(instance, httpClient, logger)
+        InstanceType.Sonarr -> SonarrRepository(instance, httpClient, logger, mokoStrings)
 
-        InstanceType.Radarr -> RadarrRepository(instance, httpClient, logger)
+        InstanceType.Radarr -> RadarrRepository(instance, httpClient, logger, mokoStrings)
 
-        InstanceType.Lidarr -> LidarrRepository(instance, httpClient, logger)
+        InstanceType.Lidarr -> LidarrRepository(instance, httpClient, logger, mokoStrings)
 
-        InstanceType.Bookshelf -> ReadarrRepository(instance, httpClient, logger)
+        InstanceType.Bookshelf -> ReadarrRepository(instance, httpClient, logger, mokoStrings)
 
-        InstanceType.Listenarr -> ListenarrRepository(instance, httpClient, logger)
+        InstanceType.Listenarr -> ListenarrRepository(instance, httpClient, logger, mokoStrings)
 
-        InstanceType.Chaptarr -> ReadarrRepository(instance, httpClient, logger)
+        InstanceType.Chaptarr -> ReadarrRepository(instance, httpClient, logger, mokoStrings)
 
-        InstanceType.Kapowarr -> KapowarrRepository(instance, httpClient, logger)
+        InstanceType.Kapowarr -> KapowarrRepository(instance, httpClient, logger, mokoStrings)
     }
 
     fun getArrRepository(instanceId: Long): ArrInstanceRepository? = _instanceRepositories.value[instanceId] as? ArrInstanceRepository?

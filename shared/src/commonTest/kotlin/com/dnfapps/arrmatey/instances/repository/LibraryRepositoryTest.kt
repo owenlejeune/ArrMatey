@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.client.SonarrClient
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.utils.fakeMokoStrings
 import dev.shivathapaa.logger.api.LoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -51,7 +52,7 @@ class LibraryRepositoryTest {
                 }
             }
         val client = SonarrClient(fakeInstance, httpClient)
-        val libraryRepo = LibraryRepository(client, fakeLogger)
+        val libraryRepo = LibraryRepository(client, fakeLogger, fakeMokoStrings)
 
         libraryRepo.refreshLibrary()
 

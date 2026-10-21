@@ -15,8 +15,9 @@ interface StringResolver {
     fun resolve(pluralsDesc: PluralStringDesc): String
 }
 
-class MokoStrings {
-    private val resolver: StringResolver = createResolver()
+class MokoStrings(
+    private val resolver: StringResolver = createResolver(),
+) {
 
     fun getString(resource: StringResource): String {
         val desc = StringDesc.Resource(resource)

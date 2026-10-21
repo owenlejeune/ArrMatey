@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.instances.repository
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.utils.fakeMokoStrings
 import dev.shivathapaa.logger.api.LoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -50,7 +51,7 @@ class ArrInstanceRepositoryTest {
                     )
                 }
             }
-        val repository = ArrInstanceRepository(fakeInstance, httpClient, fakeLogger)
+        val repository = ArrInstanceRepository(fakeInstance, httpClient, fakeLogger, fakeMokoStrings)
 
         repository.refreshStatus()
 

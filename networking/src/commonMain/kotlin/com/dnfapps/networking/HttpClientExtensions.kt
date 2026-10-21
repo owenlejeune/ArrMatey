@@ -14,6 +14,10 @@ import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 
 suspend inline fun <reified T> HttpClient.safeGet(
     url: String,
@@ -58,34 +62,36 @@ suspend inline fun <reified T> HttpClient.safePatch(
     patch(url, builder).body()
 }
 
-suspend inline fun <reified T> HttpClient.safeCall(crossinline block: suspend HttpClient.() -> T): NetworkResult<T> = try {
-    val data = block(this)
-    NetworkResult.Success(data)
-} catch (e: ClientRequestException) {
-    // 4xx
-    val status = e.response.status
-    NetworkResult.Error(code = status.value, message = status.description, errorType = ErrorType.Http)
-} catch (e: ServerResponseException) {
-    // 5xx
-    val status = e.response.status
-    NetworkResult.Error(code = status.value, message = status.description, errorType = ErrorType.Http)
-} catch (e: ResponseException) {
-    // Any other non‑2xx mapped by Ktor into ResponseException
-    val status = e.response.status
-    NetworkResult.Error(code = status.value, message = status.description, errorType = ErrorType.Http)
-} catch (e: ConnectTimeoutException) {
-    NetworkResult.Error(message = "Request timed out", cause = e, errorType = ErrorType.Timeout)
-} catch (e: HttpRequestTimeoutException) {
-    NetworkResult.Error(message = "Request timed out", cause = e, errorType = ErrorType.Timeout)
-} catch (e: kotlinx.coroutines.CancellationException) {
-    throw e
-} catch (e: Throwable) {
-    if (e.isTimeoutError()) {
+suspend inline fun <reified T> HttpClient.safeCall(crossinline block: suspend HttpClient.() -> T): NetworkResult<T> = withContext(Dispatchers.IO) {
+    try {
+        val data = block(this@safeCall)
+        NetworkResult.Success(data)
+    } catch (e: ClientRequestException) {
+        // 4xx
+        val status = e.response.status
+        NetworkResult.Error(code = status.value, message = status.description, errorType = ErrorType.Http)
+    } catch (e: ServerResponseException) {
+        // 5xx
+        val status = e.response.status
+        NetworkResult.Error(code = status.value, message = status.description, errorType = ErrorType.Http)
+    } catch (e: ResponseException) {
+        // Any other non‑2xx mapped by Ktor into ResponseException
+        val status = e.response.status
+        NetworkResult.Error(code = status.value, message = status.description, errorType = ErrorType.Http)
+    } catch (e: ConnectTimeoutException) {
         NetworkResult.Error(message = "Request timed out", cause = e, errorType = ErrorType.Timeout)
-    } else if (e.isNoConnectionError()) {
-        NetworkResult.Error(message = e.cause?.message ?: e.message, cause = e, errorType = ErrorType.Network)
-    } else {
-        NetworkResult.Error(message = e.message, cause = e, errorType = ErrorType.Unexpected)
+    } catch (e: HttpRequestTimeoutException) {
+        NetworkResult.Error(message = "Request timed out", cause = e, errorType = ErrorType.Timeout)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Throwable) {
+        if (e.isTimeoutError()) {
+            NetworkResult.Error(message = "Request timed out", cause = e, errorType = ErrorType.Timeout)
+        } else if (e.isNoConnectionError()) {
+            NetworkResult.Error(message = e.cause?.message ?: e.message, cause = e, errorType = ErrorType.Network)
+        } else {
+            NetworkResult.Error(message = e.message, cause = e, errorType = ErrorType.Unexpected)
+        }
     }
 }
 

@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
@@ -23,7 +24,8 @@ class ReadarrRepository(
     instance: Instance,
     httpClient: HttpClient,
     logger: Logger,
-) : ArrInstanceRepository(instance, httpClient, logger) {
+    mokoStrings: MokoStrings,
+) : ArrInstanceRepository(instance, httpClient, logger, mokoStrings) {
     val bookshelfClient: BookshelfClient = client as? BookshelfClient ?: BookshelfClient(instance, httpClient)
 
     private val _authorSeries = MutableStateFlow<Map<Long, List<BookSeries>>>(emptyMap())

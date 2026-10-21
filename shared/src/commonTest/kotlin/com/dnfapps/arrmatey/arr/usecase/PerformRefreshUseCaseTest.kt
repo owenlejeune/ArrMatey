@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
+import com.dnfapps.arrmatey.utils.fakeMokoStrings
 import dev.shivathapaa.logger.api.LoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -28,7 +29,7 @@ class PerformRefreshUseCaseTest {
                 enabled = true,
             )
         val mockEngine = MockEngine { respond("", HttpStatusCode.OK) }
-        return ArrInstanceRepository(instance, HttpClient(mockEngine), logger)
+        return ArrInstanceRepository(instance, HttpClient(mockEngine), logger, fakeMokoStrings)
     }
 
     @Test

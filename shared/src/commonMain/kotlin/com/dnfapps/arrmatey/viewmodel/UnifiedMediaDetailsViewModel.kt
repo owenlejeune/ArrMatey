@@ -376,10 +376,9 @@ class UnifiedMediaDetailsViewModel(
                 if (seerrRepository != null && tmdbId != null && resolvedRequestType != null) {
                     launch { seerrRepository.refreshMediaDetails(tmdbId, resolvedRequestType) }
                 }
-                launch { activityQueueService.manualRefresh() }
+                launch { activityQueueService.refreshActivity() }
                 launch { recommendationsHandler.refresh() }
             }
-            dataObserver.observeData(_uiState)
         } finally {
             _isRefreshing.value = false
         }

@@ -1148,7 +1148,11 @@ class CombinedDashboardViewModel(
                 .collect { status ->
                     _removeItemState.value = status
                     if (status is OperationStatus.Success) {
-                        refresh()
+                        item.instanceId?.let { instanceId ->
+                            launch {
+                                instanceManager.getArrRepository(instanceId)?.refreshActivityTasks()
+                            }
+                        }
                     }
                 }
         }

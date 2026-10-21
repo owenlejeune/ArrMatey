@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.instances.repository
 import com.dnfapps.arrmatey.arr.api.client.RadarrClient
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onSuccess
 import dev.shivathapaa.logger.api.Logger
@@ -15,7 +16,8 @@ class RadarrRepository(
     instance: Instance,
     httpClient: HttpClient,
     logger: Logger,
-) : ArrInstanceRepository(instance, httpClient, logger) {
+    mokoStrings: MokoStrings,
+) : ArrInstanceRepository(instance, httpClient, logger, mokoStrings) {
     val radarrClient: RadarrClient = client as? RadarrClient ?: RadarrClient(instance, httpClient)
 
     private val _movieExtraFiles = MutableStateFlow<Map<Long, List<ExtraFile>>>(emptyMap())

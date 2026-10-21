@@ -63,7 +63,7 @@ class LidarrRepositoryTest {
                     )
                 }
             }
-        val repository = LidarrRepository(fakeInstance, httpClient, fakeLogger)
+        val repository = LidarrRepository(fakeInstance, httpClient, fakeLogger, com.dnfapps.arrmatey.utils.fakeMokoStrings)
 
         repository.getArtistAlbums(artistId = 2)
 
