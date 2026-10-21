@@ -24,10 +24,6 @@ struct TabConfigurationScreen: View {
                 InfoCard()
                     .padding(.horizontal)
 
-                floatingNavBarSection
-
-                Divider().padding(.vertical, 8)
-
                 navigationBarItemsSection
 
                 Divider().padding(.vertical, 8)
@@ -51,36 +47,6 @@ struct TabConfigurationScreen: View {
                 }
             }
         }
-    }
-
-    private var floatingNavBarSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Toggle(isOn: Binding(
-                get: { viewModel.useFloatingNavigationBar },
-                set: { _ in viewModel.toggleUseFloatingNavigationBar() }
-            )) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(MR.strings().floating_navigation_bar_toggle_title.localized())
-                    Text(MR.strings().floating_navigation_bar_toggle_description.localized())
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-
-            Toggle(isOn: Binding(
-                get: { viewModel.hideFloatingNavigationBarLabels },
-                set: { _ in viewModel.toggleHideFloatingNavigationBarLabels() }
-            )) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(MR.strings().hide_floating_navigation_bar_labels_title.localized())
-                    Text(MR.strings().hide_floating_navigation_bar_labels_description.localized())
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .disabled(!viewModel.useFloatingNavigationBar)
-        }
-        .padding(.horizontal)
     }
 
     private var navigationBarItemsSection: some View {

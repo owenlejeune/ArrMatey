@@ -13,6 +13,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.ui.helpers.LocalIsTabActive
 
 @Composable
@@ -33,7 +34,10 @@ fun HomeMainContent(
         label = "OverlayTransition",
     ) { currentOverlay ->
         if (currentOverlay != null) {
-            CompositionLocalProvider(LocalIsTabActive provides true) {
+            CompositionLocalProvider(
+                LocalIsTabActive provides true,
+                LocalFloatingBarVisible provides false,
+            ) {
                 TabItemContent(currentOverlay, windowSizeClass, false)
             }
         } else {

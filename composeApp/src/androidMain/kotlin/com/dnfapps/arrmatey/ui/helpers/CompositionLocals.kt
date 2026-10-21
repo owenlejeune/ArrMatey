@@ -7,3 +7,4 @@ import androidx.compose.ui.unit.dp
 val LocalIsInTwoPane = staticCompositionLocalOf { false }
 val LocalFloatingBarBottomPadding = compositionLocalOf { 0.dp }
 val LocalIsTabActive = staticCompositionLocalOf { true }
+val LocalFloatingBarVisible = compositionLocalOf { false }

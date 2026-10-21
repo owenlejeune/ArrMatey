@@ -41,6 +41,7 @@ import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarActionState
 import com.dnfapps.arrmatey.ui.components.appbar.LocalFloatingBarActionState
 import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.ui.screens.home.HomeBottomNavBar
 import com.dnfapps.arrmatey.ui.screens.home.HomeDrawerContent
 import com.dnfapps.arrmatey.ui.screens.home.HomeFloatingNavBar
@@ -148,6 +149,7 @@ fun HomeScreen(
         LocalNavigationManager provides navigationManager,
         LocalFloatingBarBottomPadding provides floatingBarBottomPadding,
         LocalFloatingBarActionState provides floatingBarActionState,
+        LocalFloatingBarVisible provides floatingBarIsVisible,
     ) {
         val mainContent = @Composable {
             HomeMainContent(

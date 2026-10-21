@@ -99,6 +99,7 @@ import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.ui.screens.monitoring.PlaybackStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.screens.requests.IssueDetailsSheet
 import com.dnfapps.arrmatey.ui.screens.requests.IssuesList
@@ -534,10 +535,10 @@ fun CombinedDashboard(
         },
         floatingActionButton = {
             val showFab = isEditing && availableCards.isNotEmpty()
-            val useFloatingNavigationBar by preferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
+            val isFloatingBarVisible = LocalFloatingBarVisible.current
 
             ProvideFloatingBarAction(
-                visible = useFloatingNavigationBar && showFab,
+                visible = isFloatingBarVisible && showFab,
                 action =
                 FloatingBarAction(
                     icon = { Icon(Icons.Default.Add, null) },
@@ -545,7 +546,7 @@ fun CombinedDashboard(
                 ),
             )
 
-            if (!useFloatingNavigationBar && showFab) {
+            if (!isFloatingBarVisible && showFab) {
                 ExtendedFloatingActionButton(
                     onClick = { showAddCardSheet = true },
                     icon = { Icon(Icons.Default.Add, null) },

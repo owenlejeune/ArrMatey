@@ -54,7 +54,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
@@ -69,11 +68,11 @@ import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.ui.sheets.DiscoverSectionCustomizationSheet
 import com.dnfapps.arrmatey.ui.tabs.DiscoverSearchOverlay
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -83,8 +82,7 @@ fun DiscoverHomeScreen(
     onSeeMore: (DiscoverCategory) -> Unit,
     onItemClick: (SearchResult) -> Unit,
 ) {
-    val globalPreferencesStore: PreferencesStore = koinInject()
-    val useFloatingNavigationBar by globalPreferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
+    val isFloatingBarVisible = LocalFloatingBarVisible.current
 
     val selectedInstance by viewModel.selectedInstance.collectAsStateWithLifecycle()
     val trendingState by viewModel.trendingState.collectAsStateWithLifecycle()
@@ -115,7 +113,7 @@ fun DiscoverHomeScreen(
     val showFab = !wideRailIsVisible && selectedInstance != null && !searchBarState.isExpanded()
 
     ProvideFloatingBarAction(
-        visible = useFloatingNavigationBar && showFab,
+        visible = isFloatingBarVisible && showFab,
         action =
         FloatingBarAction(
             icon = {
@@ -182,7 +180,7 @@ fun DiscoverHomeScreen(
             )
         },
         floatingActionButton = {
-            if (!useFloatingNavigationBar) {
+            if (!isFloatingBarVisible) {
                 AnimatedVisibility(
                     visible = showFab,
                     enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),

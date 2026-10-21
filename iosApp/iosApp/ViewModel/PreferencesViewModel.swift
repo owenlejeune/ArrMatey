@@ -23,8 +23,6 @@ class PreferencesViewModel: ObservableObject {
     @Published var useColoredActivityCards: Bool = false
     @Published var useColoredCalendarCards: Bool = false
     @Published var startOfWeekMonday: Bool = false
-    @Published var useFloatingNavigationBar: Bool = false
-    @Published var hideFloatingNavigationBarLabels: Bool = false
 
     @Published var bottomTabItems: [AnyTabItem] = []
     @Published var drawerTabs: [AnyTabItem] = []
@@ -62,12 +60,6 @@ class PreferencesViewModel: ObservableObject {
         }
         preferenceStore.startOfWeekMonday.observeAsync(on: self) { owner, val in
             owner.startOfWeekMonday = val.boolValue
-        }
-        preferenceStore.useFloatingNavigationBar.observeAsync(on: self) { owner, val in
-            owner.useFloatingNavigationBar = val.boolValue
-        }
-        preferenceStore.hideFloatingNavigationBarLabels.observeAsync(on: self) { owner, val in
-            owner.hideFloatingNavigationBarLabels = val.boolValue
         }
 
         tabManager.tabConfiguration.observeAsync(on: self) { owner, config in
@@ -120,14 +112,6 @@ class PreferencesViewModel: ObservableObject {
 
     func setUseServiceNavLogos(_ value: Bool) {
         preferenceStore.setUseServiceNavLogos(value: value)
-    }
-
-    func toggleUseFloatingNavigationBar() {
-        preferenceStore.toggleUseFloatingNavigationBar()
-    }
-
-    func toggleHideFloatingNavigationBarLabels() {
-        preferenceStore.toggleHideFloatingNavigationBarLabels()
     }
 
     func toggleStartOfWeekMonday() {

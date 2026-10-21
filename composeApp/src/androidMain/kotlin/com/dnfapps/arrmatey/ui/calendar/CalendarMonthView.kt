@@ -47,6 +47,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -106,7 +107,6 @@ fun CalendarMonthView(
     }
 
     val useColoredCards by preferencesStore.useColoredCalendarCards.collectAsStateWithLifecycle(false)
-    val useFloatingNavigationBar by preferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -154,8 +154,10 @@ fun CalendarMonthView(
             }
         }
 
+        val isFloatingBarVisible = LocalFloatingBarVisible.current
+
         ProvideFloatingBarAction(
-            visible = useFloatingNavigationBar && !isTodaySelected,
+            visible = isFloatingBarVisible && !isTodaySelected,
             action =
             FloatingBarAction(
                 icon = {
@@ -171,7 +173,7 @@ fun CalendarMonthView(
             ),
         )
 
-        if (!useFloatingNavigationBar) {
+        if (!isFloatingBarVisible) {
             AnimatedVisibility(
                 visible = !isTodaySelected,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { it }),

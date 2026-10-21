@@ -78,6 +78,7 @@ import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
 import com.dnfapps.arrmatey.ui.sheets.DirectoryManualImportSheet
@@ -205,9 +206,7 @@ fun UnifiedLibraryScreen(
         val currentInstance = selectedInstance!!
         val currentType = currentInstance.type
         val showFab = !wideRailIsVisible && !isInSelectionMode
-        val useFloatingNavigationBar by globalPreferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(
-            false,
-        )
+        val isFloatingBarVisible = LocalFloatingBarVisible.current
         val searchAllInstances by globalPreferencesStore.unifiedLibrarySearchAllInstances.collectAsStateWithLifecycle(
             true,
         )
@@ -221,7 +220,7 @@ fun UnifiedLibraryScreen(
         }
 
         ProvideFloatingBarAction(
-            visible = useFloatingNavigationBar && showFab,
+            visible = isFloatingBarVisible && showFab,
             action =
             FloatingBarAction(
                 icon = { Icon(Icons.Default.Add, null) },
@@ -232,7 +231,7 @@ fun UnifiedLibraryScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             floatingActionButton = {
-                if (!useFloatingNavigationBar) {
+                if (!isFloatingBarVisible) {
                     AnimatedVisibility(
                         visible = showFab,
                         enter = scaleIn(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),

@@ -37,6 +37,7 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
 
@@ -128,10 +129,10 @@ fun CalendarListView(
             }
         }
 
-        val useFloatingNavigationBar by preferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
+        val isFloatingBarVisible = LocalFloatingBarVisible.current
 
         com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction(
-            visible = useFloatingNavigationBar && !isTodayVisible,
+            visible = isFloatingBarVisible && !isTodayVisible,
             action =
             com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction(
                 icon = {
@@ -148,7 +149,7 @@ fun CalendarListView(
             ),
         )
 
-        if (!useFloatingNavigationBar) {
+        if (!isFloatingBarVisible) {
             AnimatedVisibility(
                 visible = !isTodayVisible,
                 enter = fadeIn() + slideInVertically(initialOffsetY = { it }),

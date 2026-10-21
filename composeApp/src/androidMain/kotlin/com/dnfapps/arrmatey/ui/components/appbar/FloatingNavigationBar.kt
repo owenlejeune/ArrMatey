@@ -65,6 +65,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.ui.helpers.LocalIsTabActive
 import com.dnfapps.arrmatey.ui.theme.ArrMateyTheme
 
@@ -107,7 +108,8 @@ fun ProvideFloatingBarAction(
 ) {
     val state = LocalFloatingBarActionState.current
     val isTabActive = LocalIsTabActive.current
-    val shouldShow = isTabActive && visible && action != null
+    val isFloatingBarVisible = LocalFloatingBarVisible.current
+    val shouldShow = isFloatingBarVisible && isTabActive && visible && action != null
 
     DisposableEffect(shouldShow, action) {
         if (shouldShow) {
