@@ -62,6 +62,7 @@ import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.utils.mokoString
+import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
 fun PosterItem(
@@ -218,17 +219,22 @@ fun PosterItem(
 
         val model =
             posterModel
-                ?: rememberRemoteImageData(
-                    url = item.fullPosterPath,
-                    trim = false,
-                    onError = { _, err ->
-                        println(err.throwable.message)
-                        imageLoadError = true
-                    },
-                    onSuccess = { _, _ ->
-                        imageLoadError = false
-                    },
-                )
+                ?: if (item.fullPosterPath != null) {
+                    rememberRemoteImageData(
+                        url = item.fullPosterPath,
+                        trim = false,
+                        onError = { _, err ->
+                            println(err.throwable.message)
+                            imageLoadError = true
+                        },
+                        onSuccess = { _, _ ->
+                            imageLoadError = false
+                        },
+                    )
+                } else {
+                    val mockCover = if (item.mediaType == RequestType.Tv) InstanceType.Sonarr.mockCover else InstanceType.Radarr.mockCover
+                    mockCover?.let { painterResource(it) } ?: ""
+                }
 
         BasePosterItem(
             model = model,
@@ -284,7 +290,7 @@ fun PosterItem(
                 }
             },
             errorContent = {
-                if (imageLoadError || item.fullPosterPath == null) {
+                if (imageLoadError || (item.fullPosterPath == null && model !is Painter)) {
                     Column(
                         modifier = Modifier.align(Alignment.Center).padding(4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -327,17 +333,22 @@ fun PosterItem(
 
     val model =
         posterModel
-            ?: rememberRemoteImageData(
-                url = item.fullPosterPath,
-                trim = false,
-                onError = { _, err ->
-                    println(err.throwable.message)
-                    imageLoadError = true
-                },
-                onSuccess = { _, _ ->
-                    imageLoadError = false
-                },
-            )
+            ?: if (item.fullPosterPath != null) {
+                rememberRemoteImageData(
+                    url = item.fullPosterPath,
+                    trim = false,
+                    onError = { _, err ->
+                        println(err.throwable.message)
+                        imageLoadError = true
+                    },
+                    onSuccess = { _, _ ->
+                        imageLoadError = false
+                    },
+                )
+            } else {
+                val mockCover = if (item.requestType == RequestType.Tv) InstanceType.Sonarr.mockCover else InstanceType.Radarr.mockCover
+                mockCover?.let { painterResource(it) } ?: ""
+            }
 
     BasePosterItem(
         model = model,
@@ -363,7 +374,7 @@ fun PosterItem(
             }
         },
         errorContent = {
-            if (imageLoadError || item.fullPosterPath == null) {
+            if (imageLoadError || (item.fullPosterPath == null && model !is Painter)) {
                 Column(
                     modifier = Modifier.align(Alignment.Center).padding(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,

@@ -16,7 +16,6 @@ class DashboardViewModelS: ObservableObject {
     @Published private(set) var state: CombinedDashboardState = CombinedDashboardStateInitial()
     @Published private(set) var isEditing: Bool = false
     @Published private(set) var showFirstLaunchAlert: Bool = false
-    @Published private(set) var showDashboardSearch: Bool = true
     @Published var cards: [DashboardCards] = []
     @Published private(set) var discoverSectionPreferences = DiscoverSectionPreferences()
 
@@ -35,9 +34,6 @@ class DashboardViewModelS: ObservableObject {
         }
         viewModel.showFirstLaunchToast.observeAsync(on: self) { owner, show in
             owner.showFirstLaunchAlert = show.boolValue
-        }
-        viewModel.showDashboardSearch.observeAsync(on: self) { owner, show in
-            owner.showDashboardSearch = show.boolValue
         }
         viewModel.cards.observeAsync(on: self) { owner, cards in
             owner.cards = cards
@@ -93,10 +89,6 @@ class DashboardViewModelS: ObservableObject {
 
     func declineRequest(requestId: Int64) {
         viewModel.declineRequest(requestId: requestId)
-    }
-
-    func toggleDashboardSearch() {
-        viewModel.toggleDashboardSearch()
     }
 
     func shuffleQuickPick() {

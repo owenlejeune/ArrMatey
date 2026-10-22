@@ -48,7 +48,7 @@ struct DashboardTabContent: View {
 
     var body: some View {
         Group {
-            if viewModel.showDashboardSearch && !searchQuery.isEmpty {
+            if !searchQuery.isEmpty {
                 DiscoverSearchOverlay(
                     items: discoverViewModel.searchResults,
                     isLoading: discoverViewModel.isSearching,
@@ -75,7 +75,7 @@ struct DashboardTabContent: View {
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .always))
         .onChange(of: searchQuery) { _, newValue in
-            if viewModel.showDashboardSearch && !viewModel.isEditing {
+            if !viewModel.isEditing {
                 discoverViewModel.updateSearchQuery(newValue)
             }
         }
@@ -123,10 +123,6 @@ struct DashboardTabContent: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {
-                        Button(action: { viewModel.toggleDashboardSearch() }) {
-                            Image(systemName: viewModel.showDashboardSearch ? "magnifyingglass" : "magnifyingglass.slash")
-                        }
-
                         Button(action: { viewModel.resetCardsOrder() }) {
                             Image(systemName: "arrow.counterclockwise")
                         }
@@ -140,8 +136,8 @@ struct DashboardTabContent: View {
                 }
             } else {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(MR.strings().edit.localized()) {
-                        viewModel.toggleEditing()
+                    Button(action: { viewModel.toggleEditing() }) {
+                        Image(systemName: "pencil")
                     }
                 }
             }
@@ -922,7 +918,7 @@ struct DashboardRecentlyAddedSection: View {
                             let ratio: Shared.AspectRatio = isWide ? .cover : .poster
                             let width: CGFloat = isWide ? 150 : 100
 
-                            PosterItem(item: item, instanceType: type, aspectRatio: ratio, elevation: .none, posterHeight: 150, showFooter: true) { clickedItem in
+                            PosterItem(item: item, instanceType: type, aspectRatio: ratio, elevation: .none, posterHeight: 150, posterImage: type?.mockCover, showFooter: true) { clickedItem in
                                 if let type = type, let id = clickedItem.id {
                                     navigationManager.goToDetailsOnDashboard(arrId: id.int64Value, instanceType: type)
                                 }
@@ -1621,6 +1617,8 @@ struct AddDashboardCardSheet: View {
     @ObservedObject var viewModel: DashboardViewModelS
     @Environment(\.dismiss) var dismiss
 
+    @State private var expandedServices: Set<String> = []
+
     private let columns = [
         GridItem(.adaptive(minimum: 300, maximum: .infinity), spacing: 16)
     ]
@@ -1632,33 +1630,102 @@ struct AddDashboardCardSheet: View {
                     !viewModel.cards.contains(where: { $0.name == card.name })
                 }
 
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(available, id: \.self) { card in
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text(card.title.localized())
-                                    .font(.headline)
-                                    .bold()
-                                Spacer()
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title2)
-                                    .foregroundColor(.accentColor)
-                            }
+                let servicesWithCards: [(DashboardCardService, [DashboardCards])] = DashboardCardService.allCases.map { service in
+                    (service, available.filter { $0.service == service })
+                }
 
-                            let mockSuccess = CombinedDashboardStateCompanion.shared.Mock
-                            DashboardCardView(card: card, state: mockSuccess, isEditing: false)
-                                .disabled(true)
-                                .padding(12)
-                                .background(Color(UIColor.systemBackground).opacity(0.5))
-                                .cornerRadius(12)
+                LazyVStack(spacing: 16) {
+                    ForEach(servicesWithCards, id: \.0.name) { service, serviceCards in
+                        let isExpanded = expandedServices.contains(service.name)
+
+                        VStack(alignment: .leading, spacing: 0) {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    if isExpanded {
+                                        expandedServices.remove(service.name)
+                                    } else {
+                                        expandedServices.insert(service.name)
+                                    }
+                                }
+                            }) {
+                                HStack(spacing: 12) {
+                                    serviceIcon(for: service)
+
+                                    Text(service.title.localized())
+                                        .font(.title3)
+                                        .bold()
+                                        .foregroundColor(.primary)
+
+                                    Text("\(serviceCards.count)")
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 2)
+                                        .background(Color.secondary.opacity(0.2))
+                                        .clipShape(Capsule())
+                                        .foregroundColor(.primary)
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.down")
+                                        .font(.body)
+                                        .foregroundColor(.secondary)
+                                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
+                                .background(Color(UIColor.secondarySystemGroupedBackground))
+                            }
+                            .buttonStyle(.plain)
+
+                            if isExpanded {
+                                Divider()
+                                    .padding(.horizontal, 16)
+
+                                if serviceCards.isEmpty {
+                                    Text(MR.strings().all_cards_added.localized())
+                                        .font(.body)
+                                        .foregroundColor(.secondary)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .padding(.vertical, 16)
+                                        .background(Color(UIColor.secondarySystemGroupedBackground))
+                                } else {
+                                    LazyVGrid(columns: columns, spacing: 16) {
+                                        ForEach(serviceCards, id: \.self) { card in
+                                            VStack(alignment: .leading, spacing: 12) {
+                                                HStack {
+                                                    Text(card.title.localized())
+                                                        .font(.headline)
+                                                        .bold()
+                                                    Spacer()
+                                                    Image(systemName: "plus.circle.fill")
+                                                        .font(.title2)
+                                                        .foregroundColor(.accentColor)
+                                                }
+
+                                                let mockSuccess = CombinedDashboardStateCompanion.shared.Mock
+                                                DashboardCardView(card: card, state: mockSuccess, isEditing: false)
+                                                    .disabled(true)
+                                                    .padding(12)
+                                                    .background(Color(UIColor.systemBackground).opacity(0.5))
+                                                    .cornerRadius(12)
+                                            }
+                                            .padding()
+                                            .background(Color(UIColor.systemBackground))
+                                            .cornerRadius(16)
+                                            .contentShape(Rectangle())
+                                            .onTapGesture {
+                                                viewModel.addCard(card: card)
+                                            }
+                                        }
+                                    }
+                                    .padding(16)
+                                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                                }
+                            }
                         }
-                        .padding()
-                        .background(Color(UIColor.secondarySystemBackground))
                         .cornerRadius(16)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            viewModel.addCard(card: card)
-                        }
+                        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                     }
                 }
                 .padding()
@@ -1671,6 +1738,60 @@ struct AddDashboardCardSheet: View {
                         dismiss()
                     }
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func serviceIcon(for service: DashboardCardService) -> some View {
+        Group {
+            switch service {
+            case .arr:
+                Image(resource: MR.images().sonarr_tab)
+                    .resizable()
+                    .renderingMode(.template)
+                    .scaledToFit()
+                    .frame(width: 22, height: 22)
+                    .foregroundColor(.accentColor)
+            case .seerr:
+                Image(resource: MR.images().seerr_tab)
+                    .resizable()
+                    .renderingMode(.template)
+                    .scaledToFit()
+                    .frame(width: 22, height: 22)
+                    .foregroundColor(.accentColor)
+            case .prowlarr:
+                Image(resource: MR.images().prowlarr_tab)
+                    .resizable()
+                    .renderingMode(.template)
+                    .scaledToFit()
+                    .frame(width: 22, height: 22)
+                    .foregroundColor(.accentColor)
+            case .bazarr:
+                Image(resource: MR.images().bazarr_tab)
+                    .resizable()
+                    .renderingMode(.template)
+                    .scaledToFit()
+                    .frame(width: 22, height: 22)
+                    .foregroundColor(.accentColor)
+            case .playback:
+                Image(systemName: "tv.badge.wifi")
+                    .font(.system(size: 20))
+                    .foregroundColor(.accentColor)
+            case .downloadClients:
+                Image(systemName: "arrow.down.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(.accentColor)
+            case .network:
+                Image(systemName: "wifi")
+                    .font(.system(size: 20))
+                    .foregroundColor(.accentColor)
+            case .wakeOnLan:
+                Image(systemName: "power")
+                    .font(.system(size: 20))
+                    .foregroundColor(.accentColor)
+            default:
+                EmptyView()
             }
         }
     }
@@ -1760,6 +1881,7 @@ struct CompactRequestCard: View {
         Button(action: onClick) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .top, spacing: 8) {
+                    let mockCover: Shared.ImageResource? = (request.type == .tv ? InstanceType.sonarr.mockCover : InstanceType.radarr.mockCover)
                     if let posterUrl = details?.fullPosterPath, let url = URL(string: posterUrl) {
                         CachedAsyncImage(url: url) { image in
                             image.resizable().aspectRatio(contentMode: .fill)
@@ -1768,6 +1890,12 @@ struct CompactRequestCard: View {
                         }
                         .frame(width: 48, height: 72)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } else if let mockCover = mockCover {
+                        Image(resource: mockCover)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 48, height: 72)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     } else {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color(.systemGray4))
@@ -1905,6 +2033,7 @@ struct CompactIssueCard: View {
         Button(action: onClick) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .top, spacing: 8) {
+                    let mockCover: Shared.ImageResource? = (issue.media?.mediaType == .tv ? InstanceType.sonarr.mockCover : InstanceType.radarr.mockCover)
                     if let posterUrl = details?.fullPosterPath, let url = URL(string: posterUrl) {
                         CachedAsyncImage(url: url) { image in
                             image.resizable().aspectRatio(contentMode: .fill)
@@ -1913,6 +2042,12 @@ struct CompactIssueCard: View {
                         }
                         .frame(width: 48, height: 72)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } else if let mockCover = mockCover {
+                        Image(resource: mockCover)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 48, height: 72)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     } else {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color(.systemGray4))
@@ -2114,6 +2249,7 @@ struct DashboardDiscoverSpotlightSection: View {
                             ForEach(spotlightItems.indices, id: \.self) { index in
                                 let item = spotlightItems[index]
                                 ZStack {
+                                    let mockCover: Shared.ImageResource? = (item.mediaType == .tv ? InstanceType.sonarr.mockCover : InstanceType.radarr.mockCover)
                                     if let backdrop = item.fullBackdropPath ?? item.fullPosterPath, let url = URL(string: backdrop) {
                                         CachedAsyncImage(url: url) { phase in
                                             switch phase {
@@ -2122,14 +2258,24 @@ struct DashboardDiscoverSpotlightSection: View {
                                             case .empty:
                                                 ProgressView()
                                             default:
-                                                ZStack {
-                                                    Color(.secondarySystemBackground)
-                                                    Image(systemName: item.mediaType == .tv ? "tv" : "film")
-                                                        .font(.system(size: 40))
-                                                        .foregroundColor(.secondary.opacity(0.4))
+                                                if let mockCover = mockCover {
+                                                    Image(resource: mockCover)
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                                } else {
+                                                    ZStack {
+                                                        Color(.secondarySystemBackground)
+                                                        Image(systemName: item.mediaType == .tv ? "tv" : "film")
+                                                            .font(.system(size: 40))
+                                                            .foregroundColor(.secondary.opacity(0.4))
+                                                    }
                                                 }
                                             }
                                         }
+                                    } else if let mockCover = mockCover {
+                                        Image(resource: mockCover)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
                                     } else {
                                         ZStack {
                                             Color(.secondarySystemBackground)
@@ -2379,8 +2525,11 @@ struct DashboardDiscoverQuickPickSection: View {
             } else if let item = currentItem {
                 VStack(spacing: 12) {
                     HStack(alignment: .top, spacing: 12) {
-                        GenericPosterItem(posterUrl: item.fullPosterPath)
-                            .frame(width: 90, height: 135)
+                        GenericPosterItem(
+                            posterUrl: item.fullPosterPath,
+                            posterImage: item.fullPosterPath == nil ? (item.mediaType == .tv ? InstanceType.sonarr.mockCover : InstanceType.radarr.mockCover) : nil
+                        )
+                        .frame(width: 90, height: 135)
 
                         VStack(alignment: .leading, spacing: 6) {
                             Text(item.title ?? item.name ?? MR.strings().unknown.localized())

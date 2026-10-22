@@ -43,7 +43,7 @@ struct PosterItem<Content: View>: View {
         self.radius = radius
         self.aspectRatio = aspectRatio
         self.posterHeight = posterHeight
-        self.posterImage = posterImage
+        self.posterImage = posterImage ?? ((item is MockMedia) ? (instanceType?.mockCover ?? (item as? InstanceTypeIdentifiable)?.instanceType.mockCover) : nil)
         self.showFooter = showFooter
         self.onItemClick = onItemClick
         self.enabled = enabled
@@ -244,10 +244,11 @@ struct DiscoverPosterItem: View {
 
     @ViewBuilder
     private var posterImageView: some View {
+        let mockCover: Shared.ImageResource? = (item.mediaType == .tv ? InstanceType.sonarr.mockCover : InstanceType.radarr.mockCover)
         GeometryReader { geometry in
             PosterImageView(
                 urlString: item.fullPosterPath,
-                resource: nil,
+                resource: item.fullPosterPath == nil ? mockCover : nil,
                 geometry: geometry,
                 loadError: $loadError
             )
@@ -299,17 +300,19 @@ struct RequestPosterItem: View {
                 posterHeight: posterHeight,
                 placeholderIcon: placeholder,
                 posterContent: {
+                    let mockCover: Shared.ImageResource? = (item.requestType == .tv ? InstanceType.sonarr.mockCover : InstanceType.radarr.mockCover)
                     GeometryReader { geometry in
                         PosterImageView(
                             urlString: item.fullPosterPath,
-                            resource: nil,
+                            resource: item.fullPosterPath == nil ? mockCover : nil,
                             geometry: geometry,
                             loadError: $loadError
                         )
                     }
                 },
                 errorContent: {
-                    if loadError || item.fullPosterPath == nil {
+                    let mockCover: Shared.ImageResource? = (item.requestType == .tv ? InstanceType.sonarr.mockCover : InstanceType.radarr.mockCover)
+                    if loadError || (item.fullPosterPath == nil && mockCover == nil) {
                         VStack(spacing: 4) {
                             Image(systemName: "photo.badge.exclamationmark")
                                 .resizable()

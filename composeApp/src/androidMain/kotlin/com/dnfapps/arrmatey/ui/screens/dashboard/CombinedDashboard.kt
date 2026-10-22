@@ -3,7 +3,6 @@ package com.dnfapps.arrmatey.ui.screens.dashboard
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -25,9 +23,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.Restore
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -41,8 +38,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSearchBarState
@@ -395,7 +390,6 @@ fun CombinedDashboard(
     val scope = rememberCoroutineScope()
 
     val showFirstLaunchToast by viewModel.showFirstLaunchToast.collectAsStateWithLifecycle()
-    val showDashboardSearch by viewModel.showDashboardSearch.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val cards by viewModel.cards.collectAsStateWithLifecycle()
@@ -463,75 +457,40 @@ fun CombinedDashboard(
 
     Scaffold(
         topBar = {
-            if (showDashboardSearch) {
-                ArrAppBarWithSearch(
-                    textFieldEnabled = !isEditing,
-                    textFieldState = textFieldState,
-                    searchBarState = searchBarState,
-                    searchPlaceholder = mokoString(MR.strings.search),
-                    navigationIcon = {
-                        if (isEditing) {
-                            IconButton(onClick = { viewModel.toggleEditing() }) {
-                                Icon(Icons.Default.Close, null)
-                            }
-                        } else if (isCompact) {
-                            NavigationDrawerButton()
+            ArrAppBarWithSearch(
+                textFieldEnabled = !isEditing,
+                textFieldState = textFieldState,
+                searchBarState = searchBarState,
+                searchPlaceholder = mokoString(MR.strings.search),
+                navigationIcon = {
+                    if (isEditing) {
+                        IconButton(onClick = { viewModel.toggleEditing() }) {
+                            Icon(Icons.Default.Close, null)
                         }
-                    },
-                    actions = {
-                        if (isEditing) {
-                            IconButton(onClick = { viewModel.toggleDashboardSearch() }) {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                )
+                    } else if (isCompact) {
+                        NavigationDrawerButton()
+                    }
+                },
+                actions = {
+                    if (isEditing) {
+                        IconButton(onClick = {
+                            viewModel.resetCardsOrder()
+                            scope.launch {
+                                gridState.animateScrollToItem(0)
                             }
-                            IconButton(onClick = {
-                                viewModel.resetCardsOrder()
-                                scope.launch {
-                                    gridState.animateScrollToItem(0)
-                                }
-                            }) {
-                                Icon(Icons.Default.Restore, null)
-                            }
+                        }) {
+                            Icon(Icons.Default.Restore, null)
                         }
-                    },
-                )
-            } else {
-                TopAppBar(
-                    title = { Text(mokoString(MR.strings.dashboard)) },
-                    navigationIcon = {
-                        if (isEditing) {
-                            IconButton(onClick = { viewModel.toggleEditing() }) {
-                                Icon(Icons.Default.Close, null)
-                            }
-                        } else if (isCompact) {
-                            NavigationDrawerButton()
+                    } else {
+                        IconButton(onClick = { viewModel.toggleEditing() }) {
+                            Icon(
+                                imageVector = Icons.Default.DashboardCustomize,
+                                contentDescription = mokoString(MR.strings.edit),
+                            )
                         }
-                    },
-                    windowInsets = TopAppBarDefaults.windowInsets,
-                    actions = {
-                        if (isEditing) {
-                            IconButton(onClick = { viewModel.toggleDashboardSearch() }) {
-                                Icon(
-                                    imageVector = Icons.Default.SearchOff,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            IconButton(onClick = {
-                                viewModel.resetCardsOrder()
-                                scope.launch {
-                                    gridState.animateScrollToItem(0)
-                                }
-                            }) {
-                                Icon(Icons.Default.Restore, null)
-                            }
-                        }
-                    },
-                )
-            }
+                    }
+                },
+            )
         },
         floatingActionButton = {
             val showFab = isEditing && availableCards.isNotEmpty()
@@ -562,7 +521,7 @@ fun CombinedDashboard(
                 .padding(top = contentPadding.calculateTopPadding())
                 .fillMaxSize(),
         ) {
-            if (showDashboardSearch && searchBarState.isExpanded()) {
+            if (searchBarState.isExpanded()) {
                 DiscoverSearchOverlay(
                     items = searchState,
                     isLoading = isSearching,
@@ -850,62 +809,17 @@ fun CombinedDashboard(
                 }
 
                 if (showAddCardSheet) {
-                    ModalBottomSheet(
+                    AddDashboardCardSheet(
+                        availableCards = availableCards,
+                        onAddCard = { card -> viewModel.addCard(card) },
                         onDismissRequest = { showAddCardSheet = false },
                         sheetState = sheetState,
-                    ) {
-                        Column(
-                            modifier =
-                            Modifier
-                                .fillMaxWidth(),
-                        ) {
-                            Text(
-                                text = mokoString(MR.strings.add_dashboard_cards),
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(horizontal = 24.dp),
-                            )
-                            LazyVerticalStaggeredGrid(
-                                columns = StaggeredGridCells.Fixed(count = if (isCompact) 1 else 2),
-                                verticalItemSpacing = 16.dp,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = PaddingValues(all = 16.dp),
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                items(availableCards) { card ->
-                                    Box(
-                                        modifier =
-                                        Modifier
-                                            .clip(MaterialTheme.shapes.large)
-                                            .clickable {
-                                                viewModel.addCard(card)
-                                            },
-                                    ) {
-                                        Column(
-                                            modifier = Modifier.padding(horizontal = 12.dp),
-                                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                                        ) {
-                                            Text(
-                                                text = mokoString(card.title),
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Bold,
-                                            )
-                                            DashboardCardContent(
-                                                enabled = false,
-                                                cardType = card,
-                                                currentState = CombinedDashboardState.Mock,
-                                                isEditing = false,
-                                                onNavigateToArrDashboard = onNavigateToArrDashboard,
-                                                onNavigateToMediaDetails = onNavigateToMediaDetails,
-                                                onNavigateToSeerrMediaDetails = onNavigateToSeerrMediaDetails,
-                                                onNavigateToDiscoverTab = onNavigateToDiscoverTab,
-                                                onSendWol = {},
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                        isCompact = isCompact,
+                        onNavigateToArrDashboard = onNavigateToArrDashboard,
+                        onNavigateToMediaDetails = onNavigateToMediaDetails,
+                        onNavigateToSeerrMediaDetails = onNavigateToSeerrMediaDetails,
+                        onNavigateToDiscoverTab = onNavigateToDiscoverTab,
+                    )
                 }
 
                 selectedRequestForSheet?.let { pkg ->

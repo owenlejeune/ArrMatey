@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -157,9 +158,11 @@ fun DashboardDiscoverSpotlightSection(
                             val spotlightItem = spotlightItems[page]
                             val title = spotlightItem.title ?: spotlightItem.name ?: mokoString(MR.strings.unknown)
 
-                            val imageModel: String? =
+                            val mockCover = if (spotlightItem.mediaType == RequestType.Tv) InstanceType.Sonarr.mockCover else InstanceType.Radarr.mockCover
+                            val imageModel: Any? =
                                 spotlightItem.fullBackdropPath
                                     ?: spotlightItem.fullPosterPath
+                                    ?: mockCover?.let { painterResource(it) }
 
                             Box(
                                 modifier =
@@ -170,12 +173,23 @@ fun DashboardDiscoverSpotlightSection(
                                     },
                             ) {
                                 if (imageModel != null) {
-                                    AsyncImage(
-                                        model = imageModel,
-                                        contentDescription = title,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize(),
-                                    )
+                                    when (imageModel) {
+                                        is Painter ->
+                                            Image(
+                                                painter = imageModel,
+                                                contentDescription = title,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize(),
+                                            )
+
+                                        else ->
+                                            AsyncImage(
+                                                model = imageModel,
+                                                contentDescription = title,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize(),
+                                            )
+                                    }
                                 } else {
                                     Box(
                                         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),

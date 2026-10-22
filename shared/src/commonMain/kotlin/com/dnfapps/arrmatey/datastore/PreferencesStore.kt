@@ -57,7 +57,6 @@ interface PreferencesStore {
 
     val dashboardCardsOrder: Flow<List<DashboardCards>>
     val dashboardFirstLaunch: Flow<Boolean>
-    val showDashboardSearch: Flow<Boolean>
 
     val credentialsMigrated: Flow<Boolean>
     val localNetworkNoticeSeen: Flow<Boolean>
@@ -154,8 +153,6 @@ interface PreferencesStore {
     suspend fun updateDashboardCardsOrder(cards: List<DashboardCards>)
 
     fun markDashboardAsSeen()
-
-    fun setShowDashboardSearch(show: Boolean)
 
     fun markCredentialsMigrated()
 
@@ -680,7 +677,7 @@ class DefaultPreferencesStore(
                 raw
                     .takeUnless { it.isEmpty() }
                     ?.split("~")
-                    ?.mapNotNull { DashboardCards.fromStoredName(it) }
+                    ?.mapNotNull { runCatching { DashboardCards.valueOf(it) }.getOrNull() }
                     ?: emptyList()
             } ?: PreferenceDefaults.DASHBOARD_CARDS_ORDER
         }
@@ -700,19 +697,6 @@ class DefaultPreferencesStore(
         scope.launch {
             dataStore.edit {
                 it[PreferenceKeys.DASHBOARD_FIRST_LAUNCH] = false
-            }
-        }
-    }
-
-    override val showDashboardSearch: Flow<Boolean> =
-        dataStore.data.map { preferences ->
-            preferences[PreferenceKeys.SHOW_DASHBOARD_SEARCH] ?: PreferenceDefaults.SHOW_DASHBOARD_SEARCH
-        }
-
-    override fun setShowDashboardSearch(show: Boolean) {
-        scope.launch {
-            dataStore.edit {
-                it[PreferenceKeys.SHOW_DASHBOARD_SEARCH] = show
             }
         }
     }

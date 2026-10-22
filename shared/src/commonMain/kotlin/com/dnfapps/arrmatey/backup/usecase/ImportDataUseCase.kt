@@ -182,7 +182,6 @@ class ImportDataUseCase(
                 global.calendarFilterState?.let { preferencesStore.saveCalendarFilterState(it) }
                 global.downloadQueueSortState?.let { preferencesStore.saveDownloadClientUiState(it) }
                 global.dashboardCardsOrder?.let { preferencesStore.updateDashboardCardsOrder(it) }
-                global.showDashboardSearch?.let { preferencesStore.setShowDashboardSearch(it) }
                 global.queueRemovalPreferences?.let { preferencesStore.saveQueueRemovalPreferences(it) }
                 global.downloadDeleteFiles?.let { preferencesStore.setDownloadDeleteFiles(it) }
             }

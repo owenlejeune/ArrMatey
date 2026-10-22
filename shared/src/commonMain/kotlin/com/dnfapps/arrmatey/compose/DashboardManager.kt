@@ -80,6 +80,24 @@ class DashboardManager(
 }
 
 @kotlinx.serialization.Serializable
+enum class DashboardCardService(
+    val title: StringResource,
+) {
+    Arr(strings.dashboard_arr_overview),
+    Seerr(strings.seerr),
+    Prowlarr(strings.prowlarr),
+    Bazarr(strings.bazarr),
+    Playback(strings.playback),
+    DownloadClients(strings.download_clients),
+    Network(strings.network),
+    WakeOnLan(strings.wake_on_lan),
+    ;
+
+    val cards: List<DashboardCards>
+        get() = DashboardCards.entries.filter { it.service == this }
+}
+
+@kotlinx.serialization.Serializable
 enum class DashboardCards(
     val title: StringResource,
 ) {
@@ -97,12 +115,7 @@ enum class DashboardCards(
     InstanceDashboard(strings.dashboard_instance_dashboards),
     BazarrOverview(strings.dashboard_bazarr_overview),
 
-    @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
-    @kotlinx.serialization.json.JsonNames("TracearrOverview")
     PlaybackOverview(strings.dashboard_playback_overview),
-
-    @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
-    @kotlinx.serialization.json.JsonNames("TracearrActiveStreams")
     ActiveStreams(strings.dashboard_tracearr_active_streams),
 
     DiscoverFeed(strings.dashboard_discover_feed),
@@ -111,28 +124,44 @@ enum class DashboardCards(
     WolDevices(strings.wake_on_lan),
     ;
 
-    companion object {
-        fun fromStoredName(name: String): DashboardCards? = when (name) {
-            "TracearrOverview", "PlaybackOverview" -> PlaybackOverview
-            "TracearrActiveStreams", "ActiveStreams" -> ActiveStreams
-            else -> runCatching { valueOf(name) }.getOrNull()
+    val service: DashboardCardService
+        get() = when (this) {
+            ArrOverview,
+            RecentlyAdded,
+            ActivityQueue,
+            OnToday,
+            UpcomingReleases,
+            InstanceDashboard,
+            -> DashboardCardService.Arr
+
+            SeerrOverview,
+            PendingRequests,
+            PendingIssues,
+            DiscoverFeed,
+            DiscoverSpotlight,
+            DiscoverQuickPick,
+            -> DashboardCardService.Seerr
+
+            ProwlarrOverview -> DashboardCardService.Prowlarr
+            BazarrOverview -> DashboardCardService.Bazarr
+            PlaybackOverview, ActiveStreams -> DashboardCardService.Playback
+            DownloadClients -> DashboardCardService.DownloadClients
+            Network -> DashboardCardService.Network
+            WolDevices -> DashboardCardService.WakeOnLan
         }
 
+    companion object {
         val defaultEntries: List<DashboardCards>
             get() =
                 listOf(
                     ArrOverview,
                     SeerrOverview,
-                    PendingRequests,
-                    PendingIssues,
                     ProwlarrOverview,
                     BazarrOverview,
-                    PlaybackOverview,
                     ActiveStreams,
                     ActivityQueue,
-                    RecentlyAdded,
                     OnToday,
-                    UpcomingReleases,
+                    RecentlyAdded,
                     Network,
                     InstanceDashboard,
                 )

@@ -48,7 +48,6 @@ internal object PreferenceKeys {
 
     val DASHBOARD_CARDS_ORDER = stringPreferencesKey("dashboardCardsOrderKey")
     val DASHBOARD_FIRST_LAUNCH = booleanPreferencesKey("dashboardFirstLaunchKey")
-    val SHOW_DASHBOARD_SEARCH = booleanPreferencesKey("showDashboardSearchKey")
 
     val CREDENTIALS_MIGRATED = booleanPreferencesKey("credentialsMigrated")
     val LOCAL_NETWORK_NOTICE_SEEN = booleanPreferencesKey("localNetworkNoticeSeen")

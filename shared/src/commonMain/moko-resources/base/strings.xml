@@ -951,6 +951,9 @@
     <string name="surprise_me">Surprise Me</string>
     <string name="details">Details</string>
     <string name="no_media_found">No media found</string>
+    <string name="all_cards_added">All available cards have been added</string>
+    <string name="expand_all">Expand all</string>
+    <string name="collapse_all">Collapse all</string>
 
     <!-- Release Notes -->
     <string name="v1_title">Announcements</string>
