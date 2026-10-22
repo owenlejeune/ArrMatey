@@ -14,6 +14,7 @@ data class NzbgetStatus(
     @SerialName("AverageDownloadRate") val averageDownloadRate: Long = 0,
     @SerialName("DownloadPaused") val downloadPaused: Boolean = false,
     @SerialName("ServerPaused") val serverPaused: Boolean = false,
+    @SerialName("FreeDiskSpaceMB") val freeDiskSpaceMB: Long = 0,
 ) {
     val totalRemainingBytes: Long
         get() = if (remainingSizeHi != 0L || remainingSizeLo != 0L) {

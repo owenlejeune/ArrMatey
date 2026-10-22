@@ -50,7 +50,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ServicesSettingsScreen(
     onNavigateToInstance: (Long, InstanceType) -> Unit,
     onNavigateToAddInstance: () -> Unit,
-    onNavigateToEditDownloadClient: (Long) -> Unit,
+    onNavigateToDownloadClient: (Long) -> Unit,
     onNavigateToAddDownloadClient: () -> Unit,
     onNavigateToEditCustomWebpage: (Long) -> Unit,
     onNavigateToAddCustomWebpage: () -> Unit,
@@ -151,7 +151,7 @@ fun ServicesSettingsScreen(
                             )
                         },
                         onClick = {
-                            onNavigateToEditDownloadClient(downloadClient.id)
+                            onNavigateToDownloadClient(downloadClient.id)
                         },
                         titleExtraContent = {
                             Box(

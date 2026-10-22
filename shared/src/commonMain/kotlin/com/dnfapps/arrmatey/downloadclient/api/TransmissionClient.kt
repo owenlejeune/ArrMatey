@@ -1,10 +1,12 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
+import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.downloadclient.api.model.TransmissionRpcRequest
 import com.dnfapps.arrmatey.downloadclient.api.model.TransmissionRpcResponse
 import com.dnfapps.arrmatey.downloadclient.api.model.TransmissionSessionStats
 import com.dnfapps.arrmatey.downloadclient.api.model.TransmissionTorrent
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
+import com.dnfapps.arrmatey.downloadclient.model.DownloadClientSystemOverview
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
@@ -26,7 +28,12 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 
 private const val HEADER_SESSION_ID = "X-Transmission-Session-Id"
 
@@ -146,6 +153,51 @@ class TransmissionClient(
         }
         is NetworkResult.Error -> result
         is NetworkResult.Loading -> result
+    }
+
+    override suspend fun getSystemOverview(): NetworkResult<DownloadClientSystemOverview> {
+        val sessionGetResult = executeTransmissionRequest<JsonObject>("session-get")
+        val sessionArgs = ((sessionGetResult as? NetworkResult.Success)?.data?.argumentsResultOrError() as? NetworkResult.Success)?.data
+
+        val version = sessionArgs?.get("version")?.jsonPrimitive?.contentOrNull
+        val rpcVersion = sessionArgs?.get("rpc-version")?.jsonPrimitive?.longOrNull?.toString()
+        val downloadDir = sessionArgs?.get("download-dir")?.jsonPrimitive?.contentOrNull
+        val freeSpaceBytes = sessionArgs?.get("download-dir-free-space")?.jsonPrimitive?.longOrNull ?: 0L
+
+        val diskSpaces = if (freeSpaceBytes > 0L) {
+            listOf(ArrDiskSpace(path = downloadDir, label = "Download Directory", freeSpace = freeSpaceBytes, totalSpace = 0L))
+        } else {
+            emptyList()
+        }
+
+        val sessionStatsResult = executeTransmissionRequest<JsonObject>("session-stats")
+        val statsArgs = ((sessionStatsResult as? NetworkResult.Success)?.data?.argumentsResultOrError() as? NetworkResult.Success)?.data
+
+        val downloadSpeed = statsArgs?.get("downloadSpeed")?.jsonPrimitive?.longOrNull ?: 0L
+        val uploadSpeed = statsArgs?.get("uploadSpeed")?.jsonPrimitive?.longOrNull ?: 0L
+        val activeCount = statsArgs?.get("activeTorrentCount")?.jsonPrimitive?.intOrNull ?: 0
+        val cumulativeStats = statsArgs?.get("cumulative-stats")?.jsonObject
+        val alltimeDl = cumulativeStats?.get("downloadedBytes")?.jsonPrimitive?.longOrNull
+        val alltimeUl = cumulativeStats?.get("uploadedBytes")?.jsonPrimitive?.longOrNull
+
+        val transferInfo = DownloadTransferInfo(
+            client = downloadClient,
+            downloadSpeed = downloadSpeed,
+            uploadSpeed = uploadSpeed,
+        )
+
+        return NetworkResult.Success(
+            DownloadClientSystemOverview(
+                version = version,
+                webApiVersion = rpcVersion?.let { "RPC v$it" },
+                downloadDir = downloadDir,
+                diskSpaces = diskSpaces,
+                transferInfo = transferInfo,
+                activeDownloadsCount = activeCount,
+                alltimeDownloaded = alltimeDl,
+                alltimeUploaded = alltimeUl,
+            ),
+        )
     }
 
     private suspend fun executeTorrentAction(

@@ -1,6 +1,9 @@
 package com.dnfapps.arrmatey.arr.api.client
 
+import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
+import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
+import com.dnfapps.arrmatey.arr.api.model.ArrUpdate
 import com.dnfapps.arrmatey.arr.api.model.IndexerStatus
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrGrabPayload
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrIndexer
@@ -37,6 +40,12 @@ class ProwlarrClient(
     }
 
     suspend fun getStatus(): NetworkResult<ArrSoftwareStatus> = httpClient.safeGet("$baseUrl/system/status")
+
+    suspend fun getDiskSpace(): NetworkResult<List<ArrDiskSpace>> = httpClient.safeGet("$baseUrl/diskspace")
+
+    suspend fun getHealth(): NetworkResult<List<ArrHealth>> = httpClient.safeGet("$baseUrl/health")
+
+    suspend fun getUpdates(): NetworkResult<List<ArrUpdate>> = httpClient.safeGet("$baseUrl/update")
 
     suspend fun getIndexers(): NetworkResult<List<ProwlarrIndexer>> {
         val url = "$baseUrl/indexer"

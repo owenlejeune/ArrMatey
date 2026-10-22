@@ -1,9 +1,11 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
+import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentSyncMetadataResponse
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTorrent
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTransferInfoResponse
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
+import com.dnfapps.arrmatey.downloadclient.model.DownloadClientSystemOverview
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
@@ -117,6 +119,56 @@ class QBittorrentClient(
                     )
                 }
         }
+    }
+
+    override suspend fun getSystemOverview(): NetworkResult<DownloadClientSystemOverview> = authenticatedCall {
+        val version = (httpClient.safeGet<String>("api/v2/app/version") as? NetworkResult.Success)?.data?.trim()
+        val webApiVersion = (httpClient.safeGet<String>("api/v2/app/webapiVersion") as? NetworkResult.Success)?.data?.trim()
+        val defaultSavePath = (httpClient.safeGet<String>("api/v2/app/defaultSavePath") as? NetworkResult.Success)?.data?.trim()
+        val syncResult = getSyncMetadata()
+        val serverState = (syncResult as? NetworkResult.Success)?.data?.serverState
+
+        val downloadsResult = getDownloads()
+        val downloads = (downloadsResult as? NetworkResult.Success)?.data.orEmpty()
+        val activeCount = downloads.count { it.status == DownloadItemStatus.Downloading }
+
+        val freeSpace = serverState?.freeSpaceOnDisk ?: 0L
+        val diskPath = defaultSavePath?.takeIf { it.isNotBlank() }
+        val diskSpaces = if (freeSpace > 0L) {
+            listOf(
+                ArrDiskSpace(
+                    path = diskPath,
+                    label = diskPath ?: "Free Disk Space",
+                    freeSpace = freeSpace,
+                    totalSpace = 0L,
+                ),
+            )
+        } else {
+            emptyList()
+        }
+
+        val transferInfo = DownloadTransferInfo(
+            client = downloadClient,
+            downloadSpeed = serverState?.downloadSpeed ?: 0L,
+            uploadSpeed = serverState?.uploadSpeed ?: 0L,
+            externalIp = serverState?.lastExternalAddressV4?.takeIf { it.isNotBlank() },
+        )
+
+        NetworkResult.Success(
+            DownloadClientSystemOverview(
+                version = version,
+                webApiVersion = webApiVersion,
+                downloadDir = diskPath,
+                diskSpaces = diskSpaces,
+                connectionStatus = serverState?.connectionStatus?.takeIf { it.isNotBlank() },
+                dhtNodes = serverState?.dhtNodes,
+                totalPeers = serverState?.totalPeerConnections,
+                transferInfo = transferInfo,
+                activeDownloadsCount = activeCount,
+                alltimeDownloaded = serverState?.alltimeDl,
+                alltimeUploaded = serverState?.alltimeUl,
+            ),
+        )
     }
 
     // Re-login and retry once on 401/403 so an expired session cookie recovers automatically.

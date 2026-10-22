@@ -24,6 +24,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUsersResponse
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrVersion
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrViolationsResponse
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
@@ -58,6 +59,18 @@ class TracearrRepository(
 
     private val _servers = MutableStateFlow<List<TracearrServer>>(emptyList())
     val servers: StateFlow<List<TracearrServer>> = _servers.asStateFlow()
+
+    private val _version = MutableStateFlow<TracearrVersion?>(null)
+    val version: StateFlow<TracearrVersion?> = _version.asStateFlow()
+
+    suspend fun getVersion(): NetworkResult<TracearrVersion> = when (val result = tracearrClient.getVersion()) {
+        is NetworkResult.Success -> {
+            _version.value = result.data
+            NetworkResult.Success(result.data)
+        }
+        is NetworkResult.Error -> NetworkResult.Error(code = result.code, message = result.message, cause = result.cause, errorType = result.errorType)
+        is NetworkResult.Loading -> NetworkResult.Loading
+    }
 
     private val mediaDetailsCache = mutableMapOf<String, TracearrMediaDetails>()
     private val cacheMutex = Mutex()

@@ -56,6 +56,18 @@ class TautulliRepository(
     private val _serverStatus = MutableStateFlow<TautulliServerStatus?>(null)
     val serverStatus: StateFlow<TautulliServerStatus?> = _serverStatus.asStateFlow()
 
+    private val _updateAvailable = MutableStateFlow(false)
+    val updateAvailable: StateFlow<Boolean> = _updateAvailable.asStateFlow()
+
+    suspend fun checkUpdate(): Boolean {
+        val res = tautulliClient.checkUpdate()
+        if (res is NetworkResult.Success) {
+            _updateAvailable.value = res.data
+            return res.data
+        }
+        return false
+    }
+
     fun resolveServerName(vararg candidates: String?): String {
         for (candidate in candidates) {
             val trimmed = candidate?.trim()
@@ -74,11 +86,7 @@ class TautulliRepository(
     private val metadataCache = mutableMapOf<String, TautulliMetadata>()
     private val cacheMutex = Mutex()
 
-    override suspend fun testConnection(): NetworkResult<Unit> = when (val status = getServerStatus()) {
-        is NetworkResult.Success -> NetworkResult.Success(Unit)
-        is NetworkResult.Error -> NetworkResult.Error(code = status.code, message = status.message, cause = status.cause, errorType = status.errorType)
-        is NetworkResult.Loading -> NetworkResult.Loading
-    }
+    override suspend fun testConnection(): NetworkResult<Unit> = tautulliClient.testConnection()
 
     suspend fun getServerStatus(): NetworkResult<TautulliServerStatus> = tautulliClient.getServerStatus().onSuccess { status ->
         _serverStatus.value = status

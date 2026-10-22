@@ -151,6 +151,10 @@ sealed interface SettingsScreen : NavKey {
         val id: Long,
     ) : SettingsScreen
 
+    data class DownloadClientDashboard(
+        val id: Long,
+    ) : SettingsScreen
+
     data object AddDownloadClient : SettingsScreen
 
     data class EditDownloadClient(

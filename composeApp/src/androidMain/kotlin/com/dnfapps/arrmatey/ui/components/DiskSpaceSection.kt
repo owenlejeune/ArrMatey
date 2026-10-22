@@ -64,13 +64,14 @@ fun DiskSpaceItem(disk: ArrDiskSpace) {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
     ) {
+        val hasDiskStats = disk.totalSpace > 0L
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = disk.path ?: mokoString(MR.strings.unknown),
+                text = disk.path ?: disk.label ?: mokoString(MR.strings.unknown),
                 style = MaterialTheme.typography.titleMediumEmphasized,
             )
             Surface(
@@ -78,8 +79,14 @@ fun DiskSpaceItem(disk: ArrDiskSpace) {
                 color = MaterialTheme.colorScheme.surfaceContainerHighest,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
             ) {
+                val chipText =
+                    if (hasDiskStats && disk.freeSpace > 0L) {
+                        "${disk.freeSpace.bytesAsFileSizeString()} ${mokoString(MR.strings.free_space_lowercase)}"
+                    } else {
+                        mokoString(MR.strings.unknown)
+                    }
                 Text(
-                    text = "${disk.freeSpace.bytesAsFileSizeString()} ${mokoString(MR.strings.free_space_lowercase)}",
+                    text = chipText,
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -88,46 +95,48 @@ fun DiskSpaceItem(disk: ArrDiskSpace) {
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        if (hasDiskStats) {
+            Spacer(modifier = Modifier.height(10.dp))
 
-        val progressColor =
-            when {
-                disk.usedPercentage > 0.90f -> MaterialTheme.colorScheme.error
-                disk.usedPercentage > 0.75f -> ArrYellow
-                else -> MaterialTheme.colorScheme.primary
+            val progressColor =
+                when {
+                    disk.usedPercentage > 0.90f -> MaterialTheme.colorScheme.error
+                    disk.usedPercentage > 0.75f -> ArrYellow
+                    else -> MaterialTheme.colorScheme.primary
+                }
+
+            LinearProgressIndicator(
+                progress = { disk.usedPercentage },
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(8.dp),
+                color = progressColor,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                strokeCap = StrokeCap.Round,
+                drawStopIndicator = {},
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val usedSpace = (disk.totalSpace - disk.freeSpace).coerceAtLeast(0L)
+                Text(
+                    text = "${usedSpace.bytesAsFileSizeString()} / ${disk.totalSpace.bytesAsFileSizeString()}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "${(disk.usedPercentage * 100).toInt()}%",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (disk.usedPercentage > 0.90f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                )
             }
-
-        LinearProgressIndicator(
-            progress = { disk.usedPercentage },
-            modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(8.dp),
-            color = progressColor,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            strokeCap = StrokeCap.Round,
-            drawStopIndicator = {},
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            val usedSpace = disk.totalSpace - disk.freeSpace
-            Text(
-                text = "${usedSpace.bytesAsFileSizeString()} / ${disk.totalSpace.bytesAsFileSizeString()}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = "${(disk.usedPercentage * 100).toInt()}%",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = if (disk.usedPercentage > 0.90f) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-            )
         }
     }
 }

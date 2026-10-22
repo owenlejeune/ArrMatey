@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.client.ArrClient
 import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
+import com.dnfapps.arrmatey.arr.api.model.ArrUpdate
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
@@ -48,6 +49,9 @@ class MetadataRepository(
 
     private val _health = MutableStateFlow<List<ArrHealth>>(emptyList())
     val health: StateFlow<List<ArrHealth>> = _health.asStateFlow()
+
+    private val _updates = MutableStateFlow<List<ArrUpdate>>(emptyList())
+    val updates: StateFlow<List<ArrUpdate>> = _updates.asStateFlow()
 
     suspend fun refreshQualityProfiles() {
         client
@@ -107,6 +111,13 @@ class MetadataRepository(
             .onError { _, _, _ -> _health.value = emptyList() }
     }
 
+    suspend fun refreshUpdates() {
+        client
+            .getUpdates()
+            .onSuccess { _updates.value = it }
+            .onError { _, _, _ -> _updates.value = emptyList() }
+    }
+
     private val metadataMutex = Mutex()
     private var lastMetadataRefreshTime: Long = 0L
     private val refreshThresholdMs: Long = 30_000L
@@ -133,6 +144,7 @@ class MetadataRepository(
             launch { refreshStatus() }
             launch { refreshDiskSpace() }
             launch { refreshHealth() }
+            launch { refreshUpdates() }
         }
     }
 }

@@ -1,7 +1,10 @@
 package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.arr.api.client.ProwlarrClient
+import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
+import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
+import com.dnfapps.arrmatey.arr.api.model.ArrUpdate
 import com.dnfapps.arrmatey.arr.api.model.IndexerStatus
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
@@ -29,6 +32,15 @@ class ProwlarrInstanceRepository(
     private val _indexers = MutableStateFlow<List<ProwlarrIndexer>>(emptyList())
     val indexers: StateFlow<List<ProwlarrIndexer>> = _indexers.asStateFlow()
 
+    private val _diskSpace = MutableStateFlow<List<ArrDiskSpace>>(emptyList())
+    val diskSpace: StateFlow<List<ArrDiskSpace>> = _diskSpace.asStateFlow()
+
+    private val _health = MutableStateFlow<List<ArrHealth>>(emptyList())
+    val health: StateFlow<List<ArrHealth>> = _health.asStateFlow()
+
+    private val _updates = MutableStateFlow<List<ArrUpdate>>(emptyList())
+    val updates: StateFlow<List<ArrUpdate>> = _updates.asStateFlow()
+
     override suspend fun testConnection(): NetworkResult<Unit> = prowlarrClient.testConnection()
 
     suspend fun refreshStatus() {
@@ -36,6 +48,31 @@ class ProwlarrInstanceRepository(
             .getStatus()
             .onSuccess { _softwareStatus.value = it }
             .onError { _, _, _ -> _softwareStatus.value = null }
+    }
+
+    suspend fun refreshDiskSpace() {
+        prowlarrClient.getDiskSpace()
+            .onSuccess { _diskSpace.value = it }
+    }
+
+    suspend fun refreshHealth() {
+        prowlarrClient.getHealth()
+            .onSuccess { _health.value = it }
+    }
+
+    suspend fun refreshUpdates() {
+        prowlarrClient.getUpdates()
+            .onSuccess { _updates.value = it }
+            .onError { _, _, _ -> _updates.value = emptyList() }
+    }
+
+    suspend fun refreshInstanceStatuses() {
+        refreshStatus()
+        getIndexers()
+        getIndexerStatus()
+        refreshDiskSpace()
+        refreshHealth()
+        refreshUpdates()
     }
 
     suspend fun getIndexers(): NetworkResult<List<ProwlarrIndexer>> = prowlarrClient.getIndexers().onSuccess { _indexers.value = it }

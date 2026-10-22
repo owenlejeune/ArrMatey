@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
+import com.dnfapps.arrmatey.downloadclient.model.DownloadClientSystemOverview
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.networking.NetworkResult
@@ -19,4 +20,6 @@ interface DownloadClientApi {
     ): NetworkResult<Unit>
 
     suspend fun getTransferInfo(): NetworkResult<DownloadTransferInfo>
+
+    suspend fun getSystemOverview(): NetworkResult<DownloadClientSystemOverview>
 }

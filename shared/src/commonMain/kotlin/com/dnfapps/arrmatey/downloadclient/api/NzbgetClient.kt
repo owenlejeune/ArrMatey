@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
+import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.compose.utils.toFormattedDuration
 import com.dnfapps.arrmatey.downloadclient.api.model.NzbgetEditQueueAction
 import com.dnfapps.arrmatey.downloadclient.api.model.NzbgetEditQueueParams
@@ -9,6 +10,7 @@ import com.dnfapps.arrmatey.downloadclient.api.model.NzbgetJsonRpcRequest
 import com.dnfapps.arrmatey.downloadclient.api.model.NzbgetJsonRpcResponse
 import com.dnfapps.arrmatey.downloadclient.api.model.NzbgetStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
+import com.dnfapps.arrmatey.downloadclient.model.DownloadClientSystemOverview
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
@@ -146,6 +148,39 @@ class NzbgetClient(
         }
         is NetworkResult.Error -> result
         is NetworkResult.Loading -> result
+    }
+
+    override suspend fun getSystemOverview(): NetworkResult<DownloadClientSystemOverview> = coroutineScope {
+        val versionDeferred = async { callRpc<String>("version") }
+        val statusDeferred = async { callRpc<NzbgetStatus>("status") }
+        val downloadsDeferred = async { getDownloads() }
+
+        val version = (versionDeferred.await() as? NetworkResult.Success)?.data?.trim()
+        val status = (statusDeferred.await() as? NetworkResult.Success)?.data
+        val downloads = (downloadsDeferred.await() as? NetworkResult.Success)?.data.orEmpty()
+        val activeCount = downloads.count { it.status == DownloadItemStatus.Downloading }
+
+        val freeSpaceBytes = (status?.freeDiskSpaceMB ?: 0L) * 1024L * 1024L
+        val diskSpaces = if (freeSpaceBytes > 0L) {
+            listOf(ArrDiskSpace(path = null, label = "Free Disk Space", freeSpace = freeSpaceBytes, totalSpace = 0L))
+        } else {
+            emptyList()
+        }
+
+        val transferInfo = DownloadTransferInfo(
+            client = downloadClient,
+            downloadSpeed = status?.currentDownloadSpeed ?: 0L,
+            uploadSpeed = 0L,
+        )
+
+        NetworkResult.Success(
+            DownloadClientSystemOverview(
+                version = version,
+                diskSpaces = diskSpaces,
+                transferInfo = transferInfo,
+                activeDownloadsCount = activeCount,
+            ),
+        )
     }
 
     suspend fun getHistory(hidden: Boolean = false): NetworkResult<List<NzbgetHistoryItem>> = callRpc("history", listOf(hidden))

@@ -52,6 +52,7 @@ import com.dnfapps.arrmatey.ui.components.DiskSpaceSection
 import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
+import com.dnfapps.arrmatey.ui.components.UpdateCard
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.sheets.DirectoryManualImportSheet
@@ -225,23 +226,31 @@ fun ArrInstanceDashboard(
                             ),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Text(
-                            text = mokoString(MR.strings.health),
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                        state.healthItems.forEach {
-                            ArrHealthCard(it)
+                        state.updateInfo?.let { update ->
+                            if (update.isAvailable) {
+                                UpdateCard(update)
+                            }
                         }
-                        if (state.healthItems.isEmpty()) {
+
+                        if (state.softwareStatus != null || state.prowlarrOverview != null || state.healthItems.isNotEmpty()) {
                             Text(
-                                text = mokoString(MR.strings.no_issues),
-                                modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 6.dp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
+                                text = mokoString(MR.strings.health),
+                                style = MaterialTheme.typography.headlineSmall,
                             )
+                            state.healthItems.forEach {
+                                ArrHealthCard(it)
+                            }
+                            if (state.healthItems.isEmpty()) {
+                                Text(
+                                    text = mokoString(MR.strings.no_issues),
+                                    modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 6.dp),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
                         }
 
                         if (state.disks.isNotEmpty()) {
@@ -250,6 +259,107 @@ fun ArrInstanceDashboard(
                                 style = MaterialTheme.typography.headlineSmall,
                             )
                             DiskSpaceSection(state.disks)
+                        }
+
+                        state.prowlarrOverview?.let { prowlarr ->
+                            val indexerItems = listOf(
+                                InfoItem(moko.getString(MR.strings.total), prowlarr.totalIndexers.toString()),
+                                InfoItem(moko.getString(MR.strings.healthy_indexers), prowlarr.healthyIndexers.toString()),
+                                InfoItem(moko.getString(MR.strings.failing_indexers), prowlarr.failingIndexers.toString()),
+                            )
+                            InfoArea(indexerItems, title = MR.strings.indexers)
+                        }
+
+                        state.bazarrOverview?.let { bazarr ->
+                            val subtitleItems = listOf(
+                                InfoItem(moko.getString(MR.strings.wanted_episodes), bazarr.wantedEpisodes.toString()),
+                                InfoItem(moko.getString(MR.strings.wanted_movies), bazarr.wantedMovies.toString()),
+                                InfoItem(moko.getString(MR.strings.provider_issues), bazarr.providerIssues.toString()),
+                            )
+                            InfoArea(subtitleItems, title = MR.strings.wanted_subtitles)
+
+                            val bazarrSystemItems = buildList {
+                                add(InfoItem(moko.getString(MR.strings.host_endpoint), instance?.url ?: ""))
+                                bazarr.version?.let { add(InfoItem(moko.getString(MR.strings.version), it)) }
+                                bazarr.packageVersion?.let { add(InfoItem(moko.getString(MR.strings.package_version), it)) }
+                                bazarr.operatingSystem?.let { add(InfoItem(moko.getString(MR.strings.operating_system), it)) }
+                                bazarr.pythonVersion?.let { add(InfoItem(moko.getString(MR.strings.python_version), it)) }
+                                bazarr.cpuCores?.let { add(InfoItem(moko.getString(MR.strings.cpu_cores), it.toString())) }
+                                bazarr.timezone?.let { add(InfoItem(moko.getString(MR.strings.timezone), it)) }
+                                bazarr.bazarrDirectory?.let { add(InfoItem(moko.getString(MR.strings.startup_path), it)) }
+                                bazarr.configDirectory?.let { add(InfoItem(moko.getString(MR.strings.app_data_path), it)) }
+                            }
+                            InfoArea(bazarrSystemItems, title = MR.strings.system_info)
+                        }
+
+                        state.tautulliOverview?.let { tautulli ->
+                            val streamItems = buildList {
+                                add(InfoItem(moko.getString(MR.strings.active_streams), tautulli.streamCount.toString()))
+                                tautulli.totalBandwidth?.let { add(InfoItem(moko.getString(MR.strings.total_bandwidth), "${it / 1000} Mbps")) }
+                                tautulli.lanBandwidth?.let { add(InfoItem(moko.getString(MR.strings.lan_bandwidth), "${it / 1000} Mbps")) }
+                                tautulli.wanBandwidth?.let { add(InfoItem(moko.getString(MR.strings.wan_bandwidth), "${it / 1000} Mbps")) }
+                            }
+                            InfoArea(streamItems, title = MR.strings.active_streams)
+
+                            val tautulliSystemItems = buildList {
+                                add(InfoItem(moko.getString(MR.strings.host_endpoint), instance?.url ?: ""))
+                                tautulli.tautulliVersion?.let { add(InfoItem(moko.getString(MR.strings.version), it)) }
+                                tautulli.installType?.let { add(InfoItem(moko.getString(MR.strings.install_type), it)) }
+                                tautulli.pmsName?.let { add(InfoItem(moko.getString(MR.strings.plex_server), it)) }
+                                tautulli.pmsVersion?.let { add(InfoItem(moko.getString(MR.strings.plex_server_version), it)) }
+                                add(InfoItem(moko.getString(MR.strings.update_available), if (tautulli.updateAvailable) moko.getString(MR.strings.yes) else moko.getString(MR.strings.no)))
+                            }
+                            InfoArea(tautulliSystemItems, title = MR.strings.system_info)
+                        }
+
+                        state.tracearrOverview?.let { tracearr ->
+                            val overviewItems = listOf(
+                                InfoItem(moko.getString(MR.strings.connected_servers), tracearr.servers.size.toString()),
+                                InfoItem(moko.getString(MR.strings.active_streams), tracearr.activeStreams.size.toString()),
+                            )
+                            InfoArea(overviewItems, title = MR.strings.dashboard_tracearr_overview)
+
+                            tracearr.todayStats?.let { stats ->
+                                val todayItems = listOf(
+                                    InfoItem(moko.getString(MR.strings.today_plays), stats.todayPlays.toString()),
+                                    InfoItem(moko.getString(MR.strings.watch_time), stats.formattedWatchTime),
+                                    InfoItem(moko.getString(MR.strings.active_users), stats.activeUsersToday.toString()),
+                                )
+                                InfoArea(todayItems, title = MR.strings.today_stats)
+                            }
+
+                            val tracearrSystemItems = buildList {
+                                add(InfoItem(moko.getString(MR.strings.host_endpoint), instance?.url ?: ""))
+                                tracearr.version?.let { add(InfoItem(moko.getString(MR.strings.version), it)) }
+                                tracearr.commitTag?.let { add(InfoItem(moko.getString(MR.strings.commit_tag), it)) }
+                                add(InfoItem(moko.getString(MR.strings.update_available), if (tracearr.updateAvailable) moko.getString(MR.strings.yes) else moko.getString(MR.strings.no)))
+                            }
+                            InfoArea(tracearrSystemItems, title = MR.strings.system_info)
+                        }
+
+                        state.seerrOverview?.let { seerr ->
+                            val requestItems = listOf(
+                                InfoItem(moko.getString(MR.strings.total), seerr.totalRequests.toString()),
+                                InfoItem(moko.getString(MR.strings.pending_requests), seerr.pendingRequests.toString()),
+                                InfoItem(moko.getString(MR.strings.approved_requests), seerr.approvedRequests.toString()),
+                                InfoItem(moko.getString(MR.strings.processing), seerr.processingRequests.toString()),
+                                InfoItem(moko.getString(MR.strings.available), seerr.availableRequests.toString()),
+                            )
+                            InfoArea(requestItems, title = MR.strings.requests_label)
+
+                            val issueItems = listOf(
+                                InfoItem(moko.getString(MR.strings.total), seerr.totalIssues.toString()),
+                                InfoItem(moko.getString(MR.strings.open_issues), seerr.openIssues.toString()),
+                            )
+                            InfoArea(issueItems, title = MR.strings.issues)
+
+                            val seerrSystemItems = buildList {
+                                add(InfoItem(moko.getString(MR.strings.host_endpoint), instance?.url ?: ""))
+                                seerr.version?.let { add(InfoItem(moko.getString(MR.strings.version), it)) }
+                                seerr.commitTag?.let { add(InfoItem(moko.getString(MR.strings.commit_tag), it)) }
+                                add(InfoItem(moko.getString(MR.strings.update_available), if (seerr.updateAvailable) moko.getString(MR.strings.yes) else moko.getString(MR.strings.no)))
+                            }
+                            InfoArea(seerrSystemItems, title = MR.strings.system_info)
                         }
 
                         state.softwareStatus?.let { ss ->
@@ -286,6 +396,14 @@ fun ArrInstanceDashboard(
                                             ss.hostOs ?: moko.getString(MR.strings.unknown),
                                         ),
                                     )
+                                    state.updateInfo?.let { update ->
+                                        add(
+                                            InfoItem(
+                                                moko.getString(MR.strings.update_available),
+                                                if (update.isAvailable) moko.getString(MR.strings.yes) else moko.getString(MR.strings.no),
+                                            ),
+                                        )
+                                    }
                                 }
                             InfoArea(infoItems, title = MR.strings.system_info)
                         }

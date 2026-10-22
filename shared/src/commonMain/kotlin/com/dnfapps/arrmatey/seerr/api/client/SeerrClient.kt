@@ -26,6 +26,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrAuthResult
+import com.dnfapps.arrmatey.seerr.api.model.SeerrStatus
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
@@ -51,6 +52,8 @@ import org.koin.core.component.KoinComponent
 
 interface SeerrClient {
     suspend fun testConnection(): NetworkResult<Unit>
+
+    suspend fun getStatus(): NetworkResult<SeerrStatus>
 
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
 
@@ -214,6 +217,8 @@ class SeerrClientImpl(
         get() = "${instance.getEffectiveBaseUrl()}/${instance.type.apiBase}"
 
     override suspend fun testConnection(): NetworkResult<Unit> = get(instance.type.testEndpoint)
+
+    override suspend fun getStatus(): NetworkResult<SeerrStatus> = get("status")
 
     override suspend fun getUserInfo(): NetworkResult<SeerrUser> = get("auth/me")
 

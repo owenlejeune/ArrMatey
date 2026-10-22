@@ -150,4 +150,38 @@ class TracearrRepositoryTest {
         assertEquals(2, repository.todayStats.value?.activeStreams)
         assertEquals(15, repository.todayStats.value?.todayPlays)
     }
+
+    @Test
+    fun testGetVersion() = runTest {
+        val versionJson = """
+            {
+              "current": {
+                "version": "v2.9.0",
+                "tag": "v2.9.0",
+                "commit": "984607adc4aa7d4ec2d22286746ed05c7b07f637",
+                "buildDate": "2026-10-19T20:53:55-04:00",
+                "isPrerelease": false
+              },
+              "latest": {
+                "version": "3.0.0",
+                "tag": "v3.0.0",
+                "releaseUrl": "https://github.com/connorgallopo/Tracearr/releases/tag/v3.0.0",
+                "publishedAt": "2026-10-22T00:37:46Z",
+                "isPrerelease": false,
+                "releaseName": "v3.0.0"
+              },
+              "updateAvailable": true,
+              "lastChecked": "2026-10-22T18:00:00.888Z"
+            }
+        """.trimIndent()
+
+        val httpClient = createHttpClient { _ -> versionJson }
+        val repository = TracearrRepository(fakeInstance, httpClient)
+        assertEquals(null, repository.version.value)
+
+        val result = repository.getVersion()
+        assertTrue(result is NetworkResult.Success)
+        assertEquals("v2.9.0", repository.version.value?.current?.version)
+        assertEquals(true, repository.version.value?.updateAvailable)
+    }
 }

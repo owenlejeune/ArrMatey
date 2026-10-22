@@ -301,6 +301,13 @@ fun Navigator<SettingsScreen>.toAddDownloadClient() {
     navigateTo(SettingsScreen.AddDownloadClient)
 }
 
+fun Navigator<SettingsScreen>.toDownloadClientDashboard(id: Long) {
+    if (backStack.lastOrNull() != SettingsScreen.Services) {
+        navigateTo(SettingsScreen.Services)
+    }
+    navigateTo(SettingsScreen.DownloadClientDashboard(id))
+}
+
 fun Navigator<SettingsScreen>.toEditDownloadClient(id: Long) {
     if (backStack.lastOrNull() != SettingsScreen.Services) {
         navigateTo(SettingsScreen.Services)
@@ -347,22 +354,7 @@ fun Navigator<SettingsScreen>.toBackupRestore() = navigateTo(SettingsScreen.Back
 fun Navigator<SettingsScreen>.onInstanceTap(
     id: Long,
     type: InstanceType,
-) = when (type) {
-    InstanceType.Sonarr,
-    InstanceType.Radarr,
-    InstanceType.Lidarr,
-    InstanceType.Bookshelf,
-    InstanceType.Listenarr,
-    InstanceType.Chaptarr,
-    InstanceType.Kapowarr,
-    -> toArrDashboard(id)
-    InstanceType.Seerr,
-    InstanceType.Bazarr,
-    InstanceType.Prowlarr,
-    InstanceType.Tracearr,
-    InstanceType.Tautulli,
-    -> toEditInstance(id)
-}
+) = toArrDashboard(id)
 
 /**
  * Domain-specific navigation extensions for Dashboard feature set.

@@ -440,9 +440,7 @@ class GlobalSearchUseCaseTest {
             MockHttpClientFactory(json) { _ ->
                 MockEngine { request ->
                     val path = request.url.encodedPath
-                    if (path.contains("system/status") || path.contains("diskspace") || path.contains("health")) {
-                        respond("{}", HttpStatusCode.OK)
-                    } else {
+                    if (path.contains("series/lookup") || path.contains("lookup")) {
                         try {
                             requestStarted.complete(Unit)
                             delay(10.seconds)
@@ -451,6 +449,10 @@ class GlobalSearchUseCaseTest {
                             requestCancelled.complete(Unit)
                             throw e
                         }
+                    } else if (path.contains("system/status")) {
+                        respond("{}", HttpStatusCode.OK)
+                    } else {
+                        respond("[]", HttpStatusCode.OK)
                     }
                 }
             }

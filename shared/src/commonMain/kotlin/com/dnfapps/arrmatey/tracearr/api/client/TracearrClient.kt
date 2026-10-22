@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.tracearr.api.model.TracearrTodayStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserDetail
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUserStats
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrUsersResponse
+import com.dnfapps.arrmatey.tracearr.api.model.TracearrVersion
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrViolationsResponse
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeGet
@@ -31,6 +32,11 @@ class TracearrClient(
 
     suspend fun testConnection(): NetworkResult<Unit> {
         val url = "${instance.getEffectiveBaseUrl()}/${instance.type.testEndpoint}"
+        return httpClient.safeGet(url)
+    }
+
+    suspend fun getVersion(): NetworkResult<TracearrVersion> {
+        val url = "$v1BaseUrl/version"
         return httpClient.safeGet(url)
     }
 

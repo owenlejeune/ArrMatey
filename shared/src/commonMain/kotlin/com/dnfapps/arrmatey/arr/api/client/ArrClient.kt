@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
+import com.dnfapps.arrmatey.arr.api.model.ArrUpdate
 import com.dnfapps.arrmatey.arr.api.model.BlocklistPage
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
@@ -134,4 +135,6 @@ interface ArrClient {
         folder: String? = null,
         filterExistingFiles: Boolean = true,
     ): NetworkResult<List<ManualImportFile>>
+
+    suspend fun getUpdates(): NetworkResult<List<ArrUpdate>> = NetworkResult.Success(emptyList())
 }

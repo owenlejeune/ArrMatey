@@ -19,6 +19,9 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 class TautulliClient(
     val instance: Instance,
@@ -65,7 +68,47 @@ class TautulliClient(
         }
     }
 
-    suspend fun getServerStatus(): NetworkResult<TautulliServerStatus> = getCmd("status")
+    suspend fun getServerStatus(): NetworkResult<TautulliServerStatus> {
+        val tautulliInfoResult = getCmd<JsonObject>("get_tautulli_info")
+        val tautulliData = (tautulliInfoResult as? NetworkResult.Success)?.data
+        val serverInfoResult = getCmd<JsonObject>("get_server_info")
+        val serverData = (serverInfoResult as? NetworkResult.Success)?.data
+
+        val tautulliVersion = tautulliData?.get("tautulli_version")?.jsonPrimitive?.contentOrNull
+        val installType = tautulliData?.get("tautulli_install_type")?.jsonPrimitive?.contentOrNull
+        val pmsName = serverData?.get("pms_name")?.jsonPrimitive?.contentOrNull
+        val pmsVersion = serverData?.get("pms_version")?.jsonPrimitive?.contentOrNull
+        val pmsUrl = serverData?.get("pms_url")?.jsonPrimitive?.contentOrNull
+        val pmsIdentifier = serverData?.get("pms_identifier")?.jsonPrimitive?.contentOrNull
+
+        return if (tautulliData != null || serverData != null) {
+            NetworkResult.Success(
+                TautulliServerStatus(
+                    pmsIdentifier = pmsIdentifier,
+                    pmsName = pmsName,
+                    pmsVersion = pmsVersion,
+                    pmsUrl = pmsUrl,
+                    tautulliVersion = tautulliVersion,
+                    tautulliInstallType = installType,
+                ),
+            )
+        } else {
+            getCmd("status")
+        }
+    }
+
+    suspend fun checkUpdate(): NetworkResult<Boolean> {
+        val result = getCmd<JsonObject>("update_check")
+        return when (result) {
+            is NetworkResult.Success -> {
+                val updateVal = result.data["update"]?.jsonPrimitive?.contentOrNull
+                val isUpdate = updateVal.equals("true", ignoreCase = true) || updateVal == "1"
+                NetworkResult.Success(isUpdate)
+            }
+            is NetworkResult.Error -> NetworkResult.Error(code = result.code, message = result.message)
+            is NetworkResult.Loading -> NetworkResult.Loading
+        }
+    }
 
     suspend fun getActivity(
         sessionId: String? = null,

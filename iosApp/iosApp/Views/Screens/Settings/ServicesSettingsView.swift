@@ -28,12 +28,7 @@ struct ServicesSettingsView: View {
     }
 
     private func route(for instance: Instance) -> SettingsRoute {
-        switch instance.type {
-        case .sonarr, .radarr, .lidarr, .bookshelf, .listenarr, .chaptarr:
-            return .arrDashboard(instance.id)
-        default:
-            return .editInstance(instance.id)
-        }
+        return .arrDashboard(instance.id)
     }
 
     var body: some View {
@@ -152,7 +147,7 @@ struct DownloadClientCard: View {
     let connectionStatuses: [KotlinLong:OperationStatus]
 
     var body: some View {
-        NavigationLink(value: SettingsRoute.editDownloadClient(client.id)) {
+        NavigationLink(value: SettingsRoute.downloadClientDashboard(client.id)) {
             HStack(spacing: 8) {
                 client.type.icon.toImage(renderingMode: .original)
                     .frame(width: 32, height: 32)

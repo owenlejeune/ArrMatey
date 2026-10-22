@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.navigation.toAddInstance
 import com.dnfapps.arrmatey.navigation.toAddWolDevice
 import com.dnfapps.arrmatey.navigation.toBackupRestore
 import com.dnfapps.arrmatey.navigation.toDev
+import com.dnfapps.arrmatey.navigation.toDownloadClientDashboard
 import com.dnfapps.arrmatey.navigation.toEditCustomWebpage
 import com.dnfapps.arrmatey.navigation.toEditDownloadClient
 import com.dnfapps.arrmatey.navigation.toEditInstance
@@ -33,6 +34,7 @@ import com.dnfapps.arrmatey.ui.screens.AddEditWolDeviceScreen
 import com.dnfapps.arrmatey.ui.screens.AddInstanceScreen
 import com.dnfapps.arrmatey.ui.screens.ArrInstanceDashboard
 import com.dnfapps.arrmatey.ui.screens.DevSettingsScreen
+import com.dnfapps.arrmatey.ui.screens.DownloadClientDashboard
 import com.dnfapps.arrmatey.ui.screens.EditInstanceScreen
 import com.dnfapps.arrmatey.ui.screens.SettingsScreen
 import com.dnfapps.arrmatey.ui.screens.ShortcutsCustomizationScreen
@@ -71,7 +73,7 @@ fun SettingsTabNavHost(
                 ServicesSettingsScreen(
                     onNavigateToInstance = { id, type -> navigation.onInstanceTap(id, type) },
                     onNavigateToAddInstance = { navigation.toAddInstance() },
-                    onNavigateToEditDownloadClient = { id -> navigation.toEditDownloadClient(id) },
+                    onNavigateToDownloadClient = { id -> navigation.toDownloadClientDashboard(id) },
                     onNavigateToAddDownloadClient = { navigation.toAddDownloadClient() },
                     onNavigateToEditCustomWebpage = { id -> navigation.toEditCustomWebpage(id) },
                     onNavigateToAddCustomWebpage = { navigation.toAddCustomWebpage() },
@@ -139,6 +141,14 @@ fun SettingsTabNavHost(
                     windowSizeClass = windowSizeClass,
                     onBack = { navigation.popBackStack() },
                     onNavigateToEditInstance = { instanceId -> navigation.toEditInstance(instanceId) },
+                )
+            }
+            entry<SettingsScreen.DownloadClientDashboard> {
+                DownloadClientDashboard(
+                    id = it.id,
+                    windowSizeClass = windowSizeClass,
+                    onBack = { navigation.popBackStack() },
+                    onNavigateToEditDownloadClient = { clientId -> navigation.toEditDownloadClient(clientId) },
                 )
             }
             entry<SettingsScreen.AddDownloadClient> {

@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
+import com.dnfapps.arrmatey.arr.api.model.ArrUpdate
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.AudiobookFile
 import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataBody
@@ -98,6 +99,7 @@ open class ArrInstanceRepository(
     val softwareStatus: StateFlow<ArrSoftwareStatus?> = metadataRepository.softwareStatus
     val diskSpace: StateFlow<List<ArrDiskSpace>> = metadataRepository.diskSpace
     val health: StateFlow<List<ArrHealth>> = metadataRepository.health
+    val updates: StateFlow<List<ArrUpdate>> = metadataRepository.updates
 
     // Type-specific state forwarding
     open val episodes: StateFlow<Map<Long, List<Episode>>>
@@ -192,6 +194,10 @@ open class ArrInstanceRepository(
 
     open suspend fun refreshHealth() {
         metadataRepository.refreshHealth()
+    }
+
+    open suspend fun refreshUpdates() {
+        metadataRepository.refreshUpdates()
     }
 
     open suspend fun refreshAllMetadata(force: Boolean = false) {

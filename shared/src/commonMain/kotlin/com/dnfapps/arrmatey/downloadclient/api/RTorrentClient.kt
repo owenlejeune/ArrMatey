@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.downloadclient.api.model.XmlRpc
 import com.dnfapps.arrmatey.downloadclient.api.model.XmlRpcFault
 import com.dnfapps.arrmatey.downloadclient.api.model.XmlRpcValue
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
+import com.dnfapps.arrmatey.downloadclient.model.DownloadClientSystemOverview
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
@@ -85,6 +86,34 @@ class RTorrentClient(
 
         is NetworkResult.Error -> result
         is NetworkResult.Loading -> result
+    }
+
+    override suspend fun getSystemOverview(): NetworkResult<DownloadClientSystemOverview> {
+        val globalResult = getGlobal()
+        val global = (globalResult as? NetworkResult.Success)?.data
+
+        val dirResult = call("get_directory")
+        val downloadDir = (dirResult as? NetworkResult.Success)?.data?.asString()?.takeIf { it.isNotBlank() }
+
+        val downloadsResult = getDownloads()
+        val downloads = (downloadsResult as? NetworkResult.Success)?.data.orEmpty()
+        val activeCount = downloads.count { it.status == DownloadItemStatus.Downloading }
+
+        val transferInfo = DownloadTransferInfo(
+            client = downloadClient,
+            downloadSpeed = global?.downRate ?: 0L,
+            uploadSpeed = global?.upRate ?: 0L,
+        )
+
+        return NetworkResult.Success(
+            DownloadClientSystemOverview(
+                version = global?.version?.takeIf { it.isNotBlank() },
+                downloadDir = downloadDir,
+                listenPort = global?.listenPort?.takeIf { it > 0 },
+                transferInfo = transferInfo,
+                activeDownloadsCount = activeCount,
+            ),
+        )
     }
 
     suspend fun getGlobal(): NetworkResult<RTorrentGlobal> {

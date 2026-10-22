@@ -36,6 +36,7 @@ import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.discover.viewmodel.UnifiedSearchViewModel
+import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientDashboardViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
@@ -107,6 +108,8 @@ object KoinBridge : KoinComponent {
     fun getCalendarViewModel(): CalendarViewModel = getKoin().get()
 
     fun getArrInstanceDashboardViewModel(instanceId: Long): ArrInstanceDashboardViewModel = getKoin().get { parametersOf(instanceId) }
+
+    fun getDownloadClientDashboardViewModel(clientId: Long): DownloadClientDashboardViewModel = getKoin().get { parametersOf(clientId) }
 
     fun getRequestsViewModel(): RequestsViewModel = getKoin().get()
 

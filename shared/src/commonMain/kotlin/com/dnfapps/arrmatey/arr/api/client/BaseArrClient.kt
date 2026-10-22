@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.arr.api.client
 import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
+import com.dnfapps.arrmatey.arr.api.model.ArrUpdate
 import com.dnfapps.arrmatey.arr.api.model.BlocklistPage
 import com.dnfapps.arrmatey.arr.api.model.BookshelfBlocklistItem
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
@@ -212,6 +213,8 @@ abstract class BaseArrClient(
     override suspend fun getDiskSpace(): NetworkResult<List<ArrDiskSpace>> = get("diskspace")
 
     override suspend fun getHealth(): NetworkResult<List<ArrHealth>> = get("health")
+
+    override suspend fun getUpdates(): NetworkResult<List<ArrUpdate>> = get("update")
 
     override suspend fun updateMonitoring(
         ids: List<Long>,

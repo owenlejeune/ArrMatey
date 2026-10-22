@@ -30,6 +30,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrAuthResult
+import com.dnfapps.arrmatey.seerr.api.model.SeerrStatus
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
@@ -97,7 +98,14 @@ class SeerrInstanceRepository(
     private val _isOnline = MutableStateFlow(true)
     val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()
 
+    private val _status = MutableStateFlow<SeerrStatus?>(null)
+    val status: StateFlow<SeerrStatus?> = _status.asStateFlow()
+
     override suspend fun testConnection(): NetworkResult<Unit> = client.testConnection()
+
+    suspend fun refreshStatus() {
+        client.getStatus().onSuccess { _status.value = it }
+    }
 
     suspend fun getLoggedInUser() {
         client

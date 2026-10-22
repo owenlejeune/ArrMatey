@@ -1,10 +1,12 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
+import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.downloadclient.api.model.DelugeJsonRpcRequest
 import com.dnfapps.arrmatey.downloadclient.api.model.DelugeJsonRpcResponse
 import com.dnfapps.arrmatey.downloadclient.api.model.DelugeSessionStatus
 import com.dnfapps.arrmatey.downloadclient.api.model.DelugeTorrentData
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
+import com.dnfapps.arrmatey.downloadclient.model.DownloadClientSystemOverview
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
@@ -19,6 +21,7 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -175,6 +178,55 @@ class DelugeClient(
                 is NetworkResult.Error -> result
                 is NetworkResult.Loading -> result
             }
+        }
+        is NetworkResult.Error -> authResult
+        is NetworkResult.Loading -> NetworkResult.Loading
+    }
+
+    override suspend fun getSystemOverview(): NetworkResult<DownloadClientSystemOverview> = when (val authResult = ensureAuthenticated()) {
+        is NetworkResult.Success -> {
+            val versionResult = callDeluge<String>("daemon.get_version", emptyList())
+            val version = (versionResult as? NetworkResult.Success)?.data?.resultOrError()?.let { (it as? NetworkResult.Success)?.data }
+
+            val configResult = callDeluge<Map<String, JsonElement>>(
+                method = "core.get_config",
+                params = listOf(buildJsonArray { add(JsonPrimitive("download_location")) }),
+            )
+            val downloadLocation = (configResult as? NetworkResult.Success)?.data?.resultOrError()?.let {
+                (it as? NetworkResult.Success)?.data?.get("download_location")?.jsonPrimitive?.contentOrNull
+            }
+
+            val diskSpaces = buildList {
+                if (downloadLocation != null) {
+                    val spaceResult = callDeluge<Long>(
+                        method = "core.get_free_space",
+                        params = listOf(JsonPrimitive(downloadLocation)),
+                    )
+                    val freeBytes = (spaceResult as? NetworkResult.Success)?.data?.resultOrError()?.let {
+                        (it as? NetworkResult.Success)?.data
+                    }
+                    if (freeBytes != null && freeBytes > 0L) {
+                        add(ArrDiskSpace(path = downloadLocation, label = "Download Folder", freeSpace = freeBytes, totalSpace = 0L))
+                    }
+                }
+            }
+
+            val transferResult = getTransferInfo()
+            val transferInfo = (transferResult as? NetworkResult.Success)?.data
+
+            val downloadsResult = getDownloads()
+            val downloads = (downloadsResult as? NetworkResult.Success)?.data.orEmpty()
+            val activeCount = downloads.count { it.status == DownloadItemStatus.Downloading }
+
+            NetworkResult.Success(
+                DownloadClientSystemOverview(
+                    version = version,
+                    downloadDir = downloadLocation,
+                    diskSpaces = diskSpaces,
+                    transferInfo = transferInfo,
+                    activeDownloadsCount = activeCount,
+                ),
+            )
         }
         is NetworkResult.Error -> authResult
         is NetworkResult.Loading -> NetworkResult.Loading

@@ -131,6 +131,11 @@ class DownloadClientManager(
         downloadClientRepository.setDownloadClientActive(downloadClient)
     }
 
+    suspend fun deleteClient(client: DownloadClient) {
+        removeApi(client.id)
+        downloadClientRepository.deleteDownloadClient(client)
+    }
+
     private fun createApi(downloadClient: DownloadClient): DownloadClientApi {
         val httpClient = httpClientFactory.createDownloadClient(downloadClient)
         return when (downloadClient.type) {

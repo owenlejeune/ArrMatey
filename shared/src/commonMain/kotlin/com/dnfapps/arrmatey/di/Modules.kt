@@ -114,6 +114,7 @@ import com.dnfapps.arrmatey.downloadclient.usecase.SetDownloadClientActiveUseCas
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientPreferencesUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientUseCase
+import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientDashboardViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
@@ -551,7 +552,10 @@ val viewModelModule =
             EditInstanceViewModel(instanceId, get(), get(), get(), get(), get(), get(), get())
         }
         viewModel { (instanceId: Long) ->
-            ArrInstanceDashboardViewModel(instanceId, get(), get(), get(), get())
+            ArrInstanceDashboardViewModel(instanceId, get(), get(), get(), get(), get())
+        }
+        viewModel { (clientId: Long) ->
+            DownloadClientDashboardViewModel(clientId, get())
         }
         viewModelOf(::CalendarViewModel)
         viewModelOf(::RequestsViewModel)

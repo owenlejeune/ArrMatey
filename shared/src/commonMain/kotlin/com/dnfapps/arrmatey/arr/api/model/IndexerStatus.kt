@@ -10,7 +10,11 @@ data class IndexerStatus(
     @Contextual val disabledTill: Instant? = null,
     @Contextual val mostRecentFailure: Instant? = null,
     @Contextual val initialFailure: Instant? = null,
+    val status: IndexerHealthStatus? = null,
 ) {
     val hasFailure: Boolean
-        get() = disabledTill != null || mostRecentFailure != null || initialFailure != null
+        get() = status == IndexerHealthStatus.Failing || disabledTill != null || mostRecentFailure != null || initialFailure != null
+
+    val health: IndexerHealthStatus
+        get() = if (hasFailure) IndexerHealthStatus.Failing else (status ?: IndexerHealthStatus.Healthy)
 }

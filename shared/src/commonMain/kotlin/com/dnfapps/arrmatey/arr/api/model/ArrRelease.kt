@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalSerializationApi::class)
+
 package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
@@ -5,7 +7,9 @@ import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrRed
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.json.JsonNames
 import kotlin.time.Instant
 
 sealed interface ArrRelease {
@@ -86,7 +90,7 @@ enum class ReleaseProtocol {
     @SerialName("usenet")
     Usenet,
 
-    @SerialName("torrent")
+    @JsonNames("torrent", "TorrentDownloadProtocol")
     Torrent,
 
     @SerialName("SoulseekDownloadProtocol")
