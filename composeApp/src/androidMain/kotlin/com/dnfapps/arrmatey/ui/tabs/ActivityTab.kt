@@ -1,7 +1,10 @@
 package com.dnfapps.arrmatey.ui.tabs
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,8 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -48,6 +54,8 @@ import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
+import com.dnfapps.arrmatey.ui.components.downloads.DownloadSelectionActionItem
+import com.dnfapps.arrmatey.ui.components.downloads.DownloadSelectionTopBar
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
@@ -65,6 +73,10 @@ import com.dnfapps.arrmatey.ui.tabs.activity.DownloadedTabContent
 import com.dnfapps.arrmatey.ui.tabs.activity.HistoryTabContent
 import com.dnfapps.arrmatey.ui.tabs.activity.WantedTabContent
 import com.dnfapps.arrmatey.utils.mokoString
+import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
+import com.skydoves.flexible.core.FlexibleSheetSize
+import com.skydoves.flexible.core.FlexibleSheetValue
+import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -184,6 +196,14 @@ fun ActivityHomeScreen(
     val hasCutoffLoaded by viewModel.hasCutoffLoaded.collectAsStateWithLifecycle()
     val useColoredCards by preferences.useColoredActivityCards.collectAsStateWithLifecycle(false)
 
+    val isInSelectionMode by viewModel.selectionState.isInSelectionMode.collectAsStateWithLifecycle()
+    val selectionCount by viewModel.selectionState.selectionCount.collectAsStateWithLifecycle()
+    val selectedItems by viewModel.selectionState.selectedItems.collectAsStateWithLifecycle()
+
+    BackHandler(enabled = isInSelectionMode && uiState.selectedTab == ActivityTabSegment.Activity) {
+        viewModel.exitSelectionMode()
+    }
+
     val historyListState = rememberLazyListState()
     val downloadedListState = rememberLazyListState()
     val blocklistListState = rememberLazyListState()
@@ -231,52 +251,67 @@ fun ActivityHomeScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            val searchPlaceholder =
-                when (uiState.selectedTab) {
-                    ActivityTabSegment.Activity -> mokoString(MR.strings.activity)
-                    ActivityTabSegment.History -> mokoString(MR.strings.history)
-                    ActivityTabSegment.Downloaded -> mokoString(MR.strings.recently_downloaded)
-                    ActivityTabSegment.Blocklist -> mokoString(MR.strings.blocklist)
-                    ActivityTabSegment.Missing -> mokoString(MR.strings.missing)
-                    ActivityTabSegment.CutoffUnmet -> mokoString(MR.strings.cutoff_unmet)
-                }
-
-            ArrAppBarWithSearch(
-                textFieldState = textFieldState,
-                searchPlaceholder = searchPlaceholder,
-                navigationIcon = {
-                    if (onBack != null) {
-                        BackButton(onClick = onBack)
-                    } else if (!wideRailIsVisible) {
-                        NavigationDrawerButton()
+            if (isInSelectionMode && uiState.selectedTab == ActivityTabSegment.Activity) {
+                DownloadSelectionTopBar(
+                    count = selectionCount,
+                    onClose = { viewModel.exitSelectionMode() },
+                    onSelectAll = {
+                        if (viewModel.areAllItemsSelected()) {
+                            viewModel.clearSelection()
+                        } else {
+                            viewModel.selectAllItems()
+                        }
+                    },
+                    isAllSelected = viewModel.areAllItemsSelected(),
+                )
+            } else {
+                val searchPlaceholder =
+                    when (uiState.selectedTab) {
+                        ActivityTabSegment.Activity -> mokoString(MR.strings.activity)
+                        ActivityTabSegment.History -> mokoString(MR.strings.history)
+                        ActivityTabSegment.Downloaded -> mokoString(MR.strings.recently_downloaded)
+                        ActivityTabSegment.Blocklist -> mokoString(MR.strings.blocklist)
+                        ActivityTabSegment.Missing -> mokoString(MR.strings.missing)
+                        ActivityTabSegment.CutoffUnmet -> mokoString(MR.strings.cutoff_unmet)
                     }
-                },
-                actions = {
-                    ActivityFilterMenu(
-                        instances = instances,
-                        selectedTab = uiState.selectedTab,
-                        selectedInstanceId = uiState.instanceId,
-                        onInstanceChange = { viewModel.setInstanceId(it) },
-                        sortBy = uiState.sortBy,
-                        onSortByChanged = { viewModel.setSortBy(it) },
-                        sortOrder = uiState.sortOrder,
-                        onSortOrderChanged = { viewModel.setSortOrder(it) },
-                        selectedHistoryInstanceId = uiState.historyInstanceId,
-                        onHistoryInstanceChange = { viewModel.setHistoryInstanceId(it) },
-                        historyStateFilter = uiState.historyStateFilter,
-                        onHistoryStateFilterChanged = { viewModel.setHistoryStateFilter(it) },
-                        selectedDownloadedInstanceId = uiState.downloadedInstanceId,
-                        onDownloadedInstanceChange = { viewModel.setDownloadedInstanceId(it) },
-                        selectedBlocklistInstanceId = uiState.blocklistInstanceId,
-                        onBlocklistInstanceChange = { viewModel.setBlocklistInstanceId(it) },
-                        selectedMissingInstanceId = uiState.missingInstanceId,
-                        onMissingInstanceChange = { viewModel.setMissingInstanceId(it) },
-                        selectedCutoffInstanceId = uiState.cutoffInstanceId,
-                        onCutoffInstanceChange = { viewModel.setCutoffInstanceId(it) },
-                        onOpenViewCustomization = { showActivityCustomizationSheet = true },
-                    )
-                },
-            )
+
+                ArrAppBarWithSearch(
+                    textFieldState = textFieldState,
+                    searchPlaceholder = searchPlaceholder,
+                    navigationIcon = {
+                        if (onBack != null) {
+                            BackButton(onClick = onBack)
+                        } else if (!wideRailIsVisible) {
+                            NavigationDrawerButton()
+                        }
+                    },
+                    actions = {
+                        ActivityFilterMenu(
+                            instances = instances,
+                            selectedTab = uiState.selectedTab,
+                            selectedInstanceId = uiState.instanceId,
+                            onInstanceChange = { viewModel.setInstanceId(it) },
+                            sortBy = uiState.sortBy,
+                            onSortByChanged = { viewModel.setSortBy(it) },
+                            sortOrder = uiState.sortOrder,
+                            onSortOrderChanged = { viewModel.setSortOrder(it) },
+                            selectedHistoryInstanceId = uiState.historyInstanceId,
+                            onHistoryInstanceChange = { viewModel.setHistoryInstanceId(it) },
+                            historyStateFilter = uiState.historyStateFilter,
+                            onHistoryStateFilterChanged = { viewModel.setHistoryStateFilter(it) },
+                            selectedDownloadedInstanceId = uiState.downloadedInstanceId,
+                            onDownloadedInstanceChange = { viewModel.setDownloadedInstanceId(it) },
+                            selectedBlocklistInstanceId = uiState.blocklistInstanceId,
+                            onBlocklistInstanceChange = { viewModel.setBlocklistInstanceId(it) },
+                            selectedMissingInstanceId = uiState.missingInstanceId,
+                            onMissingInstanceChange = { viewModel.setMissingInstanceId(it) },
+                            selectedCutoffInstanceId = uiState.cutoffInstanceId,
+                            onCutoffInstanceChange = { viewModel.setCutoffInstanceId(it) },
+                            onOpenViewCustomization = { showActivityCustomizationSheet = true },
+                        )
+                    },
+                )
+            }
         },
         contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
@@ -319,8 +354,15 @@ fun ActivityHomeScreen(
                             isLoading = isLoading,
                             hasLoaded = hasLoaded,
                             useColoredCards = useColoredCards,
+                            isInSelectionMode = isInSelectionMode,
+                            selectedItemKeys = selectedItems,
                             onRefresh = { viewModel.refreshActivity() },
                             onSelectItem = { selectedItem = it },
+                            onToggleSelection = { viewModel.toggleItemSelection(it.selectionKey) },
+                            onLongClickItem = {
+                                viewModel.toggleItemSelection(it.selectionKey)
+                                viewModel.enterSelectionMode()
+                            },
                         )
                     }
 
@@ -395,7 +437,7 @@ fun ActivityHomeScreen(
                     }
                 }
 
-                if (!showConfirmRemove) {
+                if (!showConfirmRemove && !isInSelectionMode) {
                     selectedItem?.let { item ->
                         QueueItemInfoSheet(
                             item = item,
@@ -405,7 +447,7 @@ fun ActivityHomeScreen(
                     }
                 }
 
-                if (showConfirmRemove && selectedItem != null) {
+                if (showConfirmRemove && (selectedItem != null || (isInSelectionMode && selectedItems.isNotEmpty()))) {
                     ConfirmDeleteItemSheet(
                         onDismiss = {
                             showConfirmRemove = false
@@ -413,7 +455,13 @@ fun ActivityHomeScreen(
                         },
                         deleteInProgress = removeItemStatus is OperationStatus.InProgress,
                         onDelete = { clientRemove, blocklist, skipRedownload ->
-                            viewModel.removeQueueItem(selectedItem!!, clientRemove, blocklist, skipRedownload)
+                            if (isInSelectionMode) {
+                                viewModel.removeSelectedQueueItems(clientRemove, blocklist, skipRedownload)
+                            } else {
+                                selectedItem?.let {
+                                    viewModel.removeQueueItem(it, clientRemove, blocklist, skipRedownload)
+                                }
+                            }
                         },
                     )
                 }
@@ -434,6 +482,41 @@ fun ActivityHomeScreen(
                             ?.takeIf { id -> supportedInstances.any { it.id == id } },
                         onDismiss = { showManualImportSheet = false },
                         onSuccess = { viewModel.refresh() },
+                    )
+                }
+            }
+        }
+
+        if (isInSelectionMode && uiState.selectedTab == ActivityTabSegment.Activity) {
+            FlexibleBottomSheet(
+                onDismissRequest = { viewModel.exitSelectionMode() },
+                sheetState =
+                rememberFlexibleBottomSheetState(
+                    isModal = false,
+                    initialValue = FlexibleSheetValue.IntermediatelyExpanded,
+                    flexibleSheetSize =
+                    FlexibleSheetSize(
+                        fullyExpanded = FlexibleSheetSize.WrapContent,
+                        intermediatelyExpanded = 0.15f,
+                        slightlyExpanded = 0.15f,
+                    ),
+                ),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ) {
+                Row(
+                    modifier =
+                    Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 24.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    DownloadSelectionActionItem(
+                        icon = Icons.Default.Delete,
+                        label = mokoString(MR.strings.remove),
+                        onClick = { showConfirmRemove = true },
+                        enabled = selectionCount > 0,
+                        isError = true,
                     )
                 }
             }

@@ -41,11 +41,14 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.asSuccess
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -131,6 +134,8 @@ class ActivityQueueViewModel(
 
     private val _removeItemState = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val removeItemState: StateFlow<OperationStatus> = _removeItemState.asStateFlow()
+
+    val selectionState = MultiSelectState<String>()
 
     val queueItems: StateFlow<List<QueueItem>> =
         combine(
@@ -533,6 +538,9 @@ class ActivityQueueViewModel(
     }
 
     fun setSelectedTab(tab: ActivityTabSegment) {
+        if (tab != ActivityTabSegment.Activity) {
+            selectionState.exitSelectionMode()
+        }
         val currentState = _activityQueueUiState.value
         _activityQueueUiState.value = currentState.copy(selectedTab = tab)
         if (tab == ActivityTabSegment.Downloaded) {
@@ -836,6 +844,32 @@ class ActivityQueueViewModel(
         }
     }
 
+    fun toggleItemSelection(key: String) {
+        selectionState.toggle(key)
+    }
+
+    fun selectAllItems() {
+        val allKeys = queueItems.value.map { it.selectionKey }
+        selectionState.selectAll(allKeys)
+    }
+
+    fun clearSelection() {
+        selectionState.clearSelection()
+    }
+
+    fun enterSelectionMode() {
+        selectionState.enterSelectionMode()
+    }
+
+    fun exitSelectionMode() {
+        selectionState.exitSelectionMode()
+    }
+
+    fun areAllItemsSelected(): Boolean {
+        val allKeys = queueItems.value.map { it.selectionKey }
+        return allKeys.isNotEmpty() && selectionState.selectedItems.value.containsAll(allKeys)
+    }
+
     fun removeQueueItem(
         item: QueueItem,
         removeFromClient: Boolean,
@@ -847,13 +881,74 @@ class ActivityQueueViewModel(
                 .collect { state ->
                     _removeItemState.value = state
                     if (state is OperationStatus.Success) {
-                        activityQueueService.removeTaskLocally(item.id)
+                        activityQueueService.removeTaskLocally(item.id, item.instanceId)
                         if (addToBlocklist) {
                             launch { activityQueueService.refreshBlocklist() }
                         }
                         launch { activityQueueService.refreshActivity() }
                     }
                 }
+        }
+    }
+
+    fun removeSelectedQueueItems(
+        removeFromClient: Boolean,
+        addToBlocklist: Boolean,
+        skipRedownload: Boolean,
+    ) {
+        val selectedKeys = selectionState.selectedItems.value
+        if (selectedKeys.isEmpty()) return
+
+        val itemsByKey = queueItems.value.associateBy { it.selectionKey }
+        val itemsToDelete = selectedKeys.mapNotNull { itemsByKey[it] }
+        if (itemsToDelete.isEmpty()) {
+            selectionState.exitSelectionMode()
+            return
+        }
+
+        removeQueueItems(itemsToDelete, removeFromClient, addToBlocklist, skipRedownload)
+    }
+
+    fun removeQueueItems(
+        items: Collection<QueueItem>,
+        removeFromClient: Boolean,
+        addToBlocklist: Boolean,
+        skipRedownload: Boolean,
+    ) {
+        if (items.isEmpty()) return
+        viewModelScope.launch {
+            _removeItemState.value = OperationStatus.InProgress
+            var hasError = false
+            var errorMessage: String? = null
+
+            coroutineScope {
+                items.forEach { item ->
+                    launch {
+                        deleteQueueItemUseCase(item, removeFromClient, addToBlocklist, skipRedownload)
+                            .collect { state ->
+                                if (state is OperationStatus.Error) {
+                                    hasError = true
+                                    errorMessage = state.message
+                                }
+                            }
+                    }
+                }
+            }
+
+            activityQueueService.removeTasksLocally(items)
+            if (addToBlocklist) {
+                launch { activityQueueService.refreshBlocklist() }
+            }
+            launch { activityQueueService.refreshActivity() }
+
+            if (hasError) {
+                _removeItemState.value = OperationStatus.Error(message = errorMessage ?: "Failed to remove some queue items")
+            } else {
+                _removeItemState.value = OperationStatus.Success("Queue items removed successfully")
+            }
+            delay(100)
+            _removeItemState.value = OperationStatus.Idle
+            selectionState.exitSelectionMode()
         }
     }
 

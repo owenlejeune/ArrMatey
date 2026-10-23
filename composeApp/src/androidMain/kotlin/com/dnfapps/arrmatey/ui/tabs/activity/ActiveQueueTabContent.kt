@@ -30,8 +30,12 @@ fun ActiveQueueTabContent(
     isLoading: Boolean,
     hasLoaded: Boolean,
     useColoredCards: Boolean,
+    isInSelectionMode: Boolean = false,
+    selectedItemKeys: Set<String> = emptySet(),
     onRefresh: () -> Unit,
     onSelectItem: (QueueItem) -> Unit,
+    onToggleSelection: (QueueItem) -> Unit = {},
+    onLongClickItem: (QueueItem) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     if (instances.isNotEmpty() && (!hasLoaded || (queueItems.isEmpty() && isLoading))) {
@@ -64,13 +68,25 @@ fun ActiveQueueTabContent(
                         bottom = 16.dp + LocalFloatingBarBottomPadding.current,
                     ),
                 ) {
-                    items(items = queueItems) { item ->
+                    items(
+                        items = queueItems,
+                        key = { it.selectionKey },
+                    ) { item ->
+                        val isSelected = selectedItemKeys.contains(item.selectionKey)
                         ActivityItem(
                             item = item,
                             useFullColorCards = useColoredCards,
-                        ) {
-                            onSelectItem(item)
-                        }
+                            isInSelectionMode = isInSelectionMode,
+                            isSelected = isSelected,
+                            onLongClick = { onLongClickItem(item) },
+                            onClick = {
+                                if (isInSelectionMode) {
+                                    onToggleSelection(item)
+                                } else {
+                                    onSelectItem(item)
+                                }
+                            },
+                        )
                     }
                 }
             }

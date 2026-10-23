@@ -37,6 +37,9 @@ class ActivityQueueViewModelS: ObservableObject {
     @Published private(set) var removeInProgress: Bool = false
     @Published private(set) var removeSuccesss: Bool = false
     @Published private(set) var useColoredCards: Bool = false
+    @Published private(set) var isInSelectionMode: Bool = false
+    @Published private(set) var selectionCount: Int32 = 0
+    @Published private(set) var selectedItems: Set<String> = []
 
     init() {
         self.viewModel = KoinBridge.shared.getActivityQueueViewModel()
@@ -92,6 +95,15 @@ class ActivityQueueViewModelS: ObservableObject {
         }
         preferencesStore.useColoredActivityCards.observeAsync(on: self) { owner, val in
             owner.useColoredCards = val.boolValue
+        }
+        viewModel.selectionState.isInSelectionMode.observeAsync(on: self) { owner, isInSelectionMode in
+            owner.isInSelectionMode = isInSelectionMode.boolValue
+        }
+        viewModel.selectionState.selectionCount.observeAsync(on: self) { owner, count in
+            owner.selectionCount = count.int32Value
+        }
+        viewModel.selectionState.selectedItems.observeAsync(on: self) { owner, items in
+            owner.selectedItems = Set(items.compactMap { $0 as? String })
         }
     }
 
@@ -256,6 +268,34 @@ class ActivityQueueViewModelS: ObservableObject {
 
     func removeQueueItem(_ item: QueueItem, _ removeFromClient: Bool, _ addToBlocklist: Bool, _ skipRedownload: Bool) {
         viewModel.removeQueueItem(item: item, removeFromClient: removeFromClient, addToBlocklist: addToBlocklist, skipRedownload: skipRedownload)
+    }
+
+    func toggleItemSelection(_ key: String) {
+        viewModel.toggleItemSelection(key: key)
+    }
+
+    func selectAllItems() {
+        viewModel.selectAllItems()
+    }
+
+    func clearSelection() {
+        viewModel.clearSelection()
+    }
+
+    func enterSelectionMode() {
+        viewModel.enterSelectionMode()
+    }
+
+    func exitSelectionMode() {
+        viewModel.exitSelectionMode()
+    }
+
+    func areAllItemsSelected() -> Bool {
+        return viewModel.areAllItemsSelected()
+    }
+
+    func removeSelectedQueueItems(removeFromClient: Bool, addToBlocklist: Bool, skipRedownload: Bool) {
+        viewModel.removeSelectedQueueItems(removeFromClient: removeFromClient, addToBlocklist: addToBlocklist, skipRedownload: skipRedownload)
     }
 
     func refresh() {

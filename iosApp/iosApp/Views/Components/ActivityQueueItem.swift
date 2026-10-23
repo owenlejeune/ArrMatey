@@ -12,6 +12,7 @@ struct ActivityQueueItem: View {
     let item: QueueItem
     var useFullColorCards: Bool = false
     let onClick: () -> Void
+    var onLongClick: (() -> Void)? = nil
     
     private var statusText: String {
         var text = item.statusLabel
@@ -61,52 +62,67 @@ struct ActivityQueueItem: View {
         }
     }
 
-    var body: some View {
-        Button(action: onClick) {
-            HStack(spacing: 0) {
-                if !useFullColorCards {
-                    Rectangle()
-                        .fill(item.hasIssue ? Color.red : associatedColor)
-                        .frame(width: 5)
-                }
-
-                HStack(alignment: .center, spacing: 10) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(item.titleLabel)
-                            .font(.body.weight(.medium))
-                            .foregroundStyle(contentColor)
-                            .lineLimit(2)
-                        
-                        Text(statusText)
-                            .font(.subheadline)
-                            .foregroundStyle(secondaryContentColor)
-                        
-                        if let instanceName = item.instanceName, !instanceName.isEmpty {
-                            Text(instanceName)
-                                .font(.caption2.weight(.medium))
-                                .foregroundStyle(useFullColorCards ? Color.black.opacity(0.6) : Color.secondary)
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    if item.hasIssue {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(contentColor)
-                            .font(.title3)
-                    }
-                }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
+    private var cardContent: some View {
+        HStack(spacing: 0) {
+            if !useFullColorCards {
+                Rectangle()
+                    .fill(item.hasIssue ? Color.red : associatedColor)
+                    .frame(width: 5)
             }
-            .background(backgroundColor)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(item.hasIssue ? Color.red.opacity(0.3) : (useFullColorCards ? Color.clear : Color.primary.opacity(0.06)), lineWidth: 0.5)
-            )
+
+            HStack(alignment: .center, spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(item.titleLabel)
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(contentColor)
+                        .lineLimit(2)
+                    
+                    Text(statusText)
+                        .font(.subheadline)
+                        .foregroundStyle(secondaryContentColor)
+                    
+                    if let instanceName = item.instanceName, !instanceName.isEmpty {
+                        Text(instanceName)
+                            .font(.caption2.weight(.medium))
+                            .foregroundStyle(useFullColorCards ? Color.black.opacity(0.6) : Color.secondary)
+                    }
+                }
+                
+                Spacer()
+                
+                if item.hasIssue {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(contentColor)
+                        .font(.title3)
+                }
+            }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
         }
-        .buttonStyle(.plain)
+        .background(backgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(item.hasIssue ? Color.red.opacity(0.3) : (useFullColorCards ? Color.clear : Color.primary.opacity(0.06)), lineWidth: 0.5)
+        )
+    }
+
+    var body: some View {
+        if let onLongClick = onLongClick {
+            cardContent
+                .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .onTapGesture {
+                    onClick()
+                }
+                .onLongPressGesture {
+                    onLongClick()
+                }
+        } else {
+            Button(action: onClick) {
+                cardContent
+            }
+            .buttonStyle(.plain)
+        }
     }
 }
 

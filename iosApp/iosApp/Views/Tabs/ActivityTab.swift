@@ -23,8 +23,12 @@ struct ActivityTabContent: View {
     @State private var selectedItem: IdentifiableQueueItem? = nil
     @State private var showActivityCustomizationSheet = false
     @State private var showManualImportSheet = false
+    @State private var showBulkRemoveConfirm = false
 
     private var titleText: String {
+        if viewModel.uiState.selectedTab == .activity && viewModel.isInSelectionMode {
+            return MR.plurals().selected_count.localized(viewModel.selectionCount)
+        }
         switch viewModel.uiState.selectedTab {
         case .activity:
             guard !viewModel.queueItems.isEmpty else { return MR.strings().activity.localized() }
@@ -108,11 +112,20 @@ struct ActivityTabContent: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            topTabsRow
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                topTabsRow
 
-            tabContent
+                tabContent
+            }
+
+            if viewModel.uiState.selectedTab == .activity && viewModel.isInSelectionMode {
+                selectionBottomBar
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(1)
+            }
         }
+        .animation(.easeInOut(duration: 0.25), value: viewModel.isInSelectionMode)
         .navigationTitle(titleText)
         .navigationBarTitleDisplayMode(.inline)
         .searchable(
@@ -123,60 +136,85 @@ struct ActivityTabContent: View {
             prompt: MR.strings().search.localized()
         )
         .toolbar {
-            if navigationManager.shouldShowDrawerButton(for: TabItemStandard.activity.key) {
+            if viewModel.uiState.selectedTab == .activity && viewModel.isInSelectionMode {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        navigationManager.showLauncher = true
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
+                    Button(MR.strings().close.localized()) {
+                        viewModel.exitSelectionMode()
                     }
                 }
-            }
 
-            ToolbarItem(placement: .primaryAction) {
-                ActivityFilterMenu(
-                    selectedTab: viewModel.uiState.selectedTab,
-                    sortBy: Binding(
-                        get: { viewModel.uiState.sortBy },
-                        set: { viewModel.setSortBy($0) }
-                    ),
-                    sortOrder: Binding(
-                        get: { viewModel.uiState.sortOrder },
-                        set: { viewModel.setSortOrder($0) }
-                    ),
-                    instanceId: Binding(
-                        get: { viewModel.uiState.instanceId?.int64Value },
-                        set: { viewModel.setInstanceId($0) }
-                    ),
-                    historyInstanceId: Binding(
-                        get: { viewModel.uiState.historyInstanceId?.int64Value },
-                        set: { viewModel.setHistoryInstanceId($0) }
-                    ),
-                    historyStateFilter: Binding(
-                        get: { viewModel.uiState.historyStateFilter },
-                        set: { viewModel.setHistoryStateFilter($0) }
-                    ),
-                    downloadedInstanceId: Binding(
-                        get: { viewModel.uiState.downloadedInstanceId?.int64Value },
-                        set: { viewModel.setDownloadedInstanceId($0) }
-                    ),
-                    blocklistInstanceId: Binding(
-                        get: { viewModel.uiState.blocklistInstanceId?.int64Value },
-                        set: { viewModel.setBlocklistInstanceId($0) }
-                    ),
-                    missingInstanceId: Binding(
-                        get: { viewModel.uiState.missingInstanceId?.int64Value },
-                        set: { viewModel.setMissingInstanceId($0) }
-                    ),
-                    cutoffInstanceId: Binding(
-                        get: { viewModel.uiState.cutoffInstanceId?.int64Value },
-                        set: { viewModel.setCutoffInstanceId($0) }
-                    ),
-                    instances: viewModel.instances,
-                    onOpenViewCustomization: {
-                        showActivityCustomizationSheet = true
+                ToolbarItem(placement: .principal) {
+                    Text(MR.plurals().selected_count.localized(viewModel.selectionCount))
+                        .font(.headline)
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        if viewModel.areAllItemsSelected() {
+                            viewModel.clearSelection()
+                        } else {
+                            viewModel.selectAllItems()
+                        }
+                    }) {
+                        Image(systemName: viewModel.areAllItemsSelected() ? "checkmark.circle.fill" : "circle")
                     }
-                )
+                }
+            } else {
+                if navigationManager.shouldShowDrawerButton(for: TabItemStandard.activity.key) {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            navigationManager.showLauncher = true
+                        } label: {
+                            Image(systemName: "line.3.horizontal")
+                        }
+                    }
+                }
+
+                ToolbarItem(placement: .primaryAction) {
+                    ActivityFilterMenu(
+                        selectedTab: viewModel.uiState.selectedTab,
+                        sortBy: Binding(
+                            get: { viewModel.uiState.sortBy },
+                            set: { viewModel.setSortBy($0) }
+                        ),
+                        sortOrder: Binding(
+                            get: { viewModel.uiState.sortOrder },
+                            set: { viewModel.setSortOrder($0) }
+                        ),
+                        instanceId: Binding(
+                            get: { viewModel.uiState.instanceId?.int64Value },
+                            set: { viewModel.setInstanceId($0) }
+                        ),
+                        historyInstanceId: Binding(
+                            get: { viewModel.uiState.historyInstanceId?.int64Value },
+                            set: { viewModel.setHistoryInstanceId($0) }
+                        ),
+                        historyStateFilter: Binding(
+                            get: { viewModel.uiState.historyStateFilter },
+                            set: { viewModel.setHistoryStateFilter($0) }
+                        ),
+                        downloadedInstanceId: Binding(
+                            get: { viewModel.uiState.downloadedInstanceId?.int64Value },
+                            set: { viewModel.setDownloadedInstanceId($0) }
+                        ),
+                        blocklistInstanceId: Binding(
+                            get: { viewModel.uiState.blocklistInstanceId?.int64Value },
+                            set: { viewModel.setBlocklistInstanceId($0) }
+                        ),
+                        missingInstanceId: Binding(
+                            get: { viewModel.uiState.missingInstanceId?.int64Value },
+                            set: { viewModel.setMissingInstanceId($0) }
+                        ),
+                        cutoffInstanceId: Binding(
+                            get: { viewModel.uiState.cutoffInstanceId?.int64Value },
+                            set: { viewModel.setCutoffInstanceId($0) }
+                        ),
+                        instances: viewModel.instances,
+                        onOpenViewCustomization: {
+                            showActivityCustomizationSheet = true
+                        }
+                    )
+                }
             }
         }
         .sheet(isPresented: $showActivityCustomizationSheet) {
@@ -206,15 +244,61 @@ struct ActivityTabContent: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showBulkRemoveConfirm) {
+            let selectedQueueItems = viewModel.queueItems.filter { viewModel.selectedItems.contains($0.selectionKey) }
+            let showBlocklist = !selectedQueueItems.allSatisfy { $0.type == .kapowarr }
+            NavigationStack {
+                RemoveQueueItemView(
+                    deleteInProgress: viewModel.removeInProgress,
+                    showBlocklist: showBlocklist,
+                    onDelete: { remove, block, skip in
+                        viewModel.removeSelectedQueueItems(
+                            removeFromClient: remove,
+                            addToBlocklist: block,
+                            skipRedownload: skip
+                        )
+                    }
+                )
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(MR.strings().cancel.localized()) {
+                            showBulkRemoveConfirm = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
         .refreshable {
             viewModel.refresh()
         }
         .onChange(of: viewModel.removeSuccesss) { _, newValue in
             if newValue {
                 selectedItem = nil
+                showBulkRemoveConfirm = false
                 viewModel.refresh()
             }
         }
+    }
+
+    private var selectionBottomBar: some View {
+        HStack {
+            Spacer()
+            Button(role: .destructive, action: {
+                showBulkRemoveConfirm = true
+            }) {
+                Label(MR.strings().remove.localized(), systemImage: "trash")
+            }
+            .foregroundStyle(.red)
+            .disabled(viewModel.selectionCount == 0)
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .floatingCapsuleBackground(material: .regularMaterial)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 20)
     }
 
     @ViewBuilder
@@ -259,27 +343,49 @@ struct ActivityTabContent: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             List {
-                ForEach(viewModel.queueItems, id: \.id) { item in
-                    ActivityQueueItem(
-                        item: item,
-                        useFullColorCards: viewModel.useColoredCards,
-                        onClick: {
-                            selectedItem = IdentifiableQueueItem(item: item)
+                ForEach(viewModel.queueItems, id: \.selectionKey) { item in
+                    let isSelected = viewModel.selectedItems.contains(item.selectionKey)
+                    HStack(spacing: 12) {
+                        if viewModel.isInSelectionMode {
+                            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                .foregroundColor(isSelected ? .themePrimary : .secondary)
+                                .onTapGesture {
+                                    viewModel.toggleItemSelection(item.selectionKey)
+                                }
                         }
-                    )
+
+                        ActivityQueueItem(
+                            item: item,
+                            useFullColorCards: viewModel.useColoredCards,
+                            onClick: {
+                                if viewModel.isInSelectionMode {
+                                    viewModel.toggleItemSelection(item.selectionKey)
+                                } else {
+                                    selectedItem = IdentifiableQueueItem(item: item)
+                                }
+                            },
+                            onLongClick: {
+                                viewModel.toggleItemSelection(item.selectionKey)
+                                viewModel.enterSelectionMode()
+                            }
+                        )
+                    }
                     .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            selectedItem = IdentifiableQueueItem(item: item)
-                        } label: {
-                            Label(MR.strings().delete.localized(), systemImage: "trash.fill")
+                        if !viewModel.isInSelectionMode {
+                            Button(role: .destructive) {
+                                selectedItem = IdentifiableQueueItem(item: item)
+                            } label: {
+                                Label(MR.strings().delete.localized(), systemImage: "trash.fill")
+                            }
                         }
                     }
                 }
             }
             .listStyle(.plain)
+            .padding(.bottom, viewModel.isInSelectionMode ? 60 : 0)
         }
     }
 

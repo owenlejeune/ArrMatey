@@ -58,6 +58,9 @@ sealed interface QueueItem {
     val taskGroup: String
         get() = (downloadId ?: "") + (title ?: "") + size
 
+    val selectionKey: String
+        get() = "${instanceId ?: 0}:$id"
+
     val statusLabel: String
         get() =
             when (status) {

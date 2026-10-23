@@ -131,8 +131,23 @@ class ActivityQueueService(
         pollingJob = null
     }
 
-    fun removeTaskLocally(taskId: Int) {
-        _allActivityTasks.value = _allActivityTasks.value.filter { it.id != taskId }
+    fun removeTaskLocally(taskId: Int, instanceId: Long? = null) {
+        _allActivityTasks.value = _allActivityTasks.value.filter {
+            if (instanceId != null) {
+                !(it.id == taskId && it.instanceId == instanceId)
+            } else {
+                it.id != taskId
+            }
+        }
+        val issueCount = _allActivityTasks.value.groupByTask().count { task -> task.hasIssue }
+        _tasksWithIssues.value = issueCount
+    }
+
+    fun removeTasksLocally(items: Collection<QueueItem>) {
+        val toRemove = items.map { (it.instanceId ?: 0L) to it.id }.toSet()
+        _allActivityTasks.value = _allActivityTasks.value.filter {
+            ((it.instanceId ?: 0L) to it.id) !in toRemove
+        }
         val issueCount = _allActivityTasks.value.groupByTask().count { task -> task.hasIssue }
         _tasksWithIssues.value = issueCount
     }
