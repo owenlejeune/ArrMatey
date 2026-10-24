@@ -29,25 +29,27 @@ class BackupViewModel(
     val importUiState: StateFlow<ImportUiState> = _importUiState.asStateFlow()
 
     init {
-        loadExportableData()
+        viewModelScope.launch { loadExportableData() }
     }
 
-    private fun loadExportableData() {
-        viewModelScope.launch {
-            val instances = instanceDao.getAllInstances()
-            val downloadClients = downloadClientDao.getAllDownloadClients()
-            val customWebpages = customWebpageDao.getAllWebpagesList()
-            _exportUiState.update {
-                it.copy(
-                    instances = instances,
-                    downloadClients = downloadClients,
-                    customWebpages = customWebpages,
-                    selectedInstanceIds = instances.map { i -> i.id }.toSet(),
-                    selectedDownloadClientIds = downloadClients.map { c -> c.id }.toSet(),
-                    selectedCustomWebpageIds = customWebpages.map { w -> w.id }.toSet(),
-                )
-            }
+    private suspend fun loadExportableData() {
+        val instances = instanceDao.getAllInstances()
+        val downloadClients = downloadClientDao.getAllDownloadClients()
+        val customWebpages = customWebpageDao.getAllWebpagesList()
+        _exportUiState.update {
+            it.copy(
+                instances = instances,
+                downloadClients = downloadClients,
+                customWebpages = customWebpages,
+                selectedInstanceIds = instances.map { i -> i.id }.toSet(),
+                selectedDownloadClientIds = downloadClients.map { c -> c.id }.toSet(),
+                selectedCustomWebpageIds = customWebpages.map { w -> w.id }.toSet(),
+            )
         }
+    }
+
+    fun resetImportState() {
+        _importUiState.value = ImportUiState()
     }
 
     fun toggleInstanceSelection(id: Long) {
@@ -125,6 +127,15 @@ class BackupViewModel(
         val password = _importUiState.value.password
         if (password.isBlank()) return
 
+        _importUiState.update {
+            it.copy(
+                decryptedBackup = null,
+                selectedInstanceIndices = emptySet(),
+                selectedDownloadClientIndices = emptySet(),
+                selectedCustomWebpageIndices = emptySet(),
+                error = null,
+            )
+        }
         viewModelScope.launch {
             try {
                 val backup = importDataUseCase.decryptBackup(encryptedData, password)
@@ -194,7 +205,8 @@ class BackupViewModel(
                 importUiPreferences = state.importUiPreferences,
                 importIntegrationsPreferences = state.importIntegrationsPreferences,
             )
-            _importUiState.update { it.copy(isImporting = false) }
+            _importUiState.value = ImportUiState()
+            loadExportableData()
             onComplete()
         }
     }

@@ -95,6 +95,7 @@ fun OnboardingScreen(
                             inputStream.readBytes().decodeToString()
                         }
                     if (encryptedData != null) {
+                        backupViewModel.resetImportState()
                         pendingImportData = encryptedData
                         showImportDialog = true
                     }
@@ -271,6 +272,7 @@ fun OnboardingScreen(
             importState = importState,
             onDismiss = {
                 showImportDialog = false
+                backupViewModel.resetImportState()
                 pendingImportData = null
             },
             onPasswordChanged = { backupViewModel.setImportPassword(it) },

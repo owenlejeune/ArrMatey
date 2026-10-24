@@ -76,6 +76,7 @@ struct BackupRestoreSettingsView: View {
                 if url.startAccessingSecurityScopedResource() {
                     defer { url.stopAccessingSecurityScopedResource() }
                     if let data = try? Data(contentsOf: url), let string = String(data: data, encoding: .utf8) {
+                        backupViewModel.resetImportState()
                         self.importData = string
                         // Need a way to trigger ImportSheet from here.
                         // In the original it was in SettingsScreen.
@@ -85,7 +86,9 @@ struct BackupRestoreSettingsView: View {
                 print("Import failed: \(error.localizedDescription)")
             }
         }
-        .sheet(isPresented: Binding(get: { !importData.isEmpty }, set: { if !$0 { importData = "" } })) {
+        .sheet(isPresented: Binding(get: { !importData.isEmpty }, set: { if !$0 { importData = "" } }), onDismiss: {
+            backupViewModel.resetImportState()
+        }) {
             ImportSheet(viewModel: backupViewModel, isPresented: Binding(get: { !importData.isEmpty }, set: { if !$0 { importData = "" } }), encryptedData: importData) {
                 self.importData = ""
                 self.showImportSuccess = true

@@ -21,7 +21,7 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.utils.fakeMokoStrings
-import dev.shivathapaa.logger.api.LoggerFactory
+import com.dnfapps.arrmatey.utils.testLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -41,6 +41,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -49,7 +50,14 @@ import kotlin.time.Duration.Companion.seconds
 
 class GlobalSearchUseCaseTest {
     private val json = Json { ignoreUnknownKeys = true }
-    private val logger = LoggerFactory.get("test")
+    private val logger = testLogger()
+    private val managers = mutableListOf<InstanceManager>()
+
+    @AfterTest
+    fun cleanupManagers() {
+        managers.forEach { it.cleanup() }
+        managers.clear()
+    }
 
     private class FakeInstanceDao(
         initialInstances: List<Instance> = emptyList(),
@@ -222,7 +230,7 @@ class GlobalSearchUseCaseTest {
         val fakeDao = FakeInstanceDao()
         val instanceRepo = InstanceRepository(fakeDao)
         val mockFactory = MockHttpClientFactory(json) { MockEngine { respond("[]", HttpStatusCode.OK) } }
-        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings)
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings).also(managers::add)
 
         val useCase = GlobalSearchUseCase(manager)
         val results = useCase("").toList()
@@ -321,7 +329,7 @@ class GlobalSearchUseCaseTest {
                 }
             }
 
-        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings)
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings).also(managers::add)
         manager.awaitRepos(3)
 
         val useCase = GlobalSearchUseCase(manager)
@@ -339,8 +347,6 @@ class GlobalSearchUseCaseTest {
 
         // Seerr Media results should NOT be present (since both Sonarr and Radarr are configured)
         assertTrue(finalResult.none { it is SearchResult.SeerrMediaResult })
-
-        manager.cleanup()
     }
 
     @Test
@@ -408,7 +414,7 @@ class GlobalSearchUseCaseTest {
                 }
             }
 
-        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings)
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings).also(managers::add)
         manager.awaitRepos(2)
 
         val useCase = GlobalSearchUseCase(manager)
@@ -425,8 +431,6 @@ class GlobalSearchUseCaseTest {
 
         // Seerr Media result present because Radarr is not configured
         assertTrue(finalResult.any { it is SearchResult.SeerrMediaResult && it.title == "Inception" })
-
-        manager.cleanup()
     }
 
     @Test
@@ -457,7 +461,7 @@ class GlobalSearchUseCaseTest {
                 }
             }
 
-        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings)
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings).also(managers::add)
         manager.awaitRepos(1)
 
         val useCase = GlobalSearchUseCase(manager)
@@ -471,7 +475,6 @@ class GlobalSearchUseCaseTest {
 
         // Ktor cancels the engine call asynchronously, so join() can return before the engine sees it.
         withTimeout(5.seconds) { requestCancelled.await() }
-        manager.cleanup()
     }
 
     @Test
@@ -507,7 +510,7 @@ class GlobalSearchUseCaseTest {
                 }
             }
 
-        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings)
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings).also(managers::add)
         manager.awaitRepos(1)
 
         val useCase = GlobalSearchUseCase(manager)
@@ -521,7 +524,5 @@ class GlobalSearchUseCaseTest {
         assertEquals(InstanceType.Chaptarr, chaptarrResult.instanceType)
         assertTrue(chaptarrResult is SearchResult.ArrMediaResult)
         assertEquals(10L, chaptarrResult.instanceId)
-
-        manager.cleanup()
     }
 }
