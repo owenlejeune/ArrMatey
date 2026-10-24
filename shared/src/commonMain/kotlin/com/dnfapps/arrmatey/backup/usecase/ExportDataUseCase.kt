@@ -101,9 +101,11 @@ class ExportDataUseCase(
         val customWebpageExports =
             customWebpages.map { webpage ->
                 CustomWebpageExport(
+                    id = webpage.id,
                     name = webpage.name,
                     url = webpage.url,
                     headers = webpage.headers,
+                    allowSelfSignedCerts = webpage.allowSelfSignedCerts,
                 )
             }
 

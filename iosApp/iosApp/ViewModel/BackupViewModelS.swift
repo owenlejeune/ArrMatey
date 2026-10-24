@@ -61,6 +61,10 @@ class BackupViewModelS: ObservableObject {
     func setImportPassword(password: String) {
         viewModel.setImportPassword(password: password)
     }
+
+    func resetImportState() {
+        viewModel.resetImportState()
+    }
     
     func prepareImport(encryptedData: String) {
         viewModel.prepareImport(encryptedData: encryptedData)

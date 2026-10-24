@@ -2,11 +2,13 @@ package com.dnfapps.arrmatey.backup.usecase
 
 import com.dnfapps.arrmatey.backup.TransportEncryptor
 import com.dnfapps.arrmatey.backup.model.BackupExport
+import com.dnfapps.arrmatey.backup.model.CustomWebpageExport
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.database.dao.CustomWebpageDao
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.datastore.TabPreferences
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -147,21 +149,37 @@ class ImportDataUseCase(
 
         downloadClientDao.ensureFirstSelectedIfNone()
 
+        val existingWebpages = customWebpageDao.getAllWebpagesList().toMutableList()
+        val webpageIdMap = mutableMapOf<Long, Long>()
         backup.customWebpages.forEachIndexed { index, export ->
             if (index in selectedCustomWebpageIndices) {
+                val existing = existingWebpages.firstOrNull { it.name == export.name && it.url == export.url }
                 val webpage =
                     CustomWebpage(
+                        id = existing?.id ?: 0L,
                         name = export.name,
                         url = export.url,
                         headers = export.headers,
+                        allowSelfSignedCerts = export.allowSelfSignedCerts,
                     )
-                customWebpageDao.insert(webpage)
+                val importedId = if (existing == null) {
+                    customWebpageDao.insert(webpage)
+                } else {
+                    customWebpageDao.update(webpage)
+                    existing.id
+                }
+                if (existing == null) existingWebpages += webpage.copy(id = importedId)
+                export.id?.let { webpageIdMap[it] = importedId }
             }
         }
 
         backup.globalPreferences?.let { global ->
             if (importTabPreferences) {
-                global.tabPreferences?.let { preferencesStore.saveTabPreferences(it) }
+                global.tabPreferences?.let {
+                    preferencesStore.saveTabPreferences(
+                        remapCustomWebpageTabPreferences(it, backup.customWebpages, webpageIdMap),
+                    )
+                }
             }
             if (importUiPreferences) {
                 global.useServiceNavLogos?.let { preferencesStore.setUseServiceNavLogos(it) }
@@ -195,4 +213,25 @@ class ImportDataUseCase(
             }
         }
     }
+}
+
+internal fun remapCustomWebpageTabPreferences(
+    preferences: TabPreferences,
+    exportedWebpages: List<CustomWebpageExport>,
+    importedIds: Map<Long, Long>,
+): TabPreferences {
+    val sourceIds = exportedWebpages.mapNotNull { it.id }.toSet()
+    if (sourceIds.isEmpty()) return preferences
+
+    fun remap(keys: List<String>): List<String> = keys.mapNotNull { key ->
+        if (!key.startsWith("webpage_")) return@mapNotNull key
+        val sourceId = key.removePrefix("webpage_").toLongOrNull()
+        sourceId?.let(importedIds::get)?.let { "webpage_$it" }
+    }.distinct()
+
+    return preferences.copy(
+        orderedVisibleKeys = remap(preferences.orderedVisibleKeys),
+        orderedHiddenKeys = remap(preferences.orderedHiddenKeys),
+        orderedRemovedKeys = remap(preferences.orderedRemovedKeys),
+    )
 }

@@ -84,6 +84,7 @@ fun BackupRestoreSettingsScreen(
                             inputStream.readBytes().decodeToString()
                         }
                     if (encryptedData != null) {
+                        backupViewModel.resetImportState()
                         pendingImportData = encryptedData
                         showImportDialog = true
                     }
@@ -173,6 +174,7 @@ fun BackupRestoreSettingsScreen(
                 onDismiss = {
                     showImportDialog = false
                     pendingImportData = null
+                    backupViewModel.resetImportState()
                 },
                 onPasswordChanged = { backupViewModel.setImportPassword(it) },
                 onToggleInstanceSelection = { backupViewModel.toggleImportInstanceSelection(it) },
