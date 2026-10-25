@@ -197,11 +197,11 @@ class ReadarrRepositoryTest {
                     )
                 }
             }
-        val client = com.dnfapps.arrmatey.arr.api.client.BookshelfClient(fakeChaptarrInstance, httpClient)
-        val result = client.getReleases(com.dnfapps.arrmatey.arr.api.model.ReleaseParams.Book(1621))
+        val client = BookshelfClient(fakeChaptarrInstance, httpClient)
+        val result = client.getReleases(ReleaseParams.Book(1621))
 
         assertNotNull(result)
-        val data = (result as com.dnfapps.networking.NetworkResult.Success).data
+        val data = (result as NetworkResult.Success).data
         assertEquals(1, data.size)
         assertEquals("Approved Release", data[0].title)
     }

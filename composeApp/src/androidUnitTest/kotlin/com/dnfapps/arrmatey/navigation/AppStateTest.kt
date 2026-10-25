@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.navigation
 
 import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -56,8 +57,8 @@ class AppStateTest {
     @Test
     fun testAddInstanceSheet() {
         assertNull(appState.addInstanceSheetType.value)
-        appState.openAddInstanceSheet(com.dnfapps.arrmatey.instances.model.InstanceType.Sonarr)
-        assertEquals(com.dnfapps.arrmatey.instances.model.InstanceType.Sonarr, appState.addInstanceSheetType.value)
+        appState.openAddInstanceSheet(InstanceType.Sonarr)
+        assertEquals(InstanceType.Sonarr, appState.addInstanceSheetType.value)
 
         appState.closeAddInstanceSheet()
         assertNull(appState.addInstanceSheetType.value)

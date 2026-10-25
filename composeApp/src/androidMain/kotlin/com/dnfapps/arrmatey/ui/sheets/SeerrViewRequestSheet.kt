@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -292,7 +293,7 @@ private fun AdvancedSection(
                 ),
             ) {
                 if (requestInProgress) {
-                    androidx.compose.material3.CircularProgressIndicator(Modifier.size(24.dp))
+                    CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Text(mokoString(MR.strings.approve_request))
                 }

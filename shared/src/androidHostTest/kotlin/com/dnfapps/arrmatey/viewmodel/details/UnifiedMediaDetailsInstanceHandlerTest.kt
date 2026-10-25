@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.viewmodel.details
 
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
@@ -15,6 +16,7 @@ import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
+import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -42,7 +44,7 @@ class UnifiedMediaDetailsInstanceHandlerTest {
     fun testSetAddSheetTargetInstance() = runTest(UnconfinedTestDispatcher()) {
         val mockRepo = mockk<ArrInstanceRepository>(relaxed = true)
         val mockProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
-        val mockMetadataProfiles = MutableStateFlow<List<com.dnfapps.arrmatey.arr.api.model.MetadataProfile>>(emptyList())
+        val mockMetadataProfiles = MutableStateFlow<List<MetadataProfile>>(emptyList())
         val mockFolders = MutableStateFlow<List<RootFolder>>(emptyList())
         val mockTags = MutableStateFlow<List<Tag>>(emptyList())
 
@@ -89,7 +91,7 @@ class UnifiedMediaDetailsInstanceHandlerTest {
         val mockRepoA = mockk<ArrInstanceRepository>(relaxed = true)
         val mockRepoB = mockk<ArrInstanceRepository>(relaxed = true)
         val mockProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
-        val mockMetadataProfiles = MutableStateFlow<List<com.dnfapps.arrmatey.arr.api.model.MetadataProfile>>(emptyList())
+        val mockMetadataProfiles = MutableStateFlow<List<MetadataProfile>>(emptyList())
         val mockFolders = MutableStateFlow<List<RootFolder>>(emptyList())
         val mockTags = MutableStateFlow<List<Tag>>(emptyList())
 
@@ -147,7 +149,7 @@ class UnifiedMediaDetailsInstanceHandlerTest {
                 ?.id,
         )
 
-        val mockUiState = mockk<com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState.Success>(relaxed = true)
+        val mockUiState = mockk<UnifiedMediaDetailsUiState.Success>(relaxed = true)
         every { mockUiState.availableInstances } returns listOf(instanceA, instanceB)
         every { mockUiState.instancePresences } returns emptyList()
 

@@ -331,7 +331,7 @@ fun EpisodeDetailsScreen(
                                             modifier = Modifier.fillMaxSize(),
                                             contentAlignment = Alignment.Center,
                                         ) {
-                                            androidx.compose.material3.LoadingIndicator()
+                                            LoadingIndicator()
                                         }
                                     }
 

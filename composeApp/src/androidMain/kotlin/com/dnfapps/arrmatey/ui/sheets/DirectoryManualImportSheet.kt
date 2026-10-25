@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
 import com.dnfapps.arrmatey.arr.api.model.ManualImportMode
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -74,7 +75,7 @@ fun DirectoryManualImportSheet(
     var showFilesystemBrowser by remember { mutableStateOf(false) }
     var isWorking by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var scannedFiles by remember { mutableStateOf<List<com.dnfapps.arrmatey.arr.api.model.ManualImportFile>?>(null) }
+    var scannedFiles by remember { mutableStateOf<List<ManualImportFile>?>(null) }
 
     val selectedInstance = instances.firstOrNull { it.id == selectedInstanceId }
 

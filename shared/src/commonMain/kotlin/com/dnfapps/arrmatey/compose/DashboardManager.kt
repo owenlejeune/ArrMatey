@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
 class DashboardManager(
     private val preferencesStore: PreferencesStore,
@@ -79,7 +80,7 @@ class DashboardManager(
     }
 }
 
-@kotlinx.serialization.Serializable
+@Serializable
 enum class DashboardCardService(
     val title: StringResource,
 ) {
@@ -97,7 +98,7 @@ enum class DashboardCardService(
         get() = DashboardCards.entries.filter { it.service == this }
 }
 
-@kotlinx.serialization.Serializable
+@Serializable
 enum class DashboardCards(
     val title: StringResource,
 ) {

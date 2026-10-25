@@ -9,6 +9,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -63,7 +64,7 @@ class HttpClientExtensionsTest {
         assertEquals(404, result.code)
     }
 
-    @kotlinx.serialization.Serializable
+    @Serializable
     data class TestModel(
         val id: Int,
     )

@@ -21,6 +21,7 @@ import com.dnfapps.arrmatey.arr.api.model.ReleaseProtocol
 import com.dnfapps.arrmatey.arr.api.model.Revision
 import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
+import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
@@ -88,6 +89,7 @@ sealed interface CombinedDashboardState {
         val wolDevices: List<WolDevice> = emptyList(),
         val isRefreshing: Boolean = false,
         val isLoadingMoreDiscover: Map<DiscoverCategory, Boolean> = emptyMap(),
+        val cardLoadingStates: Map<DashboardCards, Boolean> = emptyMap(),
     ) : CombinedDashboardState {
         val allRequests: List<MediaRequestPackage>
             get() = seerrInstances.flatMap { inst ->

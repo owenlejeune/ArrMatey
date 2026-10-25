@@ -112,6 +112,8 @@ import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
 import com.dnfapps.arrmatey.ui.components.InstancePicker
 import com.dnfapps.arrmatey.ui.components.MediaView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
+import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
+import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
@@ -228,10 +230,10 @@ fun ArrLibraryScreen(
     val showFab = !wideRailIsVisible && !isInSelectionMode && instancesState.selectedInstance != null
     val isFloatingBarVisible = LocalFloatingBarVisible.current
 
-    com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction(
+    ProvideFloatingBarAction(
         visible = isFloatingBarVisible && showFab,
         action =
-        com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction(
+        FloatingBarAction(
             icon = { Icon(Icons.Default.Add, null) },
             onClick = { onNavigateToSearch("", activeType, instancesState.selectedInstance?.id) },
         ),

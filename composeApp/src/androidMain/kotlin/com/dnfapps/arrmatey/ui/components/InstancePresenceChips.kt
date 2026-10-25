@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -110,9 +111,9 @@ fun InstancePresenceChips(
                 tonalElevation = if (isSelected) 4.dp else 0.dp,
                 border =
                 if (isSelected) {
-                    androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+                    BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
                 } else if (!isPresent) {
-                    androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                 } else {
                     null
                 },

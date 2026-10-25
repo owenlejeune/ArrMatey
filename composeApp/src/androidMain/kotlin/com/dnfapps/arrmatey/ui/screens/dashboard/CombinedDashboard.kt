@@ -2,7 +2,10 @@ package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -391,7 +394,6 @@ fun CombinedDashboard(
 
     val showFirstLaunchToast by viewModel.showFirstLaunchToast.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val cards by viewModel.cards.collectAsStateWithLifecycle()
     val isEditing by viewModel.isEditing.collectAsStateWithLifecycle()
     val removeItemStatus by viewModel.removeItemState.collectAsStateWithLifecycle()
@@ -544,7 +546,7 @@ fun CombinedDashboard(
                 )
             } else {
                 PullToRefreshBox(
-                    isRefreshing = isRefreshing,
+                    isRefreshing = false,
                     onRefresh = { if (!isEditing) viewModel.refresh() },
                     modifier = Modifier.fillMaxSize(),
                 ) {
@@ -720,6 +722,28 @@ fun CombinedDashboard(
                                                     onSendWol = { device -> viewModel.sendWol(device) },
                                                 )
                                             }
+
+                                            val isCardLoading = currentState.cardLoadingStates[dashboardCard] == true
+                                            AnimatedVisibility(
+                                                visible = isCardLoading && !isEditing,
+                                                enter = fadeIn(),
+                                                exit = fadeOut(),
+                                                modifier = Modifier.matchParentSize(),
+                                            ) {
+                                                Surface(
+                                                    modifier = Modifier.padding(innerPadding).fillMaxSize(),
+                                                    shape = MaterialTheme.shapes.large,
+                                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                                                ) {
+                                                    Box(
+                                                        contentAlignment = Alignment.Center,
+                                                        modifier = Modifier.fillMaxSize(),
+                                                    ) {
+                                                        LoadingIndicator()
+                                                    }
+                                                }
+                                            }
+
                                             if (isEditing) {
                                                 Row(
                                                     modifier =

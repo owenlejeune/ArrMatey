@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.downloadclient.repository
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.downloadclient.api.DownloadClientApi
+import com.dnfapps.arrmatey.downloadclient.api.RTorrentClient
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
@@ -70,7 +71,7 @@ class DownloadClientManagerTest {
         )
         fakeDao.emit(listOf(rtorrentClient))
         val apis = manager.awaitApis { 5L in it.keys }
-        assertTrue(apis[5] is com.dnfapps.arrmatey.downloadclient.api.RTorrentClient)
+        assertTrue(apis[5] is RTorrentClient)
     }
 
     @Test

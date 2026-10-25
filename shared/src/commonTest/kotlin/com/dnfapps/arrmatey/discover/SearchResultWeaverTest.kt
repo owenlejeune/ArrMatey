@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Language
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
+import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.model.SearchResultWeaver
@@ -48,7 +49,7 @@ class SearchResultWeaverTest {
         seriesType = SeriesType.Standard,
         ended = true,
         seasonFolder = true,
-        monitorNewItems = com.dnfapps.arrmatey.arr.api.model.MonitorNewItems.None,
+        monitorNewItems = MonitorNewItems.None,
         useSceneNumbering = false,
         tvdbId = tvdbId,
     )

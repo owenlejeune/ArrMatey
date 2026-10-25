@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.notifications
 
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -20,7 +21,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val channelId = intent.getStringExtra("channelId") ?: ""
 
         val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val contentIntent =
             context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {

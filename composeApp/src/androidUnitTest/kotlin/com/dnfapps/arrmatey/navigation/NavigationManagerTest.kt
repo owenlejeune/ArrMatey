@@ -1,5 +1,7 @@
 package com.dnfapps.arrmatey.navigation
 
+import androidx.compose.runtime.mutableStateListOf
+import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.database.InstanceRepository
@@ -51,11 +53,11 @@ class NavigationManagerTest {
     fun testIsCurrentScreenRoot() {
         val rootNavigator =
             mockk<Navigator<*>> {
-                every { backStack } returns androidx.compose.runtime.mutableStateListOf<androidx.navigation3.runtime.NavKey>(mockk())
+                every { backStack } returns mutableStateListOf<NavKey>(mockk())
             }
         val subscreenNavigator =
             mockk<Navigator<*>> {
-                every { backStack } returns androidx.compose.runtime.mutableStateListOf<androidx.navigation3.runtime.NavKey>(mockk(), mockk())
+                every { backStack } returns mutableStateListOf<NavKey>(mockk(), mockk())
             }
         val navManager =
             NavigationManager(

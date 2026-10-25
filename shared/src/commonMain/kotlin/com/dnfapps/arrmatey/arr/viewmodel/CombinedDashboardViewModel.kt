@@ -22,6 +22,7 @@ import com.dnfapps.arrmatey.arr.state.TracearrDashboardState
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
+import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
@@ -93,6 +94,9 @@ class CombinedDashboardViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val _cardLoadingStates = MutableStateFlow<Map<DashboardCards, Boolean>>(emptyMap())
+    val cardLoadingStates: StateFlow<Map<DashboardCards, Boolean>> = _cardLoadingStates.asStateFlow()
+
     private val _state = MutableStateFlow<CombinedDashboardState>(CombinedDashboardState.Initial)
     val state: StateFlow<CombinedDashboardState> = _state.asStateFlow()
 
@@ -115,14 +119,12 @@ class CombinedDashboardViewModel(
                 initialValue = false,
             )
 
-    val discoverSectionPreferences: StateFlow<com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences> =
+    val discoverSectionPreferences: StateFlow<DiscoverSectionPreferences> =
         preferencesStore.discoverSectionPreferences
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue =
-                com.dnfapps.arrmatey.datastore
-                    .DiscoverSectionPreferences(),
+                initialValue = DiscoverSectionPreferences(),
             )
 
     private val arrInstancesFlow =
@@ -423,19 +425,68 @@ class CombinedDashboardViewModel(
     private val discoverHasMoreMap = mutableMapOf<DiscoverCategory, Boolean>()
     private val _isDiscoverLoadingMore = MutableStateFlow<Map<DiscoverCategory, Boolean>>(emptyMap())
 
+    private var previouslyVisibleCards = emptySet<DashboardCards>()
+
     init {
         observeDashboard()
         viewModelScope.launch {
+            cards.collect { currentCards ->
+                val currentSet = currentCards.toSet()
+                val newlyAdded = currentSet - previouslyVisibleCards
+                previouslyVisibleCards = currentSet
+
+                if (newlyAdded.isNotEmpty()) {
+                    coroutineScope {
+                        if (newlyAdded.any { it in setOf(DashboardCards.ArrOverview, DashboardCards.InstanceDashboard, DashboardCards.Network) }) {
+                            launch { refreshArrData(currentSet) }
+                        }
+                        if (DashboardCards.RecentlyAdded in newlyAdded) {
+                            launch { refreshRecentlyAddedData(currentSet) }
+                        }
+                        if (DashboardCards.ActivityQueue in newlyAdded) {
+                            launch { refreshActivityQueueData(currentSet) }
+                        }
+                        if (newlyAdded.any { it in setOf(DashboardCards.OnToday, DashboardCards.UpcomingReleases) }) {
+                            launch { refreshCalendarData(currentSet) }
+                        }
+                        if (newlyAdded.any { it in setOf(DashboardCards.SeerrOverview, DashboardCards.PendingRequests, DashboardCards.PendingIssues) }) {
+                            launch { refreshSeerrData(currentSet) }
+                        }
+                        if (newlyAdded.any { it in setOf(DashboardCards.DiscoverFeed, DashboardCards.DiscoverSpotlight, DashboardCards.DiscoverQuickPick) }) {
+                            launch { refreshDiscoverData(currentSet) }
+                        }
+                        if (DashboardCards.ProwlarrOverview in newlyAdded) {
+                            launch { refreshProwlarrData(currentSet) }
+                        }
+                        if (DashboardCards.BazarrOverview in newlyAdded) {
+                            launch { refreshBazarrData(currentSet) }
+                        }
+                        if (newlyAdded.any { it in setOf(DashboardCards.PlaybackOverview, DashboardCards.ActiveStreams) }) {
+                            launch { refreshPlaybackData(currentSet) }
+                        }
+                        if (DashboardCards.DownloadClients in newlyAdded) {
+                            launch { refreshDownloadClientsData(currentSet) }
+                        }
+                    }
+                }
+            }
+        }
+        viewModelScope.launch {
             instanceManager.instanceRepositories.collect {
-                fetchDiscoverData()
+                val visible = cards.value.toSet()
+                if (visible.any { it in setOf(DashboardCards.DiscoverFeed, DashboardCards.DiscoverSpotlight, DashboardCards.DiscoverQuickPick) }) {
+                    refreshDiscoverData(visible)
+                }
             }
         }
         viewModelScope.launch {
             downloadClientManager.downloadClientApis.collect {
-                checkDownloadClientStatuses()
+                val visible = cards.value.toSet()
+                if (DashboardCards.DownloadClients in visible) {
+                    refreshDownloadClientsData(visible)
+                }
             }
         }
-        refresh()
     }
 
     fun shuffleQuickPick() {
@@ -479,6 +530,7 @@ class CombinedDashboardViewModel(
                     _isDiscoverLoadingMore,
                     playbackInstancesFlow,
                     wolDeviceRepository.getAllWolDevices(),
+                    _cardLoadingStates,
                 ),
             ) { args ->
                 @Suppress("UNCHECKED_CAST")
@@ -517,21 +569,21 @@ class CombinedDashboardViewModel(
                 val upcomingCalendar = calendarPair.second
 
                 @Suppress("UNCHECKED_CAST")
-                val trending = args[11] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
+                val trending = args[11] as List<DiscoverResult>
 
                 @Suppress("UNCHECKED_CAST")
-                val popularMovies = args[12] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
+                val popularMovies = args[12] as List<DiscoverResult>
 
                 @Suppress("UNCHECKED_CAST")
-                val popularTv = args[13] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
+                val popularTv = args[13] as List<DiscoverResult>
 
                 @Suppress("UNCHECKED_CAST")
-                val upcomingMovies = args[14] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
+                val upcomingMovies = args[14] as List<DiscoverResult>
 
                 @Suppress("UNCHECKED_CAST")
-                val upcomingTv = args[15] as List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>
+                val upcomingTv = args[15] as List<DiscoverResult>
 
-                val quickPick = args[16] as com.dnfapps.arrmatey.seerr.api.model.DiscoverResult?
+                val quickPick = args[16] as DiscoverResult?
 
                 val refreshing = args[17] as Boolean
 
@@ -543,6 +595,9 @@ class CombinedDashboardViewModel(
 
                 @Suppress("UNCHECKED_CAST")
                 val wolDevices = (args[20] as? List<WolDevice>) ?: emptyList()
+
+                @Suppress("UNCHECKED_CAST")
+                val cardLoadingStates = (args[21] as? Map<DashboardCards, Boolean>) ?: emptyMap()
 
                 CombinedDashboardState.Success(
                     instances = instances,
@@ -577,6 +632,7 @@ class CombinedDashboardViewModel(
                     ),
                     isRefreshing = refreshing,
                     isLoadingMoreDiscover = isDiscoverLoadingMore,
+                    cardLoadingStates = cardLoadingStates,
                 )
             }.collect { newState ->
                 _state.value = newState
@@ -962,84 +1018,228 @@ class CombinedDashboardViewModel(
         )
     }
 
+    private fun setCardsLoading(cardTypes: Set<DashboardCards>, loading: Boolean) {
+        _cardLoadingStates.update { current ->
+            current + cardTypes.associateWith { loading }
+        }
+    }
+
+    private suspend fun refreshArrData(visibleCards: Set<DashboardCards>) {
+        val targetCards = visibleCards.filter {
+            it == DashboardCards.ArrOverview || it == DashboardCards.InstanceDashboard || it == DashboardCards.Network
+        }.toSet()
+        if (targetCards.isNotEmpty()) {
+            setCardsLoading(targetCards, true)
+            try {
+                val repos = instanceManager.getAllArrRepositories()
+                repos.forEach { repo ->
+                    try {
+                        repo.refreshInstanceStatuses()
+                    } catch (e: Exception) {
+                        logger.error(e) { "Error refreshing Arr instance status ${repo.instance.label}" }
+                    }
+                }
+            } finally {
+                setCardsLoading(targetCards, false)
+            }
+        }
+    }
+
+    private suspend fun refreshRecentlyAddedData(visibleCards: Set<DashboardCards>) {
+        if (DashboardCards.RecentlyAdded in visibleCards) {
+            setCardsLoading(setOf(DashboardCards.RecentlyAdded), true)
+            try {
+                val repos = instanceManager.getAllArrRepositories()
+                repos.forEach { repo ->
+                    try {
+                        repo.refreshLibrary()
+                    } catch (e: Exception) {
+                        logger.error(e) { "Error refreshing library for ${repo.instance.label}" }
+                    }
+                }
+            } finally {
+                setCardsLoading(setOf(DashboardCards.RecentlyAdded), false)
+            }
+        }
+    }
+
+    private suspend fun refreshActivityQueueData(visibleCards: Set<DashboardCards>) {
+        if (DashboardCards.ActivityQueue in visibleCards) {
+            setCardsLoading(setOf(DashboardCards.ActivityQueue), true)
+            try {
+                val repos = instanceManager.getAllArrRepositories()
+                repos.forEach { repo ->
+                    try {
+                        repo.refreshActivityTasks()
+                    } catch (e: Exception) {
+                        logger.error(e) { "Error refreshing activity tasks for ${repo.instance.label}" }
+                    }
+                }
+            } finally {
+                setCardsLoading(setOf(DashboardCards.ActivityQueue), false)
+            }
+        }
+    }
+
+    private suspend fun refreshCalendarData(visibleCards: Set<DashboardCards>) {
+        val targetCards = visibleCards.filter {
+            it == DashboardCards.OnToday || it == DashboardCards.UpcomingReleases
+        }.toSet()
+        if (targetCards.isNotEmpty()) {
+            setCardsLoading(targetCards, true)
+            try {
+                calendarService.load()
+            } catch (e: Exception) {
+                logger.error(e) { "Error refreshing calendar" }
+            } finally {
+                setCardsLoading(targetCards, false)
+            }
+        }
+    }
+
+    private suspend fun refreshSeerrData(visibleCards: Set<DashboardCards>) {
+        val targetCards = visibleCards.filter {
+            it == DashboardCards.SeerrOverview || it == DashboardCards.PendingRequests || it == DashboardCards.PendingIssues
+        }.toSet()
+        if (targetCards.isNotEmpty()) {
+            setCardsLoading(targetCards, true)
+            try {
+                val seerrRepos = instanceManager.getAllSeerrRepositories()
+                seerrRepos.forEach { repo ->
+                    try {
+                        repo.refreshCounts()
+                    } catch (e: Exception) {
+                        logger.error(e) { "Error refreshing Seerr counts for ${repo.instance.label}" }
+                    }
+                }
+            } finally {
+                setCardsLoading(targetCards, false)
+            }
+        }
+    }
+
+    private suspend fun refreshDiscoverData(visibleCards: Set<DashboardCards>) {
+        val targetCards = visibleCards.filter {
+            it == DashboardCards.DiscoverFeed || it == DashboardCards.DiscoverSpotlight || it == DashboardCards.DiscoverQuickPick
+        }.toSet()
+        if (targetCards.isNotEmpty()) {
+            setCardsLoading(targetCards, true)
+            try {
+                fetchDiscoverData()
+            } catch (e: Exception) {
+                logger.error(e) { "Error refreshing discover data" }
+            } finally {
+                setCardsLoading(targetCards, false)
+            }
+        }
+    }
+
+    private suspend fun refreshProwlarrData(visibleCards: Set<DashboardCards>) {
+        if (DashboardCards.ProwlarrOverview in visibleCards) {
+            setCardsLoading(setOf(DashboardCards.ProwlarrOverview), true)
+            try {
+                val prowlarrRepos = instanceManager.instanceRepositories.value.values.filterIsInstance<ProwlarrInstanceRepository>()
+                prowlarrRepos.forEach { repo ->
+                    try {
+                        repo.refreshStatus()
+                        repo.getIndexerStatus()
+                        repo.getIndexers()
+                    } catch (e: Exception) {
+                        logger.error(e) { "Error refreshing Prowlarr instance ${repo.instance.label}" }
+                    }
+                }
+            } finally {
+                setCardsLoading(setOf(DashboardCards.ProwlarrOverview), false)
+            }
+        }
+    }
+
+    private suspend fun refreshBazarrData(visibleCards: Set<DashboardCards>) {
+        if (DashboardCards.BazarrOverview in visibleCards) {
+            setCardsLoading(setOf(DashboardCards.BazarrOverview), true)
+            try {
+                val bazarrRepos = instanceManager.instanceRepositories.value.values.filterIsInstance<BazarrInstanceRepository>()
+                bazarrRepos.forEach { repo ->
+                    try {
+                        repo.getSystemStatus()
+                        repo.refreshBadges()
+                    } catch (e: Exception) {
+                        logger.error(e) { "Error refreshing Bazarr instance ${repo.instance.label}" }
+                    }
+                }
+            } finally {
+                setCardsLoading(setOf(DashboardCards.BazarrOverview), false)
+            }
+        }
+    }
+
+    private suspend fun refreshPlaybackData(visibleCards: Set<DashboardCards>) {
+        val targetCards = visibleCards.filter {
+            it == DashboardCards.PlaybackOverview || it == DashboardCards.ActiveStreams
+        }.toSet()
+        if (targetCards.isNotEmpty()) {
+            setCardsLoading(targetCards, true)
+            try {
+                val tracearrRepos = instanceManager.getAllTracearrRepositories()
+                tracearrRepos.forEach { repo ->
+                    try {
+                        if (DashboardCards.PlaybackOverview in targetCards) repo.refreshStats()
+                        if (DashboardCards.ActiveStreams in targetCards) repo.refreshStreams()
+                    } catch (e: Exception) {
+                        logger.error(e) { "Error refreshing Tracearr instance ${repo.instance.label}" }
+                    }
+                }
+                val monitoringRepos = instanceManager.getAllPlaybackMonitoringRepositories()
+                monitoringRepos.forEach { repo ->
+                    try {
+                        if (DashboardCards.PlaybackOverview in targetCards) repo.refreshPlaybackStats()
+                        if (DashboardCards.ActiveStreams in targetCards) repo.refreshPlaybackStreams()
+                    } catch (e: Exception) {
+                        logger.error(e) { "Error refreshing monitoring instance ${repo.instance.label}" }
+                    }
+                }
+            } finally {
+                setCardsLoading(targetCards, false)
+            }
+        }
+    }
+
+    private suspend fun refreshDownloadClientsData(visibleCards: Set<DashboardCards>) {
+        if (DashboardCards.DownloadClients in visibleCards) {
+            setCardsLoading(setOf(DashboardCards.DownloadClients), true)
+            try {
+                checkDownloadClientStatuses()
+                downloadQueueService.manualRefresh()
+            } catch (e: Exception) {
+                logger.error(e) { "Error refreshing download clients" }
+            } finally {
+                setCardsLoading(setOf(DashboardCards.DownloadClients), false)
+            }
+        }
+    }
+
     fun refresh() {
         if (_isRefreshing.value) return
 
         viewModelScope.launch {
             _isRefreshing.value = true
-            val repos = instanceManager.getAllArrRepositories()
-            repos.forEach { repo ->
-                try {
-                    repo.refreshInstanceStatuses()
-                    repo.refreshActivityTasks()
-                    if (repo.library.value == null) {
-                        repo.refreshLibrary()
-                    }
-                } catch (e: Exception) {
-                    logger.error(e) { "Error refreshing Arr instance ${repo.instance.label}" }
+            try {
+                val visible = cards.value.toSet()
+                coroutineScope {
+                    launch { refreshArrData(visible) }
+                    launch { refreshRecentlyAddedData(visible) }
+                    launch { refreshActivityQueueData(visible) }
+                    launch { refreshCalendarData(visible) }
+                    launch { refreshSeerrData(visible) }
+                    launch { refreshDiscoverData(visible) }
+                    launch { refreshProwlarrData(visible) }
+                    launch { refreshBazarrData(visible) }
+                    launch { refreshPlaybackData(visible) }
+                    launch { refreshDownloadClientsData(visible) }
                 }
+            } finally {
+                _isRefreshing.value = false
             }
-
-            val seerrRepos = instanceManager.getAllSeerrRepositories()
-            seerrRepos.forEach { repo ->
-                try {
-                    repo.refreshCounts()
-                } catch (e: Exception) {
-                    logger.error(e) { "Error refreshing Seerr instance ${repo.instance.label}" }
-                }
-            }
-            fetchDiscoverData()
-
-            val prowlarrRepos =
-                instanceManager.instanceRepositories.value.values
-                    .filterIsInstance<ProwlarrInstanceRepository>()
-            prowlarrRepos.forEach { repo ->
-                try {
-                    repo.refreshStatus()
-                    repo.getIndexerStatus()
-                    repo.getIndexers()
-                } catch (e: Exception) {
-                    logger.error(e) { "Error refreshing Prowlarr instance ${repo.instance.label}" }
-                }
-            }
-
-            val bazarrRepos =
-                instanceManager.instanceRepositories.value.values
-                    .filterIsInstance<BazarrInstanceRepository>()
-            bazarrRepos.forEach { repo ->
-                try {
-                    repo.getSystemStatus()
-                    repo.refreshBadges()
-                } catch (e: Exception) {
-                    logger.error(e) { "Error refreshing Bazarr instance ${repo.instance.label}" }
-                }
-            }
-
-            val tracearrRepos = instanceManager.getAllTracearrRepositories()
-            tracearrRepos.forEach { repo ->
-                try {
-                    repo.refreshStats()
-                    repo.refreshStreams()
-                } catch (e: Exception) {
-                    logger.error(e) { "Error refreshing Tracearr instance ${repo.instance.label}" }
-                }
-            }
-
-            val monitoringRepos = instanceManager.getAllPlaybackMonitoringRepositories()
-            monitoringRepos.forEach { repo ->
-                try {
-                    repo.refreshPlaybackStats()
-                    repo.refreshPlaybackStreams()
-                } catch (e: Exception) {
-                    logger.error(e) { "Error refreshing monitoring instance ${repo.instance.label}" }
-                }
-            }
-
-            checkDownloadClientStatuses()
-            downloadQueueService.manualRefresh()
-
-            calendarService.load()
-            _isRefreshing.value = false
         }
     }
 

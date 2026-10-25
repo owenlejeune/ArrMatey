@@ -79,7 +79,7 @@ fun ProwlarrIndexersContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    androidx.compose.material3.LoadingIndicator()
+                    LoadingIndicator()
                 }
             }
 

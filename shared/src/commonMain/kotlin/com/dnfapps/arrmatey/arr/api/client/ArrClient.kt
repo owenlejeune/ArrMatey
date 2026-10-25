@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.FilesystemItem
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueuePage
@@ -59,7 +60,7 @@ interface ArrClient {
 
     suspend fun getQualityProfiles(): NetworkResult<List<QualityProfile>>
 
-    suspend fun getMetadataProfiles(): NetworkResult<List<com.dnfapps.arrmatey.arr.api.model.MetadataProfile>>
+    suspend fun getMetadataProfiles(): NetworkResult<List<MetadataProfile>>
 
     suspend fun getRootFolders(): NetworkResult<List<RootFolder>>
 

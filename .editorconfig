@@ -14,5 +14,6 @@ ktlint_standard_function-naming = disabled
 ktlint_standard_backing-property-naming = disabled
 ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_no-unused-imports = enabled
+ij_kotlin_use_fq_name = false
 ij_kotlin_packages_to_use_fq_name = unset
 ij_kotlin_packages_to_use_import_on_demand = com.dnfapps.arrmatey.shared.*

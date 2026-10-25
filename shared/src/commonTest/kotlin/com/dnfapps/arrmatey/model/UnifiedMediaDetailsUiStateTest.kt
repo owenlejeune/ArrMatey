@@ -3,6 +3,8 @@ package com.dnfapps.arrmatey.model
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.seerr.api.model.Season
+import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -52,11 +54,11 @@ class UnifiedMediaDetailsUiStateTest {
     @Test
     fun testSeasonWrapperCustomTitleAndYear() {
         val seerrSeason =
-            com.dnfapps.arrmatey.seerr.api.model.Season(
+            Season(
                 id = 123,
                 seasonNumber = 1,
                 name = "Indigo League",
-                airDate = kotlinx.datetime.LocalDate(1997, 4, 1),
+                airDate = LocalDate(1997, 4, 1),
                 episodeCount = 82,
             )
         val seasonWrapper =

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.logging
 
+import android.util.Log
 import java.io.File
 
 actual object LogReader {
@@ -21,7 +22,7 @@ actual object LogReader {
                 logFile.writeText("")
             }
         } catch (e: Exception) {
-            android.util.Log.e("LogReader", "Failed to clear logs", e)
+            Log.e("LogReader", "Failed to clear logs", e)
         }
     }
 
