@@ -10,6 +10,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 class TimeExtensionsTest {
     private val timeZone = TimeZone.UTC
@@ -104,7 +105,7 @@ class TimeExtensionsTest {
     fun testNullableInstantIsBetweenReturnsFalse() {
         val start = LocalDate(2024, 6, 1)
         val end = LocalDate(2024, 6, 10)
-        val nullInstant: kotlin.time.Instant? = null
+        val nullInstant: Instant? = null
         assertFalse(nullInstant.isBetween(start, end))
     }
 

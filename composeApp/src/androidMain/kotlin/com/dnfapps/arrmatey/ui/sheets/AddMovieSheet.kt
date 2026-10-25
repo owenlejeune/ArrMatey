@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -306,9 +307,9 @@ fun MovieAddConfigurationContent(
                 enabled = enabled,
             )
 
-            val mutableTags = (selectedTags as? androidx.compose.runtime.snapshots.SnapshotStateList<Int>)
-                ?: androidx.compose.runtime.remember(selectedTags) {
-                    androidx.compose.runtime.mutableStateListOf(*selectedTags.toTypedArray())
+            val mutableTags = (selectedTags as? SnapshotStateList<Int>)
+                ?: remember(selectedTags) {
+                    mutableStateListOf(*selectedTags.toTypedArray())
                 }
             TagsSelectionCard(
                 tags = tags,

@@ -33,13 +33,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.state.CalendarState
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
+import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @Composable
 fun CalendarListView(
@@ -50,7 +54,7 @@ fun CalendarListView(
 ) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val preferencesStore: com.dnfapps.arrmatey.datastore.PreferencesStore = org.koin.compose.koinInject()
+    val preferencesStore: PreferencesStore = koinInject()
     val useColoredCards by preferencesStore.useColoredCalendarCards.collectAsStateWithLifecycle(false)
 
     val endOfListReached by remember(state.dates) {
@@ -131,10 +135,10 @@ fun CalendarListView(
 
         val isFloatingBarVisible = LocalFloatingBarVisible.current
 
-        com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction(
+        ProvideFloatingBarAction(
             visible = isFloatingBarVisible && !isTodayVisible,
             action =
-            com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction(
+            FloatingBarAction(
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Today,

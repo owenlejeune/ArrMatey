@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
@@ -471,7 +472,7 @@ class MoreScreenViewModel(
                     flowOf(InstancePreferences())
                 } else {
                     updateAllPreferencesUseCase.syncGlobalPreferencesToInstance(instance.id)
-                    instancePreferenceStoreRepository.getInstancePreferences(instance.id, com.dnfapps.arrmatey.compose.utils.SortBy.defaultFor(instance.type)).observePreferences()
+                    instancePreferenceStoreRepository.getInstancePreferences(instance.id, SortBy.defaultFor(instance.type)).observePreferences()
                 }
             }.stateIn(
                 scope = viewModelScope,

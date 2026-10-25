@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -319,14 +320,14 @@ fun SeriesAddConfigurationContent(
             )
 
             if (tags.isNotEmpty()) {
-                val mutableTags = selectedTags as? androidx.compose.runtime.snapshots.SnapshotStateList<Int>
+                val mutableTags = selectedTags as? SnapshotStateList<Int>
                 MultiSelectDropdownPicker(
                     options = tags.map { it.id },
                     selectedOptions =
                     mutableTags
-                        ?: androidx.compose.runtime.remember(
+                        ?: remember(
                             selectedTags,
-                        ) { androidx.compose.runtime.mutableStateListOf(*selectedTags.toTypedArray()) },
+                        ) { mutableStateListOf(*selectedTags.toTypedArray()) },
                     valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
                     onOptionSelected = { tag, isSelected ->
                         if (mutableTags != null) {

@@ -6,10 +6,11 @@ import io.ktor.client.plugins.logging.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import dev.shivathapaa.logger.api.Logger as AppLogger
 
 class DynamicLogger(
     private val preferencesStore: PreferencesStore,
-    private val logger: dev.shivathapaa.logger.api.Logger,
+    private val logger: AppLogger,
 ) : Logger {
     private var currentLogLevel = LogLevel.HEADERS
 

@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.compose.utils.alphabet
 import com.dnfapps.arrmatey.compose.utils.isTitleSort
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -44,12 +45,12 @@ class FastScrollUtilsTest {
 
     @Test
     fun testSortByDefault() {
-        assertEquals(SortBy.TitleLastFirst, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Bookshelf))
-        assertEquals(SortBy.TitleLastFirst, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Chaptarr))
-        assertEquals(SortBy.Title, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Sonarr))
-        assertEquals(SortBy.Title, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Radarr))
-        assertEquals(SortBy.Title, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Lidarr))
-        assertEquals(SortBy.Name, SortBy.defaultFor(com.dnfapps.arrmatey.instances.model.InstanceType.Prowlarr))
+        assertEquals(SortBy.TitleLastFirst, SortBy.defaultFor(InstanceType.Bookshelf))
+        assertEquals(SortBy.TitleLastFirst, SortBy.defaultFor(InstanceType.Chaptarr))
+        assertEquals(SortBy.Title, SortBy.defaultFor(InstanceType.Sonarr))
+        assertEquals(SortBy.Title, SortBy.defaultFor(InstanceType.Radarr))
+        assertEquals(SortBy.Title, SortBy.defaultFor(InstanceType.Lidarr))
+        assertEquals(SortBy.Name, SortBy.defaultFor(InstanceType.Prowlarr))
     }
 
     @Test

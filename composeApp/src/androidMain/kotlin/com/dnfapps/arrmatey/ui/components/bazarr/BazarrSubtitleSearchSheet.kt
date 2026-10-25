@@ -76,7 +76,7 @@ fun BazarrSubtitleSearchSheet(
                 SubtitleSearchState.Loading,
                 -> {
                     Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        androidx.compose.material3.LoadingIndicator()
+                        LoadingIndicator()
                     }
                 }
 

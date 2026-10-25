@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.repository.buildPmsImageUrl
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
@@ -171,7 +172,7 @@ fun TautulliStatsScreen(
 @Composable
 private fun HomeStatSectionCard(
     section: TautulliHomeStatSection,
-    instance: com.dnfapps.arrmatey.instances.model.Instance,
+    instance: Instance,
 ) {
     val (icon, title) =
         when (section.statId) {

@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.tautulli.api.model.TautulliHistoryItem
 import com.dnfapps.arrmatey.tautulli.api.model.TautulliHistoryResponse
 import com.dnfapps.arrmatey.tautulli.api.model.TautulliMediaType
+import com.dnfapps.arrmatey.tautulli.api.model.TautulliSession
 import com.dnfapps.networking.NetworkResult
 import io.mockk.coEvery
 import io.mockk.every
@@ -70,7 +71,7 @@ class UnifiedMediaDetailsTracearrHandlerTest {
             }
         every { tautulliRepo.instance } returns instance
         val tautulliSession =
-            com.dnfapps.arrmatey.tautulli.api.model.TautulliSession(
+            TautulliSession(
                 sessionKey = "sess1",
                 title = "Inception",
                 mediaType = TautulliMediaType.Movie,
