@@ -15,7 +15,7 @@
 - No paid Apple Developer account, no signing secrets; unsigned path is the default.
 - `workflow_dispatch` only; never trigger on push/PR.
 - Top-level `permissions: {}`, per-job `contents: read`; checkout with `persist-credentials: false`.
-- Runner is `macos-26` (pinned; intentional divergence from `ios.yml`'s `macos-latest`).
+- Runner is `macos-26` (pinned for reproducibility; `ios.yml`'s `macos-latest` resolves to the same image as of Oct 2026).
 - Mirror `ios.yml` action pins verbatim: `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1`, `actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad` (java-version `21`, distribution `temurin`), `gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e5410601425a94e6`, `maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90` (xcode-version `26.x`), `actions/cache@55cc8345863c7cc4d329aec7e3d2c9` (same konan/derived-data keys as `ios.yml`), `actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9`.
 - `CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM=""` on the device build.
 - Package with `zip -qry`, never plain `zip -r`.
@@ -52,16 +52,16 @@
   4. Caches for `~/.konan` and `$RUNNER_TEMP/derived_data` (same keys/restore-keys as `ios.yml`).
   5. `run: xcodebuild -list -workspace iosApp/iosApp.xcworkspace`.
   6. `run: xcodebuild build -workspace iosApp/iosApp.xcworkspace -scheme iosApp -configuration Release -sdk iphoneos -derivedDataPath "$RUNNER_TEMP/derived_data" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM=""`.
-  7. `run: |` — stage + entitlements: `APP=$(echo "$RUNNER_TEMP"/derived_data/Build/Products/Release-iphoneos/*.app)` then `mkdir -p "$RUNNER_TEMP/Payload" && cp -R "$APP" "$RUNNER_TEMP/Payload/"` then `command -v ldid >/dev/null || brew install ldid` then `ldid -SiosApp/iosApp/iosAppRelease.entitlements "$RUNNER_TEMP/Payload/$(basename "$APP")/$(basename "$APP" .app)"`. (Executable name follows `PRODUCT_NAME=ArrMatey`; deriving it from the `.app` name keeps this correct if it ever changes.)
-  8. `run: |` — verify + zip: `test -f "$RUNNER_TEMP/Payload/"*.app/Info.plist` and test the executable path derived in step 7 exists; `codesign -d --entitlements :-` on that same executable path (append `|| true`) for the log; `cd "$RUNNER_TEMP" && zip -qry ArrMatey-unsigned.ipa Payload`.
+  7. `run: |` — stage + entitlements: `APP=$(echo "$RUNNER_TEMP"/derived_data/Build/Products/Release-iphoneos/*.app)` then `mkdir -p "$RUNNER_TEMP/Payload" && cp -R "$APP" "$RUNNER_TEMP/Payload/"` then `test -f iosApp/iosApp/iosAppRelease.entitlements` then `command -v ldid >/dev/null || brew install ldid-procursus` (never the plain `ldid` formula — wrong fork, conflicts with `ldid-procursus`) then `ldid -SiosApp/iosApp/iosAppRelease.entitlements "$RUNNER_TEMP/Payload/$(basename "$APP")/$(basename "$APP" .app)"`. (Executable name follows `PRODUCT_NAME=ArrMatey`; deriving it from the `.app` name keeps this correct if it ever changes.) Include a `#` comment in the script: unsigned embedded frameworks (e.g. the Kotlin shared framework) work under TrollStore, which fakesigns on install; non-TrollStore sideloading without re-signing is out of scope.
+  8. `run: |` — verify + zip: `test -f "$RUNNER_TEMP/Payload/"*.app/Info.plist` and test the executable path derived in step 7 exists; verify the entitlement round-tripped with `ldid -e` on that same executable path piped to `grep -q com.apple.developer.networking.wifi-info` (no `|| true` — missing entitlement fails the job; `codesign -d` cannot read back an ldid fakesignature); `cd "$RUNNER_TEMP" && zip -qry ArrMatey-unsigned.ipa Payload`.
   9. `actions/upload-artifact@cf430e0…` (same pin) with `name: ArrMatey-unsigned-ipa`, `path: ${{ runner.temp }}/ArrMatey-unsigned.ipa`, `if-no-files-found: error`, `retention-days: 14`.
 
 - [ ] **Step 2: Validate the workflow file parses and carries the load-bearing keys**
 
   Run: `python3 -c "import yaml; d=yaml.safe_load(open('.github/workflows/ios-unsigned-ipa.yml')); assert d['on'] == 'workflow_dispatch' or 'workflow_dispatch' in d['on'], 'trigger'; jobs=list(d['jobs'].values()); assert jobs[0]['runs-on']=='macos-26', 'runner'"`
   Expected: exit 0, no output.
-  Run: `grep -c 'CODE_SIGNING_ALLOWED=NO' .github/workflows/ios-unsigned-ipa.yml && grep -c 'zip -qry' .github/workflows/ios-unsigned-ipa.yml && grep -c 'ldid -S' .github/workflows/ios-unsigned-ipa.yml && grep -c 'if-no-files-found: error' .github/workflows/ios-unsigned-ipa.yml && grep -c 'xcodebuild -list -workspace' .github/workflows/ios-unsigned-ipa.yml`
-  Expected: each prints a count ≥ 1 (unsigned flags, symlink-safe zip, entitlement step, strict upload, workspace sanity check).
+  Run: `grep -c 'CODE_SIGNING_ALLOWED=NO' .github/workflows/ios-unsigned-ipa.yml && grep -c 'zip -qry' .github/workflows/ios-unsigned-ipa.yml && grep -c 'ldid -S' .github/workflows/ios-unsigned-ipa.yml && grep -c 'ldid-procursus' .github/workflows/ios-unsigned-ipa.yml && grep -c 'ldid -e' .github/workflows/ios-unsigned-ipa.yml && grep -c 'if-no-files-found: error' .github/workflows/ios-unsigned-ipa.yml && grep -c 'xcodebuild -list -workspace' .github/workflows/ios-unsigned-ipa.yml`
+  Expected: each prints a count ≥ 1 (unsigned flags, symlink-safe zip, entitlement re-application via the Procursus fork, entitlement round-trip check, strict upload, workspace sanity check). Also assert no plain-`ldid` install slipped in: `! grep -q 'brew install ldid$' .github/workflows/ios-unsigned-ipa.yml && ! grep -q 'codesign -d --entitlements' .github/workflows/ios-unsigned-ipa.yml`.
 
 - [ ] **Step 3: Commit**
 
@@ -108,7 +108,7 @@
 
 - [ ] **Step 1: Add a 3–5 line paragraph in the iOS build section**
 
-  Copy: unsigned `Payload` IPA from the manual `ios-unsigned-ipa` workflow artifact installs via TrollStore with no Apple Developer account; paid signing stays optional for maintainers (points at `ExportOptions.plist.template`). No other README sections change.
+  Copy: unsigned `Payload` IPA from the manual `ios-unsigned-ipa` workflow artifact installs via TrollStore with no Apple Developer account; paid signing stays optional for maintainers (points at `ExportOptions.plist.template`). One scope line: embedded frameworks ship unsigned and rely on TrollStore's install-time fakesigning — other sideloading methods must re-sign. No other README sections change.
 
 - [ ] **Step 2: Verify the note exists and sits in the iOS section**
 
