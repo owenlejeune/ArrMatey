@@ -1,0 +1,105 @@
+name: Unsigned iOS IPA
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  build-unsigned-ipa:
+    name: Build unsigned iOS IPA
+    runs-on: macos-26
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e5410601425a94e6 # v6.4.0
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: '26.x'
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Cache Kotlin/Native toolchain
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-
+
+      - name: Cache Xcode DerivedData
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/derived_data
+          key: ${{ runner.os }}-deriveddata-${{ hashFiles('iosApp/**/*.swift', 'shared/**/*.kt') }}
+          restore-keys: |
+            ${{ runner.os }}-deriveddata-
+
+      - name: List schemes (sanity check)
+        run: xcodebuild -list -workspace iosApp/iosApp.xcworkspace
+
+      - name: Build unsigned app for device
+        run: |
+          xcodebuild build -workspace iosApp/iosApp.xcworkspace -scheme iosApp \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath "$RUNNER_TEMP/derived_data" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM=""
+
+      - name: Stage app and re-apply entitlements
+        run: |
+          APP=$(echo "$RUNNER_TEMP"/derived_data/Build/Products/Release-iphoneos/*.app)
+          mkdir -p "$RUNNER_TEMP/Payload" && cp -R "$APP" "$RUNNER_TEMP/Payload/"
+          test -f iosApp/iosApp/iosAppRelease.entitlements
+          # NOTE: plain `ldid` is the wrong fork and conflicts with
+          # `ldid-procursus`; never substitute it here (a mere `command -v ldid`
+          # check could silently accept the wrong binary).
+          ldid -h 2>&1 | grep -qi procursus || brew install ldid-procursus
+          # Unsigned embedded frameworks (e.g. the Kotlin shared framework) work
+          # under TrollStore, which fakesigns on install; non-TrollStore
+          # sideloading without re-signing is out of scope.
+          ldid -SiosApp/iosApp/iosAppRelease.entitlements "$RUNNER_TEMP/Payload/$(basename "$APP")/$(basename "$APP" .app)"
+          echo "APP_NAME=$(basename "$APP")" >> "$GITHUB_ENV"
+
+      - name: Verify and package IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$RUNNER_TEMP/Payload/$APP_NAME/Info.plist"
+          EXE="$RUNNER_TEMP/Payload/$APP_NAME/${APP_NAME%.app}"
+          test -f "$EXE"
+          ldid -e "$EXE" | grep -q com.apple.developer.networking.wifi-info
+          cd "$RUNNER_TEMP" && zip -qry ArrMatey-unsigned.ipa Payload
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ArrMatey-unsigned-ipa
+          path: ${{ runner.temp }}/ArrMatey-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
