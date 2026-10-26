@@ -202,6 +202,12 @@ Next, select the Apple Account's team for the `iosApp` target:
 iosApp → Signing & Capabilities → Targets → iosApp -> Signing -> Team
 ```
 
+An unsigned `Payload` IPA is produced by the manual `ios-unsigned-ipa` GitHub Actions workflow
+and installs via TrollStore without an Apple Developer account. Paid signing remains optional
+for maintainers and is configured through `ExportOptions.plist.template`. Note: embedded
+frameworks ship unsigned and rely on TrollStore's install-time fakesigning, so other
+sideloading methods must re-sign the IPA.
+
 ### Adding Localized String
 
 ArrMatey uses [moko-resources](https://github.com/icerockdev/moko-resources) for string resources across platforms.
