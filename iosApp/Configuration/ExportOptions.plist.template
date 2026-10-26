@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- method: development | ad-hoc | app-store -->
+	<!-- teamID: <APPLE_TEAM_ID> -->
+	<key>uploadSymbols</key>
+	<false/>
+</dict>
+</plist>
