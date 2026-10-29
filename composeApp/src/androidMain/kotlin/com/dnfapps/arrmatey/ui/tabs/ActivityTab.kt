@@ -29,6 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -235,6 +237,15 @@ fun ActivityHomeScreen(
     var showActivityCustomizationSheet by remember { mutableStateOf(false) }
     var showManualImportSheet by remember { mutableStateOf(false) }
 
+    val density = LocalDensity.current
+    var selectionSheetHeight by remember { mutableStateOf(0.dp) }
+
+    LaunchedEffect(isInSelectionMode) {
+        if (!isInSelectionMode) {
+            selectionSheetHeight = 0.dp
+        }
+    }
+
     val textFieldState = rememberTextFieldState()
 
     LaunchedEffect(textFieldState.text) {
@@ -356,6 +367,11 @@ fun ActivityHomeScreen(
                             useColoredCards = useColoredCards,
                             isInSelectionMode = isInSelectionMode,
                             selectedItemKeys = selectedItems,
+                            bottomPadding = if (isInSelectionMode) {
+                                maxOf(selectionSheetHeight, 100.dp)
+                            } else {
+                                0.dp
+                            },
                             onRefresh = { viewModel.refreshActivity() },
                             onSelectItem = { selectedItem = it },
                             onToggleSelection = { viewModel.toggleItemSelection(it.selectionKey) },
@@ -490,6 +506,9 @@ fun ActivityHomeScreen(
         if (isInSelectionMode && uiState.selectedTab == ActivityTabSegment.Activity) {
             FlexibleBottomSheet(
                 onDismissRequest = { viewModel.exitSelectionMode() },
+                modifier = Modifier.onSizeChanged {
+                    selectionSheetHeight = with(density) { it.height.toDp() }
+                },
                 sheetState =
                 rememberFlexibleBottomSheetState(
                     isModal = false,

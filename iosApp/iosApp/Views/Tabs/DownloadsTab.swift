@@ -271,6 +271,7 @@ struct DownloadsTab: View {
                     }
                 }
                 .listStyle(.plain)
+                .padding(.bottom, viewModel.isInSelectionMode ? 100 : 0)
                 .refreshable {
                     viewModel.refresh()
                 }

@@ -385,7 +385,7 @@ struct ActivityTabContent: View {
                 }
             }
             .listStyle(.plain)
-            .padding(.bottom, viewModel.isInSelectionMode ? 60 : 0)
+            .padding(.bottom, viewModel.isInSelectionMode ? 100 : 0)
         }
     }
 

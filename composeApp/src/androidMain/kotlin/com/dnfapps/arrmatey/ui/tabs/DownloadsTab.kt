@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.tabs
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -248,6 +249,15 @@ fun DownloadsTab(
                                 }
                             }
                         } else {
+                            val animatedBottomPadding by animateDpAsState(
+                                targetValue = if (isInSelectionMode) {
+                                    maxOf(LocalFloatingBarBottomPadding.current, 100.dp)
+                                } else {
+                                    LocalFloatingBarBottomPadding.current
+                                },
+                                label = "downloads_bottom_padding",
+                            )
+
                             LazyColumn(
                                 verticalArrangement = Arrangement.spacedBy(12.dp),
                                 modifier = Modifier.fillMaxSize(),
@@ -256,7 +266,7 @@ fun DownloadsTab(
                                     start = 16.dp,
                                     end = 16.dp,
                                     top = 16.dp,
-                                    bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+                                    bottom = 16.dp + animatedBottomPadding,
                                 ),
                                 state = listState,
                             ) {

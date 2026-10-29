@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.tabs.activity
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,8 +14,10 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -32,6 +35,7 @@ fun ActiveQueueTabContent(
     useColoredCards: Boolean,
     isInSelectionMode: Boolean = false,
     selectedItemKeys: Set<String> = emptySet(),
+    bottomPadding: Dp = 0.dp,
     onRefresh: () -> Unit,
     onSelectItem: (QueueItem) -> Unit,
     onToggleSelection: (QueueItem) -> Unit = {},
@@ -57,6 +61,16 @@ fun ActiveQueueTabContent(
                         .verticalScroll(rememberScrollState()),
                 )
             } else {
+                val effectiveBottomPadding = if (bottomPadding > 0.dp) bottomPadding else 100.dp
+                val animatedBottomPadding by animateDpAsState(
+                    targetValue = if (isInSelectionMode) {
+                        maxOf(LocalFloatingBarBottomPadding.current, effectiveBottomPadding)
+                    } else {
+                        LocalFloatingBarBottomPadding.current
+                    },
+                    label = "active_queue_bottom_padding",
+                )
+
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize(),
@@ -65,7 +79,7 @@ fun ActiveQueueTabContent(
                         start = 16.dp,
                         end = 16.dp,
                         top = 16.dp,
-                        bottom = 16.dp + LocalFloatingBarBottomPadding.current,
+                        bottom = 16.dp + animatedBottomPadding,
                     ),
                 ) {
                     items(
