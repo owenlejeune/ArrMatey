@@ -61,7 +61,7 @@ struct BackupRestoreSettingsView: View {
                 self.showFileExporter = true
             }
         }
-        .fileExporter(isPresented: $showFileExporter, document: BackupFile(data: exportData), contentType: .json, defaultFilename: "\(TimeExtensionsKt.nowTimestamp())_ArrMatey_Backup.json") { result in
+        .fileExporter(isPresented: $showFileExporter, document: BackupFile(data: exportData), contentType: .json, defaultFilename: backupViewModel.getBackupFilename()) { result in
             switch result {
             case .success:
                 self.exportData = ""
