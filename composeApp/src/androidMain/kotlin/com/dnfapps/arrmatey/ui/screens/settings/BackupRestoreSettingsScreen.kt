@@ -31,7 +31,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
-import com.dnfapps.arrmatey.extensions.nowTimestamp
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
 import com.dnfapps.arrmatey.shared.*
@@ -153,7 +152,7 @@ fun BackupRestoreSettingsScreen(
                 onDismiss = { showExportDialog = false },
                 onConfirm = {
                     showExportDialog = false
-                    exportLauncher.launch("${nowTimestamp()}_ArrMatey_Backup.json")
+                    exportLauncher.launch(backupViewModel.getBackupFilename())
                 },
                 onPasswordChanged = { backupViewModel.setExportPassword(it) },
                 onToggleIncludeInstancePreferences = { backupViewModel.toggleIncludePreferences() },

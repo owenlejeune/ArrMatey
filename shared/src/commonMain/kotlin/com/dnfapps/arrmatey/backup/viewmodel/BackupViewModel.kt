@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.backup.usecase.ImportDataUseCase
 import com.dnfapps.arrmatey.database.dao.CustomWebpageDao
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
+import com.dnfapps.arrmatey.extensions.nowTimestamp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -210,4 +211,6 @@ class BackupViewModel(
             onComplete()
         }
     }
+
+    fun getBackupFilename(): String = "${nowTimestamp().replace(":", "-")}_ArrMatey_Backup.json"
 }

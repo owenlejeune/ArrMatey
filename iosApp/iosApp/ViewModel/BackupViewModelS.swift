@@ -11,21 +11,21 @@ import SwiftUI
 @MainActor
 class BackupViewModelS: ObservableObject {
     private let viewModel: BackupViewModel
-    
+
     @Published var exportState = ExportUiState()
     @Published var importState = ImportUiState()
-    
+
     init() {
         self.viewModel = KoinBridge.shared.getBackupViewModel()
-        
+
         viewModel.exportUiState.observeAsync(on: self, to: \.exportState)
         viewModel.importUiState.observeAsync(on: self, to: \.importState)
     }
-    
+
     func toggleInstanceSelection(id: Int64) {
         viewModel.toggleInstanceSelection(id: id)
     }
-    
+
     func toggleDownloadClientSelection(id: Int64) {
         viewModel.toggleDownloadClientSelection(id: id)
     }
@@ -33,31 +33,31 @@ class BackupViewModelS: ObservableObject {
     func toggleCustomWebpageSelection(id: Int64) {
         viewModel.toggleCustomWebpageSelection(id: id)
     }
-    
+
     func setExportPassword(password: String) {
         viewModel.setExportPassword(password: password)
     }
-    
+
     func toggleIncludePreferences() {
         viewModel.toggleIncludePreferences()
     }
-    
+
     func toggleIncludeTabPreferences() {
         viewModel.toggleIncludeTabPreferences()
     }
-    
+
     func toggleIncludeUiPreferences() {
         viewModel.toggleIncludeUiPreferences()
     }
-    
+
     func toggleIncludeIntegrationsPreferences() {
         viewModel.toggleIncludeIntegrationsPreferences()
     }
-    
+
     func exportData(onExportReady: @escaping (String) -> Void) {
         viewModel.exportData(onExportReady: onExportReady)
     }
-    
+
     func setImportPassword(password: String) {
         viewModel.setImportPassword(password: password)
     }
@@ -65,15 +65,15 @@ class BackupViewModelS: ObservableObject {
     func resetImportState() {
         viewModel.resetImportState()
     }
-    
+
     func prepareImport(encryptedData: String) {
         viewModel.prepareImport(encryptedData: encryptedData)
     }
-    
+
     func toggleImportInstanceSelection(index: Int32) {
         viewModel.toggleImportInstanceSelection(index: index)
     }
-    
+
     func toggleImportDownloadClientSelection(index: Int32) {
         viewModel.toggleImportDownloadClientSelection(index: index)
     }
@@ -81,20 +81,24 @@ class BackupViewModelS: ObservableObject {
     func toggleImportCustomWebpageSelection(index: Int32) {
         viewModel.toggleImportCustomWebpageSelection(index: index)
     }
-    
+
     func toggleImportTabPreferences() {
         viewModel.toggleImportTabPreferences()
     }
-    
+
     func toggleImportUiPreferences() {
         viewModel.toggleImportUiPreferences()
     }
-    
+
     func toggleImportIntegrationsPreferences() {
         viewModel.toggleImportIntegrationsPreferences()
     }
-    
+
     func executeImport(onComplete: @escaping () -> Void) {
         viewModel.executeImport(onComplete: onComplete)
+    }
+
+    func getBackupFilename() -> String {
+        return viewModel.getBackupFilename()
     }
 }
