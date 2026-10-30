@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.navigation.ComicsTabNavigator
 import com.dnfapps.arrmatey.navigation.DashboardTabNavigator
 import com.dnfapps.arrmatey.navigation.DiscoverTabNavigator
 import com.dnfapps.arrmatey.navigation.LibraryTabNavigator
+import com.dnfapps.arrmatey.navigation.MediaServerLibraryTabNavigator
 import com.dnfapps.arrmatey.navigation.MoviesTabNavigator
 import com.dnfapps.arrmatey.navigation.MusicTabNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
@@ -52,6 +53,7 @@ val androidModule =
         single { TracearrTabNavigator() }
         single { ComicsTabNavigator() }
         single { ActivityTabNavigator() }
+        single { MediaServerLibraryTabNavigator() }
 
         // Navigation Manager
         single {
@@ -71,6 +73,7 @@ val androidModule =
                     TabItem.Standard.DASHBOARD to get<DashboardTabNavigator>(),
                     TabItem.Standard.BAZARR to get<BazarrTabNavigator>(),
                     TabItem.Standard.MONITORING to get<TracearrTabNavigator>(),
+                    TabItem.Standard.MEDIA_LIBRARY to get<MediaServerLibraryTabNavigator>(),
                     TabItem.Settings to get<SettingsTabNavigator>(),
                 )
             NavigationManager(

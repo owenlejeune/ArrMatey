@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.ui.tabs.CalendarTab
 import com.dnfapps.arrmatey.ui.tabs.DashboardTab
 import com.dnfapps.arrmatey.ui.tabs.DiscoverTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
+import com.dnfapps.arrmatey.ui.tabs.MediaLibraryTab
 import com.dnfapps.arrmatey.ui.tabs.MonitoringTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
 import com.dnfapps.arrmatey.ui.tabs.SeerrTab
@@ -63,5 +64,6 @@ fun StandardTabContent(
         TabItem.Standard.BAZARR -> BazarrTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.DISCOVER -> DiscoverTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.MONITORING -> MonitoringTab(windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.MEDIA_LIBRARY -> MediaLibraryTab(windowSizeClass, wideRailIsVisible)
     }
 }

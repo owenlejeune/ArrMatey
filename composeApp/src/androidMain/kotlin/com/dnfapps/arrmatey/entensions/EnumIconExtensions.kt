@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SortByAlpha
@@ -74,6 +75,7 @@ val TabItem.androidIcon: ImageVector
                     TabItem.Standard.BAZARR -> Icons.Default.Subtitles
                     TabItem.Standard.DASHBOARD -> Icons.Default.Dashboard
                     TabItem.Standard.MONITORING -> Icons.Default.Analytics
+                    TabItem.Standard.MEDIA_LIBRARY -> Icons.Default.PlayCircle
                 }
             is TabItem.CustomWebpage -> Icons.Default.Language
             is TabItem.Settings -> Icons.Default.Settings

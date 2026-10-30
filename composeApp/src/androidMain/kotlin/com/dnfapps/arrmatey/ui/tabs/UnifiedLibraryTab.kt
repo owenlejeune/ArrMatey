@@ -47,6 +47,7 @@ private fun unifiedLibraryEntryProvider(
             onNavigateToSearch = { query, type, instanceId -> navigation.toSearch(query, type, instanceId) },
             onNavigateToGlobalSearch = { query -> navigation.toGlobalSearch(query) },
             onNavigateToDetails = { media, type, instanceId -> navigation.toMediaDetails(media, type, instanceId) },
+            onNavigateToMediaServerDetails = { item -> navigation.toMediaDetails(item) },
         )
     }
     mediaNavEntries(

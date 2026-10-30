@@ -1,6 +1,16 @@
 package com.dnfapps.arrmatey.mediaserver.model
 
+import com.dnfapps.arrmatey.shared.*
+import com.dnfapps.arrmatey.shared.MR
+import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Serializable
+
+@Serializable
+enum class WatchedFilter(val resource: StringResource) {
+    ALL(MR.strings.all),
+    UNWATCHED(MR.strings.unwatched),
+    WATCHED(MR.strings.watched),
+}
 
 @Serializable
 enum class MediaType {

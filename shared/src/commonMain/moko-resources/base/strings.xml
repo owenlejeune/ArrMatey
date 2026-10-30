@@ -1367,4 +1367,8 @@
     <string name="total">Total</string>
     <string name="new_version_available">A new version (%1$s) is available</string>
     <string name="view_release">View Release</string>
+    <string name="unwatched">Unwatched</string>
+    <string name="no_media_servers_configured">No media servers configured</string>
+    <string name="no_media_servers_description">Connect Plex, Jellyfin, or Emby under Integrations to browse your personal media library.</string>
+    <string name="all_libraries">All Libraries</string>
 </resources>

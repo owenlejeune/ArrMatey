@@ -27,6 +27,12 @@ import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateAllPreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaLibrary
+import com.dnfapps.arrmatey.mediaserver.model.WatchedFilter
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerRepository
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.Blur
@@ -52,6 +58,21 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+sealed interface UnifiedLibraryTabTarget {
+    val tabId: String
+    val label: String
+
+    data class Arr(val instance: Instance) : UnifiedLibraryTabTarget {
+        override val tabId: String = "arr_${instance.id}"
+        override val label: String = instance.label
+    }
+
+    data class MediaServer(val integration: MediaServerIntegration) : UnifiedLibraryTabTarget {
+        override val tabId: String = "ms_${integration.id}"
+        override val label: String = integration.label
+    }
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class UnifiedLibraryViewModel(
     private val observeAllInstancesUseCase: ObserveAllInstancesUseCase,
@@ -69,6 +90,7 @@ class UnifiedLibraryViewModel(
     private val executeArrCommandUseCase: ExecuteArrCommandUseCase,
     private val preferencesStore: PreferencesStore,
     getActivityTasksUseCase: GetActivityTasksUseCase,
+    private val mediaServerManager: MediaServerManager? = null,
 ) : ViewModel() {
     val searchAllInstances: StateFlow<Boolean> =
         preferencesStore.unifiedLibrarySearchAllInstances
@@ -113,6 +135,94 @@ class UnifiedLibraryViewModel(
                 initialValue = emptyList(),
             )
 
+    val configuredMediaServers: StateFlow<List<MediaServerIntegration>> =
+        mediaServerManager?.observeIntegrations()
+            ?.map { list -> list.filter { it.enabled } }
+            ?.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = emptyList(),
+            ) ?: MutableStateFlow(emptyList())
+
+    val allTabs: StateFlow<List<UnifiedLibraryTabTarget>> =
+        combine(arrInstances, configuredMediaServers) { arrs, servers ->
+            val list = mutableListOf<UnifiedLibraryTabTarget>()
+            arrs.forEach { list.add(UnifiedLibraryTabTarget.Arr(it)) }
+            servers.forEach { list.add(UnifiedLibraryTabTarget.MediaServer(it)) }
+            list
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList(),
+        )
+
+    private val _selectedTab = MutableStateFlow<UnifiedLibraryTabTarget?>(null)
+    val selectedTab: StateFlow<UnifiedLibraryTabTarget?> = _selectedTab.asStateFlow()
+
+    private val _selectedMediaServer = MutableStateFlow<MediaServerIntegration?>(null)
+    val selectedMediaServer: StateFlow<MediaServerIntegration?> = _selectedMediaServer.asStateFlow()
+
+    private val _mediaServerLibraries = MutableStateFlow<List<UnifiedMediaLibrary>>(emptyList())
+    val mediaServerLibraries: StateFlow<List<UnifiedMediaLibrary>> = _mediaServerLibraries.asStateFlow()
+
+    private val _selectedMediaServerLibrary = MutableStateFlow<UnifiedMediaLibrary?>(null)
+    val selectedMediaServerLibrary: StateFlow<UnifiedMediaLibrary?> = _selectedMediaServerLibrary.asStateFlow()
+
+    private val _mediaServerRawItems = MutableStateFlow<List<UnifiedMediaItem>>(emptyList())
+    val mediaServerRawItems: StateFlow<List<UnifiedMediaItem>> = _mediaServerRawItems.asStateFlow()
+
+    private val _mediaServerIsLoading = MutableStateFlow(false)
+    val mediaServerIsLoading: StateFlow<Boolean> = _mediaServerIsLoading.asStateFlow()
+
+    private val _mediaServerViewType = MutableStateFlow(ViewType.Grid)
+    val mediaServerViewType: StateFlow<ViewType> = _mediaServerViewType.asStateFlow()
+
+    private val _mediaServerSortBy = MutableStateFlow(SortBy.Title)
+    val mediaServerSortBy: StateFlow<SortBy> = _mediaServerSortBy.asStateFlow()
+
+    private val _mediaServerSortOrder = MutableStateFlow(SortOrder.Asc)
+    val mediaServerSortOrder: StateFlow<SortOrder> = _mediaServerSortOrder.asStateFlow()
+
+    private val _mediaServerWatchedFilter = MutableStateFlow(WatchedFilter.ALL)
+    val mediaServerWatchedFilter: StateFlow<WatchedFilter> = _mediaServerWatchedFilter.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    val mediaServerFilteredItems: StateFlow<List<UnifiedMediaItem>> =
+        combine(
+            _mediaServerRawItems,
+            _searchQuery,
+            _mediaServerWatchedFilter,
+            _mediaServerSortBy,
+            _mediaServerSortOrder,
+        ) { items, query, filter, sort, order ->
+            var list = items
+            if (query.isNotBlank()) {
+                list = list.filter {
+                    it.title.contains(query, ignoreCase = true) ||
+                        it.seriesTitle?.contains(query, ignoreCase = true) == true
+                }
+            }
+            list = when (filter) {
+                WatchedFilter.ALL -> list
+                WatchedFilter.UNWATCHED -> list.filter { !it.played }
+                WatchedFilter.WATCHED -> list.filter { it.played }
+            }
+            val comparator = when (sort) {
+                SortBy.Title -> compareBy<UnifiedMediaItem> { it.title.lowercase() }
+                SortBy.Year -> compareBy<UnifiedMediaItem> { it.year ?: 0 }
+                SortBy.Added -> compareBy<UnifiedMediaItem> { it.lastPlayedDate ?: 0L }
+                SortBy.Rating -> compareBy<UnifiedMediaItem> { it.rating ?: 0.0 }
+                else -> compareBy<UnifiedMediaItem> { it.title.lowercase() }
+            }
+            if (order == SortOrder.Desc) list.sortedWith(comparator.reversed()) else list.sortedWith(comparator)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList(),
+        )
+
     private val _selectedInstance = MutableStateFlow<Instance?>(null)
     val selectedInstance: StateFlow<Instance?> = _selectedInstance.asStateFlow()
 
@@ -147,9 +257,6 @@ class UnifiedLibraryViewModel(
                 started = SharingStarted.Eagerly,
                 initialValue = emptySet(),
             )
-
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     val selectionState = MultiSelectState<Long>()
 
@@ -259,12 +366,19 @@ class UnifiedLibraryViewModel(
 
     init {
         viewModelScope.launch {
-            arrInstances.collect { instances ->
-                val current = _selectedInstance.value
-                if (current == null || instances.none { it.id == current.id }) {
-                    _selectedInstance.value = instances.firstOrNull()
+            allTabs.collect { tabs ->
+                val current = _selectedTab.value
+                if (current == null || tabs.none { it.tabId == current.tabId }) {
+                    tabs.firstOrNull()?.let { selectTab(it) } ?: run {
+                        _selectedTab.value = null
+                        _selectedInstance.value = null
+                        _selectedMediaServer.value = null
+                    }
                 } else {
-                    _selectedInstance.value = instances.firstOrNull { it.id == current.id }
+                    val updated = tabs.firstOrNull { it.tabId == current.tabId }
+                    if (updated != null && updated != current) {
+                        selectTab(updated)
+                    }
                 }
             }
         }
@@ -279,8 +393,146 @@ class UnifiedLibraryViewModel(
         }
     }
 
+    fun selectTab(tab: UnifiedLibraryTabTarget) {
+        _selectedTab.value = tab
+        when (tab) {
+            is UnifiedLibraryTabTarget.Arr -> {
+                _selectedInstance.value = tab.instance
+                _selectedMediaServer.value = null
+            }
+            is UnifiedLibraryTabTarget.MediaServer -> {
+                _selectedInstance.value = null
+                _selectedMediaServer.value = tab.integration
+                loadMediaServerLibrariesAndContents(tab.integration, null)
+            }
+        }
+    }
+
     fun selectInstance(instance: Instance) {
-        _selectedInstance.value = instance
+        selectTab(UnifiedLibraryTabTarget.Arr(instance))
+    }
+
+    fun selectMediaServer(server: MediaServerIntegration) {
+        selectTab(UnifiedLibraryTabTarget.MediaServer(server))
+    }
+
+    fun selectMediaServerLibrary(library: UnifiedMediaLibrary?) {
+        _selectedMediaServerLibrary.value = library
+        val server = _selectedMediaServer.value ?: return
+        loadMediaServerContents(server, library)
+    }
+
+    fun setMediaServerViewType(viewType: ViewType) {
+        _mediaServerViewType.value = viewType
+    }
+
+    fun toggleMediaServerViewType() {
+        _mediaServerViewType.value = if (_mediaServerViewType.value == ViewType.Grid) ViewType.List else ViewType.Grid
+    }
+
+    fun setMediaServerSortBy(sortBy: SortBy) {
+        _mediaServerSortBy.value = sortBy
+    }
+
+    fun setMediaServerSortOrder(order: SortOrder) {
+        _mediaServerSortOrder.value = order
+    }
+
+    fun toggleMediaServerSortOrder() {
+        _mediaServerSortOrder.value = if (_mediaServerSortOrder.value == SortOrder.Asc) SortOrder.Desc else SortOrder.Asc
+    }
+
+    fun setMediaServerWatchedFilter(filter: WatchedFilter) {
+        _mediaServerWatchedFilter.value = filter
+    }
+
+    fun refreshMediaServer() {
+        val server = _selectedMediaServer.value ?: return
+        loadMediaServerLibrariesAndContents(server, _selectedMediaServerLibrary.value)
+    }
+
+    fun toggleMediaServerWatched(item: UnifiedMediaItem) {
+        val manager = mediaServerManager ?: return
+        val repo = manager.getRepository(item.serverType) ?: return
+        viewModelScope.launch {
+            val newPlayed = !item.played
+            if (repo.markWatched(item.id, newPlayed) is NetworkResult.Success) {
+                _mediaServerRawItems.value = _mediaServerRawItems.value.map {
+                    if (it.id == item.id) it.copy(played = newPlayed) else it
+                }
+            }
+        }
+    }
+
+    private fun loadMediaServerLibrariesAndContents(
+        server: MediaServerIntegration,
+        targetLibrary: UnifiedMediaLibrary?,
+    ) {
+        val manager = mediaServerManager ?: return
+        viewModelScope.launch {
+            val repo = manager.getOrCreateRepository(server)
+            _mediaServerIsLoading.value = true
+            when (val libResult = repo.getLibraries()) {
+                is NetworkResult.Success -> {
+                    val libs = libResult.data
+                    _mediaServerLibraries.value = libs
+                    val libraryToLoad = targetLibrary?.takeIf { libs.any { l -> l.id == it.id } }
+                        ?: libs.firstOrNull()
+                    _selectedMediaServerLibrary.value = libraryToLoad
+                    if (libraryToLoad != null) {
+                        loadMediaServerContentsInternal(repo, libraryToLoad)
+                    } else {
+                        _mediaServerRawItems.value = emptyList()
+                        _mediaServerIsLoading.value = false
+                    }
+                }
+                else -> {
+                    _mediaServerIsLoading.value = false
+                }
+            }
+        }
+    }
+
+    private fun loadMediaServerContents(
+        server: MediaServerIntegration,
+        library: UnifiedMediaLibrary?,
+    ) {
+        val manager = mediaServerManager ?: return
+        viewModelScope.launch {
+            val repo = manager.getOrCreateRepository(server)
+            _mediaServerIsLoading.value = true
+            if (library != null) {
+                loadMediaServerContentsInternal(repo, library)
+            } else {
+                try {
+                    val results = _mediaServerLibraries.value.map { lib ->
+                        repo.getLibraryContents(lib.id, page = 0, pageSize = 100)
+                    }
+                    val all = mutableListOf<UnifiedMediaItem>()
+                    results.forEach { res ->
+                        if (res is NetworkResult.Success) all.addAll(res.data)
+                    }
+                    _mediaServerRawItems.value = all
+                } finally {
+                    _mediaServerIsLoading.value = false
+                }
+            }
+        }
+    }
+
+    private suspend fun loadMediaServerContentsInternal(
+        repo: MediaServerRepository,
+        library: UnifiedMediaLibrary,
+    ) {
+        when (val result = repo.getLibraryContents(library.id, page = 0, pageSize = 200)) {
+            is NetworkResult.Success -> {
+                _mediaServerRawItems.value = result.data
+                _mediaServerIsLoading.value = false
+            }
+            else -> {
+                _mediaServerIsLoading.value = false
+            }
+        }
     }
 
     fun refreshSelected() {

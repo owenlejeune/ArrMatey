@@ -31,8 +31,8 @@ import kotlinx.coroutines.launch
 class MediaServerManager(
     private val dao: MediaServerIntegrationDao,
     private val httpClientFactory: HttpClientFactory,
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
 ) {
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     private val _repositories = MutableStateFlow<Map<MediaServerType, MediaServerRepository>>(emptyMap())
     val activeRepositories: StateFlow<List<MediaServerRepository>> =
@@ -69,7 +69,22 @@ class MediaServerManager(
         _repositories.value = current
     }
 
-    fun getRepository(type: MediaServerType): MediaServerRepository? = _repositories.value[type]
+    fun getRepository(type: MediaServerType): MediaServerRepository? = _repositories.value[type] ?: cachedIntegrations[type]?.let { integration ->
+        val repo = createRepository(integration)
+        _repositories.value += (type to repo)
+        repo
+    }
+
+    fun getOrCreateRepository(integration: MediaServerIntegration): MediaServerRepository {
+        val existing = _repositories.value[integration.serverType]
+        if (existing != null && cachedIntegrations[integration.serverType] == integration) {
+            return existing
+        }
+        val repo = createRepository(integration)
+        cachedIntegrations[integration.serverType] = integration
+        _repositories.value += (integration.serverType to repo)
+        return repo
+    }
 
     fun observeIntegrations(): Flow<List<MediaServerIntegration>> = dao.observeAll()
 
@@ -127,13 +142,11 @@ class MediaServerManager(
         }.awaitAll().flatten()
     }
 
-    suspend fun testConnection(integration: MediaServerIntegration): NetworkResult<List<UnifiedMediaLibrary>> {
-        return try {
-            val repo = createRepository(integration)
-            repo.getLibraries()
-        } catch (e: Exception) {
-            NetworkResult.Error(message = e.message ?: "Connection test failed", cause = e)
-        }
+    suspend fun testConnection(integration: MediaServerIntegration): NetworkResult<List<UnifiedMediaLibrary>> = try {
+        val repo = createRepository(integration)
+        repo.getLibraries()
+    } catch (e: Exception) {
+        NetworkResult.Error(message = e.message ?: "Connection test failed", cause = e)
     }
 
     suspend fun authenticateMediaBrowser(

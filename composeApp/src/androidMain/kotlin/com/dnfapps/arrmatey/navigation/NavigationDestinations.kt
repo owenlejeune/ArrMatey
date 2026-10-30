@@ -218,3 +218,7 @@ sealed interface TracearrScreen : NavKey {
 
     data object Stats : TracearrScreen
 }
+
+sealed interface MediaServerLibraryScreen : NavKey {
+    data object Library : MediaServerLibraryScreen
+}

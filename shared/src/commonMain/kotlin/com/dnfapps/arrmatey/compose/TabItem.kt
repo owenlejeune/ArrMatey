@@ -67,6 +67,7 @@ sealed interface TabItem {
         BAZARR("captions.bubble", MR.strings.bazarr, associatedTypes = listOf(InstanceType.Bazarr)),
         DASHBOARD("rectangle.grid.3x1", MR.strings.dashboard),
         MONITORING("tv.badge.wifi", MR.strings.monitoring, associatedTypes = listOf(InstanceType.Tracearr, InstanceType.Tautulli)),
+        MEDIA_LIBRARY("play.tv", MR.strings.media_library),
         ;
 
         override val key: String get() = "standard_$name"

@@ -12,6 +12,8 @@ import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 
 /**
@@ -108,6 +110,8 @@ class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
 
 class TracearrTabNavigator : BaseNavigator<NavKey>(TracearrScreen.Main)
 
+class MediaServerLibraryTabNavigator : BaseNavigator<NavKey>(MediaServerLibraryScreen.Library)
+
 /**
  * Shared media navigation extensions.
  */
@@ -187,6 +191,27 @@ fun Navigator<*>.toMediaDetails(
         tvdbId = tvdbId,
         type = type,
         instanceId = instanceId,
+    )
+}
+
+fun Navigator<*>.toMediaDetails(item: UnifiedMediaItem) {
+    val reqType = when (item.type) {
+        MediaType.MOVIE -> RequestType.Movie
+        MediaType.SHOW, MediaType.SEASON, MediaType.EPISODE -> RequestType.Tv
+        else -> null
+    }
+    val instanceType = when (item.type) {
+        MediaType.MOVIE -> InstanceType.Radarr
+        MediaType.SHOW, MediaType.SEASON, MediaType.EPISODE -> InstanceType.Sonarr
+        MediaType.TRACK, MediaType.ALBUM -> InstanceType.Lidarr
+        else -> null
+    }
+    toDetails(
+        id = null,
+        tmdbId = item.tmdbId,
+        tvdbId = item.tvdbId,
+        requestType = reqType,
+        type = instanceType,
     )
 }
 

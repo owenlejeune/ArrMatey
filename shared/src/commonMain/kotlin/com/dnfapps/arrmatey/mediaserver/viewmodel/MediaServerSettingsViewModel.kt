@@ -382,14 +382,16 @@ class MediaServerSettingsViewModel(
         _configState.update { it?.copy(isTesting = true, errorMessage = null, testSuccess = null) }
 
         viewModelScope.launch {
-            when (val res = mediaServerManager.authenticateMediaBrowser(
-                serverType = state.serverType,
-                baseUrl = state.url,
-                username = state.username,
-                password = state.password,
-                clientIdentifier = state.clientIdentifier,
-                headers = state.headers,
-            )) {
+            when (
+                val res = mediaServerManager.authenticateMediaBrowser(
+                    serverType = state.serverType,
+                    baseUrl = state.url,
+                    username = state.username,
+                    password = state.password,
+                    clientIdentifier = state.clientIdentifier,
+                    headers = state.headers,
+                )
+            ) {
                 is NetworkResult.Success -> {
                     val auth = res.data
                     _configState.update {

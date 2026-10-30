@@ -141,6 +141,11 @@ class NavigationManager(
         settings.toAddDownloadClient()
     }
 
+    fun openIntegrationsSettings() {
+        openOverlay(TabItem.Settings)
+        settings.toIntegrations()
+    }
+
     fun openArrTab(type: InstanceType) {
         when (type) {
             InstanceType.Seerr -> openRequestsTab()

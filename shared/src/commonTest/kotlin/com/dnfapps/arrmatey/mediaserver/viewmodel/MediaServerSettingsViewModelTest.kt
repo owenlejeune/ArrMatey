@@ -31,8 +31,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -44,13 +42,11 @@ private class FakeMediaServerDao : MediaServerIntegrationDao {
 
     override fun observeAll(): Flow<List<MediaServerIntegration>> = data.asStateFlow()
 
-    override fun observeByType(type: MediaServerType): Flow<MediaServerIntegration?> =
-        data.map { list -> list.firstOrNull { it.serverType == type } }
+    override fun observeByType(type: MediaServerType): Flow<MediaServerIntegration?> = data.map { list -> list.firstOrNull { it.serverType == type } }
 
     override suspend fun getById(id: Long): MediaServerIntegration? = data.value.firstOrNull { it.id == id }
 
-    override suspend fun getByType(type: MediaServerType): MediaServerIntegration? =
-        data.value.firstOrNull { it.serverType == type }
+    override suspend fun getByType(type: MediaServerType): MediaServerIntegration? = data.value.firstOrNull { it.serverType == type }
 
     override suspend fun getAll(): List<MediaServerIntegration> = data.value
 
@@ -148,7 +144,7 @@ class MediaServerSettingsViewModelTest {
                     token = EncryptedString("secret-jf-token"),
                     username = "jellyuser",
                     clientIdentifier = "jf-client-id",
-                )
+                ),
             )
             val (viewModel, _) = createViewModel(dao = dao)
             viewModel.openConfiguration(MediaServerType.Jellyfin)
@@ -205,7 +201,7 @@ class MediaServerSettingsViewModelTest {
                     url = "http://localhost:32400",
                     token = EncryptedString("token"),
                     clientIdentifier = "cid",
-                )
+                ),
             )
             val (viewModel, _) = createViewModel(dao = dao)
             viewModel.openConfiguration(MediaServerType.Plex)
@@ -240,8 +236,8 @@ class MediaServerSettingsViewModelTest {
                         port = 32400,
                         uri = "https://192-168-1-50.plex.direct:32400",
                         local = true,
-                    )
-                )
+                    ),
+                ),
             )
 
             viewModel.selectDiscoveredPlexServer(resource)
