@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.arr.api.model.SeriesAddOptions
 import com.dnfapps.arrmatey.arr.api.model.SeriesRatings
 import com.dnfapps.arrmatey.arr.api.model.SeriesStatistics
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.utils.EncryptionManager
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
@@ -138,4 +139,10 @@ class Converters : KoinComponent {
             emptyList()
         }
     }
+
+    @TypeConverter
+    fun storeMediaServerType(type: MediaServerType): String = type.name
+
+    @TypeConverter
+    fun retrieveMediaServerType(value: String): MediaServerType = MediaServerType.valueOf(value)
 }

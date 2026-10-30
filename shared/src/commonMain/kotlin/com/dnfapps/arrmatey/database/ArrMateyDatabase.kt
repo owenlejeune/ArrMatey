@@ -13,14 +13,16 @@ import com.dnfapps.arrmatey.database.migrations.migrations
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.mediaserver.database.MediaServerIntegrationDao
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
 import com.dnfapps.arrmatey.webpage.model.CustomWebpage
 import com.dnfapps.arrmatey.wol.model.WolDevice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
 @Database(
-    entities = [Instance::class, DownloadClient::class, CustomWebpage::class, WolDevice::class],
-    version = 16,
+    entities = [Instance::class, DownloadClient::class, CustomWebpage::class, WolDevice::class, MediaServerIntegration::class],
+    version = 17,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -33,6 +35,8 @@ abstract class ArrMateyDatabase : RoomDatabase() {
     abstract fun getCustomWebpageDao(): CustomWebpageDao
 
     abstract fun getWolDeviceDao(): WolDeviceDao
+
+    abstract fun getMediaServerIntegrationDao(): MediaServerIntegrationDao
 }
 
 @Suppress("KotlinNoActualForExpect")

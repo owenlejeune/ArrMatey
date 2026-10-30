@@ -740,6 +740,14 @@
     <string name="report_an_issue">Report an issue</string>
     <string name="watch_on_plex">Watch on Plex</string>
     <string name="watch_on_jellyfin">Watch on Jellyfin</string>
+    <string name="watch_on_emby">Watch on Emby</string>
+    <string name="plex">Plex</string>
+    <string name="jellyfin">Jellyfin</string>
+    <string name="emby">Emby</string>
+    <string name="media_server">Media Server</string>
+    <string name="media_servers">Media Servers</string>
+    <string name="media_library">Media Library</string>
+    <string name="continue_watching">Continue Watching</string>
     <string name="watch">Watch</string>
     <string name="watch_trailer">Watch Trailer</string>
     <string name="view_request">View Request</string>

@@ -148,6 +148,8 @@ import com.dnfapps.arrmatey.instances.usecase.UpdateCalendarFilterPreferenceUseC
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
 import com.dnfapps.arrmatey.logging.FileSink
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
+import com.dnfapps.arrmatey.mediaserver.usecase.JellyfinQuickConnectUseCase
 import com.dnfapps.arrmatey.monitoring.usecase.GetPlaybackStreamsUseCase
 import com.dnfapps.arrmatey.monitoring.usecase.TerminatePlaybackStreamUseCase
 import com.dnfapps.arrmatey.monitoring.viewmodel.MonitoringHistoryViewModel
@@ -253,6 +255,7 @@ val databaseModule =
         single { get<ArrMateyDatabase>().getDownloadClientDao() }
         single { get<ArrMateyDatabase>().getCustomWebpageDao() }
         single { get<ArrMateyDatabase>().getWolDeviceDao() }
+        single { get<ArrMateyDatabase>().getMediaServerIntegrationDao() }
     }
 
 val networkModule =
@@ -296,6 +299,8 @@ val repositoryModule =
         single { DownloadClientRepository(get()) }
         single { DownloadClientManager(get(), get()) }
 
+        single { MediaServerManager(get(), get()) }
+
         single { CustomWebpageRepository(get()) }
         single { WolDeviceRepository(get()) }
 
@@ -336,6 +341,7 @@ val useCaseModule =
         factory { TestNewInstanceConnectionUseCase(get()) }
         factory { SeerrAuthUseCase(get()) }
         factory { PlexAuthUseCase(get()) }
+        factory { JellyfinQuickConnectUseCase(get()) }
         factory { CreateInstanceUseCase(get(), get()) }
         factory { UpdateInstanceUseCase(get()) }
         factory { DismissInfoCardUseCase(get()) }
