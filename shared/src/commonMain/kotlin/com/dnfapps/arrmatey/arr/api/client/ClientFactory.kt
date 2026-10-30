@@ -178,7 +178,7 @@ open class HttpClientFactory(
 
     open fun createGeneric(): HttpClient = createInstanceClient(null, json, logger)
 
-    fun createMediaServerClient(integration: MediaServerIntegration): HttpClient = HttpClient {
+    open fun createMediaServerClient(integration: MediaServerIntegration): HttpClient = HttpClient {
         install(ContentNegotiation) {
             json(json)
         }

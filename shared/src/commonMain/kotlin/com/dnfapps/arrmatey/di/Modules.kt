@@ -150,6 +150,7 @@ import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
 import com.dnfapps.arrmatey.logging.FileSink
 import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.mediaserver.usecase.JellyfinQuickConnectUseCase
+import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerSettingsViewModel
 import com.dnfapps.arrmatey.monitoring.usecase.GetPlaybackStreamsUseCase
 import com.dnfapps.arrmatey.monitoring.usecase.TerminatePlaybackStreamUseCase
 import com.dnfapps.arrmatey.monitoring.viewmodel.MonitoringHistoryViewModel
@@ -645,6 +646,7 @@ val viewModelModule =
             ManualImportViewModel(item, get(), get())
         }
         viewModelOf(::UnifiedSearchViewModel)
+        viewModelOf(::MediaServerSettingsViewModel)
     }
 
 val resourcesModule =

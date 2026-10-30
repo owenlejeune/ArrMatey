@@ -1,13 +1,18 @@
 package com.dnfapps.arrmatey.mediaserver.repository
 
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
+import com.dnfapps.arrmatey.database.EncryptedString
+import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.mediaserver.client.EmbyClient
 import com.dnfapps.arrmatey.mediaserver.client.JellyfinClient
 import com.dnfapps.arrmatey.mediaserver.client.PlexClient
 import com.dnfapps.arrmatey.mediaserver.database.MediaServerIntegrationDao
+import com.dnfapps.arrmatey.mediaserver.model.MediaBrowserAuthRequest
+import com.dnfapps.arrmatey.mediaserver.model.MediaBrowserAuthResult
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaLibrary
 import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -120,6 +125,39 @@ class MediaServerManager(
                 }
             }
         }.awaitAll().flatten()
+    }
+
+    suspend fun testConnection(integration: MediaServerIntegration): NetworkResult<List<UnifiedMediaLibrary>> {
+        return try {
+            val repo = createRepository(integration)
+            repo.getLibraries()
+        } catch (e: Exception) {
+            NetworkResult.Error(message = e.message ?: "Connection test failed", cause = e)
+        }
+    }
+
+    suspend fun authenticateMediaBrowser(
+        serverType: MediaServerType,
+        baseUrl: String,
+        username: String,
+        password: String,
+        clientIdentifier: String,
+        headers: List<InstanceHeader> = emptyList(),
+    ): NetworkResult<MediaBrowserAuthResult> {
+        val tempIntegration = MediaServerIntegration(
+            serverType = serverType,
+            label = serverType.name,
+            url = baseUrl,
+            token = EncryptedString(""),
+            clientIdentifier = clientIdentifier,
+            headers = headers,
+        )
+        val httpClient = httpClientFactory.createMediaServerClient(tempIntegration)
+        return when (serverType) {
+            MediaServerType.Jellyfin -> JellyfinClient(tempIntegration, httpClient).authenticate(MediaBrowserAuthRequest(username, password))
+            MediaServerType.Emby -> EmbyClient(tempIntegration, httpClient).authenticate(MediaBrowserAuthRequest(username, password))
+            else -> NetworkResult.Error(message = "Unsupported server type for credentials authentication")
+        }
     }
 
     private fun createRepository(integration: MediaServerIntegration): MediaServerRepository {
