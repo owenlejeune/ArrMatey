@@ -32,6 +32,7 @@ struct TabItemContent: View {
                 case .bazarr: BazarrTab()
                 case .dashboard: DashboardTab()
                 case .monitoring: MonitoringTab()
+                @unknown default: EmptyView()
                 }
             } else if let custom = tabItem as? TabItemCustomWebpage {
                 CustomWebpageViewerScreen(webpageId: custom.id)
