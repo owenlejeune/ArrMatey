@@ -27,6 +27,8 @@ class PlexClient(
         header("X-Plex-Token", token)
         header("X-Plex-Client-Identifier", clientIdentifier)
         header("Accept", "application/json")
+        parameter("X-Plex-Token", token)
+        parameter("X-Plex-Client-Identifier", clientIdentifier)
     }
 
     suspend fun getSectionMedia(
@@ -34,13 +36,17 @@ class PlexClient(
         start: Int = 0,
         size: Int = 50,
         filterType: Int? = null,
-        sort: String? = "titleSort:asc",
+        sort: String? = null,
     ): NetworkResult<PlexRootContainer<PlexMediaListing>> = httpClient.safeGet("$baseUrl/library/sections/$sectionId/all") {
         header("X-Plex-Token", token)
         header("X-Plex-Client-Identifier", clientIdentifier)
         header("X-Plex-Container-Start", start.toString())
         header("X-Plex-Container-Size", size.toString())
         header("Accept", "application/json")
+        parameter("X-Plex-Token", token)
+        parameter("X-Plex-Client-Identifier", clientIdentifier)
+        parameter("X-Plex-Container-Start", start)
+        parameter("X-Plex-Container-Size", size)
         if (filterType != null) parameter("type", filterType)
         if (sort != null) parameter("sort", sort)
     }
@@ -49,26 +55,33 @@ class PlexClient(
         header("X-Plex-Token", token)
         header("X-Plex-Client-Identifier", clientIdentifier)
         header("Accept", "application/json")
+        parameter("X-Plex-Token", token)
+        parameter("X-Plex-Client-Identifier", clientIdentifier)
     }
 
     suspend fun getItemChildren(ratingKey: String): NetworkResult<PlexRootContainer<PlexMediaListing>> = httpClient.safeGet("$baseUrl/library/metadata/$ratingKey/children") {
         header("X-Plex-Token", token)
         header("X-Plex-Client-Identifier", clientIdentifier)
         header("Accept", "application/json")
+        parameter("X-Plex-Token", token)
+        parameter("X-Plex-Client-Identifier", clientIdentifier)
     }
 
     suspend fun getOnDeck(): NetworkResult<PlexRootContainer<PlexMediaListing>> = httpClient.safeGet("$baseUrl/library/onDeck") {
         header("X-Plex-Token", token)
         header("X-Plex-Client-Identifier", clientIdentifier)
         header("Accept", "application/json")
+        parameter("X-Plex-Token", token)
+        parameter("X-Plex-Client-Identifier", clientIdentifier)
     }
 
-    suspend fun search(query: String): NetworkResult<PlexRootContainer<PlexMediaListing>> = httpClient.safeGet("$baseUrl/hubs/search") {
+    suspend fun search(query: String): NetworkResult<PlexRootContainer<PlexMediaListing>> = httpClient.safeGet("$baseUrl/search") {
         header("X-Plex-Token", token)
         header("X-Plex-Client-Identifier", clientIdentifier)
         header("Accept", "application/json")
+        parameter("X-Plex-Token", token)
+        parameter("X-Plex-Client-Identifier", clientIdentifier)
         parameter("query", query)
-        parameter("limit", 30)
     }
 
     suspend fun markWatched(ratingKey: String, watched: Boolean): NetworkResult<Unit> {
@@ -76,6 +89,8 @@ class PlexClient(
         return httpClient.safeGet("$baseUrl$endpoint") {
             header("X-Plex-Token", token)
             header("X-Plex-Client-Identifier", clientIdentifier)
+            parameter("X-Plex-Token", token)
+            parameter("X-Plex-Client-Identifier", clientIdentifier)
             parameter("key", ratingKey)
             parameter("identifier", "com.plexapp.plugins.library")
         }
@@ -84,5 +99,7 @@ class PlexClient(
     suspend fun refreshSection(sectionId: String): NetworkResult<Unit> = httpClient.safeGet("$baseUrl/library/sections/$sectionId/refresh") {
         header("X-Plex-Token", token)
         header("X-Plex-Client-Identifier", clientIdentifier)
+        parameter("X-Plex-Token", token)
+        parameter("X-Plex-Client-Identifier", clientIdentifier)
     }
 }

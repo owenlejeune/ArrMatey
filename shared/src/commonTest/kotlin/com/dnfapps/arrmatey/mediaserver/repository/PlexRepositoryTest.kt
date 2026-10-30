@@ -192,4 +192,61 @@ class PlexRepositoryTest {
         )
         assertEquals("plex://preplay/?metadataKey=%2Flibrary%2Fmetadata%2F12345&server=server-uuid-999", deepLink)
     }
+
+    @Test
+    fun handlesNullOrMissingMetadataSafely() = runTest {
+        val mockEngine = MockEngine {
+            respond(
+                content = """
+                    {
+                      "MediaContainer": {
+                        "size": 0
+                      }
+                    }
+                """.trimIndent(),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+            )
+        }
+
+        val repository = PlexRepository(createClient(mockEngine))
+        val result = repository.getLibraryContents("1", page = 0, pageSize = 50)
+
+        assertTrue(result is NetworkResult.Success)
+        assertTrue(result.data.isEmpty())
+    }
+
+    @Test
+    fun parsesLegacyGuidsAndNullFields() = runTest {
+        val mockEngine = MockEngine {
+            respond(
+                content = """
+                    {
+                      "MediaContainer": {
+                        "size": 1,
+                        "Metadata": [
+                          {
+                            "ratingKey": "999",
+                            "title": "Legacy Movie",
+                            "type": "movie",
+                            "guid": "com.plexapp.agents.themoviedb://550?lang=en"
+                          }
+                        ]
+                      }
+                    }
+                """.trimIndent(),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+            )
+        }
+
+        val repository = PlexRepository(createClient(mockEngine))
+        val result = repository.getLibraryContents("1", page = 0, pageSize = 50)
+
+        assertTrue(result is NetworkResult.Success)
+        val item = result.data.first()
+        assertEquals("999", item.id)
+        assertEquals("Legacy Movie", item.title)
+        assertEquals(550L, item.tmdbId)
+    }
 }

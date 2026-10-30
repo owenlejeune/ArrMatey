@@ -20,7 +20,7 @@ class PlexRepository(
 
     override suspend fun getLibraries(): NetworkResult<List<UnifiedMediaLibrary>> = when (val res = client.getSections()) {
         is NetworkResult.Success -> {
-            val libs = res.data.mediaContainer.directories.map { dir ->
+            val libs = res.data.mediaContainer.directories.orEmpty().map { dir ->
                 UnifiedMediaLibrary(
                     id = dir.key,
                     title = dir.title,
@@ -41,7 +41,9 @@ class PlexRepository(
         sort: String?,
     ): NetworkResult<List<UnifiedMediaItem>> = when (val res = client.getSectionMedia(sectionId = libraryId, start = page * pageSize, size = pageSize, sort = sort)) {
         is NetworkResult.Success -> {
-            val items = res.data.mediaContainer.metadata.map { it.toUnifiedMediaItem(libraryId) }
+            val items = res.data.mediaContainer.metadata.orEmpty()
+                .filter { !it.ratingKey.isNullOrBlank() }
+                .map { it.toUnifiedMediaItem(libraryId) }
             NetworkResult.Success(items)
         }
         is NetworkResult.Error -> res
@@ -50,7 +52,7 @@ class PlexRepository(
 
     override suspend fun getItemDetail(itemId: String): NetworkResult<UnifiedMediaItem> = when (val res = client.getItemMetadata(itemId)) {
         is NetworkResult.Success -> {
-            val first = res.data.mediaContainer.metadata.firstOrNull()
+            val first = res.data.mediaContainer.metadata.orEmpty().firstOrNull { !it.ratingKey.isNullOrBlank() }
             if (first != null) {
                 NetworkResult.Success(first.toUnifiedMediaItem())
             } else {
@@ -63,7 +65,10 @@ class PlexRepository(
 
     override suspend fun getContinueWatching(limit: Int): NetworkResult<List<UnifiedMediaItem>> = when (val res = client.getOnDeck()) {
         is NetworkResult.Success -> {
-            val items = res.data.mediaContainer.metadata.take(limit).map { it.toUnifiedMediaItem() }
+            val items = res.data.mediaContainer.metadata.orEmpty()
+                .filter { !it.ratingKey.isNullOrBlank() }
+                .take(limit)
+                .map { it.toUnifiedMediaItem() }
             NetworkResult.Success(items)
         }
         is NetworkResult.Error -> res
@@ -72,7 +77,10 @@ class PlexRepository(
 
     override suspend fun search(query: String, limit: Int): NetworkResult<List<UnifiedMediaItem>> = when (val res = client.search(query)) {
         is NetworkResult.Success -> {
-            val items = res.data.mediaContainer.metadata.take(limit).map { it.toUnifiedMediaItem() }
+            val items = res.data.mediaContainer.metadata.orEmpty()
+                .filter { !it.ratingKey.isNullOrBlank() }
+                .take(limit)
+                .map { it.toUnifiedMediaItem() }
             NetworkResult.Success(items)
         }
         is NetworkResult.Error -> res
@@ -96,15 +104,16 @@ class PlexRepository(
     }
 
     private fun PlexMetadataItem.toUnifiedMediaItem(libraryId: String? = null): UnifiedMediaItem {
-        val firstMedia = media.firstOrNull()
+        val firstMedia = media?.firstOrNull()
+        val rKey = ratingKey ?: ""
         return UnifiedMediaItem(
-            id = ratingKey,
-            title = title,
-            type = MediaType.fromString(type),
+            id = rKey,
+            title = title ?: "",
+            type = type?.let { MediaType.fromString(it) } ?: MediaType.UNKNOWN,
             year = year,
             summary = summary,
-            posterUrl = thumb?.let { buildImageUrl(it, ratingKey) },
-            backdropUrl = art?.let { buildImageUrl(it, ratingKey, maxWidth = 1280) },
+            posterUrl = thumb?.let { buildImageUrl(it, rKey) },
+            backdropUrl = art?.let { buildImageUrl(it, rKey, maxWidth = 1280) },
             tmdbId = extractTmdbId(),
             tvdbId = extractTvdbId(),
             imdbId = extractImdbId(),

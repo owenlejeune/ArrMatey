@@ -11,14 +11,14 @@ data class PlexRootContainer<T>(
 @Serializable
 data class PlexDirectoryListing(
     @SerialName("size") val size: Int = 0,
-    @SerialName("Directory") val directories: List<PlexDirectory> = emptyList(),
+    @SerialName("Directory") val directories: List<PlexDirectory>? = null,
 )
 
 @Serializable
 data class PlexDirectory(
-    @SerialName("key") val key: String,
-    @SerialName("title") val title: String,
-    @SerialName("type") val type: String,
+    @SerialName("key") val key: String = "",
+    @SerialName("title") val title: String = "",
+    @SerialName("type") val type: String = "",
 )
 
 @Serializable
@@ -26,16 +26,16 @@ data class PlexMediaListing(
     @SerialName("size") val size: Int = 0,
     @SerialName("totalSize") val totalSize: Int? = null,
     @SerialName("offset") val offset: Int? = null,
-    @SerialName("Metadata") val metadata: List<PlexMetadataItem> = emptyList(),
+    @SerialName("Metadata") val metadata: List<PlexMetadataItem>? = null,
 )
 
 @Serializable
 data class PlexMetadataItem(
-    @SerialName("ratingKey") val ratingKey: String,
+    @SerialName("ratingKey") val ratingKey: String? = null,
     @SerialName("key") val key: String? = null,
     @SerialName("guid") val guid: String? = null,
-    @SerialName("title") val title: String,
-    @SerialName("type") val type: String,
+    @SerialName("title") val title: String? = null,
+    @SerialName("type") val type: String? = null,
     @SerialName("year") val year: Int? = null,
     @SerialName("summary") val summary: String? = null,
     @SerialName("thumb") val thumb: String? = null,
@@ -51,31 +51,43 @@ data class PlexMetadataItem(
     @SerialName("grandparentTitle") val grandparentTitle: String? = null,
     @SerialName("index") val index: Int? = null,
     @SerialName("parentIndex") val parentIndex: Int? = null,
-    @SerialName("Guid") val guids: List<PlexGuid> = emptyList(),
-    @SerialName("Media") val media: List<PlexMediaItem> = emptyList(),
+    @SerialName("Guid") val guids: List<PlexGuid>? = null,
+    @SerialName("Media") val media: List<PlexMediaItem>? = null,
 ) {
     fun extractTmdbId(): Long? {
-        val tmdbGuid = guids.firstOrNull { it.id.startsWith("tmdb://") }?.id
+        val tmdbGuid = guids?.firstOrNull { it.id.startsWith("tmdb://") }?.id
             ?: guid?.takeIf { it.startsWith("tmdb://") }
-        return tmdbGuid?.removePrefix("tmdb://")?.toLongOrNull()
+        if (tmdbGuid != null) {
+            return tmdbGuid.removePrefix("tmdb://").toLongOrNull()
+        }
+        val legacy = guid?.takeIf { it.contains("themoviedb://") }
+        return legacy?.substringAfter("themoviedb://")?.substringBefore("?")?.toLongOrNull()
     }
 
     fun extractTvdbId(): Long? {
-        val tvdbGuid = guids.firstOrNull { it.id.startsWith("tvdb://") }?.id
+        val tvdbGuid = guids?.firstOrNull { it.id.startsWith("tvdb://") }?.id
             ?: guid?.takeIf { it.startsWith("tvdb://") }
-        return tvdbGuid?.removePrefix("tvdb://")?.toLongOrNull()
+        if (tvdbGuid != null) {
+            return tvdbGuid.removePrefix("tvdb://").toLongOrNull()
+        }
+        val legacy = guid?.takeIf { it.contains("thetvdb://") }
+        return legacy?.substringAfter("thetvdb://")?.substringBefore("?")?.toLongOrNull()
     }
 
     fun extractImdbId(): String? {
-        val imdbGuid = guids.firstOrNull { it.id.startsWith("imdb://") }?.id
+        val imdbGuid = guids?.firstOrNull { it.id.startsWith("imdb://") }?.id
             ?: guid?.takeIf { it.startsWith("imdb://") }
-        return imdbGuid?.removePrefix("imdb://")
+        if (imdbGuid != null) {
+            return imdbGuid.removePrefix("imdb://")
+        }
+        val legacy = guid?.takeIf { it.contains("imdb://") }
+        return legacy?.substringAfter("imdb://")?.substringBefore("?")
     }
 }
 
 @Serializable
 data class PlexGuid(
-    @SerialName("id") val id: String,
+    @SerialName("id") val id: String = "",
 )
 
 @Serializable
@@ -85,7 +97,7 @@ data class PlexMediaItem(
     @SerialName("videoCodec") val videoCodec: String? = null,
     @SerialName("audioCodec") val audioCodec: String? = null,
     @SerialName("audioChannels") val audioChannels: Int? = null,
-    @SerialName("Part") val part: List<PlexPart> = emptyList(),
+    @SerialName("Part") val part: List<PlexPart>? = null,
 )
 
 @Serializable

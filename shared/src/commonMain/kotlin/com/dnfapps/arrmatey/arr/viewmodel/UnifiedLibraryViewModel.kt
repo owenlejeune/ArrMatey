@@ -45,6 +45,8 @@ import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -364,20 +366,26 @@ class UnifiedLibraryViewModel(
             initialValue = null,
         )
 
+    private var userHasSelectedTab = false
+
     init {
         viewModelScope.launch {
             allTabs.collect { tabs ->
                 val current = _selectedTab.value
+                val firstArr = tabs.firstOrNull { it is UnifiedLibraryTabTarget.Arr }
                 if (current == null || tabs.none { it.tabId == current.tabId }) {
-                    tabs.firstOrNull()?.let { selectTab(it) } ?: run {
+                    val defaultTab = firstArr ?: tabs.firstOrNull()
+                    defaultTab?.let { selectTab(it, userInitiated = false) } ?: run {
                         _selectedTab.value = null
                         _selectedInstance.value = null
                         _selectedMediaServer.value = null
                     }
+                } else if (!userHasSelectedTab && current is UnifiedLibraryTabTarget.MediaServer && firstArr != null) {
+                    selectTab(firstArr, userInitiated = false)
                 } else {
                     val updated = tabs.firstOrNull { it.tabId == current.tabId }
                     if (updated != null && updated != current) {
-                        selectTab(updated)
+                        selectTab(updated, userInitiated = false)
                     }
                 }
             }
@@ -393,7 +401,10 @@ class UnifiedLibraryViewModel(
         }
     }
 
-    fun selectTab(tab: UnifiedLibraryTabTarget) {
+    fun selectTab(tab: UnifiedLibraryTabTarget, userInitiated: Boolean = false) {
+        if (userInitiated) {
+            userHasSelectedTab = true
+        }
         _selectedTab.value = tab
         when (tab) {
             is UnifiedLibraryTabTarget.Arr -> {
@@ -409,11 +420,11 @@ class UnifiedLibraryViewModel(
     }
 
     fun selectInstance(instance: Instance) {
-        selectTab(UnifiedLibraryTabTarget.Arr(instance))
+        selectTab(UnifiedLibraryTabTarget.Arr(instance), userInitiated = true)
     }
 
     fun selectMediaServer(server: MediaServerIntegration) {
-        selectTab(UnifiedLibraryTabTarget.MediaServer(server))
+        selectTab(UnifiedLibraryTabTarget.MediaServer(server), userInitiated = true)
     }
 
     fun selectMediaServerLibrary(library: UnifiedMediaLibrary?) {
@@ -477,14 +488,16 @@ class UnifiedLibraryViewModel(
                     val libs = libResult.data
                     _mediaServerLibraries.value = libs
                     val libraryToLoad = targetLibrary?.takeIf { libs.any { l -> l.id == it.id } }
-                        ?: libs.firstOrNull()
                     _selectedMediaServerLibrary.value = libraryToLoad
                     if (libraryToLoad != null) {
                         loadMediaServerContentsInternal(repo, libraryToLoad)
                     } else {
-                        _mediaServerRawItems.value = emptyList()
-                        _mediaServerIsLoading.value = false
+                        loadAllMediaServerContentsInternal(repo, libs)
                     }
+                }
+                is NetworkResult.Error -> {
+                    _errorMessage.value = libResult.message ?: "Failed to load libraries"
+                    _mediaServerIsLoading.value = false
                 }
                 else -> {
                     _mediaServerIsLoading.value = false
@@ -504,18 +517,7 @@ class UnifiedLibraryViewModel(
             if (library != null) {
                 loadMediaServerContentsInternal(repo, library)
             } else {
-                try {
-                    val results = _mediaServerLibraries.value.map { lib ->
-                        repo.getLibraryContents(lib.id, page = 0, pageSize = 100)
-                    }
-                    val all = mutableListOf<UnifiedMediaItem>()
-                    results.forEach { res ->
-                        if (res is NetworkResult.Success) all.addAll(res.data)
-                    }
-                    _mediaServerRawItems.value = all
-                } finally {
-                    _mediaServerIsLoading.value = false
-                }
+                loadAllMediaServerContentsInternal(repo, _mediaServerLibraries.value)
             }
         }
     }
@@ -529,9 +531,34 @@ class UnifiedLibraryViewModel(
                 _mediaServerRawItems.value = result.data
                 _mediaServerIsLoading.value = false
             }
+            is NetworkResult.Error -> {
+                _errorMessage.value = result.message ?: "Failed to load library items"
+                _mediaServerIsLoading.value = false
+            }
             else -> {
                 _mediaServerIsLoading.value = false
             }
+        }
+    }
+
+    private suspend fun loadAllMediaServerContentsInternal(
+        repo: MediaServerRepository,
+        libraries: List<UnifiedMediaLibrary>,
+    ) = coroutineScope {
+        try {
+            val deferredList = libraries.map { lib ->
+                async { repo.getLibraryContents(lib.id, page = 0, pageSize = 100) }
+            }
+            val results = deferredList.awaitAll()
+            val all = mutableListOf<UnifiedMediaItem>()
+            results.forEach { res ->
+                if (res is NetworkResult.Success) all.addAll(res.data)
+            }
+            _mediaServerRawItems.value = all
+        } catch (e: Exception) {
+            _errorMessage.value = e.message ?: "Error loading media items"
+        } finally {
+            _mediaServerIsLoading.value = false
         }
     }
 

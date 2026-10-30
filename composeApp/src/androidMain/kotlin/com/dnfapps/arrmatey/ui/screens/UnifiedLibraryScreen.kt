@@ -282,7 +282,7 @@ fun UnifiedLibraryScreen(
                                                 selected = tabTarget.tabId == currentTab.tabId,
                                                 onClick = {
                                                     textFieldState.setTextAndPlaceCursorAtEnd("")
-                                                    unifiedLibraryViewModel.selectTab(tabTarget)
+                                                    unifiedLibraryViewModel.selectTab(tabTarget, userInitiated = true)
                                                 },
                                                 text = {
                                                     Row(
@@ -319,7 +319,7 @@ fun UnifiedLibraryScreen(
                                                 selected = tabTarget.tabId == currentTab.tabId,
                                                 onClick = {
                                                     textFieldState.setTextAndPlaceCursorAtEnd("")
-                                                    unifiedLibraryViewModel.selectTab(tabTarget)
+                                                    unifiedLibraryViewModel.selectTab(tabTarget, userInitiated = true)
                                                 },
                                                 text = {
                                                     Row(
@@ -547,7 +547,7 @@ fun UnifiedLibraryScreen(
                                                 selected = tabTarget.tabId == currentTab.tabId,
                                                 onClick = {
                                                     textFieldState.setTextAndPlaceCursorAtEnd("")
-                                                    unifiedLibraryViewModel.selectTab(tabTarget)
+                                                    unifiedLibraryViewModel.selectTab(tabTarget, userInitiated = true)
                                                 },
                                                 text = {
                                                     Row(
@@ -584,7 +584,7 @@ fun UnifiedLibraryScreen(
                                                 selected = tabTarget.tabId == currentTab.tabId,
                                                 onClick = {
                                                     textFieldState.setTextAndPlaceCursorAtEnd("")
-                                                    unifiedLibraryViewModel.selectTab(tabTarget)
+                                                    unifiedLibraryViewModel.selectTab(tabTarget, userInitiated = true)
                                                 },
                                                 text = {
                                                     Row(

@@ -179,6 +179,7 @@ open class HttpClientFactory(
     open fun createGeneric(): HttpClient = createInstanceClient(null, json, logger)
 
     open fun createMediaServerClient(integration: MediaServerIntegration): HttpClient = HttpClient {
+        expectSuccess = true
         install(ContentNegotiation) {
             json(json)
         }
