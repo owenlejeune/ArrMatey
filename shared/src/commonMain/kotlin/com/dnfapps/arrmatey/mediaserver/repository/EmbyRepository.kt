@@ -83,6 +83,15 @@ class EmbyRepository(
         is NetworkResult.Loading -> res
     }
 
+    override suspend fun getShowEpisodes(showId: String): NetworkResult<List<UnifiedMediaItem>> = when (val res = client.getShowEpisodes(userId, showId)) {
+        is NetworkResult.Success -> {
+            val items = res.data.items.map { it.toUnifiedMediaItem() }
+            NetworkResult.Success(items)
+        }
+        is NetworkResult.Error -> res
+        is NetworkResult.Loading -> res
+    }
+
     override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(userId, itemId, watched)
 
     override fun buildImageUrl(imageKeyOrTag: String, itemId: String, maxWidth: Int): String {
@@ -96,6 +105,12 @@ class EmbyRepository(
     override fun buildDeepLinkUrl(item: UnifiedMediaItem): String {
         val serverParam = integration.serverId?.let { "&serverId=$it" } ?: ""
         return "emby://open?itemId=${item.id}$serverParam"
+    }
+
+    override fun buildWebUrl(item: UnifiedMediaItem): String? {
+        val cleanBase = baseUrl.trimEnd('/')
+        val serverParam = integration.serverId?.let { "&serverId=$it" } ?: ""
+        return "$cleanBase/web/index.html#!/item?id=${item.id}$serverParam"
     }
 
     private fun MediaBrowserBaseItem.toUnifiedMediaItem(libraryId: String? = null): UnifiedMediaItem {
@@ -135,6 +150,8 @@ class EmbyRepository(
             audioCodec = audioStream?.codec,
             videoCodec = videoStream?.codec,
             videoResolution = resolution,
+            container = mediaSource?.container,
+            bitrate = mediaSource?.bitrate,
         )
     }
 }

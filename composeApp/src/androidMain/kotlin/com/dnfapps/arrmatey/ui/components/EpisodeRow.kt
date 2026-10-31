@@ -21,7 +21,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -52,6 +54,7 @@ import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.bazarr.EpisodeSubtitlesRow
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
@@ -68,6 +71,9 @@ fun EpisodeRow(
     onLongClick: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     bazarrDetailsIntegration: Boolean = true,
+    isMediaServerWatched: Boolean = false,
+    episodeDeepLink: String? = null,
+    onPlayEpisode: ((String) -> Unit)? = null,
 ) {
     val arrEp = episode.arrEpisode
 
@@ -109,13 +115,27 @@ fun EpisodeRow(
                             }
                         }
                     }
-                Text(
-                    text = titleString,
-                    style = MaterialTheme.typography.titleMedium,
-                    lineHeight = 1.4.em,
-                    overflow = TextOverflow.MiddleEllipsis,
-                    maxLines = 2,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        text = titleString,
+                        style = MaterialTheme.typography.titleMedium,
+                        lineHeight = 1.4.em,
+                        overflow = TextOverflow.MiddleEllipsis,
+                        maxLines = 2,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (isMediaServerWatched) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Watched",
+                            tint = ArrGreen,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                }
 
                 val airDate = episode.airDate?.takeIf { it.isTodayOrAfter() }
                 val (statusText, statusColor) =
@@ -170,15 +190,28 @@ fun EpisodeRow(
             }
 
             AnimatedVisibility(
-                visible = arrEp != null,
+                visible = arrEp != null || episodeDeepLink != null,
                 enter = fadeIn() + expandHorizontally(),
                 exit = fadeOut() + shrinkHorizontally(),
             ) {
-                if (arrEp != null) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(0.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(0.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (episodeDeepLink != null && onPlayEpisode != null) {
+                        IconButton(
+                            onClick = { onPlayEpisode(episodeDeepLink) },
+                            modifier = Modifier.size(32.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Play",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    }
+                    if (arrEp != null) {
                         IconButton(
                             onClick = {
                                 onNavigateToSeriesRelease(arrEp.id)

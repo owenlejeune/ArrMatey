@@ -92,6 +92,13 @@ class JellyfinClient(
         parameter("Fields", "Overview,UserData,ProviderIds")
     }
 
+    suspend fun getShowEpisodes(userId: String, showId: String): NetworkResult<MediaBrowserItemsResult> = httpClient.safeGet("$baseUrl/Shows/$showId/Episodes") {
+        header("Authorization", buildAuthHeader())
+        header("Accept", "application/json")
+        parameter("UserId", userId)
+        parameter("Fields", "Overview,UserData,PrimaryImageAspectRatio,ProviderIds")
+    }
+
     suspend fun markWatched(userId: String, itemId: String, watched: Boolean): NetworkResult<Unit> = if (watched) {
         httpClient.safePost("$baseUrl/Users/$userId/PlayedItems/$itemId") {
             header("Authorization", buildAuthHeader())

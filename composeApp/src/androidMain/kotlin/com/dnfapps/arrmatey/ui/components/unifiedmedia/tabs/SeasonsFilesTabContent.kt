@@ -66,6 +66,9 @@ fun SeasonsFilesTabContent(
     selectedBookMediaFilter: BookMediaFilterBy = BookMediaFilterBy.All,
     onBookMediaTypeFilterChanged: (BookMediaFilterBy) -> Unit = {},
     onEditAuthor: (() -> Unit)? = null,
+    episodeWatchStatus: Map<Pair<Int, Int>, Boolean> = emptyMap(),
+    episodeDeepLinks: Map<Pair<Int, Int>, String> = emptyMap(),
+    onPlayEpisode: ((String) -> Unit)? = null,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -89,6 +92,9 @@ fun SeasonsFilesTabContent(
                 deleteEpisodeFile = onDeleteEpisodeFile,
                 onNavigateToSeriesRelease = onNavigateToSeriesRelease,
                 bazarrDetailsIntegration = state.bazarrDetailsIntegration,
+                episodeWatchStatus = episodeWatchStatus,
+                episodeDeepLinks = episodeDeepLinks,
+                onPlayEpisode = onPlayEpisode,
             )
         }
 

@@ -530,6 +530,7 @@ val viewModelModule =
                 getSimilarUseCase = get(),
                 preferencesStore = get(),
                 logger = get(),
+                mediaServerManager = getOrNull(),
             )
         }
         viewModel { params ->

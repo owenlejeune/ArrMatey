@@ -69,10 +69,12 @@ import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsTab
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.state.MediaProvider
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
@@ -243,6 +245,10 @@ fun UnifiedMediaDetailsScreen(
     val addSheetUiState by viewModel.addSheetUiState.collectAsStateWithLifecycle()
     val activeInstance by viewModel.activeInstance.collectAsStateWithLifecycle()
     val activeSeerrInstance by viewModel.activeSeerrInstance.collectAsStateWithLifecycle()
+    val mediaServerDetails by viewModel.mediaServerDetails.collectAsStateWithLifecycle()
+    val firstMediaServer = mediaServerDetails.firstOrNull()
+    val episodeWatchStatus = firstMediaServer?.episodeWatchStatus ?: emptyMap()
+    val episodeDeepLinks = firstMediaServer?.episodeDeepLinks ?: emptyMap()
 
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
@@ -662,6 +668,17 @@ fun UnifiedMediaDetailsScreen(
                                             selectedBookMediaFilter = selectedBookMediaFilter,
                                             onBookMediaTypeFilterChanged = { selectedBookMediaFilter = it },
                                             onEditAuthor = { showEditSheet = true },
+                                            episodeWatchStatus = episodeWatchStatus,
+                                            episodeDeepLinks = episodeDeepLinks,
+                                            onPlayEpisode = { url ->
+                                                val provider = when (firstMediaServer?.serverType) {
+                                                    MediaServerType.Plex -> MediaProvider.Plex
+                                                    MediaServerType.Jellyfin -> MediaProvider.Jellyfin
+                                                    MediaServerType.Emby -> MediaProvider.Emby
+                                                    else -> MediaProvider.None
+                                                }
+                                                handleWatchClick(url, provider, context, moko, firstMediaServer?.webFallbackUrl)
+                                            },
                                         )
                                     }
 
@@ -681,6 +698,13 @@ fun UnifiedMediaDetailsScreen(
                                             onMediaClick = { id, type -> onMediaClick?.invoke(id, type) },
                                             onLoadMoreRecommendations = { viewModel.loadNextRecommendationsPage() },
                                             onLoadMoreSimilar = { viewModel.loadNextSimilarPage() },
+                                            mediaServerDetails = mediaServerDetails,
+                                            onMediaServerWatchClick = { url, provider, webUrl ->
+                                                handleWatchClick(url, provider, context, moko, webUrl)
+                                            },
+                                            onMediaServerToggleWatched = { serverType, itemId, watched ->
+                                                viewModel.markMediaServerWatched(serverType, itemId, watched)
+                                            },
                                         )
                                     }
 

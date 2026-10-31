@@ -15,16 +15,26 @@ fun handleWatchClick(
     provider: MediaProvider,
     context: Context,
     moko: MokoStrings,
+    webFallbackUrl: String? = null,
 ) {
     when (provider) {
         MediaProvider.Plex,
         MediaProvider.Jellyfin,
+        MediaProvider.Emby,
         -> {
             val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             try {
                 context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
+                if (!webFallbackUrl.isNullOrBlank()) {
+                    try {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, webFallbackUrl.toUri()))
+                    } catch (e2: Exception) {
+                        Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(context, moko.getString(MR.strings.no_app_found), Toast.LENGTH_SHORT).show()
+                }
             }
         }
 

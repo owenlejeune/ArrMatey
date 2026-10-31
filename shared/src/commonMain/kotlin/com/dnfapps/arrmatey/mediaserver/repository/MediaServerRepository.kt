@@ -25,9 +25,13 @@ interface MediaServerRepository {
 
     suspend fun search(query: String, limit: Int = 30): NetworkResult<List<UnifiedMediaItem>>
 
+    suspend fun getShowEpisodes(showId: String): NetworkResult<List<UnifiedMediaItem>>
+
     suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit>
 
     fun buildImageUrl(imageKeyOrTag: String, itemId: String, maxWidth: Int = 400): String
 
     fun buildDeepLinkUrl(item: UnifiedMediaItem): String
+
+    fun buildWebUrl(item: UnifiedMediaItem): String?
 }

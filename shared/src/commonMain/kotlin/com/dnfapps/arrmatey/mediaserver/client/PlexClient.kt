@@ -125,6 +125,16 @@ class PlexClient(
         }
     }
 
+    suspend fun getShowEpisodes(ratingKey: String): NetworkResult<PlexRootContainer<PlexMediaListing>> = withDirectIpFallback {
+        httpClient.safeGet("$baseUrl/library/metadata/$ratingKey/allLeaves") {
+            header("X-Plex-Token", token)
+            header("X-Plex-Client-Identifier", clientIdentifier)
+            header("Accept", "application/json")
+            parameter("X-Plex-Token", token)
+            parameter("X-Plex-Client-Identifier", clientIdentifier)
+        }
+    }
+
     suspend fun markWatched(ratingKey: String, watched: Boolean): NetworkResult<Unit> {
         val endpoint = if (watched) "/:/scrobble" else "/:/unscrobble"
         return httpClient.safeGet("$baseUrl$endpoint") {

@@ -38,14 +38,25 @@ data class MediaButtonState(
     val showClearDataButton: Boolean = false,
     val showMarkAsAvailableButton: Boolean = false,
     val mediaProvider: MediaProvider = MediaProvider.None,
+    val watchOptions: List<WatchOption> = emptyList(),
 ) {
     constructor() : this(false) // empty ios constructor
 }
+
+@Serializable
+data class WatchOption(
+    val provider: MediaProvider,
+    val serverName: String,
+    val url: String,
+    val webFallbackUrl: String? = null,
+    @Contextual val label: StringResource,
+)
 
 enum class MediaProvider {
     None,
     Plex,
     Jellyfin,
+    Emby,
 }
 
 fun MediaInfo?.toButtonState(

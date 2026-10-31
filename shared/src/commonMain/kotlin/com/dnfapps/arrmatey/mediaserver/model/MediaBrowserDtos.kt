@@ -72,6 +72,7 @@ data class MediaBrowserUserData(
 data class MediaBrowserMediaSource(
     @SerialName("Id") val id: String? = null,
     @SerialName("Container") val container: String? = null,
+    @SerialName("Bitrate") val bitrate: Long? = null,
     @SerialName("MediaStreams") val mediaStreams: List<MediaBrowserMediaStream> = emptyList(),
 )
 

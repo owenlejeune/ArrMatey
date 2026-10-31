@@ -162,6 +162,17 @@ class PlexRepository(
         is NetworkResult.Loading -> res
     }
 
+    override suspend fun getShowEpisodes(showId: String): NetworkResult<List<UnifiedMediaItem>> = when (val res = client.getShowEpisodes(showId)) {
+        is NetworkResult.Success -> {
+            val items = res.data.mediaContainer.metadata.orEmpty()
+                .filter { !it.ratingKey.isNullOrBlank() }
+                .map { it.toUnifiedMediaItem() }
+            NetworkResult.Success(items)
+        }
+        is NetworkResult.Error -> res
+        is NetworkResult.Loading -> res
+    }
+
     override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(itemId, watched)
 
     override fun buildImageUrl(imageKeyOrTag: String, itemId: String, maxWidth: Int): String {
@@ -176,6 +187,11 @@ class PlexRepository(
     override fun buildDeepLinkUrl(item: UnifiedMediaItem): String {
         val serverParam = integration.serverId?.let { "&server=$it" } ?: ""
         return "plex://preplay/?metadataKey=%2Flibrary%2Fmetadata%2F${item.id}$serverParam"
+    }
+
+    override fun buildWebUrl(item: UnifiedMediaItem): String? {
+        val serverId = integration.serverId ?: return null
+        return "https://app.plex.tv/desktop/#!/server/$serverId/details?key=%2Flibrary%2Fmetadata%2F${item.id}"
     }
 
     private fun PlexMetadataItem.toUnifiedMediaItem(libraryId: String? = null): UnifiedMediaItem {
@@ -206,6 +222,8 @@ class PlexRepository(
             audioCodec = firstMedia?.audioCodec,
             videoCodec = firstMedia?.videoCodec,
             videoResolution = firstMedia?.videoResolution,
+            container = firstMedia?.container,
+            bitrate = firstMedia?.bitrate,
         )
     }
 }

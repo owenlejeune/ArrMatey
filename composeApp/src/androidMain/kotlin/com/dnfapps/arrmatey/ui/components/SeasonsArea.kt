@@ -75,6 +75,9 @@ fun SeasonsArea(
     onNavigateToEpisodeDetails: (ArrEpisode) -> Unit = {},
     onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?) -> Unit = { _, _, _ -> },
     bazarrDetailsIntegration: Boolean = true,
+    episodeWatchStatus: Map<Pair<Int, Int>, Boolean> = emptyMap(),
+    episodeDeepLinks: Map<Pair<Int, Int>, String> = emptyMap(),
+    onPlayEpisode: ((String) -> Unit)? = null,
 ) {
     if (seasons.isEmpty()) return
 
@@ -260,6 +263,7 @@ fun SeasonsArea(
                         season.episodes.forEachIndexed { index, episode ->
                             val arrEp = episode.arrEpisode
 
+                            val key = season.seasonNumber to episode.episodeNumber
                             EpisodeRow(
                                 episode = episode,
                                 onClick = arrEp?.let { ep -> { onNavigateToEpisodeDetails(ep) } },
@@ -271,6 +275,9 @@ fun SeasonsArea(
                                 },
                                 searchInProgress = { searchIds.contains(it) },
                                 bazarrDetailsIntegration = bazarrDetailsIntegration,
+                                isMediaServerWatched = episodeWatchStatus[key] == true,
+                                episodeDeepLink = episodeDeepLinks[key],
+                                onPlayEpisode = onPlayEpisode,
                             )
 
                             if (index < season.episodes.size - 1) {
