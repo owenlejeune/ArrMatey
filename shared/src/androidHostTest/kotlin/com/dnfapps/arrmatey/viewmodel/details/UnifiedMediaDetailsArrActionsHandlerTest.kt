@@ -1,6 +1,8 @@
 package com.dnfapps.arrmatey.viewmodel.details
 
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteAudiobookFileUseCase
@@ -13,19 +15,25 @@ import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.SmartAddMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
 import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
+import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.networking.NetworkResult
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -127,6 +135,62 @@ class UnifiedMediaDetailsArrActionsHandlerTest {
 
         coVerify { updateMediaUseCase.bulkUpdateMonitoring(listOf(456L), "none", mockRepo) }
         assertTrue(handler.editStatus.value is OperationStatus.Success)
+    }
+
+    private fun smartAddSeries(
+        lookupItem: ArrSeries,
+        addedItem: ArrSeries?,
+        onItemAdded: (Long, ArrMedia) -> Unit,
+    ): ArrInstanceRepository {
+        val instance = mockk<Instance> { every { id } returns 7L }
+        val repo =
+            mockk<ArrInstanceRepository> {
+                every { this@mockk.instance } returns instance
+                every { addItemStatus } returns MutableStateFlow(OperationStatus.Idle)
+            }
+        coEvery {
+            smartAddMediaUseCase(InstanceType.Sonarr, repo, lookupItem, any(), false)
+        } returns addedItem
+
+        handler.smartAdd(
+            scope = TestScope(UnconfinedTestDispatcher()),
+            resolvedInstanceType = InstanceType.Sonarr,
+            requestType = null,
+            instanceType = InstanceType.Sonarr,
+            item = lookupItem,
+            uiState = UnifiedMediaDetailsUiState.Initial,
+            preferencesStore = mockk(),
+            targetRepoProvider = { repo },
+            activeRepoProvider = { repo },
+            selectedInstanceIdProvider = { 7L },
+            addSheetTargetInstanceIdProvider = { null },
+            selectInstance = {},
+            refresh = {},
+            logger = mockk(relaxed = true),
+            onItemAdded = onItemAdded,
+        )
+        return repo
+    }
+
+    @Test
+    fun smartAdd_reportsAddedItemSoDetailsCanResolveNewId() = runTest(UnconfinedTestDispatcher()) {
+        val lookupItem = mockk<ArrSeries> { every { title } returns "Show" }
+        val addedItem = mockk<ArrSeries> { every { id } returns 42L }
+        var reported: Pair<Long, ArrMedia>? = null
+
+        smartAddSeries(lookupItem, addedItem) { instanceId, item -> reported = instanceId to item }
+
+        assertEquals(7L to addedItem, reported)
+    }
+
+    @Test
+    fun smartAdd_doesNotReportWhenAddFails() = runTest(UnconfinedTestDispatcher()) {
+        val lookupItem = mockk<ArrSeries> { every { title } returns "Show" }
+        var reported = false
+
+        smartAddSeries(lookupItem, addedItem = null) { _, _ -> reported = true }
+
+        assertFalse(reported)
     }
 
     @Test
