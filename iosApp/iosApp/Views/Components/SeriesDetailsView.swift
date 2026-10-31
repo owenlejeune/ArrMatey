@@ -36,6 +36,7 @@ struct SeriesDetailsView: View {
     private var firstLine: String {
         [yearString, seasonString, fileSizeString, item.network]
             .compactMap { $0 }
+            .filter { !$0.isEmpty }
             .joined(separator: " • ")
     }
     

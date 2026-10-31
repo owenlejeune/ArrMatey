@@ -53,6 +53,7 @@ struct MovieDetailsView: View {
     private var firstLine: String {
         [runtimeString, item.studio]
             .compactMap { $0 }
+            .filter { !$0.isEmpty }
             .joined(separator: " • ")
     }
     

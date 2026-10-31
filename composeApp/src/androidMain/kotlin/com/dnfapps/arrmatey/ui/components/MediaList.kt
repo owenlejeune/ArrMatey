@@ -654,8 +654,8 @@ private fun SeriesDetails(
     val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
     val yearLabel = item.year.takeIf { it > 0 }?.toString()
     val seasonLabel = item.seasonCount.takeIf { it > 0 }?.let { mokoPlural(MR.plurals.seasons, it) }
-    val fileSizeString = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
-    val network = item.network
+    val fileSizeString = item.fileSize?.takeIf { it > 0 }?.bytesAsFileSizeString()?.takeUnless { item.id == null }
+    val network = item.network?.takeIf { it.isNotBlank() }
 
     val secondLine = listOfNotNull(yearLabel, seasonLabel, fileSizeString, network).joinToString(BULLET)
     if (secondLine.isNotEmpty()) {
@@ -726,7 +726,7 @@ private fun MovieDetails(
         Text(it, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 
-    val firstLine = listOfNotNull(item.runtimeString, item.studio).joinToString(" • ")
+    val firstLine = listOfNotNull(item.runtimeString, item.studio).filter { it.isNotBlank() }.joinToString(" • ")
     firstLine.unlessEmpty { firstLine ->
         Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
@@ -736,7 +736,7 @@ private fun MovieDetails(
             ?.quality
             ?.quality
             ?.name
-    val fileSizeLabel = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
+    val fileSizeLabel = item.fileSize?.takeIf { it > 0 }?.bytesAsFileSizeString()?.takeUnless { item.id == null }
     val thirdLine = listOfNotNull(qualityLabel, fileSizeLabel).joinToString(BULLET)
     thirdLine.unlessEmpty { thirdLine ->
         Text(thirdLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
@@ -870,7 +870,7 @@ private fun AudiobookDetails(
         item.series?.let {
             if (item.seriesNumber != null) "$it (#${item.seriesNumber})" else it
         }
-    val fileSizeString = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
+    val fileSizeString = item.fileSize?.takeIf { it > 0 }?.bytesAsFileSizeString()?.takeUnless { item.id == null }
 
     val secondLine = listOfNotNull(seriesString, fileSizeString, item.publisher).joinToString(BULLET)
     if (secondLine.isNotEmpty()) {
