@@ -652,19 +652,26 @@ private fun SeriesDetails(
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
-    val seasonLabel = mokoPlural(MR.plurals.seasons, item.seasonCount)
-    val fileSizeString = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
-    val network = item.network
+    val yearLabel = item.year.takeIf { it > 0 }?.toString()
+    val seasonLabel = item.seasonCount.takeIf { it > 0 }?.let { mokoPlural(MR.plurals.seasons, it) }
+    val fileSizeString = item.fileSize?.takeIf { it > 0 }?.bytesAsFileSizeString()?.takeUnless { item.id == null }
+    val network = item.network?.takeIf { it.isNotBlank() }
 
-    val secondLine = listOfNotNull(seasonLabel, fileSizeString, network).joinToString(BULLET)
-    Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    val secondLine = listOfNotNull(yearLabel, seasonLabel, fileSizeString, network).joinToString(BULLET)
+    if (secondLine.isNotEmpty()) {
+        Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    }
 
     val nextAirStr = item.nextAiring?.format()
     val statusStr =
         when (item.status) {
             MediaStatus.Continuing ->
                 nextAirStr
-                    ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
+                    ?: if (item.id == null) {
+                        mokoString(item.status.resource)
+                    } else {
+                        "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
+                    }
 
             else -> listOfNotNull(mokoString(item.status.resource), nextAirStr).joinToString(BULLET)
         }
@@ -713,12 +720,13 @@ private fun MovieDetails(
             ?: item.physicalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.physical_release)}: $it" }
             ?: item.inCinemas?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.in_cinemas)}: $it" }
             ?: item.releaseDate?.format("MMMM d, yyyy")
+            ?: item.year.takeIf { it > 0 }?.toString()
 
     nextReleaseDate?.let {
         Text(it, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
 
-    val firstLine = listOfNotNull(item.runtimeString, item.studio).joinToString(" • ")
+    val firstLine = listOfNotNull(item.runtimeString, item.studio).filter { it.isNotBlank() }.joinToString(" • ")
     firstLine.unlessEmpty { firstLine ->
         Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
@@ -728,7 +736,7 @@ private fun MovieDetails(
             ?.quality
             ?.quality
             ?.name
-    val fileSizeLabel = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
+    val fileSizeLabel = item.fileSize?.takeIf { it > 0 }?.bytesAsFileSizeString()?.takeUnless { item.id == null }
     val thirdLine = listOfNotNull(qualityLabel, fileSizeLabel).joinToString(BULLET)
     thirdLine.unlessEmpty { thirdLine ->
         Text(thirdLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
@@ -766,10 +774,13 @@ private fun ArtistDetails(
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
-    val albumLabel = mokoPlural(MR.plurals.albums, item.albumCount)
-    val trackLabel = mokoPlural(MR.plurals.tracks, item.trackCount)
-    val secondLine = listOfNotNull(albumLabel, trackLabel).joinToString(BULLET)
-    Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    // Lookup results have no statistics, so counts would always read 0
+    if (item.id != null) {
+        val albumLabel = mokoPlural(MR.plurals.albums, item.albumCount)
+        val trackLabel = mokoPlural(MR.plurals.tracks, item.trackCount)
+        val secondLine = listOfNotNull(albumLabel, trackLabel).joinToString(BULLET)
+        Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    }
 
     val nextRelease = item.nextAlbum?.releaseDate?.format()
     val statusStr =
@@ -859,7 +870,7 @@ private fun AudiobookDetails(
         item.series?.let {
             if (item.seriesNumber != null) "$it (#${item.seriesNumber})" else it
         }
-    val fileSizeString = item.fileSize?.bytesAsFileSizeString()?.takeUnless { item.id == null }
+    val fileSizeString = item.fileSize?.takeIf { it > 0 }?.bytesAsFileSizeString()?.takeUnless { item.id == null }
 
     val secondLine = listOfNotNull(seriesString, fileSizeString, item.publisher).joinToString(BULLET)
     if (secondLine.isNotEmpty()) {
@@ -882,11 +893,17 @@ private fun SearchAudiobookDetails(
     val authorString = item.authors.joinToString(", ") { it.name }
     Text(authorString, color = contentColor, style = MaterialTheme.typography.bodyMedium)
 
+    val narratorString = item.narrators.joinToString(", ") { it.name }
+    if (narratorString.isNotEmpty()) {
+        Text(mokoString(MR.strings.narrated_by, narratorString), color = contentColor, style = MaterialTheme.typography.bodyMedium)
+    }
+
     val seriesString =
         item.series.firstOrNull()?.let {
             if (it.position != null) "${it.name} (#${it.position})" else it.name
         }
-    val secondLine = listOfNotNull(seriesString, item.publisher).joinToString(BULLET)
+    val runtimeString = item.runtimeString.takeIf { it.isNotEmpty() }
+    val secondLine = listOfNotNull(seriesString, item.publisher, runtimeString).joinToString(BULLET)
     if (secondLine.isNotEmpty()) {
         Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
     }
