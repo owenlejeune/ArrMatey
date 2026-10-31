@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -161,7 +162,25 @@ fun Navigator<*>.toDetails(
     type: InstanceType? = null,
     instanceId: Long? = null,
     episodeId: Long? = null,
-) = nav().navigateTo(MediaScreen.Details(id?.takeIf { it > 0 }, tmdbId, tvdbId, requestType, type, instanceId, episodeId))
+    mediaServerItemId: String? = null,
+    mediaServerType: MediaServerType? = null,
+    initialTitle: String? = null,
+    initialYear: Int? = null,
+) = nav().navigateTo(
+    MediaScreen.Details(
+        id = id?.takeIf { it > 0 },
+        tmdbId = tmdbId,
+        tvdbId = tvdbId,
+        requestType = requestType,
+        type = type,
+        instanceId = instanceId,
+        episodeId = episodeId,
+        mediaServerItemId = mediaServerItemId,
+        mediaServerType = mediaServerType,
+        initialTitle = initialTitle,
+        initialYear = initialYear,
+    ),
+)
 
 fun Navigator<*>.replaceDetails(
     id: Long? = null,
@@ -171,7 +190,25 @@ fun Navigator<*>.replaceDetails(
     type: InstanceType? = null,
     instanceId: Long? = null,
     episodeId: Long? = null,
-) = nav().replaceCurrent(MediaScreen.Details(id?.takeIf { it > 0 }, tmdbId, tvdbId, requestType, type, instanceId, episodeId))
+    mediaServerItemId: String? = null,
+    mediaServerType: MediaServerType? = null,
+    initialTitle: String? = null,
+    initialYear: Int? = null,
+) = nav().replaceCurrent(
+    MediaScreen.Details(
+        id = id?.takeIf { it > 0 },
+        tmdbId = tmdbId,
+        tvdbId = tvdbId,
+        requestType = requestType,
+        type = type,
+        instanceId = instanceId,
+        episodeId = episodeId,
+        mediaServerItemId = mediaServerItemId,
+        mediaServerType = mediaServerType,
+        initialTitle = initialTitle,
+        initialYear = initialYear,
+    ),
+)
 
 fun Navigator<*>.toMediaDetails(
     media: ArrMedia,
@@ -212,6 +249,10 @@ fun Navigator<*>.toMediaDetails(item: UnifiedMediaItem) {
         tvdbId = item.tvdbId,
         requestType = reqType,
         type = instanceType,
+        mediaServerItemId = item.id,
+        mediaServerType = item.serverType,
+        initialTitle = item.title,
+        initialYear = item.year,
     )
 }
 

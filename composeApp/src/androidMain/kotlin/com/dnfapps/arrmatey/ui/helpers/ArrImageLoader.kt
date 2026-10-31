@@ -2,7 +2,10 @@ package com.dnfapps.arrmatey.ui.helpers
 
 import android.content.Context
 import coil3.ImageLoader
+import coil3.disk.DiskCache
+import coil3.disk.directory
 import coil3.intercept.Interceptor
+import coil3.memory.MemoryCache
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.crossfade
@@ -75,7 +78,19 @@ class ArrImageLoader(
             .Builder(context)
             .components {
                 add(apiKeyInterceptor)
-            }.crossfade(true)
+            }
+            .memoryCache {
+                MemoryCache.Builder()
+                    .maxSizePercent(context, 0.25)
+                    .build()
+            }
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(context.cacheDir.resolve("image_cache"))
+                    .maxSizeBytes(150L * 1024 * 1024)
+                    .build()
+            }
+            .crossfade(true)
             .build()
     }
 }

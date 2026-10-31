@@ -204,7 +204,7 @@ class PlexRepository(
             year = year,
             summary = summary,
             posterUrl = thumb?.let { buildImageUrl(it, rKey) },
-            backdropUrl = art?.let { buildImageUrl(it, rKey, maxWidth = 1280) },
+            backdropUrl = art?.let { buildImageUrl(it, rKey, maxWidth = 720) },
             tmdbId = extractTmdbId(),
             tvdbId = extractTvdbId(),
             imdbId = extractImdbId(),

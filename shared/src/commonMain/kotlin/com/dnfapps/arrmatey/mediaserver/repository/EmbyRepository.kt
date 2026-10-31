@@ -133,7 +133,7 @@ class EmbyRepository(
             year = productionYear,
             summary = overview,
             posterUrl = primaryTag?.let { buildImageUrl(it, id) } ?: "$baseUrl/Items/$id/Images/Primary",
-            backdropUrl = backdropTag?.let { "$baseUrl/Items/$id/Images/Backdrop/0?maxWidth=1280&tag=$it" },
+            backdropUrl = backdropTag?.let { "$baseUrl/Items/$id/Images/Backdrop/0?maxWidth=720&tag=$it" },
             tmdbId = extractTmdbId(),
             tvdbId = extractTvdbId(),
             imdbId = extractImdbId(),

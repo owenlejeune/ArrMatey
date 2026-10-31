@@ -266,9 +266,11 @@ class UnifiedMediaDetailsDataObserver(
                                 ?: instanceHandler.selectedInstanceId.value?.let { map[it] }?.takeIf { it.id != null && it.id != 0L }
                                 ?: map.values.firstOrNull { it != null && it.id != null && it.id != 0L }
 
+                        val currentMediaServerItem = (uiStateFlow.value as? UnifiedMediaDetailsUiState.Success)?.mediaServerItem
                         uiStateFlow.value =
                             rawState.copy(
                                 arrMedia = effectiveArrMedia,
+                                mediaServerItem = currentMediaServerItem,
                                 availableInstances = if (!combineMedia && !rawState.hasArrId) emptyList() else allRepos.map { it.instance },
                                 selectedInstanceId = activeRepo?.instance?.id ?: instanceHandler.selectedInstanceId.value,
                                 instancePresences = if (!combineMedia && !rawState.hasArrId) emptyList() else presences,

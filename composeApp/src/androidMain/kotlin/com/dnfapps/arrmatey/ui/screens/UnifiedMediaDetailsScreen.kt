@@ -131,6 +131,10 @@ fun UnifiedMediaDetailsScreen(
     instanceType: InstanceType? = null,
     requestType: RequestType? = null,
     initialEpisodeId: Long? = null,
+    mediaServerItemId: String? = null,
+    mediaServerType: MediaServerType? = null,
+    initialTitle: String? = null,
+    initialYear: Int? = null,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit,
@@ -147,8 +151,8 @@ fun UnifiedMediaDetailsScreen(
     onNavigateToUser: ((String) -> Unit)? = null,
     instanceId: Long? = null,
     viewModel: UnifiedMediaDetailsViewModel =
-        koinViewModel(key = "${arrId}_${tmdbId}_${tvdbId}_${instanceType}_${requestType}_$instanceId", parameters = {
-            parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId)
+        koinViewModel(key = "${arrId}_${tmdbId}_${tvdbId}_${instanceType}_${requestType}_${instanceId}_${mediaServerItemId}_$mediaServerType", parameters = {
+            parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId, mediaServerItemId, mediaServerType, initialTitle, initialYear)
         }),
     moko: MokoStrings = koinInject(),
 ) {

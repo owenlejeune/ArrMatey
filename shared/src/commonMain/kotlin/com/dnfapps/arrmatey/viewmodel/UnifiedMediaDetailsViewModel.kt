@@ -45,9 +45,12 @@ import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerMediaDetails
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.model.AddSheetUiState
+import com.dnfapps.arrmatey.model.EpisodeWrapper
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.model.SmartAddSeerrAction
 import com.dnfapps.arrmatey.model.TracearrMediaUiState
 import com.dnfapps.arrmatey.model.TracearrStatsWindowType
@@ -84,6 +87,7 @@ import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsRecommendations
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsSeerrHandler
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsSeerrServiceHandler
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsTracearrHandler
+import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -105,6 +109,10 @@ class UnifiedMediaDetailsViewModel(
     private val instanceType: InstanceType?,
     private val requestType: RequestType?,
     initialForcedInstanceId: Long? = null,
+    private val mediaServerItemId: String? = null,
+    private val mediaServerType: MediaServerType? = null,
+    private val initialTitle: String? = null,
+    private val initialYear: Int? = null,
     getUnifiedMediaDetailsUseCase: GetUnifiedMediaDetailsUseCase,
     smartAddMediaUseCase: SmartAddMediaUseCase,
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
@@ -388,14 +396,16 @@ class UnifiedMediaDetailsViewModel(
                 _uiState
                     .filterIsInstance<UnifiedMediaDetailsUiState.Success>()
                     .collectLatest { success ->
-                        val title = success.displayTitle ?: success.arrMedia?.title ?: (success.seerrMedia as? MovieDetails)?.title ?: (success.seerrMedia as? TvDetails)?.name
+                        val title = success.displayTitle ?: success.arrMedia?.title ?: (success.seerrMedia as? MovieDetails)?.title ?: (success.seerrMedia as? TvDetails)?.name ?: initialTitle
                         val year = (success.arrMedia as? ArrMovie)?.year
                             ?: (success.arrMedia as? ArrSeries)?.year
                             ?: (success.seerrMedia as? MovieDetails)?.releaseDate?.year
                             ?: (success.seerrMedia as? TvDetails)?.firstAirDate?.year
-                        val isShow = resolvedRequestType == RequestType.Tv || resolvedInstanceType == InstanceType.Sonarr || success.arrMedia is ArrSeries || success.seerrMedia is TvDetails
-                        val targetTmdbId = tmdbId ?: (success.arrMedia as? ArrMovie)?.tmdbId ?: (success.arrMedia as? ArrSeries)?.tmdbId ?: (success.seerrMedia as? MovieDetails)?.id ?: (success.seerrMedia as? TvDetails)?.id
-                        val targetTvdbId = tvdbId ?: (success.arrMedia as? ArrSeries)?.tvdbId
+                            ?: success.mediaServerItem?.year
+                            ?: initialYear
+                        val isShow = resolvedRequestType == RequestType.Tv || resolvedInstanceType == InstanceType.Sonarr || success.arrMedia is ArrSeries || success.seerrMedia is TvDetails || success.mediaServerItem?.type == MediaType.SHOW
+                        val targetTmdbId = tmdbId ?: (success.arrMedia as? ArrMovie)?.tmdbId ?: (success.arrMedia as? ArrSeries)?.tmdbId ?: (success.seerrMedia as? MovieDetails)?.id ?: (success.seerrMedia as? TvDetails)?.id ?: success.mediaServerItem?.tmdbId
+                        val targetTvdbId = tvdbId ?: (success.arrMedia as? ArrSeries)?.tvdbId ?: success.mediaServerItem?.tvdbId
                         mediaServerHandler.findMedia(
                             tmdbId = targetTmdbId,
                             tvdbId = targetTvdbId,
@@ -405,6 +415,75 @@ class UnifiedMediaDetailsViewModel(
                         )
                     }
             }
+        }
+
+        if (mediaServerManager != null && mediaServerType != null && mediaServerItemId != null) {
+            viewModelScope.launch {
+                val repo = mediaServerManager.getRepository(mediaServerType)
+                if (repo != null) {
+                    when (val detailResult = repo.getItemDetail(mediaServerItemId)) {
+                        is NetworkResult.Success -> {
+                            val item = detailResult.data
+                            val isShow = item.type == MediaType.SHOW
+                            var showSeasons = emptyList<SeasonWrapper>()
+                            var showEpisodes = emptyList<EpisodeWrapper>()
+                            if (isShow) {
+                                val epResult = repo.getShowEpisodes(item.id)
+                                if (epResult is NetworkResult.Success) {
+                                    val sGroups = epResult.data.groupBy { it.seasonNumber ?: 1 }
+                                    val seasonWrappers = mutableListOf<SeasonWrapper>()
+                                    val allEpisodeWrappers = mutableListOf<EpisodeWrapper>()
+                                    sGroups.keys.sorted().forEach { sNum ->
+                                        val eps = sGroups[sNum].orEmpty()
+                                        val epWrappers = eps.map { epItem ->
+                                            EpisodeWrapper(
+                                                mediaServerEpisode = epItem,
+                                            )
+                                        }
+                                        seasonWrappers.add(SeasonWrapper(seasonNumber = sNum, episodes = epWrappers))
+                                        allEpisodeWrappers.addAll(epWrappers)
+                                    }
+                                    showSeasons = seasonWrappers
+                                    showEpisodes = allEpisodeWrappers
+                                }
+                            }
+
+                            val current = _uiState.value
+                            if (current !is UnifiedMediaDetailsUiState.Success) {
+                                _uiState.value = UnifiedMediaDetailsUiState.Success(
+                                    mediaServerItem = item,
+                                    seasons = showSeasons,
+                                    episodes = showEpisodes,
+                                )
+                            } else {
+                                _uiState.value = current.copy(
+                                    mediaServerItem = item,
+                                    seasons = if (current.seasons.isEmpty()) showSeasons else current.seasons,
+                                    episodes = if (current.episodes.isEmpty()) showEpisodes else current.episodes,
+                                )
+                            }
+
+                            mediaServerHandler?.findMedia(
+                                tmdbId = tmdbId ?: item.tmdbId,
+                                tvdbId = tvdbId ?: item.tvdbId,
+                                title = item.title,
+                                year = item.year,
+                                isShow = isShow,
+                            )
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        } else if (mediaServerHandler != null && (tmdbId != null || tvdbId != null || !initialTitle.isNullOrBlank())) {
+            val isShow = resolvedRequestType == RequestType.Tv || resolvedInstanceType == InstanceType.Sonarr
+            mediaServerHandler.findMedia(
+                tmdbId = tmdbId,
+                tvdbId = tvdbId,
+                title = initialTitle,
+                year = initialYear,
+                isShow = isShow,
+            )
         }
     }
 

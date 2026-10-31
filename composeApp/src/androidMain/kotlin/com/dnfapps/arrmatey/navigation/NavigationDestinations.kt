@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 
 sealed interface MediaScreen : NavKey {
@@ -19,6 +20,10 @@ sealed interface MediaScreen : NavKey {
         val type: InstanceType? = null,
         val instanceId: Long? = null,
         val episodeId: Long? = null,
+        val mediaServerItemId: String? = null,
+        val mediaServerType: MediaServerType? = null,
+        val initialTitle: String? = null,
+        val initialYear: Int? = null,
     ) : MediaScreen
 
     data class Preview<T>(

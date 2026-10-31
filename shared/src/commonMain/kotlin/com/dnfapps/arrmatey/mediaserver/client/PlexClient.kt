@@ -79,6 +79,7 @@ class PlexClient(
             parameter("X-Plex-Client-Identifier", clientIdentifier)
             parameter("X-Plex-Container-Start", start)
             parameter("X-Plex-Container-Size", size)
+            parameter("includeGuids", 1)
             if (filterType != null) parameter("type", filterType)
             if (sort != null) parameter("sort", sort)
         }
@@ -91,6 +92,7 @@ class PlexClient(
             header("Accept", "application/json")
             parameter("X-Plex-Token", token)
             parameter("X-Plex-Client-Identifier", clientIdentifier)
+            parameter("includeGuids", 1)
         }
     }
 
@@ -101,6 +103,7 @@ class PlexClient(
             header("Accept", "application/json")
             parameter("X-Plex-Token", token)
             parameter("X-Plex-Client-Identifier", clientIdentifier)
+            parameter("includeGuids", 1)
         }
     }
 
@@ -111,6 +114,7 @@ class PlexClient(
             header("Accept", "application/json")
             parameter("X-Plex-Token", token)
             parameter("X-Plex-Client-Identifier", clientIdentifier)
+            parameter("includeGuids", 1)
         }
     }
 
@@ -121,6 +125,7 @@ class PlexClient(
             header("Accept", "application/json")
             parameter("X-Plex-Token", token)
             parameter("X-Plex-Client-Identifier", clientIdentifier)
+            parameter("includeGuids", 1)
             parameter("query", query)
         }
     }
@@ -132,6 +137,7 @@ class PlexClient(
             header("Accept", "application/json")
             parameter("X-Plex-Token", token)
             parameter("X-Plex-Client-Identifier", clientIdentifier)
+            parameter("includeGuids", 1)
         }
     }
 

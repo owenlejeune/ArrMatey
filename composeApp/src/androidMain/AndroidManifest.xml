@@ -22,6 +22,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting"
         android:hardwareAccelerated="true"
+        android:largeHeap="true"
         tools:targetApi="33">
         <activity
             android:exported="true"
