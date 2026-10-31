@@ -63,7 +63,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.entensions.openLink
+import com.dnfapps.arrmatey.mediaserver.client.PlexConnectionUtils
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.model.PlexServerConnection
 import com.dnfapps.arrmatey.mediaserver.model.PlexServerResource
 import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerAuthMode
 import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerConfigState
@@ -196,6 +198,9 @@ private fun MediaServerConfigurationContent(
                             },
                             onCancelPlexSignIn = { viewModel.cancelPlexSignIn() },
                             onSelectServer = { viewModel.selectDiscoveredPlexServer(it) },
+                            onSelectConnection = { conn, useDirectIp ->
+                                viewModel.selectPlexConnection(conn, useDirectIp)
+                            },
                             copiedMessage = copiedMessage,
                         )
                     }
@@ -343,6 +348,7 @@ private fun PlexOAuthSection(
     onStartPlexSignIn: () -> Unit,
     onCancelPlexSignIn: () -> Unit,
     onSelectServer: (PlexServerResource) -> Unit,
+    onSelectConnection: (PlexServerConnection, Boolean) -> Unit,
     copiedMessage: String,
 ) {
     val context = LocalContext.current
@@ -447,38 +453,122 @@ private fun PlexOAuthSection(
                     fontWeight = FontWeight.SemiBold,
                 )
                 state.discoveredPlexServers.forEach { server ->
+                    val isSelected = state.serverId == server.clientIdentifier
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onSelectServer(server) },
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     ) {
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = server.name,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Text(
+                                        text = "${server.platform ?: ""} ${server.productVersion ?: ""}".trim(),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                if (isSelected) {
+                                    Icon(
+                                        Icons.Default.CheckCircle,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp),
+                                    )
+                                }
+                            }
+
+                            if (isSelected && server.connections.isNotEmpty()) {
+                                HorizontalDivider()
                                 Text(
-                                    text = server.name,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                                Text(
-                                    text = "${server.platform ?: ""} ${server.productVersion ?: ""}".trim(),
-                                    style = MaterialTheme.typography.bodySmall,
+                                    text = "Available Endpoints:",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
-                            }
-                            if (state.serverId == server.clientIdentifier) {
-                                Icon(
-                                    Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp),
-                                )
+
+                                PlexConnectionUtils.sortConnections(server.connections).forEach { conn ->
+                                    val isDocker = PlexConnectionUtils.isDockerBridgeIp(conn.address)
+                                    val directHttp = "http://${conn.address}:${conn.port}"
+                                    val isCurrentDirect = state.url == directHttp
+                                    val isCurrentSecure = state.url == conn.uri
+
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        ) {
+                                            Text(
+                                                text = "${conn.address}:${conn.port}",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = if (isCurrentDirect || isCurrentSecure) FontWeight.Bold else FontWeight.Normal,
+                                            )
+                                            if (conn.local && !isDocker) {
+                                                Text(
+                                                    text = "LAN",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                )
+                                            } else if (!conn.local) {
+                                                Text(
+                                                    text = "Remote",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.secondary,
+                                                )
+                                            } else if (isDocker) {
+                                                Text(
+                                                    text = "Docker Bridge (Unroutable)",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.error,
+                                                )
+                                            }
+                                        }
+
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            OutlinedButton(
+                                                onClick = { onSelectConnection(conn, true) },
+                                                modifier = Modifier.weight(1f),
+                                            ) {
+                                                Text(
+                                                    text = if (isCurrentDirect) "Direct HTTP (Active)" else "Direct HTTP",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    maxLines = 1,
+                                                )
+                                            }
+                                            OutlinedButton(
+                                                onClick = { onSelectConnection(conn, false) },
+                                                modifier = Modifier.weight(1f),
+                                            ) {
+                                                Text(
+                                                    text = if (isCurrentSecure) "Secure HTTPS (Active)" else "Secure HTTPS",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    maxLines = 1,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

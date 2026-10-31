@@ -1,37 +1,52 @@
 package com.dnfapps.arrmatey.mediaserver.repository
 
 import com.dnfapps.arrmatey.mediaserver.client.PlexClient
+import com.dnfapps.arrmatey.mediaserver.client.PlexConnectionUtils
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.mediaserver.model.PlexMetadataItem
+import com.dnfapps.arrmatey.mediaserver.model.PlexServerResource
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaLibrary
 import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeGet
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 
 class PlexRepository(
     private val client: PlexClient,
+    private val onUrlUpdated: (suspend (String) -> Unit)? = null,
 ) : MediaServerRepository {
     override val serverType: MediaServerType = MediaServerType.Plex
     override val integration: MediaServerIntegration = client.integration
 
     private val baseUrl: String
-        get() = integration.getEffectiveBaseUrl().trimEnd('/')
+        get() = client.baseUrl
 
-    override suspend fun getLibraries(): NetworkResult<List<UnifiedMediaLibrary>> = when (val res = client.getSections()) {
-        is NetworkResult.Success -> {
-            val libs = res.data.mediaContainer.directories.orEmpty().map { dir ->
-                UnifiedMediaLibrary(
-                    id = dir.key,
-                    title = dir.title,
-                    type = MediaType.fromString(dir.type),
-                    serverType = MediaServerType.Plex,
-                )
+    override suspend fun getLibraries(): NetworkResult<List<UnifiedMediaLibrary>> {
+        var res = client.getSections()
+        if (res is NetworkResult.Error && isRecoverableNetworkError(res)) {
+            val healed = autoHealFromPlexTv()
+            if (healed) {
+                res = client.getSections()
             }
-            NetworkResult.Success(libs)
         }
-        is NetworkResult.Error -> res
-        is NetworkResult.Loading -> res
+        return when (res) {
+            is NetworkResult.Success -> {
+                val libs = res.data.mediaContainer.directories.orEmpty().map { dir ->
+                    UnifiedMediaLibrary(
+                        id = dir.key,
+                        title = dir.title,
+                        type = MediaType.fromString(dir.type),
+                        serverType = MediaServerType.Plex,
+                    )
+                }
+                NetworkResult.Success(libs)
+            }
+            is NetworkResult.Error -> res
+            is NetworkResult.Loading -> res
+        }
     }
 
     override suspend fun getLibraryContents(
@@ -39,15 +54,75 @@ class PlexRepository(
         page: Int,
         pageSize: Int,
         sort: String?,
-    ): NetworkResult<List<UnifiedMediaItem>> = when (val res = client.getSectionMedia(sectionId = libraryId, start = page * pageSize, size = pageSize, sort = sort)) {
-        is NetworkResult.Success -> {
-            val items = res.data.mediaContainer.metadata.orEmpty()
-                .filter { !it.ratingKey.isNullOrBlank() }
-                .map { it.toUnifiedMediaItem(libraryId) }
-            NetworkResult.Success(items)
+    ): NetworkResult<List<UnifiedMediaItem>> {
+        var res = client.getSectionMedia(sectionId = libraryId, start = page * pageSize, size = pageSize, sort = sort)
+        if (res is NetworkResult.Error && isRecoverableNetworkError(res)) {
+            val healed = autoHealFromPlexTv()
+            if (healed) {
+                res = client.getSectionMedia(sectionId = libraryId, start = page * pageSize, size = pageSize, sort = sort)
+            }
         }
-        is NetworkResult.Error -> res
-        is NetworkResult.Loading -> res
+        return when (res) {
+            is NetworkResult.Success -> {
+                val items = res.data.mediaContainer.metadata.orEmpty()
+                    .filter { !it.ratingKey.isNullOrBlank() }
+                    .map { it.toUnifiedMediaItem(libraryId) }
+                NetworkResult.Success(items)
+            }
+            is NetworkResult.Error -> res
+            is NetworkResult.Loading -> res
+        }
+    }
+
+    private fun isRecoverableNetworkError(error: NetworkResult.Error): Boolean {
+        val msg = error.message ?: ""
+        return msg.contains("UnknownHostException", ignoreCase = true) ||
+            msg.contains("No address associated with hostname", ignoreCase = true) ||
+            msg.contains("Unable to resolve host", ignoreCase = true) ||
+            msg.contains("Connection refused", ignoreCase = true) ||
+            msg.contains("ConnectException", ignoreCase = true) ||
+            PlexConnectionUtils.isDockerBridgeUrl(client.baseUrl)
+    }
+
+    suspend fun autoHealFromPlexTv(): Boolean {
+        val token = integration.token.value
+        if (token.isBlank()) return false
+        val clientIdentifier = integration.clientIdentifier
+
+        val res = client.httpClient.safeGet<List<PlexServerResource>>("https://plex.tv/api/v2/resources?includeHttps=1") {
+            header("Accept", "application/json")
+            header("X-Plex-Token", token)
+            header("X-Plex-Client-Identifier", clientIdentifier)
+            parameter("X-Plex-Token", token)
+            parameter("X-Plex-Client-Identifier", clientIdentifier)
+        }
+        if (res !is NetworkResult.Success) return false
+
+        val servers = res.data.filter { it.provides.contains("server") }
+        val matchedServer = servers.firstOrNull { it.clientIdentifier == integration.serverId }
+            ?: servers.firstOrNull() ?: return false
+
+        val sorted = PlexConnectionUtils.sortConnections(matchedServer.connections)
+        for (conn in sorted) {
+            val isDocker = PlexConnectionUtils.isDockerBridgeIp(conn.address)
+            if (isDocker) continue
+
+            val candidateUrls = listOfNotNull(
+                conn.uri,
+                "http://${conn.address}:${conn.port}".takeIf { it != conn.uri },
+            )
+            for (url in candidateUrls) {
+                client.overrideBaseUrl = url
+                when (client.getSections()) {
+                    is NetworkResult.Success -> {
+                        onUrlUpdated?.invoke(url)
+                        return true
+                    }
+                    else -> {}
+                }
+            }
+        }
+        return false
     }
 
     override suspend fun getItemDetail(itemId: String): NetworkResult<UnifiedMediaItem> = when (val res = client.getItemMetadata(itemId)) {

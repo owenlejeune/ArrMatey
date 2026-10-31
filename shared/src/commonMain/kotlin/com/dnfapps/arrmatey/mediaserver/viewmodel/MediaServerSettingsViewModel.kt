@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.usecase.PlexAuthUseCase
+import com.dnfapps.arrmatey.mediaserver.client.PlexConnectionUtils
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.model.PlexServerConnection
 import com.dnfapps.arrmatey.mediaserver.model.PlexServerResource
 import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.mediaserver.usecase.JellyfinQuickConnectUseCase
@@ -50,6 +52,7 @@ data class MediaServerConfigState(
     val isPlexWaiting: Boolean = false,
     val plexAuthUrl: String? = null,
     val discoveredPlexServers: List<PlexServerResource> = emptyList(),
+    val selectedPlexServer: PlexServerResource? = null,
     val quickConnectCode: String? = null,
     val quickConnectSecret: String? = null,
     val isQuickConnectWaiting: Boolean = false,
@@ -110,6 +113,9 @@ class MediaServerSettingsViewModel(
                         }
                     },
                 )
+                if (serverType == MediaServerType.Plex && existing.token.value.isNotBlank()) {
+                    loadDiscoveredServersForExisting(existing)
+                }
             } else {
                 _configState.value = MediaServerConfigState(
                     serverType = serverType,
@@ -182,15 +188,95 @@ class MediaServerSettingsViewModel(
     }
 
     fun selectDiscoveredPlexServer(server: PlexServerResource) {
-        val bestConnection = server.connections.firstOrNull { it.local } ?: server.connections.firstOrNull()
+        val bestConnection = PlexConnectionUtils.findBestConnection(server)
         _configState.update {
             it?.copy(
                 label = server.name.ifBlank { it.label },
                 serverId = server.clientIdentifier,
+                selectedPlexServer = server,
                 url = bestConnection?.uri ?: it.url,
                 testSuccess = null,
                 errorMessage = null,
             )
+        }
+        autoTestPlexConnections(server)
+    }
+
+    fun selectPlexConnection(connection: PlexServerConnection, useDirectIp: Boolean = false) {
+        val url = if (useDirectIp) {
+            "http://${connection.address}:${connection.port}"
+        } else {
+            connection.uri
+        }
+        _configState.update {
+            it?.copy(
+                url = url,
+                testSuccess = null,
+                errorMessage = null,
+            )
+        }
+        testConnection()
+    }
+
+    private fun loadDiscoveredServersForExisting(existing: MediaServerIntegration) {
+        viewModelScope.launch {
+            when (val res = plexAuthUseCase.fetchPlexServers(existing.token.value, existing.clientIdentifier)) {
+                is NetworkResult.Success -> {
+                    val servers = res.data.filter { it.provides.contains("server") }
+                    _configState.update { it?.copy(discoveredPlexServers = servers) }
+                    val matchedServer = servers.firstOrNull { it.clientIdentifier == existing.serverId }
+                        ?: servers.firstOrNull()
+                    if (matchedServer != null) {
+                        _configState.update { it?.copy(selectedPlexServer = matchedServer) }
+                        val isDockerUrl = PlexConnectionUtils.isDockerBridgeUrl(existing.url)
+                        if (isDockerUrl) {
+                            autoTestPlexConnections(matchedServer)
+                        }
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
+
+    private fun autoTestPlexConnections(server: PlexServerResource) {
+        val state = _configState.value ?: return
+        val token = state.token
+        val clientIdentifier = state.clientIdentifier
+        if (token.isBlank()) return
+
+        viewModelScope.launch {
+            val sorted = PlexConnectionUtils.sortConnections(server.connections)
+            for (conn in sorted) {
+                val candidateUrls = listOfNotNull(
+                    conn.uri,
+                    "http://${conn.address}:${conn.port}".takeIf { it != conn.uri },
+                )
+                for (url in candidateUrls) {
+                    val candidate = MediaServerIntegration(
+                        id = state.existingId,
+                        serverType = MediaServerType.Plex,
+                        label = state.label.ifBlank { server.name },
+                        url = url,
+                        token = EncryptedString(token),
+                        clientIdentifier = clientIdentifier,
+                        serverId = server.clientIdentifier,
+                    )
+                    when (mediaServerManager.testConnection(candidate)) {
+                        is NetworkResult.Success -> {
+                            _configState.update {
+                                it?.copy(
+                                    url = url,
+                                    testSuccess = true,
+                                    errorMessage = null,
+                                )
+                            }
+                            return@launch
+                        }
+                        else -> {}
+                    }
+                }
+            }
         }
     }
 

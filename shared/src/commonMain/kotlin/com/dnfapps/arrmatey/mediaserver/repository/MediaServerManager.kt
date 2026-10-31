@@ -100,6 +100,15 @@ class MediaServerManager(
         return id
     }
 
+    suspend fun updateIntegrationUrl(serverType: MediaServerType, newUrl: String) {
+        val existing = getIntegration(serverType) ?: return
+        if (existing.url != newUrl) {
+            val updated = existing.copy(url = newUrl)
+            dao.insert(updated)
+            cachedIntegrations[serverType] = updated
+        }
+    }
+
     suspend fun deleteIntegration(type: MediaServerType) {
         dao.deleteByType(type)
         cachedIntegrations.remove(type)
@@ -176,7 +185,10 @@ class MediaServerManager(
     private fun createRepository(integration: MediaServerIntegration): MediaServerRepository {
         val httpClient = httpClientFactory.createMediaServerClient(integration)
         return when (integration.serverType) {
-            MediaServerType.Plex -> PlexRepository(PlexClient(integration, httpClient))
+            MediaServerType.Plex -> PlexRepository(
+                client = PlexClient(integration, httpClient),
+                onUrlUpdated = { newUrl -> updateIntegrationUrl(integration.serverType, newUrl) },
+            )
             MediaServerType.Jellyfin -> JellyfinRepository(JellyfinClient(integration, httpClient))
             MediaServerType.Emby -> EmbyRepository(EmbyClient(integration, httpClient))
         }
