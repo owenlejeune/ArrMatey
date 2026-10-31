@@ -59,6 +59,9 @@ class MediaPreviewViewModel(
     private val logger: Logger,
 ) : ViewModel() {
     private val _fallbackAddItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+
+    // Held until the screen navigates so a missed emission can't leave the preview stuck.
+    private val _addedItemId = MutableStateFlow<Long?>(null)
     private val _selectedInstanceId = MutableStateFlow<Long?>(null)
     val selectedInstanceId: StateFlow<Long?> = _selectedInstanceId.asStateFlow()
 
@@ -260,7 +263,7 @@ class MediaPreviewViewModel(
                     },
                     combine(
                         mergedAddItemStatus,
-                        repository.lastAddedItemId,
+                        _addedItemId,
                         previewPath,
                     ) { addItemStatus, lastAddedItemId, previewPath ->
                         Triple(addItemStatus, lastAddedItemId, previewPath)
@@ -314,13 +317,15 @@ class MediaPreviewViewModel(
             logger.info {
                 "MediaPreviewViewModel.addItem: adding '${item.title}' to instance ${repository.instance.id} (${repository.instance.label})"
             }
-            addMediaUseCase(
-                instanceType = instanceType,
-                repository = repository,
-                item = item,
-                metadata = metadata,
-                searchOnAdd = searchOnAdd,
-            )
+            val addedItem =
+                addMediaUseCase(
+                    instanceType = instanceType,
+                    repository = repository,
+                    item = item,
+                    metadata = metadata,
+                    searchOnAdd = searchOnAdd,
+                )
+            addedItem?.id?.takeIf { it != 0L }?.let { _addedItemId.value = it }
         }
     }
 

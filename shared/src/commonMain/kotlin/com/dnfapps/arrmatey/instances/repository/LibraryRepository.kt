@@ -71,9 +71,6 @@ class LibraryRepository(
     private val _lookupResults = MutableStateFlow<NetworkResult<List<ArrMedia>>?>(null)
     val lookupResults: StateFlow<NetworkResult<List<ArrMedia>>?> = _lookupResults.asStateFlow()
 
-    private val _lastAddedItemId = MutableStateFlow<Long?>(null)
-    val lastAddedItemId: StateFlow<Long?> = _lastAddedItemId.asStateFlow()
-
     private val _releases = MutableStateFlow<NetworkResult<List<ArrRelease>>?>(null)
     val releases: StateFlow<NetworkResult<List<ArrRelease>>?> = _releases.asStateFlow()
 
@@ -227,18 +224,18 @@ class LibraryRepository(
     suspend fun addItem(
         item: ArrMedia,
         searchOnAdd: Boolean,
-    ) {
+    ): ArrMedia? {
         _addItemStatus.value = OperationStatus.InProgress
         delay(100.milliseconds)
 
         val result = withContext(Dispatchers.IO) { client.addItemToLibrary(item) }
-        processAddResult(result, searchOnAdd)
+        return processAddResult(result, searchOnAdd)
     }
 
     suspend fun processAddResult(
         result: NetworkResult<ArrMedia>,
         searchOnAdd: Boolean,
-    ) {
+    ): ArrMedia? {
         result
             .onSuccess { addedItem ->
                 _addItemStatus.value = OperationStatus.Success(mokoStrings.getString(MR.strings.item_added_successfully))
@@ -247,7 +244,6 @@ class LibraryRepository(
                     newMap[it] = addedItem
                     _mediaDetailsCache.value = newMap
                 }
-                _lastAddedItemId.value = addedItem.id
 
                 val currentLibrary = (_library.value as? NetworkResult.Success)?.data
                 if (currentLibrary != null) {
@@ -267,13 +263,12 @@ class LibraryRepository(
 
                 delay(200.milliseconds)
                 _addItemStatus.value = OperationStatus.Idle
-                _lastAddedItemId.value = null
             }.onError { code, error, cause ->
                 _addItemStatus.value = OperationStatus.Error(code, error, cause)
                 delay(1500.milliseconds)
                 _addItemStatus.value = OperationStatus.Idle
-                _lastAddedItemId.value = null
             }
+        return (result as? NetworkResult.Success)?.data
     }
 
     suspend fun getReleases(params: ReleaseParams) {
