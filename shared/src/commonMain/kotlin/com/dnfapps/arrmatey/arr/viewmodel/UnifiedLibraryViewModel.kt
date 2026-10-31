@@ -176,29 +176,58 @@ class UnifiedLibraryViewModel(
     private val _mediaServerIsLoading = MutableStateFlow(false)
     val mediaServerIsLoading: StateFlow<Boolean> = _mediaServerIsLoading.asStateFlow()
 
-    private val _mediaServerViewType = MutableStateFlow(ViewType.Grid)
-    val mediaServerViewType: StateFlow<ViewType> = _mediaServerViewType.asStateFlow()
-
-    private val _mediaServerSortBy = MutableStateFlow(SortBy.Title)
-    val mediaServerSortBy: StateFlow<SortBy> = _mediaServerSortBy.asStateFlow()
-
-    private val _mediaServerSortOrder = MutableStateFlow(SortOrder.Asc)
-    val mediaServerSortOrder: StateFlow<SortOrder> = _mediaServerSortOrder.asStateFlow()
-
     private val _mediaServerWatchedFilter = MutableStateFlow(WatchedFilter.ALL)
     val mediaServerWatchedFilter: StateFlow<WatchedFilter> = _mediaServerWatchedFilter.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    val preferences: StateFlow<InstancePreferences> =
+        _selectedTab
+            .filterNotNull()
+            .flatMapLatest { tab ->
+                when (tab) {
+                    is UnifiedLibraryTabTarget.Arr -> {
+                        instancePreferenceStoreRepository.getInstancePreferences(tab.instance.id, SortBy.defaultFor(tab.instance.type)).observePreferences()
+                    }
+                    is UnifiedLibraryTabTarget.MediaServer -> {
+                        instancePreferenceStoreRepository.getMediaServerPreferences(tab.integration.id, SortBy.Title).observePreferences()
+                    }
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = InstancePreferences(),
+            )
+
+    val mediaServerViewType: StateFlow<ViewType> =
+        preferences.map { it.viewType }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = ViewType.Grid,
+        )
+
+    val mediaServerSortBy: StateFlow<SortBy> =
+        preferences.map { it.sortBy }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = SortBy.Title,
+        )
+
+    val mediaServerSortOrder: StateFlow<SortOrder> =
+        preferences.map { it.sortOrder }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = SortOrder.Asc,
+        )
+
     val mediaServerFilteredItems: StateFlow<List<UnifiedMediaItem>> =
         combine(
             _mediaServerRawItems,
             _searchQuery,
             _mediaServerWatchedFilter,
-            _mediaServerSortBy,
-            _mediaServerSortOrder,
-        ) { items, query, filter, sort, order ->
+            preferences,
+        ) { items, query, filter, prefs ->
             var list = items
             if (query.isNotBlank()) {
                 list = list.filter {
@@ -211,6 +240,8 @@ class UnifiedLibraryViewModel(
                 WatchedFilter.UNWATCHED -> list.filter { !it.played }
                 WatchedFilter.WATCHED -> list.filter { it.played }
             }
+            val sort = prefs.sortBy
+            val order = prefs.sortOrder
             val comparator = when (sort) {
                 SortBy.Title -> compareBy<UnifiedMediaItem> { it.title.lowercase() }
                 SortBy.Year -> compareBy<UnifiedMediaItem> { it.year ?: 0 }
@@ -292,17 +323,6 @@ class UnifiedLibraryViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.Eagerly,
                 initialValue = null,
-            )
-
-    val preferences: StateFlow<InstancePreferences> =
-        _selectedInstance
-            .filterNotNull()
-            .flatMapLatest { instance ->
-                instancePreferenceStoreRepository.getInstancePreferences(instance.id, SortBy.defaultFor(instance.type)).observePreferences()
-            }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.Eagerly,
-                initialValue = InstancePreferences(),
             )
 
     val instanceData: StateFlow<InstanceData?> =
@@ -410,10 +430,16 @@ class UnifiedLibraryViewModel(
             is UnifiedLibraryTabTarget.Arr -> {
                 _selectedInstance.value = tab.instance
                 _selectedMediaServer.value = null
+                viewModelScope.launch {
+                    updateAllPreferencesUseCase.syncGlobalPreferencesToInstance(tab.instance.id)
+                }
             }
             is UnifiedLibraryTabTarget.MediaServer -> {
                 _selectedInstance.value = null
                 _selectedMediaServer.value = tab.integration
+                viewModelScope.launch {
+                    updateAllPreferencesUseCase.syncGlobalPreferencesToMediaServer(tab.integration.id)
+                }
                 loadMediaServerLibrariesAndContents(tab.integration, null)
             }
         }
@@ -434,23 +460,25 @@ class UnifiedLibraryViewModel(
     }
 
     fun setMediaServerViewType(viewType: ViewType) {
-        _mediaServerViewType.value = viewType
+        updateViewType(viewType)
     }
 
     fun toggleMediaServerViewType() {
-        _mediaServerViewType.value = if (_mediaServerViewType.value == ViewType.Grid) ViewType.List else ViewType.Grid
+        val next = if (preferences.value.viewType == ViewType.Grid) ViewType.List else ViewType.Grid
+        updateViewType(next)
     }
 
     fun setMediaServerSortBy(sortBy: SortBy) {
-        _mediaServerSortBy.value = sortBy
+        updateSortBy(sortBy)
     }
 
     fun setMediaServerSortOrder(order: SortOrder) {
-        _mediaServerSortOrder.value = order
+        updateSortOrder(order)
     }
 
     fun toggleMediaServerSortOrder() {
-        _mediaServerSortOrder.value = if (_mediaServerSortOrder.value == SortOrder.Asc) SortOrder.Desc else SortOrder.Asc
+        val next = if (preferences.value.sortOrder == SortOrder.Asc) SortOrder.Desc else SortOrder.Asc
+        updateSortOrder(next)
     }
 
     fun setMediaServerWatchedFilter(filter: WatchedFilter) {
@@ -682,14 +710,22 @@ class UnifiedLibraryViewModel(
 
     private fun safeSavePreference(transform: (InstancePreferences) -> InstancePreferences) {
         viewModelScope.launch {
-            val instance = _selectedInstance.value ?: return@launch
+            val currentTab = _selectedTab.value ?: return@launch
             val prefs = preferences.value
             val updated = transform(prefs)
 
             if (updated.applyGlobally) {
                 updateAllPreferencesUseCase(updated)
             } else {
-                updateInstancePreferencesUseCase(instance.id, updated)
+                when (currentTab) {
+                    is UnifiedLibraryTabTarget.Arr -> {
+                        updateInstancePreferencesUseCase(currentTab.instance.id, updated)
+                    }
+                    is UnifiedLibraryTabTarget.MediaServer -> {
+                        val store = instancePreferenceStoreRepository.getMediaServerPreferences(currentTab.integration.id)
+                        store.savePreferences(updated)
+                    }
+                }
             }
         }
     }

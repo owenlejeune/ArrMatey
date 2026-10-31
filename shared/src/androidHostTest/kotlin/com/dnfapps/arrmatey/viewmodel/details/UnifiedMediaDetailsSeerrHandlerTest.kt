@@ -19,17 +19,29 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UnifiedMediaDetailsSeerrHandlerTest {
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
+    @AfterTest
+    fun tearDown() {
+        // Keep Dispatchers.Main set so background continuations don't fail when resetting
+    }
     private val submitRequestUseCase: SubmitRequestUseCase = mockk()
     private val cancelRequestUseCase: CancelRequestUseCase = mockk()
     private val setRequestApprovalStatusUseCase: SetRequestApprovalStatusUseCase = mockk()
@@ -76,7 +88,7 @@ class UnifiedMediaDetailsSeerrHandlerTest {
         handler.showRequestSheet(is4k = false)
 
         handler.submitRequest(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             repositoryProvider = { mockRepo },
             resolvedRequestType = RequestType.Movie,
             tmdbId = 12345L,
@@ -97,7 +109,7 @@ class UnifiedMediaDetailsSeerrHandlerTest {
         coEvery { submitRequestUseCase(capture(bodySlot), mockRepo) } returns NetworkResult.Success(mockk())
 
         handler.submitRequest(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             repositoryProvider = { mockRepo },
             resolvedRequestType = RequestType.Movie,
             tmdbId = 12345L,
@@ -117,7 +129,7 @@ class UnifiedMediaDetailsSeerrHandlerTest {
         coEvery { submitRequestUseCase(capture(bodySlot), mockRepo) } returns NetworkResult.Success(mockk())
 
         handler.submitRequest(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             repositoryProvider = { mockRepo },
             resolvedRequestType = RequestType.Movie,
             tmdbId = 12345L,
@@ -137,7 +149,7 @@ class UnifiedMediaDetailsSeerrHandlerTest {
         coEvery { submitRequestUseCase(capture(bodySlot), mockRepo) } returns NetworkResult.Success(mockk())
 
         handler.submitRequest(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             repositoryProvider = { mockRepo },
             resolvedRequestType = RequestType.Movie,
             tmdbId = 12345L,
@@ -155,7 +167,7 @@ class UnifiedMediaDetailsSeerrHandlerTest {
 
         var refreshed = false
         handler.cancelRequest(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             repositoryProvider = { mockRepo },
             requestId = 100L,
             onSuccessRefresh = { refreshed = true },
@@ -175,7 +187,7 @@ class UnifiedMediaDetailsSeerrHandlerTest {
         var refreshed = false
 
         handler.declineRequest(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             repositoryProvider = { mockRepo },
             requestId = 200L,
             onSuccessRefresh = { refreshed = true },

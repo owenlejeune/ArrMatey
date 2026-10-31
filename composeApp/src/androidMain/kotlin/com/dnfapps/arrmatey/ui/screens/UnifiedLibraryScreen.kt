@@ -32,6 +32,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -243,16 +244,23 @@ fun UnifiedLibraryScreen(
                             },
                             actions = {
                                 ViewTypeMenuButton(
-                                    viewType = mediaServerViewType,
-                                    onViewTypeChanged = { unifiedLibraryViewModel.setMediaServerViewType(it) },
+                                    viewType = preferences.viewType,
+                                    onViewTypeChanged = { unifiedLibraryViewModel.updateViewType(it) },
                                 )
+                                IconButton(onClick = { showViewCustomizationSheet = true }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Palette,
+                                        contentDescription = mokoString(MR.strings.view_customization),
+                                    )
+                                }
                                 MediaServerFilterSortMenu(
-                                    sortBy = mediaServerSortBy,
-                                    onSortByChanged = { unifiedLibraryViewModel.setMediaServerSortBy(it) },
-                                    sortOrder = mediaServerSortOrder,
-                                    onSortOrderChanged = { unifiedLibraryViewModel.setMediaServerSortOrder(it) },
+                                    sortBy = preferences.sortBy,
+                                    onSortByChanged = { unifiedLibraryViewModel.updateSortBy(it) },
+                                    sortOrder = preferences.sortOrder,
+                                    onSortOrderChanged = { unifiedLibraryViewModel.updateSortOrder(it) },
                                     watchedFilter = mediaServerWatchedFilter,
                                     onWatchedFilterChanged = { unifiedLibraryViewModel.setMediaServerWatchedFilter(it) },
+                                    onOpenViewCustomization = { showViewCustomizationSheet = true },
                                 )
                             },
                         )
@@ -379,7 +387,7 @@ fun UnifiedLibraryScreen(
                         ) {
                             MediaServerMediaView(
                                 items = mediaServerFilteredItems,
-                                viewType = mediaServerViewType,
+                                preferences = preferences,
                                 onItemClick = { onNavigateToMediaServerDetails?.invoke(it) },
                                 onToggleWatched = { unifiedLibraryViewModel.toggleMediaServerWatched(it) },
                             )
@@ -679,25 +687,6 @@ fun UnifiedLibraryScreen(
                         }
                     }
 
-                    if (showViewCustomizationSheet) {
-                        ArrViewCustomizationSheet(
-                            onDismissRequest = { showViewCustomizationSheet = false },
-                            preferences = preferences,
-                            type = currentType,
-                            onViewTypeChanged = { unifiedLibraryViewModel.updateViewType(it) },
-                            onShowFullDetailsChanged = { unifiedLibraryViewModel.updateShowFullDetails(it) },
-                            onShowOverlayChanged = { unifiedLibraryViewModel.updateShowOverlay(it) },
-                            onShowBannerBackgroundChanged = { unifiedLibraryViewModel.updateShowBannerBackground(it) },
-                            onIncludeOverviewChanged = { unifiedLibraryViewModel.updateIncludeOverview(it) },
-                            onBannerBlurChanged = { unifiedLibraryViewModel.updateBannerBlur(it) },
-                            onGridDensityChanged = { unifiedLibraryViewModel.updateGridDensity(it) },
-                            onGridSpacingChanged = { unifiedLibraryViewModel.updateGridSpacing(it) },
-                            onPosterElevationChanged = { unifiedLibraryViewModel.updatePosterElevation(it) },
-                            onPosterRadiusChanged = { unifiedLibraryViewModel.updatePosterRadius(it) },
-                            onApplyGloballyChanged = { unifiedLibraryViewModel.updateApplyGlobally(it) },
-                        )
-                    }
-
                     if (isInSelectionMode) {
                         FlexibleBottomSheet(
                             onDismissRequest = { unifiedLibraryViewModel.exitSelectionMode() },
@@ -830,6 +819,29 @@ fun UnifiedLibraryScreen(
                     }
                 }
             }
+        }
+
+        if (showViewCustomizationSheet) {
+            val customizationType = when (currentTab) {
+                is UnifiedLibraryTabTarget.Arr -> currentTab.instance.type
+                is UnifiedLibraryTabTarget.MediaServer -> InstanceType.Radarr
+            }
+            ArrViewCustomizationSheet(
+                onDismissRequest = { showViewCustomizationSheet = false },
+                preferences = preferences,
+                type = customizationType,
+                onViewTypeChanged = { unifiedLibraryViewModel.updateViewType(it) },
+                onShowFullDetailsChanged = { unifiedLibraryViewModel.updateShowFullDetails(it) },
+                onShowOverlayChanged = { unifiedLibraryViewModel.updateShowOverlay(it) },
+                onShowBannerBackgroundChanged = { unifiedLibraryViewModel.updateShowBannerBackground(it) },
+                onIncludeOverviewChanged = { unifiedLibraryViewModel.updateIncludeOverview(it) },
+                onBannerBlurChanged = { unifiedLibraryViewModel.updateBannerBlur(it) },
+                onGridDensityChanged = { unifiedLibraryViewModel.updateGridDensity(it) },
+                onGridSpacingChanged = { unifiedLibraryViewModel.updateGridSpacing(it) },
+                onPosterElevationChanged = { unifiedLibraryViewModel.updatePosterElevation(it) },
+                onPosterRadiusChanged = { unifiedLibraryViewModel.updatePosterRadius(it) },
+                onApplyGloballyChanged = { unifiedLibraryViewModel.updateApplyGlobally(it) },
+            )
         }
     }
 }

@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
+import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
+import com.dnfapps.arrmatey.datastore.InstancePreferences
+import com.dnfapps.arrmatey.instances.usecase.UpdateAllPreferencesUseCase
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
@@ -12,7 +15,13 @@ import com.dnfapps.arrmatey.mediaserver.model.WatchedFilter
 import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.mediaserver.repository.MediaServerRepository
 import com.dnfapps.arrmatey.ui.theme.ViewType
+import com.dnfapps.arrmatey.utils.Blur
+import com.dnfapps.arrmatey.utils.GridDensity
+import com.dnfapps.arrmatey.utils.GridSpacing
+import com.dnfapps.arrmatey.utils.PosterElevation
+import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.networking.NetworkResult
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -21,12 +30,16 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MediaServerLibraryViewModel(
     private val mediaServerManager: MediaServerManager,
+    private val instancePreferenceStoreRepository: InstancePreferenceStoreRepository? = null,
+    private val updateAllPreferencesUseCase: UpdateAllPreferencesUseCase? = null,
 ) : ViewModel() {
 
     val configuredServers: StateFlow<List<MediaServerIntegration>> =
@@ -41,6 +54,22 @@ class MediaServerLibraryViewModel(
     private val _selectedServer = MutableStateFlow<MediaServerIntegration?>(null)
     val selectedServer: StateFlow<MediaServerIntegration?> = _selectedServer.asStateFlow()
 
+    private val fallbackPreferences = MutableStateFlow(InstancePreferences())
+
+    val preferences: StateFlow<InstancePreferences> =
+        _selectedServer
+            .flatMapLatest { server ->
+                if (server != null && instancePreferenceStoreRepository != null) {
+                    instancePreferenceStoreRepository.getMediaServerPreferences(server.id, SortBy.Title).observePreferences()
+                } else {
+                    fallbackPreferences
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = InstancePreferences(),
+            )
+
     private val _libraries = MutableStateFlow<List<UnifiedMediaLibrary>>(emptyList())
     val libraries: StateFlow<List<UnifiedMediaLibrary>> = _libraries.asStateFlow()
 
@@ -53,14 +82,26 @@ class MediaServerLibraryViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _viewType = MutableStateFlow(ViewType.Grid)
-    val viewType: StateFlow<ViewType> = _viewType.asStateFlow()
+    val viewType: StateFlow<ViewType> =
+        preferences.map { it.viewType }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = ViewType.Grid,
+        )
 
-    private val _sortBy = MutableStateFlow(SortBy.Title)
-    val sortBy: StateFlow<SortBy> = _sortBy.asStateFlow()
+    val sortBy: StateFlow<SortBy> =
+        preferences.map { it.sortBy }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = SortBy.Title,
+        )
 
-    private val _sortOrder = MutableStateFlow(SortOrder.Asc)
-    val sortOrder: StateFlow<SortOrder> = _sortOrder.asStateFlow()
+    val sortOrder: StateFlow<SortOrder> =
+        preferences.map { it.sortOrder }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = SortOrder.Asc,
+        )
 
     private val _watchedFilter = MutableStateFlow(WatchedFilter.ALL)
     val watchedFilter: StateFlow<WatchedFilter> = _watchedFilter.asStateFlow()
@@ -76,9 +117,8 @@ class MediaServerLibraryViewModel(
             _rawItems,
             _searchQuery,
             _watchedFilter,
-            _sortBy,
-            _sortOrder,
-        ) { items, query, filter, sort, order ->
+            preferences,
+        ) { items, query, filter, prefs ->
             var list = items
 
             // 1. Search Query Filter
@@ -97,6 +137,8 @@ class MediaServerLibraryViewModel(
             }
 
             // 3. Sorting
+            val sort = prefs.sortBy
+            val order = prefs.sortOrder
             val comparator = when (sort) {
                 SortBy.Title -> compareBy<UnifiedMediaItem> { it.title.lowercase() }
                 SortBy.Year -> compareBy<UnifiedMediaItem> { it.year ?: 0 }
@@ -135,6 +177,9 @@ class MediaServerLibraryViewModel(
     fun selectServer(server: MediaServerIntegration) {
         _selectedServer.value = server
         _selectedLibrary.value = null
+        viewModelScope.launch {
+            updateAllPreferencesUseCase?.syncGlobalPreferencesToMediaServer(server.id)
+        }
         loadLibrariesAndContents(server, null)
     }
 
@@ -154,24 +199,87 @@ class MediaServerLibraryViewModel(
         _searchQuery.value = query
     }
 
-    fun setViewType(viewType: ViewType) {
-        _viewType.value = viewType
+    fun updateViewType(viewType: ViewType) {
+        safeSavePreference { it.copy(viewType = viewType) }
     }
+
+    fun setViewType(viewType: ViewType) = updateViewType(viewType)
 
     fun toggleViewType() {
-        _viewType.value = if (_viewType.value == ViewType.Grid) ViewType.List else ViewType.Grid
+        val next = if (preferences.value.viewType == ViewType.Grid) ViewType.List else ViewType.Grid
+        updateViewType(next)
     }
 
-    fun setSortBy(sortBy: SortBy) {
-        _sortBy.value = sortBy
+    fun updateShowFullDetails(showFullDetails: Boolean) {
+        safeSavePreference { it.copy(showFullDetails = showFullDetails) }
     }
 
-    fun setSortOrder(order: SortOrder) {
-        _sortOrder.value = order
+    fun updateShowOverlay(showOverlay: Boolean) {
+        safeSavePreference { it.copy(showOverlay = showOverlay) }
     }
+
+    fun updateShowBannerBackground(showBannerBackground: Boolean) {
+        safeSavePreference { it.copy(showBannerBackground = showBannerBackground) }
+    }
+
+    fun updateIncludeOverview(includeOverview: Boolean) {
+        safeSavePreference { it.copy(includeOverview = includeOverview) }
+    }
+
+    fun updateBannerBlur(bannerBlur: Blur) {
+        safeSavePreference { it.copy(bannerBlur = bannerBlur) }
+    }
+
+    fun updateGridDensity(gridDensity: GridDensity) {
+        safeSavePreference { it.copy(gridDensity = gridDensity) }
+    }
+
+    fun updateGridSpacing(gridSpacing: GridSpacing) {
+        safeSavePreference { it.copy(gridSpacing = gridSpacing) }
+    }
+
+    fun updatePosterElevation(posterElevation: PosterElevation) {
+        safeSavePreference { it.copy(posterElevation = posterElevation) }
+    }
+
+    fun updatePosterRadius(posterRadius: PosterRadius) {
+        safeSavePreference { it.copy(posterRadius = posterRadius) }
+    }
+
+    fun updateApplyGlobally(applyGlobally: Boolean) {
+        safeSavePreference { it.copy(applyGlobally = applyGlobally) }
+    }
+
+    fun updateSortBy(sortBy: SortBy) {
+        safeSavePreference { it.copy(sortBy = sortBy) }
+    }
+
+    fun setSortBy(sortBy: SortBy) = updateSortBy(sortBy)
+
+    fun updateSortOrder(order: SortOrder) {
+        safeSavePreference { it.copy(sortOrder = order) }
+    }
+
+    fun setSortOrder(order: SortOrder) = updateSortOrder(order)
 
     fun toggleSortOrder() {
-        _sortOrder.value = if (_sortOrder.value == SortOrder.Asc) SortOrder.Desc else SortOrder.Asc
+        val next = if (preferences.value.sortOrder == SortOrder.Asc) SortOrder.Desc else SortOrder.Asc
+        updateSortOrder(next)
+    }
+
+    private fun safeSavePreference(transform: (InstancePreferences) -> InstancePreferences) {
+        viewModelScope.launch {
+            val server = _selectedServer.value
+            val currentPrefs = preferences.value
+            val updated = transform(currentPrefs)
+            if (updated.applyGlobally && updateAllPreferencesUseCase != null) {
+                updateAllPreferencesUseCase(updated)
+            } else if (server != null && instancePreferenceStoreRepository != null) {
+                instancePreferenceStoreRepository.getMediaServerPreferences(server.id).savePreferences(updated)
+            } else {
+                fallbackPreferences.value = updated
+            }
+        }
     }
 
     fun setWatchedFilter(filter: WatchedFilter) {

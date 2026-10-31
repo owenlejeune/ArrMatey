@@ -20,17 +20,29 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UnifiedMediaDetailsArrActionsHandlerTest {
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
+    @AfterTest
+    fun tearDown() {
+        // Keep Dispatchers.Main set so background continuations don't fail when resetting
+    }
     private val toggleMonitorUseCase: ToggleMonitorUseCase = mockk()
     private val performAutomaticSearchUseCase: PerformAutomaticSearchUseCase = mockk()
     private val updateMediaUseCase: UpdateMediaUseCase = mockk()
@@ -65,7 +77,7 @@ class UnifiedMediaDetailsArrActionsHandlerTest {
         coEvery { toggleMonitorUseCase.toggleMedia(mockMedia, mockRepo) } returns NetworkResult.Success(mockMedia)
 
         handler.toggleMonitored(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             repositoryProvider = { mockRepo },
             mediaProvider = { mockMedia },
         )
@@ -79,7 +91,7 @@ class UnifiedMediaDetailsArrActionsHandlerTest {
         every { deleteMediaUseCase(123L, true, false, mockRepo) } returns flowOf(OperationStatus.Success())
 
         handler.deleteMedia(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             repositoryProvider = { mockRepo },
             effectiveIdProvider = { 123L },
             deleteFiles = true,
@@ -102,7 +114,7 @@ class UnifiedMediaDetailsArrActionsHandlerTest {
         } returns flowOf(OperationStatus.Success())
 
         handler.removeQueueItem(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             queueItem = mockQueueItem,
             removeFromClient = true,
             addToBlocklist = false,
@@ -119,7 +131,7 @@ class UnifiedMediaDetailsArrActionsHandlerTest {
         coEvery { mockRepo.getMediaDetails(456L) } returns NetworkResult.Success(mockk())
 
         handler.updateMonitoring(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             repositoryProvider = { mockRepo },
             effectiveIdProvider = { 456L },
             monitorOption = "none",

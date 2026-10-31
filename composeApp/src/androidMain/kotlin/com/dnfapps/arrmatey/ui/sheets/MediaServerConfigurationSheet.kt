@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -74,6 +73,7 @@ import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.ConfirmableButton
+import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.ui.screens.CustomHeaderSection
 import com.dnfapps.arrmatey.utils.mokoString
@@ -442,131 +442,108 @@ private fun PlexOAuthSection(
     }
 
     if (state.discoveredPlexServers.isNotEmpty()) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        val selectedServer = state.discoveredPlexServers.firstOrNull { it.clientIdentifier == state.serverId }
+
+        DropdownPicker(
+            options = state.discoveredPlexServers,
+            selectedOption = selectedServer,
+            onOptionSelected = onSelectServer,
+            getOptionLabel = { server ->
+                val platform = listOfNotNull(server.platform, server.productVersion).filter { it.isNotBlank() }.joinToString(" ")
+                if (platform.isNotBlank()) "${server.name} ($platform)" else server.name
+            },
+            label = {
                 Text(
                     text = mokoString(MR.strings.discovered_plex_servers),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                 )
-                state.discoveredPlexServers.forEach { server ->
-                    val isSelected = state.serverId == server.clientIdentifier
-                    Card(
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        selectedServer?.let { server ->
+            if (server.connections.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                ) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onSelectServer(server) },
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                        Text(
+                            text = "Available Endpoints:",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+
+                        PlexConnectionUtils.sortConnections(server.connections).forEach { conn ->
+                            val isDocker = PlexConnectionUtils.isDockerBridgeIp(conn.address)
+                            val directHttp = "http://${conn.address}:${conn.port}"
+                            val isCurrentDirect = state.url == directHttp
+                            val isCurrentSecure = state.url == conn.uri
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
                                     Text(
-                                        text = server.name,
+                                        text = "${conn.address}:${conn.port}",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = if (isCurrentDirect || isCurrentSecure) FontWeight.Bold else FontWeight.Normal,
                                     )
-                                    Text(
-                                        text = "${server.platform ?: ""} ${server.productVersion ?: ""}".trim(),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
+                                    if (conn.local && !isDocker) {
+                                        Text(
+                                            text = "LAN",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.SemiBold,
+                                        )
+                                    } else if (!conn.local) {
+                                        Text(
+                                            text = "Remote",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.secondary,
+                                        )
+                                    } else if (isDocker) {
+                                        Text(
+                                            text = "Docker Bridge (Unroutable)",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.error,
+                                        )
+                                    }
                                 }
-                                if (isSelected) {
-                                    Icon(
-                                        Icons.Default.CheckCircle,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(20.dp),
-                                    )
-                                }
-                            }
 
-                            if (isSelected && server.connections.isNotEmpty()) {
-                                HorizontalDivider()
-                                Text(
-                                    text = "Available Endpoints:",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-
-                                PlexConnectionUtils.sortConnections(server.connections).forEach { conn ->
-                                    val isDocker = PlexConnectionUtils.isDockerBridgeIp(conn.address)
-                                    val directHttp = "http://${conn.address}:${conn.port}"
-                                    val isCurrentDirect = state.url == directHttp
-                                    val isCurrentSecure = state.url == conn.uri
-
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 4.dp),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    OutlinedButton(
+                                        onClick = { onSelectConnection(conn, true) },
+                                        modifier = Modifier.weight(1f),
                                     ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                        ) {
-                                            Text(
-                                                text = "${conn.address}:${conn.port}",
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                fontWeight = if (isCurrentDirect || isCurrentSecure) FontWeight.Bold else FontWeight.Normal,
-                                            )
-                                            if (conn.local && !isDocker) {
-                                                Text(
-                                                    text = "LAN",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    fontWeight = FontWeight.SemiBold,
-                                                )
-                                            } else if (!conn.local) {
-                                                Text(
-                                                    text = "Remote",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = MaterialTheme.colorScheme.secondary,
-                                                )
-                                            } else if (isDocker) {
-                                                Text(
-                                                    text = "Docker Bridge (Unroutable)",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    color = MaterialTheme.colorScheme.error,
-                                                )
-                                            }
-                                        }
-
-                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            OutlinedButton(
-                                                onClick = { onSelectConnection(conn, true) },
-                                                modifier = Modifier.weight(1f),
-                                            ) {
-                                                Text(
-                                                    text = if (isCurrentDirect) "Direct HTTP (Active)" else "Direct HTTP",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    maxLines = 1,
-                                                )
-                                            }
-                                            OutlinedButton(
-                                                onClick = { onSelectConnection(conn, false) },
-                                                modifier = Modifier.weight(1f),
-                                            ) {
-                                                Text(
-                                                    text = if (isCurrentSecure) "Secure HTTPS (Active)" else "Secure HTTPS",
-                                                    style = MaterialTheme.typography.labelSmall,
-                                                    maxLines = 1,
-                                                )
-                                            }
-                                        }
+                                        Text(
+                                            text = if (isCurrentDirect) "Direct HTTP (Active)" else "Direct HTTP",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            maxLines = 1,
+                                        )
+                                    }
+                                    OutlinedButton(
+                                        onClick = { onSelectConnection(conn, false) },
+                                        modifier = Modifier.weight(1f),
+                                    ) {
+                                        Text(
+                                            text = if (isCurrentSecure) "Secure HTTPS (Active)" else "Secure HTTPS",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            maxLines = 1,
+                                        )
                                     }
                                 }
                             }

@@ -48,19 +48,15 @@ object PlexConnectionUtils {
     /**
      * Sorts connections with best (most likely reachable) connections first.
      */
-    fun sortConnections(connections: List<PlexServerConnection>): List<PlexServerConnection> {
-        return connections.sortedWith(
-            compareByDescending<PlexServerConnection> { rankConnection(it) }
-                .thenBy { if (it.protocol == "https") 0 else 1 }
-        )
-    }
+    fun sortConnections(connections: List<PlexServerConnection>): List<PlexServerConnection> = connections.sortedWith(
+        compareByDescending<PlexServerConnection> { rankConnection(it) }
+            .thenBy { if (it.protocol == "https") 0 else 1 },
+    )
 
     /**
      * Finds the best candidate connection for a Plex server resource.
      */
-    fun findBestConnection(server: PlexServerResource): PlexServerConnection? {
-        return sortConnections(server.connections).firstOrNull()
-    }
+    fun findBestConnection(server: PlexServerResource): PlexServerConnection? = sortConnections(server.connections).firstOrNull()
 
     /**
      * If a host is in the format "<a-b-c-d>.<hash>.plex.direct", extracts the IP "a.b.c.d".
@@ -86,4 +82,3 @@ object PlexConnectionUtils {
         return "http://$ip:$port"
     }
 }
-

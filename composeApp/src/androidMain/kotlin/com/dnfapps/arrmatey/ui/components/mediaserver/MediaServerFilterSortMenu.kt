@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -35,6 +36,7 @@ fun MediaServerFilterSortMenu(
     watchedFilter: WatchedFilter,
     onWatchedFilterChanged: (WatchedFilter) -> Unit,
     modifier: Modifier = Modifier,
+    onOpenViewCustomization: (() -> Unit)? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -50,6 +52,23 @@ fun MediaServerFilterSortMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
+            if (onOpenViewCustomization != null) {
+                DropdownMenuItem(
+                    text = { Text(mokoString(MR.strings.view_customization)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = {
+                        expanded = false
+                        onOpenViewCustomization()
+                    },
+                )
+                HorizontalDivider()
+            }
+
             // Watched Filter Section
             Text(
                 text = mokoString(MR.strings.filter_by),

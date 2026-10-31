@@ -20,10 +20,13 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryScrollableTabRow
@@ -33,12 +36,16 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerLibraryViewModel
 import com.dnfapps.arrmatey.shared.*
@@ -49,6 +56,7 @@ import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerEmptyConfigView
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerFilterSortMenu
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerMediaView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
+import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -65,12 +73,12 @@ fun MediaLibraryScreen(
     val selectedServer by viewModel.selectedServer.collectAsStateWithLifecycle()
     val libraries by viewModel.libraries.collectAsStateWithLifecycle()
     val selectedLibrary by viewModel.selectedLibrary.collectAsStateWithLifecycle()
+    val preferences by viewModel.preferences.collectAsStateWithLifecycle()
     val filteredItems by viewModel.filteredItems.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val viewType by viewModel.viewType.collectAsStateWithLifecycle()
-    val sortBy by viewModel.sortBy.collectAsStateWithLifecycle()
-    val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
     val watchedFilter by viewModel.watchedFilter.collectAsStateWithLifecycle()
+
+    var showViewCustomizationSheet by remember { mutableStateOf(false) }
 
     val textFieldState = rememberTextFieldState()
 
@@ -121,16 +129,23 @@ fun MediaLibraryScreen(
                 },
                 actions = {
                     ViewTypeMenuButton(
-                        viewType = viewType,
-                        onViewTypeChanged = { viewModel.setViewType(it) },
+                        viewType = preferences.viewType,
+                        onViewTypeChanged = { viewModel.updateViewType(it) },
                     )
+                    IconButton(onClick = { showViewCustomizationSheet = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = mokoString(MR.strings.view_customization),
+                        )
+                    }
                     MediaServerFilterSortMenu(
-                        sortBy = sortBy,
-                        onSortByChanged = { viewModel.setSortBy(it) },
-                        sortOrder = sortOrder,
-                        onSortOrderChanged = { viewModel.setSortOrder(it) },
+                        sortBy = preferences.sortBy,
+                        onSortByChanged = { viewModel.updateSortBy(it) },
+                        sortOrder = preferences.sortOrder,
+                        onSortOrderChanged = { viewModel.updateSortOrder(it) },
                         watchedFilter = watchedFilter,
                         onWatchedFilterChanged = { viewModel.setWatchedFilter(it) },
+                        onOpenViewCustomization = { showViewCustomizationSheet = true },
                     )
                 },
             )
@@ -221,11 +236,30 @@ fun MediaLibraryScreen(
             ) {
                 MediaServerMediaView(
                     items = filteredItems,
-                    viewType = viewType,
+                    preferences = preferences,
                     onItemClick = onNavigateToDetails,
                     onToggleWatched = { viewModel.toggleWatched(it) },
                 )
             }
+        }
+
+        if (showViewCustomizationSheet) {
+            ArrViewCustomizationSheet(
+                onDismissRequest = { showViewCustomizationSheet = false },
+                type = InstanceType.Radarr,
+                preferences = preferences,
+                onViewTypeChanged = { viewModel.updateViewType(it) },
+                onShowFullDetailsChanged = { viewModel.updateShowFullDetails(it) },
+                onShowOverlayChanged = { viewModel.updateShowOverlay(it) },
+                onShowBannerBackgroundChanged = { viewModel.updateShowBannerBackground(it) },
+                onIncludeOverviewChanged = { viewModel.updateIncludeOverview(it) },
+                onBannerBlurChanged = { viewModel.updateBannerBlur(it) },
+                onGridDensityChanged = { viewModel.updateGridDensity(it) },
+                onGridSpacingChanged = { viewModel.updateGridSpacing(it) },
+                onPosterElevationChanged = { viewModel.updatePosterElevation(it) },
+                onPosterRadiusChanged = { viewModel.updatePosterRadius(it) },
+                onApplyGloballyChanged = { viewModel.updateApplyGlobally(it) },
+            )
         }
     }
 }

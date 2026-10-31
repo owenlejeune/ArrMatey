@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.mediaserver.viewmodel
 
+import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
@@ -19,8 +20,11 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +33,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
 import kotlin.test.AfterTest
@@ -94,6 +97,9 @@ class MediaServerLibraryViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    private var activeVm: MediaServerLibraryViewModel? = null
+    private var activeManagerScope: CoroutineScope? = null
+
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
@@ -101,7 +107,8 @@ class MediaServerLibraryViewModelTest {
 
     @AfterTest
     fun tearDown() {
-        Dispatchers.resetMain()
+        activeVm?.viewModelScope?.cancel()
+        activeManagerScope?.cancel()
     }
 
     private val plexSectionsJson = """
@@ -178,9 +185,12 @@ class MediaServerLibraryViewModelTest {
             override fun log(message: String) {}
         }
         val clientFactory = TestLibraryHttpClientFactory(json, mockEngine, logger)
-        val manager = MediaServerManager(dao, clientFactory)
+        val managerScope = CoroutineScope(Dispatchers.Default + Job())
+        activeManagerScope = managerScope
+        val manager = MediaServerManager(dao, clientFactory, managerScope)
 
         val vm = MediaServerLibraryViewModel(manager)
+        activeVm = vm
         return vm to fakeIntegration
     }
 

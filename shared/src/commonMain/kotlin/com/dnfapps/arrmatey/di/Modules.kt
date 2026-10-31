@@ -457,7 +457,7 @@ val useCaseModule =
         factory { ExportDataUseCase(get(), get(), get(), get(), get(), get(), get()) }
         factory { ImportDataUseCase(get(), get(), get(), get(), get(), get(), get()) }
         factory { GetInstancePresencesUseCase() }
-        factory { UpdateAllPreferencesUseCase(get(), get()) }
+        factory { UpdateAllPreferencesUseCase(get(), get(), getOrNull()) }
     }
 
 val viewModelModule =

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.mediaserver.viewmodel
 
+import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.usecase.PlexAuthUseCase
@@ -19,15 +20,17 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
@@ -89,6 +92,9 @@ private class TestHttpClientFactory(
 @OptIn(ExperimentalCoroutinesApi::class)
 class MediaServerSettingsViewModelTest {
 
+    private var activeViewModel: MediaServerSettingsViewModel? = null
+    private var activeManagerScope: CoroutineScope? = null
+
     private fun createViewModel(
         dao: FakeMediaServerDao = FakeMediaServerDao(),
         mockEngine: MockEngine = MockEngine { respond("{}", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json")) },
@@ -98,7 +104,9 @@ class MediaServerSettingsViewModelTest {
         }
         val json = Json { ignoreUnknownKeys = true }
         val httpFactory = TestHttpClientFactory(json, mockEngine, testLogger)
-        val manager = MediaServerManager(dao, httpFactory)
+        val managerScope = CoroutineScope(Dispatchers.Default + Job())
+        activeManagerScope = managerScope
+        val manager = MediaServerManager(dao, httpFactory, managerScope)
         val plexAuthUseCase = PlexAuthUseCase(httpFactory)
         val jellyfinQuickConnectUseCase = JellyfinQuickConnectUseCase(httpFactory)
 
@@ -107,6 +115,7 @@ class MediaServerSettingsViewModelTest {
             plexAuthUseCase = plexAuthUseCase,
             jellyfinQuickConnectUseCase = jellyfinQuickConnectUseCase,
         )
+        activeViewModel = viewModel
         return Triple(viewModel, dao, manager)
     }
 
@@ -126,7 +135,8 @@ class MediaServerSettingsViewModelTest {
             assertTrue(state.clientIdentifier.isNotEmpty())
             assertEquals(0L, state.existingId)
         } finally {
-            Dispatchers.resetMain()
+            activeViewModel?.viewModelScope?.cancel()
+            activeManagerScope?.cancel()
         }
     }
 
@@ -158,7 +168,8 @@ class MediaServerSettingsViewModelTest {
             assertEquals("secret-jf-token", state.token)
             assertEquals("jellyuser", state.username)
         } finally {
-            Dispatchers.resetMain()
+            activeViewModel?.viewModelScope?.cancel()
+            activeManagerScope?.cancel()
         }
     }
 
@@ -184,7 +195,8 @@ class MediaServerSettingsViewModelTest {
             assertEquals("emby-api-key", saved.token.value)
             assertTrue(viewModel.configState.value?.saveCompleted == true)
         } finally {
-            Dispatchers.resetMain()
+            activeViewModel?.viewModelScope?.cancel()
+            activeManagerScope?.cancel()
         }
     }
 
@@ -214,7 +226,8 @@ class MediaServerSettingsViewModelTest {
             assertNull(dao.getByType(MediaServerType.Plex))
             assertNull(viewModel.configState.value)
         } finally {
-            Dispatchers.resetMain()
+            activeViewModel?.viewModelScope?.cancel()
+            activeManagerScope?.cancel()
         }
     }
 
@@ -248,7 +261,8 @@ class MediaServerSettingsViewModelTest {
             assertEquals("plex-remote-id-1234", state.serverId)
             assertEquals("https://192-168-1-50.plex.direct:32400", state.url)
         } finally {
-            Dispatchers.resetMain()
+            activeViewModel?.viewModelScope?.cancel()
+            activeManagerScope?.cancel()
         }
     }
 }
