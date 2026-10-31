@@ -17,7 +17,14 @@ struct SeriesDetailsView: View {
         return "\(item.episodeFileCount)/\(item.episodeCount) (\(progress)%)"
     }
     
-    private var seasonString: String {
+    private var yearString: String? {
+        let year = item.year.intValue
+        guard year > 0 else { return nil }
+        return String(year)
+    }
+
+    private var seasonString: String? {
+        guard item.seasonCount > 0 else { return nil }
         return MR.plurals().seasons.localized(item.seasonCount)
     }
     
@@ -27,7 +34,7 @@ struct SeriesDetailsView: View {
     }
     
     private var firstLine: String {
-        [seasonString, fileSizeString, item.network]
+        [yearString, seasonString, fileSizeString, item.network]
             .compactMap { $0 }
             .joined(separator: " • ")
     }
@@ -37,6 +44,8 @@ struct SeriesDetailsView: View {
         case .continuing:
             if let nextAiring = item.nextAiring {
                 return formatDate(nextAiring)
+            } else if item.id == nil {
+                return item.status.name
             } else {
                 return "\(item.status.name) - \(MR.strings().unknown.localized())"
             }

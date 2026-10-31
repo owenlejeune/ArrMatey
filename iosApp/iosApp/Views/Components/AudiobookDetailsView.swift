@@ -31,6 +31,15 @@ struct AudiobookDetailsView: View {
         return ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
     }
     
+    private var releaseDateString: String? {
+        if let published = item.publishedDate {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMMM d, yyyy"
+            return formatter.string(from: Date(timeIntervalSince1970: TimeInterval(published.epochSeconds)))
+        }
+        return item.publishYear
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(item.authors.joined(separator: ", "))
@@ -56,7 +65,7 @@ struct AudiobookDetailsView: View {
                     .font(.system(size: 14))
             }
             
-            Text(item.status.resource.localized())
+            Text([item.status.resource.localized(), releaseDateString].compactMap { $0 }.joined(separator: " • "))
                 .font(.system(size: 14))
             
             if item.id != nil {

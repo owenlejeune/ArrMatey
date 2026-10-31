@@ -29,6 +29,8 @@ struct MediaDetailsView: View {
                 AudiobookDetailsView(item: audiobook, isActive: isActive)
             } else if let searchAudiobook = item as? SearchAudiobook {
                 SearchAudiobookDetailsView(item: searchAudiobook)
+            } else if let comic = item as? ComicVolume {
+                ComicVolumeDetailsView(item: comic, isActive: isActive)
             }
         }
         .foregroundColor(showBannerBackground ? .white : .secondary)
