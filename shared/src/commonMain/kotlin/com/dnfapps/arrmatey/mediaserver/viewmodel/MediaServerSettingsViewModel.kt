@@ -341,10 +341,18 @@ class MediaServerSettingsViewModel(
                     }
                 }
                 is NetworkResult.Error -> {
+                    val rawMessage = pinRes.message ?: "Failed to initiate Plex sign in"
+                    val userFriendly = if (rawMessage.contains("plex.tv", ignoreCase = true) &&
+                        (rawMessage.contains("UnknownHostException", ignoreCase = true) || rawMessage.contains("Unable to resolve host", ignoreCase = true))
+                    ) {
+                        "Cannot reach plex.tv. Check your internet connection, or switch to 'Manual Token' mode."
+                    } else {
+                        rawMessage
+                    }
                     _configState.update {
                         it?.copy(
                             isPlexWaiting = false,
-                            errorMessage = pinRes.message ?: "Failed to initiate Plex sign in",
+                            errorMessage = userFriendly,
                         )
                     }
                 }

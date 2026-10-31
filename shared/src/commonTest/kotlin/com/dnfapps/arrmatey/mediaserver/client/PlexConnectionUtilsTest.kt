@@ -75,3 +75,4 @@ class PlexConnectionUtilsTest {
         assertEquals(dockerConn.address, sorted[2].address)
     }
 }
+
