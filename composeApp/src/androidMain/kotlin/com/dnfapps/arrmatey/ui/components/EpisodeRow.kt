@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -31,12 +31,10 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -201,7 +199,7 @@ fun EpisodeRow(
             )
         }
 
-        // 3. Middle Content & Actions: adapts dynamically based on image presence & available service actions
+        // 3. Middle Content: Image & Overview (overview text full height with the episode image)
         if (hasImage) {
             Row(
                 verticalAlignment = Alignment.Top,
@@ -242,110 +240,63 @@ fun EpisodeRow(
                     }
                 }
 
-                Column(
-                    modifier =
-                    Modifier
-                        .weight(1f)
-                        .heightIn(min = 72.dp),
-                    verticalArrangement =
-                    when {
-                        hasActions && epOverview != null -> Arrangement.SpaceBetween
-                        hasActions -> Arrangement.Center
-                        else -> Arrangement.spacedBy(4.dp)
-                    },
-                ) {
-                    if (epOverview != null) {
-                        Text(
-                            text = epOverview,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = if (hasActions) 2 else 3,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-
-                    if (hasActions) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            EpisodeActions(
-                                arrEp = arrEp,
-                                isMediaServerWatched = isMediaServerWatched,
-                                effectiveMediaServerType = effectiveMediaServerType,
-                                episodeDeepLink = episodeDeepLink,
-                                searchInProgress = searchInProgress,
-                                onPlayEpisode = onPlayEpisode,
-                                onToggleMediaServerWatched = onToggleMediaServerWatched,
-                                onNavigateToSeriesRelease = onNavigateToSeriesRelease,
-                                onAutomaticSearch = onAutomaticSearch,
-                                onToggleMonitor = onToggleMonitor,
-                            )
-                        }
-                    }
-                }
-            }
-
-            if (hasSubtitles) {
-                episode.bazarrEpisode?.let { bazarrEp ->
-                    EpisodeSubtitlesRow(
-                        bazarrEpisode = bazarrEp,
-                        modifier = Modifier.fillMaxWidth(),
+                if (epOverview != null) {
+                    Text(
+                        text = epOverview,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
-        } else {
-            // No image: overview occupies full width, actions & subtitles below it without vertical dead space
-            if (epOverview != null) {
-                Text(
-                    text = epOverview,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
+        } else if (epOverview != null) {
+            Text(
+                text = epOverview,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        // 4. Subtitles (if available)
+        if (hasSubtitles) {
+            episode.bazarrEpisode?.let { bazarrEp ->
+                EpisodeSubtitlesRow(
+                    bazarrEpisode = bazarrEp,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
+        }
 
-            if (hasActions || hasSubtitles) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(modifier = Modifier.weight(1f, fill = false)) {
-                        if (hasSubtitles) {
-                            episode.bazarrEpisode?.let { bazarrEp ->
-                                EpisodeSubtitlesRow(
-                                    bazarrEpisode = bazarrEp,
-                                )
-                            }
-                        }
-                    }
-
-                    if (hasActions) {
-                        EpisodeActions(
-                            arrEp = arrEp,
-                            isMediaServerWatched = isMediaServerWatched,
-                            effectiveMediaServerType = effectiveMediaServerType,
-                            episodeDeepLink = episodeDeepLink,
-                            searchInProgress = searchInProgress,
-                            onPlayEpisode = onPlayEpisode,
-                            onToggleMediaServerWatched = onToggleMediaServerWatched,
-                            onNavigateToSeriesRelease = onNavigateToSeriesRelease,
-                            onAutomaticSearch = onAutomaticSearch,
-                            onToggleMonitor = onToggleMonitor,
-                        )
-                    }
-                }
+        // 5. Action Buttons: row of buttons of equal weights below image/text content
+        if (hasActions) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                EpisodeActions(
+                    arrEp = arrEp,
+                    isMediaServerWatched = isMediaServerWatched,
+                    effectiveMediaServerType = effectiveMediaServerType,
+                    episodeDeepLink = episodeDeepLink,
+                    searchInProgress = searchInProgress,
+                    onPlayEpisode = onPlayEpisode,
+                    onToggleMediaServerWatched = onToggleMediaServerWatched,
+                    onNavigateToSeriesRelease = onNavigateToSeriesRelease,
+                    onAutomaticSearch = onAutomaticSearch,
+                    onToggleMonitor = onToggleMonitor,
+                )
             }
         }
     }
 }
 
 @Composable
-private fun EpisodeActions(
+private fun RowScope.EpisodeActions(
     arrEp: ArrEpisode?,
     isMediaServerWatched: Boolean,
     effectiveMediaServerType: MediaServerType?,
@@ -356,118 +307,109 @@ private fun EpisodeActions(
     onNavigateToSeriesRelease: (Long?) -> Unit,
     onAutomaticSearch: (Long) -> Unit,
     onToggleMonitor: (ArrEpisode) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier,
+    // Media Server Actions
+    if (episodeDeepLink != null && onPlayEpisode != null) {
+        IconButton(
+            onClick = { onPlayEpisode(episodeDeepLink) },
+            modifier = Modifier.weight(1f),
         ) {
-            // Media Server Actions
-            if (episodeDeepLink != null && onPlayEpisode != null) {
-                IconButton(
-                    onClick = { onPlayEpisode(episodeDeepLink) },
-                    modifier = Modifier.size(32.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Play",
-                        tint = effectiveMediaServerType?.brandColor ?: MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-            }
-            if (onToggleMediaServerWatched != null) {
-                IconButton(
-                    onClick = { onToggleMediaServerWatched(!isMediaServerWatched) },
-                    modifier = Modifier.size(32.dp),
-                ) {
-                    Icon(
-                        imageVector = if (isMediaServerWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
-                        contentDescription = if (isMediaServerWatched) "Mark Unwatched" else "Mark Watched",
-                        tint = if (isMediaServerWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-            }
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Play",
+                tint = effectiveMediaServerType?.brandColor ?: MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+    if (onToggleMediaServerWatched != null) {
+        IconButton(
+            onClick = { onToggleMediaServerWatched(!isMediaServerWatched) },
+            modifier = Modifier.weight(1f),
+        ) {
+            Icon(
+                imageVector = if (isMediaServerWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                contentDescription = if (isMediaServerWatched) "Mark Unwatched" else "Mark Watched",
+                tint = if (isMediaServerWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
 
-            // Arr Actions
-            if (arrEp != null) {
-                IconButton(
-                    onClick = {
-                        onNavigateToSeriesRelease(arrEp.id)
-                    },
-                    modifier = Modifier.size(32.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Releases",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-                IconButton(
-                    onClick = {
-                        onAutomaticSearch(arrEp.id)
-                    },
-                    enabled = arrEp.monitored && !searchInProgress(arrEp.id),
-                    modifier = Modifier.size(32.dp),
-                ) {
-                    if (searchInProgress(arrEp.id)) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                        )
+    // Arr Actions
+    if (arrEp != null) {
+        IconButton(
+            onClick = {
+                onNavigateToSeriesRelease(arrEp.id)
+            },
+            modifier = Modifier.weight(1f),
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Releases",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        IconButton(
+            onClick = {
+                onAutomaticSearch(arrEp.id)
+            },
+            enabled = arrEp.monitored && !searchInProgress(arrEp.id),
+            modifier = Modifier.weight(1f),
+        ) {
+            if (searchInProgress(arrEp.id)) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    strokeWidth = 2.dp,
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint =
+                    if (arrEp.monitored) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
                     } else {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint =
-                            if (arrEp.monitored) {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                    alpha = 0.38f,
-                                )
-                            },
-                            modifier = Modifier.size(20.dp),
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = 0.38f,
                         )
-                    }
-                }
-                IconButton(
-                    onClick = {
-                        onToggleMonitor(arrEp)
                     },
-                    modifier = Modifier.size(32.dp),
-                ) {
-                    AnimatedContent(
-                        targetState = arrEp.monitored,
-                        transitionSpec = {
-                            (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
-                        },
-                        label = "EpisodeBookmarkIconAnimation",
-                    ) { monitored ->
-                        Icon(
-                            imageVector =
-                            if (monitored) {
-                                Icons.Default.Bookmark
-                            } else {
-                                Icons.Default.BookmarkBorder
-                            },
-                            contentDescription = if (monitored) "Monitored" else "Unmonitored",
-                            tint =
-                            if (monitored) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                    alpha = 0.6f,
-                                )
-                            },
-                            modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
+        IconButton(
+            onClick = {
+                onToggleMonitor(arrEp)
+            },
+            modifier = Modifier.weight(1f),
+        ) {
+            AnimatedContent(
+                targetState = arrEp.monitored,
+                transitionSpec = {
+                    (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
+                },
+                label = "EpisodeBookmarkIconAnimation",
+            ) { monitored ->
+                Icon(
+                    imageVector =
+                    if (monitored) {
+                        Icons.Default.Bookmark
+                    } else {
+                        Icons.Default.BookmarkBorder
+                    },
+                    contentDescription = if (monitored) "Monitored" else "Unmonitored",
+                    tint =
+                    if (monitored) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = 0.6f,
                         )
-                    }
-                }
+                    },
+                    modifier = Modifier.size(20.dp),
+                )
             }
         }
     }
