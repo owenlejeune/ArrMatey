@@ -280,4 +280,81 @@ class UnifiedMediaDetailsMediaServerHandlerTest {
             testJob.cancel()
         }
     }
+
+    @Test
+    fun testFindEpisodeMatchesAndPopulatesDetails() = runTest(UnconfinedTestDispatcher()) {
+        val testJob = kotlinx.coroutines.Job()
+        val testScope = kotlinx.coroutines.CoroutineScope(testJob + UnconfinedTestDispatcher())
+        try {
+            val plexRepo = createMockRepo(MediaServerType.Plex, "My Plex")
+            val show = UnifiedMediaItem(
+                id = "show-1",
+                title = "Breaking Bad",
+                type = MediaType.SHOW,
+                tvdbId = 81189L,
+                year = 2008,
+                serverType = MediaServerType.Plex,
+            )
+            val ep1 = UnifiedMediaItem(
+                id = "ep-1",
+                title = "Pilot",
+                type = MediaType.EPISODE,
+                seasonNumber = 1,
+                episodeNumber = 1,
+                serverType = MediaServerType.Plex,
+                played = true,
+                videoResolution = "1080p",
+                videoCodec = "h264",
+                audioCodec = "aac",
+                container = "mkv",
+                bitrate = 8_000_000L,
+            )
+            val ep2 = UnifiedMediaItem(
+                id = "ep-2",
+                title = "Cat's in the Bag...",
+                type = MediaType.EPISODE,
+                seasonNumber = 1,
+                episodeNumber = 2,
+                serverType = MediaServerType.Plex,
+                played = false,
+            )
+
+            coEvery { plexRepo.search("Breaking Bad", 15) } returns NetworkResult.Success(listOf(show))
+            coEvery { plexRepo.getShowEpisodes("show-1") } returns NetworkResult.Success(listOf(ep1, ep2))
+
+            val manager = mockk<MediaServerManager>()
+            every { manager.activeRepositories } returns MutableStateFlow(listOf(plexRepo))
+
+            val handler = UnifiedMediaDetailsMediaServerHandler(testScope, manager)
+            handler.findEpisode(
+                tmdbId = null,
+                tvdbId = 81189L,
+                title = "Breaking Bad",
+                year = 2008,
+                seasonNumber = 1,
+                episodeNumber = 1,
+            )
+
+            val details = handler.mediaServerDetails.value
+            assertEquals(1, details.size)
+            val epDetail = details.first()
+            assertEquals("ep-1", epDetail.itemId)
+            assertEquals("Pilot", epDetail.title)
+            assertEquals(MediaServerType.Plex, epDetail.serverType)
+            assertEquals("My Plex", epDetail.serverLabel)
+            assertTrue(epDetail.played)
+            assertEquals("1080p", epDetail.videoResolution)
+            assertEquals("h264", epDetail.videoCodec)
+            assertEquals("aac", epDetail.audioCodec)
+            assertEquals("mkv", epDetail.container)
+            assertEquals(8_000_000L, epDetail.bitrate)
+            assertEquals("plex://item/ep-1", epDetail.deepLinkUrl)
+            assertEquals("http://localhost:8096/web/ep-1", epDetail.webFallbackUrl)
+
+            assertEquals(1, handler.watchOptions.value.size)
+            assertEquals(MediaProvider.Plex, handler.watchOptions.value.first().provider)
+        } finally {
+            testJob.cancel()
+        }
+    }
 }

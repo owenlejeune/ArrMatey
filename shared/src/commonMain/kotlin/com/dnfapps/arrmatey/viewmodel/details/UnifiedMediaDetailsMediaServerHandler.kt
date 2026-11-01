@@ -136,6 +136,99 @@ class UnifiedMediaDetailsMediaServerHandler(
         }
     }
 
+    fun findEpisode(
+        tmdbId: Long?,
+        tvdbId: Long?,
+        title: String?,
+        year: Int?,
+        seasonNumber: Int,
+        episodeNumber: Int,
+    ) {
+        if (title.isNullOrBlank() && tmdbId == null && tvdbId == null) return
+        scope.launch {
+            _isSearching.value = true
+            try {
+                val repos = mediaServerManager.activeRepositories.value
+                val results = mutableListOf<MediaServerMediaDetails>()
+                val options = mutableListOf<WatchOption>()
+
+                for (repo in repos) {
+                    val searchResult = repo.search(title ?: "", limit = 15)
+                    if (searchResult is NetworkResult.Success) {
+                        val matchingShow = searchResult.data.firstOrNull { item ->
+                            val tmdbMatch = tmdbId != null && item.tmdbId != null && tmdbId == item.tmdbId
+                            val tvdbMatch = tvdbId != null && item.tvdbId != null && tvdbId == item.tvdbId
+                            val titleMatch = !title.isNullOrBlank() && item.title.equals(title, ignoreCase = true)
+                            val yearMatch = year == null || item.year == null || year == item.year
+                            tmdbMatch || tvdbMatch || (titleMatch && yearMatch)
+                        }
+
+                        if (matchingShow != null) {
+                            val episodesRes = repo.getShowEpisodes(matchingShow.id)
+                            if (episodesRes is NetworkResult.Success) {
+                                val matchingEp = episodesRes.data.firstOrNull { ep ->
+                                    val sNum = ep.seasonNumber ?: 1
+                                    val eNum = ep.episodeNumber ?: 0
+                                    sNum == seasonNumber && eNum == episodeNumber
+                                }
+
+                                if (matchingEp != null) {
+                                    val deepLink = repo.buildDeepLinkUrl(matchingEp)
+                                    val webUrl = repo.buildWebUrl(matchingEp)
+                                    val provider = when (repo.serverType) {
+                                        MediaServerType.Plex -> MediaProvider.Plex
+                                        MediaServerType.Jellyfin -> MediaProvider.Jellyfin
+                                        MediaServerType.Emby -> MediaProvider.Emby
+                                    }
+                                    val label = when (repo.serverType) {
+                                        MediaServerType.Plex -> MR.strings.watch_on_plex
+                                        MediaServerType.Jellyfin -> MR.strings.watch_on_jellyfin
+                                        MediaServerType.Emby -> MR.strings.watch_on_emby
+                                    }
+
+                                    options.add(
+                                        WatchOption(
+                                            provider = provider,
+                                            serverName = repo.integration.label,
+                                            url = deepLink,
+                                            webFallbackUrl = webUrl,
+                                            label = label,
+                                        ),
+                                    )
+
+                                    results.add(
+                                        MediaServerMediaDetails(
+                                            serverType = repo.serverType,
+                                            serverId = repo.integration.serverId,
+                                            serverLabel = repo.integration.label,
+                                            itemId = matchingEp.id,
+                                            title = matchingEp.title,
+                                            deepLinkUrl = deepLink,
+                                            webFallbackUrl = webUrl,
+                                            played = matchingEp.played,
+                                            playbackPositionTicks = matchingEp.playbackPositionTicks,
+                                            durationTicks = matchingEp.durationTicks,
+                                            videoCodec = matchingEp.videoCodec,
+                                            audioCodec = matchingEp.audioCodec,
+                                            videoResolution = matchingEp.videoResolution,
+                                            container = matchingEp.container,
+                                            bitrate = matchingEp.bitrate,
+                                        ),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                _mediaServerDetails.value = results
+                _watchOptions.value = options
+            } finally {
+                _isSearching.value = false
+            }
+        }
+    }
+
     fun markWatched(serverType: MediaServerType, itemId: String, watched: Boolean) {
         scope.launch {
             val repo = mediaServerManager.getRepository(serverType) ?: return@launch

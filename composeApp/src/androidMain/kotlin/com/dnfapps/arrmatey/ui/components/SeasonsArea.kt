@@ -50,6 +50,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
@@ -77,6 +78,7 @@ fun SeasonsArea(
     bazarrDetailsIntegration: Boolean = true,
     episodeWatchStatus: Map<Pair<Int, Int>, Boolean> = emptyMap(),
     episodeDeepLinks: Map<Pair<Int, Int>, String> = emptyMap(),
+    mediaServerType: MediaServerType? = null,
     onPlayEpisode: ((String) -> Unit)? = null,
 ) {
     if (seasons.isEmpty()) return
@@ -277,6 +279,7 @@ fun SeasonsArea(
                                 bazarrDetailsIntegration = bazarrDetailsIntegration,
                                 isMediaServerWatched = episodeWatchStatus[key] == true,
                                 episodeDeepLink = episodeDeepLinks[key],
+                                mediaServerType = mediaServerType,
                                 onPlayEpisode = onPlayEpisode,
                             )
 

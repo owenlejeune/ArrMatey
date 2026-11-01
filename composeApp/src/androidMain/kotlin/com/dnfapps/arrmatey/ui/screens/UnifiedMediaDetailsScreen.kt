@@ -674,6 +674,7 @@ fun UnifiedMediaDetailsScreen(
                                             onEditAuthor = { showEditSheet = true },
                                             episodeWatchStatus = episodeWatchStatus,
                                             episodeDeepLinks = episodeDeepLinks,
+                                            mediaServerType = firstMediaServer?.serverType,
                                             onPlayEpisode = { url ->
                                                 val provider = when (firstMediaServer?.serverType) {
                                                     MediaServerType.Plex -> MediaProvider.Plex

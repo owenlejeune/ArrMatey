@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,7 +49,9 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.seerr.state.MediaProvider
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
@@ -60,6 +63,7 @@ import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
+import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerSpecsCard
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrHistorySection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrSummaryChipRow
@@ -69,7 +73,10 @@ import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
+import com.dnfapps.arrmatey.utils.MokoStrings
+import com.dnfapps.arrmatey.utils.handleWatchClick
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -89,9 +96,10 @@ fun EpisodeDetailsScreen(
     onBack: () -> Unit = {},
     onNavigateToSeriesRelease: (Long) -> Unit = {},
     viewModel: EpisodeDetailsViewModel =
-        koinViewModel(key = "${series.id}_${episode.id}", parameters = { parametersOf(series.id, episode) }),
+        koinViewModel(key = "${series.id}_${episode.id}", parameters = { parametersOf(series.id, episode, series) }),
 ) {
     val context = LocalContext.current
+    val moko: MokoStrings = koinInject()
     val scrollState = rememberScrollState()
 
     val currentEpisode by viewModel.episode.collectAsStateWithLifecycle()
@@ -101,6 +109,8 @@ fun EpisodeDetailsScreen(
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
     val tracearrState by viewModel.tracearrState.collectAsStateWithLifecycle()
+    val mediaServerList by viewModel.mediaServerDetails.collectAsStateWithLifecycle()
+    val firstMediaServer = mediaServerList.firstOrNull()
 
     var confirmDelete by remember { mutableStateOf(false) }
     var selectedQueueItem by remember { mutableStateOf<QueueItem?>(null) }
@@ -158,6 +168,31 @@ fun EpisodeDetailsScreen(
                     }
                 },
                 actions = {
+                    if (firstMediaServer != null) {
+                        val provider = when (firstMediaServer.serverType) {
+                            MediaServerType.Plex -> MediaProvider.Plex
+                            MediaServerType.Jellyfin -> MediaProvider.Jellyfin
+                            MediaServerType.Emby -> MediaProvider.Emby
+                        }
+                        IconButton(
+                            onClick = {
+                                handleWatchClick(
+                                    firstMediaServer.deepLinkUrl,
+                                    provider,
+                                    context,
+                                    moko,
+                                    firstMediaServer.webFallbackUrl,
+                                )
+                            },
+                            colors = IconButtonDefaults.headerBarColors(),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Watch",
+                                tint = firstMediaServer.serverType.brandColor,
+                            )
+                        }
+                    }
                     IconButton(
                         onClick = { viewModel.toggleMonitor() },
                         colors = IconButtonDefaults.headerBarColors(),
@@ -274,6 +309,25 @@ fun EpisodeDetailsScreen(
                                         overview = overview,
                                         modifier = Modifier.padding(horizontal = 24.dp),
                                     )
+                                }
+
+                                if (mediaServerList.isNotEmpty()) {
+                                    Column(
+                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                    ) {
+                                        mediaServerList.forEach { serverDetails ->
+                                            MediaServerSpecsCard(
+                                                details = serverDetails,
+                                                onWatchClick = { url, provider, webUrl ->
+                                                    handleWatchClick(url, provider, context, moko, webUrl)
+                                                },
+                                                onToggleWatched = { watched ->
+                                                    viewModel.markMediaServerWatched(serverDetails.serverType, serverDetails.itemId, watched)
+                                                },
+                                            )
+                                        }
+                                    }
                                 }
 
                                 ReleaseDownloadButtons(

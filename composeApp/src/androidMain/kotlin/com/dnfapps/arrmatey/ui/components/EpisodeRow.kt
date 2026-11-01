@@ -49,6 +49,7 @@ import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.extensions.isToday
 import com.dnfapps.arrmatey.extensions.isTodayOrAfter
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.model.EpisodeWrapper
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
@@ -73,9 +74,11 @@ fun EpisodeRow(
     bazarrDetailsIntegration: Boolean = true,
     isMediaServerWatched: Boolean = false,
     episodeDeepLink: String? = null,
+    mediaServerType: MediaServerType? = null,
     onPlayEpisode: ((String) -> Unit)? = null,
 ) {
     val arrEp = episode.arrEpisode
+    val effectiveMediaServerType = mediaServerType ?: episode.mediaServerEpisode?.serverType
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -206,7 +209,7 @@ fun EpisodeRow(
                             Icon(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = "Play",
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = effectiveMediaServerType?.brandColor ?: MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp),
                             )
                         }

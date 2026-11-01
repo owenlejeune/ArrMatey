@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.client.GenericClient
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
 import com.dnfapps.arrmatey.arr.api.client.logging.DynamicLogger
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
@@ -556,8 +557,26 @@ val viewModelModule =
             InteractiveSearchViewModel(type, defaultFilter, instanceId, get(), get(), get(), get())
         }
 
-        viewModel { (seriesId: Long, episode: Episode) ->
-            EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+        viewModel { params ->
+            val seriesId: Long = params[0]
+            val episode: Episode = params[1]
+            val series: ArrSeries? = if (params.size() > 2) params[2] else null
+            EpisodeDetailsViewModel(
+                seriesId = seriesId,
+                episode = episode,
+                getArrInstanceRepositoryUseCase = get(),
+                toggleMonitorUseCase = get(),
+                performAutomaticSearchUseCase = get(),
+                getEpisodeHistoryUseCase = get(),
+                deleteEpisodeUseCase = get(),
+                getActivityTasksUseCase = get(),
+                deleteQueueItemUseCase = get(),
+                getTracearrInstanceRepositoryUseCase = get(),
+                getPlaybackMonitoringRepositoryUseCase = getOrNull(),
+                preferencesStore = get(),
+                mediaServerManager = getOrNull(),
+                initialSeries = series,
+            )
         }
         viewModelOf(::MoreScreenViewModel)
         viewModelOf(::AddInstanceViewModel)

@@ -32,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerMediaDetails
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
@@ -41,7 +40,6 @@ import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.utils.mokoString
-import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -52,22 +50,8 @@ fun MediaServerSpecsCard(
     onToggleWatched: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val serverColor: Color
-    val iconRes: ImageResource
-    when (details.serverType) {
-        MediaServerType.Plex -> {
-            serverColor = Color(0xFFE5A00D)
-            iconRes = MR.images.plex
-        }
-        MediaServerType.Jellyfin -> {
-            serverColor = Color(0xFF4747ED)
-            iconRes = MR.images.jellyfin
-        }
-        MediaServerType.Emby -> {
-            serverColor = Color(0xFF52B54B)
-            iconRes = MR.images.emby
-        }
-    }
+    val serverColor = details.serverType.brandColor
+    val iconRes = details.serverType.icon
     val provider = when (details.serverType) {
         MediaServerType.Plex -> MediaProvider.Plex
         MediaServerType.Jellyfin -> MediaProvider.Jellyfin
