@@ -32,7 +32,6 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -82,7 +81,6 @@ import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.InstanceOptionsMenu
 import com.dnfapps.arrmatey.ui.components.MediaView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
-import com.dnfapps.arrmatey.ui.components.ViewTypeMenuButton
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerFilterSortMenu
@@ -243,16 +241,6 @@ fun UnifiedLibraryScreen(
                                 }
                             },
                             actions = {
-                                ViewTypeMenuButton(
-                                    viewType = preferences.viewType,
-                                    onViewTypeChanged = { unifiedLibraryViewModel.updateViewType(it) },
-                                )
-                                IconButton(onClick = { showViewCustomizationSheet = true }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Palette,
-                                        contentDescription = mokoString(MR.strings.view_customization),
-                                    )
-                                }
                                 MediaServerFilterSortMenu(
                                     sortBy = preferences.sortBy,
                                     onSortByChanged = { unifiedLibraryViewModel.updateSortBy(it) },

@@ -20,13 +20,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryScrollableTabRow
@@ -51,7 +48,6 @@ import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerLibraryViewModel
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
-import com.dnfapps.arrmatey.ui.components.ViewTypeMenuButton
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerEmptyConfigView
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerFilterSortMenu
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerMediaView
@@ -128,16 +124,6 @@ fun MediaLibraryScreen(
                     }
                 },
                 actions = {
-                    ViewTypeMenuButton(
-                        viewType = preferences.viewType,
-                        onViewTypeChanged = { viewModel.updateViewType(it) },
-                    )
-                    IconButton(onClick = { showViewCustomizationSheet = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Palette,
-                            contentDescription = mokoString(MR.strings.view_customization),
-                        )
-                    }
                     MediaServerFilterSortMenu(
                         sortBy = preferences.sortBy,
                         onSortByChanged = { viewModel.updateSortBy(it) },
