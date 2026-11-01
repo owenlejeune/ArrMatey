@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -75,6 +76,7 @@ fun EpisodeRow(
     isMediaServerWatched: Boolean = false,
     episodeDeepLink: String? = null,
     mediaServerType: MediaServerType? = null,
+    onToggleMediaServerWatched: ((Boolean) -> Unit)? = null,
     onPlayEpisode: ((String) -> Unit)? = null,
 ) {
     val arrEp = episode.arrEpisode
@@ -130,7 +132,7 @@ fun EpisodeRow(
                         maxLines = 2,
                         modifier = Modifier.weight(1f, fill = false),
                     )
-                    if (isMediaServerWatched) {
+                    if (isMediaServerWatched && onToggleMediaServerWatched == null) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = "Watched",
@@ -193,7 +195,7 @@ fun EpisodeRow(
             }
 
             AnimatedVisibility(
-                visible = arrEp != null || episodeDeepLink != null,
+                visible = arrEp != null || episodeDeepLink != null || onToggleMediaServerWatched != null,
                 enter = fadeIn() + expandHorizontally(),
                 exit = fadeOut() + shrinkHorizontally(),
             ) {
@@ -210,6 +212,19 @@ fun EpisodeRow(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = "Play",
                                 tint = effectiveMediaServerType?.brandColor ?: MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    }
+                    if (onToggleMediaServerWatched != null) {
+                        IconButton(
+                            onClick = { onToggleMediaServerWatched(!isMediaServerWatched) },
+                            modifier = Modifier.size(32.dp),
+                        ) {
+                            Icon(
+                                imageVector = if (isMediaServerWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                                contentDescription = if (isMediaServerWatched) "Mark Unwatched" else "Mark Watched",
+                                tint = if (isMediaServerWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                 modifier = Modifier.size(20.dp),
                             )
                         }

@@ -323,6 +323,10 @@ class UnifiedMediaDetailsViewModel(
         mediaServerHandler?.markWatched(serverType, itemId, watched)
     }
 
+    fun markEpisodeWatched(serverType: MediaServerType, seasonNumber: Int, episodeNumber: Int, watched: Boolean) {
+        mediaServerHandler?.markEpisodeWatched(serverType, seasonNumber, episodeNumber, watched)
+    }
+
     val buttonState: StateFlow<MediaButtonState> =
         if (mediaServerHandler != null) {
             combine(

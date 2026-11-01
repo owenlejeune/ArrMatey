@@ -80,6 +80,7 @@ class UnifiedMediaDetailsMediaServerHandler(
 
                             var epWatchStatus = emptyMap<Pair<Int, Int>, Boolean>()
                             var epDeepLinks = emptyMap<Pair<Int, Int>, String>()
+                            var epItemIds = emptyMap<Pair<Int, Int>, String>()
                             var episodesWatched = 0
                             var totalEpisodes = 0
 
@@ -88,16 +89,20 @@ class UnifiedMediaDetailsMediaServerHandler(
                                 if (episodesRes is NetworkResult.Success) {
                                     val statusMap = mutableMapOf<Pair<Int, Int>, Boolean>()
                                     val linksMap = mutableMapOf<Pair<Int, Int>, String>()
+                                    val itemIdsMap = mutableMapOf<Pair<Int, Int>, String>()
                                     totalEpisodes = episodesRes.data.size
                                     for (ep in episodesRes.data) {
                                         val sNum = ep.seasonNumber ?: 1
                                         val eNum = ep.episodeNumber ?: 0
-                                        statusMap[sNum to eNum] = ep.played
-                                        linksMap[sNum to eNum] = repo.buildDeepLinkUrl(ep)
+                                        val key = sNum to eNum
+                                        statusMap[key] = ep.played
+                                        linksMap[key] = repo.buildDeepLinkUrl(ep)
+                                        itemIdsMap[key] = ep.id
                                         if (ep.played) episodesWatched++
                                     }
                                     epWatchStatus = statusMap
                                     epDeepLinks = linksMap
+                                    epItemIds = itemIdsMap
                                 }
                             }
 
@@ -122,6 +127,7 @@ class UnifiedMediaDetailsMediaServerHandler(
                                     totalEpisodesCount = if (isShow) totalEpisodes else null,
                                     episodeWatchStatus = epWatchStatus,
                                     episodeDeepLinks = epDeepLinks,
+                                    episodeItemIds = epItemIds,
                                 ),
                             )
                         }
@@ -235,13 +241,39 @@ class UnifiedMediaDetailsMediaServerHandler(
             repo.markWatched(itemId, watched)
             _mediaServerDetails.update { list ->
                 list.map { detail ->
-                    if (detail.serverType == serverType && detail.itemId == itemId) {
-                        detail.copy(played = watched, playbackPositionTicks = if (watched) detail.durationTicks else 0L)
+                    if (detail.serverType == serverType) {
+                        if (detail.itemId == itemId) {
+                            detail.copy(played = watched, playbackPositionTicks = if (watched) detail.durationTicks else 0L)
+                        } else if (detail.episodeItemIds.containsValue(itemId)) {
+                            val updatedStatus = detail.episodeWatchStatus.toMutableMap()
+                            val key = detail.episodeItemIds.entries.firstOrNull { it.value == itemId }?.key
+                            if (key != null) {
+                                updatedStatus[key] = watched
+                            }
+                            val updatedWatchedCount = updatedStatus.values.count { it }
+                            detail.copy(
+                                episodeWatchStatus = updatedStatus,
+                                episodesWatchedCount = updatedWatchedCount,
+                            )
+                        } else {
+                            detail
+                        }
                     } else {
                         detail
                     }
                 }
             }
         }
+    }
+
+    fun markEpisodeWatched(
+        serverType: MediaServerType,
+        seasonNumber: Int,
+        episodeNumber: Int,
+        watched: Boolean,
+    ) {
+        val detail = _mediaServerDetails.value.firstOrNull { it.serverType == serverType } ?: return
+        val itemId = detail.episodeItemIds[seasonNumber to episodeNumber] ?: return
+        markWatched(serverType, itemId, watched)
     }
 }

@@ -78,7 +78,9 @@ fun SeasonsArea(
     bazarrDetailsIntegration: Boolean = true,
     episodeWatchStatus: Map<Pair<Int, Int>, Boolean> = emptyMap(),
     episodeDeepLinks: Map<Pair<Int, Int>, String> = emptyMap(),
+    episodeItemIds: Map<Pair<Int, Int>, String> = emptyMap(),
     mediaServerType: MediaServerType? = null,
+    onToggleEpisodeWatched: ((Int, Int, Boolean) -> Unit)? = null,
     onPlayEpisode: ((String) -> Unit)? = null,
 ) {
     if (seasons.isEmpty()) return
@@ -266,6 +268,7 @@ fun SeasonsArea(
                             val arrEp = episode.arrEpisode
 
                             val key = season.seasonNumber to episode.episodeNumber
+                            val canToggleWatched = onToggleEpisodeWatched != null && (episodeItemIds.containsKey(key) || episode.mediaServerEpisode != null)
                             EpisodeRow(
                                 episode = episode,
                                 onClick = arrEp?.let { ep -> { onNavigateToEpisodeDetails(ep) } },
@@ -280,6 +283,11 @@ fun SeasonsArea(
                                 isMediaServerWatched = episodeWatchStatus[key] == true,
                                 episodeDeepLink = episodeDeepLinks[key],
                                 mediaServerType = mediaServerType,
+                                onToggleMediaServerWatched = if (canToggleWatched) {
+                                    { watched -> onToggleEpisodeWatched(season.seasonNumber, episode.episodeNumber, watched) }
+                                } else {
+                                    null
+                                },
                                 onPlayEpisode = onPlayEpisode,
                             )
 

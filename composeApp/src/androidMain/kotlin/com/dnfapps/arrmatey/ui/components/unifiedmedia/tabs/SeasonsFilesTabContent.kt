@@ -69,7 +69,9 @@ fun SeasonsFilesTabContent(
     onEditAuthor: (() -> Unit)? = null,
     episodeWatchStatus: Map<Pair<Int, Int>, Boolean> = emptyMap(),
     episodeDeepLinks: Map<Pair<Int, Int>, String> = emptyMap(),
+    episodeItemIds: Map<Pair<Int, Int>, String> = emptyMap(),
     mediaServerType: MediaServerType? = null,
+    onToggleEpisodeWatched: ((Int, Int, Boolean) -> Unit)? = null,
     onPlayEpisode: ((String) -> Unit)? = null,
 ) {
     Column(
@@ -96,7 +98,9 @@ fun SeasonsFilesTabContent(
                 bazarrDetailsIntegration = state.bazarrDetailsIntegration,
                 episodeWatchStatus = episodeWatchStatus,
                 episodeDeepLinks = episodeDeepLinks,
+                episodeItemIds = episodeItemIds,
                 mediaServerType = mediaServerType,
+                onToggleEpisodeWatched = onToggleEpisodeWatched,
                 onPlayEpisode = onPlayEpisode,
             )
         }

@@ -1,20 +1,25 @@
 package com.dnfapps.arrmatey.ui.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -35,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -63,7 +69,6 @@ import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
-import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerSpecsCard
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrHistorySection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrSummaryChipRow
@@ -73,6 +78,7 @@ import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.handleWatchClick
 import com.dnfapps.arrmatey.utils.mokoString
@@ -192,6 +198,23 @@ fun EpisodeDetailsScreen(
                                 tint = firstMediaServer.serverType.brandColor,
                             )
                         }
+                        val isWatched = firstMediaServer.played
+                        IconButton(
+                            onClick = {
+                                viewModel.markMediaServerWatched(
+                                    firstMediaServer.serverType,
+                                    firstMediaServer.itemId,
+                                    !isWatched,
+                                )
+                            },
+                            colors = IconButtonDefaults.headerBarColors(),
+                        ) {
+                            Icon(
+                                imageVector = if (isWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                                contentDescription = if (isWatched) "Mark as Unwatched" else "Mark as Watched",
+                                tint = if (isWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                     IconButton(
                         onClick = { viewModel.toggleMonitor() },
@@ -261,11 +284,46 @@ fun EpisodeDetailsScreen(
                                 currentEpisode.runtimeString,
                                 currentEpisode.formatAirDateUtc(),
                             ).joinToString(BULLET)
-                        Text(
-                            text = statusRow,
-                            style = MaterialTheme.typography.bodySmall,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.padding(horizontal = 24.dp),
-                        )
+                        ) {
+                            Text(
+                                text = statusRow,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            if (firstMediaServer != null) {
+                                val isWatched = firstMediaServer.played
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier
+                                        .clip(MaterialTheme.shapes.small)
+                                        .clickable {
+                                            viewModel.markMediaServerWatched(
+                                                firstMediaServer.serverType,
+                                                firstMediaServer.itemId,
+                                                !isWatched,
+                                            )
+                                        }
+                                        .padding(vertical = 2.dp, horizontal = 4.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = if (isWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                                        contentDescription = if (isWatched) "Mark as Unwatched" else "Mark as Watched",
+                                        tint = if (isWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Text(
+                                        text = if (isWatched) "Watched" else "Unwatched",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (isWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = FontWeight.Medium,
+                                    )
+                                }
+                            }
+                        }
                         if (tracearrState.isTracearrConfigured) {
                             TracearrSummaryChipRow(
                                 uiState = tracearrState,
@@ -309,25 +367,6 @@ fun EpisodeDetailsScreen(
                                         overview = overview,
                                         modifier = Modifier.padding(horizontal = 24.dp),
                                     )
-                                }
-
-                                if (mediaServerList.isNotEmpty()) {
-                                    Column(
-                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                                    ) {
-                                        mediaServerList.forEach { serverDetails ->
-                                            MediaServerSpecsCard(
-                                                details = serverDetails,
-                                                onWatchClick = { url, provider, webUrl ->
-                                                    handleWatchClick(url, provider, context, moko, webUrl)
-                                                },
-                                                onToggleWatched = { watched ->
-                                                    viewModel.markMediaServerWatched(serverDetails.serverType, serverDetails.itemId, watched)
-                                                },
-                                            )
-                                        }
-                                    }
                                 }
 
                                 ReleaseDownloadButtons(

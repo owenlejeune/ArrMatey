@@ -178,6 +178,8 @@ class UnifiedMediaDetailsMediaServerHandlerTest {
             assertEquals(false, detail.episodeWatchStatus[1 to 2])
             assertEquals("jellyfin://item/jf-ep-1", detail.episodeDeepLinks[1 to 1])
             assertEquals("jellyfin://item/jf-ep-2", detail.episodeDeepLinks[1 to 2])
+            assertEquals("jf-ep-1", detail.episodeItemIds[1 to 1])
+            assertEquals("jf-ep-2", detail.episodeItemIds[1 to 2])
 
             val options = handler.watchOptions.value
             assertEquals(1, options.size)
@@ -353,6 +355,58 @@ class UnifiedMediaDetailsMediaServerHandlerTest {
 
             assertEquals(1, handler.watchOptions.value.size)
             assertEquals(MediaProvider.Plex, handler.watchOptions.value.first().provider)
+        } finally {
+            testJob.cancel()
+        }
+    }
+
+    @Test
+    fun testMarkEpisodeWatchedUpdatesShowState() = runTest(UnconfinedTestDispatcher()) {
+        val testJob = kotlinx.coroutines.Job()
+        val testScope = kotlinx.coroutines.CoroutineScope(testJob + UnconfinedTestDispatcher())
+        try {
+            val jfRepo = createMockRepo(MediaServerType.Jellyfin, "Jellyfin")
+            val showItem = UnifiedMediaItem(
+                id = "jf-202",
+                title = "Breaking Bad",
+                type = MediaType.SHOW,
+                tmdbId = 1396L,
+                serverType = MediaServerType.Jellyfin,
+            )
+            val ep1 = UnifiedMediaItem(
+                id = "jf-ep-1",
+                title = "Pilot",
+                type = MediaType.EPISODE,
+                serverType = MediaServerType.Jellyfin,
+                seasonNumber = 1,
+                episodeNumber = 1,
+                played = false,
+            )
+
+            coEvery { jfRepo.search("Breaking Bad", 15) } returns NetworkResult.Success(listOf(showItem))
+            coEvery { jfRepo.getShowEpisodes("jf-202") } returns NetworkResult.Success(listOf(ep1))
+            coEvery { jfRepo.markWatched("jf-ep-1", true) } returns NetworkResult.Success(Unit)
+
+            val manager = mockk<MediaServerManager>()
+            every { manager.activeRepositories } returns MutableStateFlow(listOf(jfRepo))
+            every { manager.getRepository(MediaServerType.Jellyfin) } returns jfRepo
+
+            val handler = UnifiedMediaDetailsMediaServerHandler(testScope, manager)
+            handler.findMedia(
+                tmdbId = 1396L,
+                tvdbId = null,
+                title = "Breaking Bad",
+                year = 2008,
+                isShow = true,
+            )
+
+            assertEquals(false, handler.mediaServerDetails.value.first().episodeWatchStatus[1 to 1])
+
+            handler.markEpisodeWatched(MediaServerType.Jellyfin, 1, 1, true)
+
+            coVerify { jfRepo.markWatched("jf-ep-1", true) }
+            assertEquals(true, handler.mediaServerDetails.value.first().episodeWatchStatus[1 to 1])
+            assertEquals(1, handler.mediaServerDetails.value.first().episodesWatchedCount)
         } finally {
             testJob.cancel()
         }

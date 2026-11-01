@@ -253,6 +253,7 @@ fun UnifiedMediaDetailsScreen(
     val firstMediaServer = mediaServerDetails.firstOrNull()
     val episodeWatchStatus = firstMediaServer?.episodeWatchStatus ?: emptyMap()
     val episodeDeepLinks = firstMediaServer?.episodeDeepLinks ?: emptyMap()
+    val episodeItemIds = firstMediaServer?.episodeItemIds ?: emptyMap()
 
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
@@ -674,7 +675,18 @@ fun UnifiedMediaDetailsScreen(
                                             onEditAuthor = { showEditSheet = true },
                                             episodeWatchStatus = episodeWatchStatus,
                                             episodeDeepLinks = episodeDeepLinks,
+                                            episodeItemIds = episodeItemIds,
                                             mediaServerType = firstMediaServer?.serverType,
+                                            onToggleEpisodeWatched = { sNum, eNum, watched ->
+                                                firstMediaServer?.let { server ->
+                                                    val itemId = server.episodeItemIds[sNum to eNum]
+                                                    if (itemId != null) {
+                                                        viewModel.markMediaServerWatched(server.serverType, itemId, watched)
+                                                    } else {
+                                                        viewModel.markEpisodeWatched(server.serverType, sNum, eNum, watched)
+                                                    }
+                                                }
+                                            },
                                             onPlayEpisode = { url ->
                                                 val provider = when (firstMediaServer?.serverType) {
                                                     MediaServerType.Plex -> MediaProvider.Plex

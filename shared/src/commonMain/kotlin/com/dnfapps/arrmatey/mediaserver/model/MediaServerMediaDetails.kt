@@ -23,6 +23,7 @@ data class MediaServerMediaDetails(
     val totalEpisodesCount: Int? = null,
     val episodeWatchStatus: Map<Pair<Int, Int>, Boolean> = emptyMap(),
     val episodeDeepLinks: Map<Pair<Int, Int>, String> = emptyMap(),
+    val episodeItemIds: Map<Pair<Int, Int>, String> = emptyMap(),
 ) {
     val progressPercentage: Float?
         get() = if (durationTicks != null && durationTicks > 0 && playbackPositionTicks != null) {
