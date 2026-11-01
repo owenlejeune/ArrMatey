@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -30,10 +31,12 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -82,9 +85,17 @@ fun EpisodeRow(
 ) {
     val arrEp = episode.arrEpisode
     val effectiveMediaServerType = mediaServerType ?: episode.mediaServerEpisode?.serverType
+    val stillUrl = episode.stillPath?.takeUnless { it.isBlank() }
+    val epOverview = episode.overview?.takeUnless { it.isBlank() }
+
+    val hasArrActions = arrEp != null
+    val hasMediaServerActions = (episodeDeepLink != null && onPlayEpisode != null) || onToggleMediaServerWatched != null
+    val hasActions = hasArrActions || hasMediaServerActions
+    val hasSubtitles = bazarrDetailsIntegration && episode.bazarrEpisode != null
+    val hasImage = stillUrl != null
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier =
         modifier
             .padding(vertical = 4.dp)
@@ -190,191 +201,271 @@ fun EpisodeRow(
             )
         }
 
-        // 3. Thumbnail + Overview
-        val stillUrl = episode.stillPath
-        val epOverview = episode.overview?.takeUnless { it.isBlank() }
-        if (stillUrl != null || epOverview != null) {
+        // 3. Middle Content & Actions: adapts dynamically based on image presence & available service actions
+        if (hasImage) {
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                if (stillUrl != null) {
-                    Box(
-                        modifier =
-                        Modifier
-                            .height(72.dp)
-                            .aspectRatio(16f / 9f)
-                            .clip(MaterialTheme.shapes.small)
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                    ) {
-                        AsyncImage(
-                            model = rememberRemoteImageData(stillUrl),
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                            contentDescription = null,
-                        )
-                        if (isMediaServerWatched) {
-                            Box(
-                                modifier =
-                                Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(4.dp)
-                                    .size(18.dp)
-                                    .background(Color.Black.copy(alpha = 0.6f), CircleShape),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Watched",
-                                    tint = ArrGreen,
-                                    modifier = Modifier.size(14.dp),
-                                )
-                            }
-                        }
-                    }
-                }
-
-                if (epOverview != null) {
-                    Text(
-                        text = epOverview,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
+                Box(
+                    modifier =
+                    Modifier
+                        .height(72.dp)
+                        .aspectRatio(16f / 9f)
+                        .clip(MaterialTheme.shapes.small)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                ) {
+                    AsyncImage(
+                        model = rememberRemoteImageData(stillUrl),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null,
                     )
-                }
-            }
-        }
-
-        // 4. Action Row (Subtitles on left, Actions on right)
-        val hasActions = arrEp != null || episodeDeepLink != null || onToggleMediaServerWatched != null
-        val hasSubtitles = bazarrDetailsIntegration && episode.bazarrEpisode != null
-
-        if (hasActions || hasSubtitles) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(modifier = Modifier.weight(1f, fill = false)) {
-                    if (hasSubtitles) {
-                        episode.bazarrEpisode?.let { bazarrEp ->
-                            EpisodeSubtitlesRow(
-                                bazarrEpisode = bazarrEp,
+                    if (isMediaServerWatched) {
+                        Box(
+                            modifier =
+                            Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .size(18.dp)
+                                .background(Color.Black.copy(alpha = 0.6f), CircleShape),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Watched",
+                                tint = ArrGreen,
+                                modifier = Modifier.size(14.dp),
                             )
                         }
                     }
                 }
 
-                if (hasActions) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (episodeDeepLink != null && onPlayEpisode != null) {
-                            IconButton(
-                                onClick = { onPlayEpisode(episodeDeepLink) },
-                                modifier = Modifier.size(32.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = "Play",
-                                    tint = effectiveMediaServerType?.brandColor ?: MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp),
+                Column(
+                    modifier =
+                    Modifier
+                        .weight(1f)
+                        .heightIn(min = 72.dp),
+                    verticalArrangement =
+                    when {
+                        hasActions && epOverview != null -> Arrangement.SpaceBetween
+                        hasActions -> Arrangement.Center
+                        else -> Arrangement.spacedBy(4.dp)
+                    },
+                ) {
+                    if (epOverview != null) {
+                        Text(
+                            text = epOverview,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = if (hasActions) 2 else 3,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+
+                    if (hasActions) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            EpisodeActions(
+                                arrEp = arrEp,
+                                isMediaServerWatched = isMediaServerWatched,
+                                effectiveMediaServerType = effectiveMediaServerType,
+                                episodeDeepLink = episodeDeepLink,
+                                searchInProgress = searchInProgress,
+                                onPlayEpisode = onPlayEpisode,
+                                onToggleMediaServerWatched = onToggleMediaServerWatched,
+                                onNavigateToSeriesRelease = onNavigateToSeriesRelease,
+                                onAutomaticSearch = onAutomaticSearch,
+                                onToggleMonitor = onToggleMonitor,
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (hasSubtitles) {
+                episode.bazarrEpisode?.let { bazarrEp ->
+                    EpisodeSubtitlesRow(
+                        bazarrEpisode = bazarrEp,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        } else {
+            // No image: overview occupies full width, actions & subtitles below it without vertical dead space
+            if (epOverview != null) {
+                Text(
+                    text = epOverview,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            if (hasActions || hasSubtitles) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(modifier = Modifier.weight(1f, fill = false)) {
+                        if (hasSubtitles) {
+                            episode.bazarrEpisode?.let { bazarrEp ->
+                                EpisodeSubtitlesRow(
+                                    bazarrEpisode = bazarrEp,
                                 )
                             }
                         }
-                        if (onToggleMediaServerWatched != null) {
-                            IconButton(
-                                onClick = { onToggleMediaServerWatched(!isMediaServerWatched) },
-                                modifier = Modifier.size(32.dp),
-                            ) {
-                                Icon(
-                                    imageVector = if (isMediaServerWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
-                                    contentDescription = if (isMediaServerWatched) "Mark Unwatched" else "Mark Watched",
-                                    tint = if (isMediaServerWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                    modifier = Modifier.size(20.dp),
+                    }
+
+                    if (hasActions) {
+                        EpisodeActions(
+                            arrEp = arrEp,
+                            isMediaServerWatched = isMediaServerWatched,
+                            effectiveMediaServerType = effectiveMediaServerType,
+                            episodeDeepLink = episodeDeepLink,
+                            searchInProgress = searchInProgress,
+                            onPlayEpisode = onPlayEpisode,
+                            onToggleMediaServerWatched = onToggleMediaServerWatched,
+                            onNavigateToSeriesRelease = onNavigateToSeriesRelease,
+                            onAutomaticSearch = onAutomaticSearch,
+                            onToggleMonitor = onToggleMonitor,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EpisodeActions(
+    arrEp: ArrEpisode?,
+    isMediaServerWatched: Boolean,
+    effectiveMediaServerType: MediaServerType?,
+    episodeDeepLink: String?,
+    searchInProgress: (Long) -> Boolean,
+    onPlayEpisode: ((String) -> Unit)?,
+    onToggleMediaServerWatched: ((Boolean) -> Unit)?,
+    onNavigateToSeriesRelease: (Long?) -> Unit,
+    onAutomaticSearch: (Long) -> Unit,
+    onToggleMonitor: (ArrEpisode) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier,
+        ) {
+            // Media Server Actions
+            if (episodeDeepLink != null && onPlayEpisode != null) {
+                IconButton(
+                    onClick = { onPlayEpisode(episodeDeepLink) },
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Play",
+                        tint = effectiveMediaServerType?.brandColor ?: MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
+            if (onToggleMediaServerWatched != null) {
+                IconButton(
+                    onClick = { onToggleMediaServerWatched(!isMediaServerWatched) },
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        imageVector = if (isMediaServerWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                        contentDescription = if (isMediaServerWatched) "Mark Unwatched" else "Mark Watched",
+                        tint = if (isMediaServerWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
+
+            // Arr Actions
+            if (arrEp != null) {
+                IconButton(
+                    onClick = {
+                        onNavigateToSeriesRelease(arrEp.id)
+                    },
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Releases",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        onAutomaticSearch(arrEp.id)
+                    },
+                    enabled = arrEp.monitored && !searchInProgress(arrEp.id),
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    if (searchInProgress(arrEp.id)) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint =
+                            if (arrEp.monitored) {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                    alpha = 0.38f,
                                 )
-                            }
-                        }
-                        if (arrEp != null) {
-                            IconButton(
-                                onClick = {
-                                    onNavigateToSeriesRelease(arrEp.id)
-                                },
-                                modifier = Modifier.size(32.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = "Releases",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(20.dp),
+                            },
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+                IconButton(
+                    onClick = {
+                        onToggleMonitor(arrEp)
+                    },
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    AnimatedContent(
+                        targetState = arrEp.monitored,
+                        transitionSpec = {
+                            (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
+                        },
+                        label = "EpisodeBookmarkIconAnimation",
+                    ) { monitored ->
+                        Icon(
+                            imageVector =
+                            if (monitored) {
+                                Icons.Default.Bookmark
+                            } else {
+                                Icons.Default.BookmarkBorder
+                            },
+                            contentDescription = if (monitored) "Monitored" else "Unmonitored",
+                            tint =
+                            if (monitored) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                    alpha = 0.6f,
                                 )
-                            }
-                            IconButton(
-                                onClick = {
-                                    onAutomaticSearch(arrEp.id)
-                                },
-                                enabled = arrEp.monitored && !searchInProgress(arrEp.id),
-                                modifier = Modifier.size(32.dp),
-                            ) {
-                                if (searchInProgress(arrEp.id)) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(16.dp),
-                                        strokeWidth = 2.dp,
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Search,
-                                        contentDescription = "Search",
-                                        tint =
-                                        if (arrEp.monitored) {
-                                            MaterialTheme.colorScheme.onSurfaceVariant
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                alpha = 0.38f,
-                                            )
-                                        },
-                                        modifier = Modifier.size(20.dp),
-                                    )
-                                }
-                            }
-                            IconButton(
-                                onClick = {
-                                    onToggleMonitor(arrEp)
-                                },
-                                modifier = Modifier.size(32.dp),
-                            ) {
-                                AnimatedContent(
-                                    targetState = arrEp.monitored,
-                                    transitionSpec = {
-                                        (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
-                                    },
-                                    label = "EpisodeBookmarkIconAnimation",
-                                ) { monitored ->
-                                    Icon(
-                                        imageVector =
-                                        if (monitored) {
-                                            Icons.Default.Bookmark
-                                        } else {
-                                            Icons.Default.BookmarkBorder
-                                        },
-                                        contentDescription = if (monitored) "Monitored" else "Unmonitored",
-                                        tint =
-                                        if (monitored) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                alpha = 0.6f,
-                                            )
-                                        },
-                                        modifier = Modifier.size(20.dp),
-                                    )
-                                }
-                            }
-                        }
+                            },
+                            modifier = Modifier.size(20.dp),
+                        )
                     }
                 }
             }
