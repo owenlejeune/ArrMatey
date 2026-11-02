@@ -72,6 +72,8 @@ data class UnifiedMediaItem(
     val videoResolution: String? = null,
     val container: String? = null,
     val bitrate: Long? = null,
+    val audioChannels: Int? = null,
+    val videoRange: String? = null,
 ) {
     val progressPercentage: Float?
         get() {

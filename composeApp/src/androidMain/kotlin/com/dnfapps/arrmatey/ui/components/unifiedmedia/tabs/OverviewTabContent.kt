@@ -54,6 +54,7 @@ fun OverviewTabContent(
     mediaServerDetails: List<MediaServerMediaDetails> = emptyList(),
     onMediaServerWatchClick: ((String, MediaProvider, String?) -> Unit)? = null,
     onMediaServerToggleWatched: ((MediaServerType, String, Boolean) -> Unit)? = null,
+    onMediaServerRefreshItem: ((MediaServerType, String) -> Unit)? = null,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -78,6 +79,9 @@ fun OverviewTabContent(
                         },
                         onToggleWatched = { watched ->
                             onMediaServerToggleWatched?.invoke(serverDetails.serverType, serverDetails.itemId, watched)
+                        },
+                        onRefreshItem = onMediaServerRefreshItem?.let { refresh ->
+                            { refresh(serverDetails.serverType, serverDetails.itemId) }
                         },
                     )
                 }

@@ -411,4 +411,24 @@ class UnifiedMediaDetailsMediaServerHandlerTest {
             testJob.cancel()
         }
     }
+
+    @Test
+    fun testRefreshItemCallsRepo() = runTest(UnconfinedTestDispatcher()) {
+        val testJob = kotlinx.coroutines.Job()
+        val testScope = kotlinx.coroutines.CoroutineScope(testJob + UnconfinedTestDispatcher())
+        try {
+            val plexRepo = createMockRepo(MediaServerType.Plex, "My Plex")
+            coEvery { plexRepo.refreshItem("plex-101") } returns NetworkResult.Success(Unit)
+
+            val manager = mockk<MediaServerManager>()
+            every { manager.getRepository(MediaServerType.Plex) } returns plexRepo
+
+            val handler = UnifiedMediaDetailsMediaServerHandler(testScope, manager)
+            handler.refreshItem(MediaServerType.Plex, "plex-101")
+
+            coVerify { plexRepo.refreshItem("plex-101") }
+        } finally {
+            testJob.cancel()
+        }
+    }
 }

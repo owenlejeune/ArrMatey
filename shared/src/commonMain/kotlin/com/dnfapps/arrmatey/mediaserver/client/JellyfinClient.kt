@@ -115,4 +115,10 @@ class JellyfinClient(
         header("Authorization", buildAuthHeader())
         header("Accept", "application/json")
     }
+
+    suspend fun refreshItem(itemId: String): NetworkResult<Unit> = httpClient.safePost("$baseUrl/Items/$itemId/Refresh") {
+        header("Authorization", buildAuthHeader())
+        header("Accept", "application/json")
+        parameter("Recursive", true)
+    }
 }

@@ -141,6 +141,8 @@ class JellyfinRepository(
 
     override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(userId, itemId, watched)
 
+    override suspend fun refreshItem(itemId: String): NetworkResult<Unit> = client.refreshItem(itemId)
+
     override fun buildImageUrl(imageKeyOrTag: String, itemId: String, maxWidth: Int): String {
         if (imageKeyOrTag.startsWith("http://") || imageKeyOrTag.startsWith("https://")) {
             return imageKeyOrTag
@@ -199,6 +201,8 @@ class JellyfinRepository(
             videoResolution = resolution,
             container = mediaSource?.container,
             bitrate = mediaSource?.bitrate,
+            audioChannels = audioStream?.channels,
+            videoRange = videoStream?.videoRange,
         )
     }
 }

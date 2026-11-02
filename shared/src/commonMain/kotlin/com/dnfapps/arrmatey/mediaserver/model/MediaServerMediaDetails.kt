@@ -19,6 +19,8 @@ data class MediaServerMediaDetails(
     val videoResolution: String? = null,
     val container: String? = null,
     val bitrate: Long? = null,
+    val audioChannels: Int? = null,
+    val videoRange: String? = null,
     val episodesWatchedCount: Int? = null,
     val totalEpisodesCount: Int? = null,
     val episodeWatchStatus: Map<Pair<Int, Int>, Boolean> = emptyMap(),
@@ -38,5 +40,24 @@ data class MediaServerMediaDetails(
             remainingTicks / 10_000_000L / 60L
         } else {
             null
+        }
+
+    val audioLayoutString: String?
+        get() = when (audioChannels) {
+            1 -> "Mono"
+            2 -> "Stereo"
+            6 -> "5.1"
+            8 -> "7.1"
+            null -> null
+            else -> "${audioChannels}ch"
+        }
+
+    val hdrString: String?
+        get() = when {
+            videoRange?.contains("dovi", ignoreCase = true) == true || videoRange?.contains("dv", ignoreCase = true) == true -> "Dolby Vision"
+            videoRange?.contains("hdr10+", ignoreCase = true) == true -> "HDR10+"
+            videoRange?.contains("hdr", ignoreCase = true) == true -> "HDR"
+            videoRange?.equals("sdr", ignoreCase = true) == true -> null
+            else -> videoRange?.uppercase()
         }
 }

@@ -34,6 +34,8 @@ interface MediaServerRepository {
 
     suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit>
 
+    suspend fun refreshItem(itemId: String): NetworkResult<Unit>
+
     fun buildImageUrl(imageKeyOrTag: String, itemId: String, maxWidth: Int = 400): String
 
     fun buildDeepLinkUrl(item: UnifiedMediaItem): String

@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExpandCircleDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -54,6 +55,7 @@ import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
@@ -164,6 +166,33 @@ fun SeasonsArea(
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
+                                }
+
+                                val watchedInSeason = if (episodeWatchStatus.isNotEmpty()) {
+                                    season.episodes.count { ep ->
+                                        episodeWatchStatus[season.seasonNumber to ep.episodeNumber] == true
+                                    }
+                                } else {
+                                    0
+                                }
+
+                                if (episodeWatchStatus.isNotEmpty() && season.episodes.isNotEmpty() && watchedInSeason > 0) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = null,
+                                            tint = ArrGreen,
+                                            modifier = Modifier.size(14.dp),
+                                        )
+                                        Text(
+                                            text = "$watchedInSeason/${season.episodes.size}",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = ArrGreen,
+                                        )
+                                    }
                                 }
                             }
 

@@ -123,6 +123,8 @@ class UnifiedMediaDetailsMediaServerHandler(
                                     videoResolution = matchingItem.videoResolution,
                                     container = matchingItem.container,
                                     bitrate = matchingItem.bitrate,
+                                    audioChannels = matchingItem.audioChannels,
+                                    videoRange = matchingItem.videoRange,
                                     episodesWatchedCount = if (isShow) episodesWatched else null,
                                     totalEpisodesCount = if (isShow) totalEpisodes else null,
                                     episodeWatchStatus = epWatchStatus,
@@ -219,6 +221,8 @@ class UnifiedMediaDetailsMediaServerHandler(
                                             videoResolution = matchingEp.videoResolution,
                                             container = matchingEp.container,
                                             bitrate = matchingEp.bitrate,
+                                            audioChannels = matchingEp.audioChannels,
+                                            videoRange = matchingEp.videoRange,
                                         ),
                                     )
                                 }
@@ -232,6 +236,13 @@ class UnifiedMediaDetailsMediaServerHandler(
             } finally {
                 _isSearching.value = false
             }
+        }
+    }
+
+    fun refreshItem(serverType: MediaServerType, itemId: String) {
+        scope.launch {
+            val repo = mediaServerManager.getRepository(serverType) ?: return@launch
+            repo.refreshItem(itemId)
         }
     }
 

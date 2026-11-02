@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
@@ -26,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +51,7 @@ fun MediaServerSpecsCard(
     onWatchClick: (String, MediaProvider, String?) -> Unit,
     onToggleWatched: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    onRefreshItem: (() -> Unit)? = null,
 ) {
     val serverColor = details.serverType.brandColor
     val iconRes = details.serverType.icon
@@ -172,8 +175,10 @@ fun MediaServerSpecsCard(
             // Media Specifications Chips
             val specBadges = buildList {
                 details.videoResolution?.let { add(it.uppercase()) }
+                details.hdrString?.let { add(it) }
                 details.videoCodec?.let { add(it.uppercase()) }
                 details.audioCodec?.let { add(it.uppercase()) }
+                details.audioLayoutString?.let { add(it) }
                 details.container?.let { add(it.uppercase()) }
                 details.bitrate?.let { br ->
                     if (br > 0) {
@@ -200,18 +205,36 @@ fun MediaServerSpecsCard(
                 }
             }
 
-            // Toggle Watched Action
-            OutlinedButton(
-                onClick = { onToggleWatched(!details.played) },
+            // Actions: Toggle Watched & Refresh
+            Row(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    imageVector = if (details.played) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(if (details.played) "Mark as Unwatched" else "Mark as Watched")
+                OutlinedButton(
+                    onClick = { onToggleWatched(!details.played) },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(
+                        imageVector = if (details.played) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (details.played) "Mark as Unwatched" else "Mark as Watched")
+                }
+
+                if (onRefreshItem != null) {
+                    OutlinedIconButton(
+                        onClick = onRefreshItem,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = mokoString(MR.strings.refresh),
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
             }
         }
     }

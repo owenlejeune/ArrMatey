@@ -223,6 +223,8 @@ class PlexRepository(
 
     override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(itemId, watched)
 
+    override suspend fun refreshItem(itemId: String): NetworkResult<Unit> = client.refreshItem(itemId)
+
     override fun buildImageUrl(imageKeyOrTag: String, itemId: String, maxWidth: Int): String {
         if (imageKeyOrTag.startsWith("http://") || imageKeyOrTag.startsWith("https://")) {
             return imageKeyOrTag
@@ -272,6 +274,15 @@ class PlexRepository(
             videoResolution = firstMedia?.videoResolution,
             container = firstMedia?.container,
             bitrate = firstMedia?.bitrate,
+            audioChannels = firstMedia?.audioChannels,
+            videoRange = when {
+                firstMedia?.videoProfile?.contains("dovi", ignoreCase = true) == true ||
+                    firstMedia?.videoProfile?.contains("dv", ignoreCase = true) == true -> "DOVI"
+                firstMedia?.videoProfile?.contains("hdr10+", ignoreCase = true) == true -> "HDR10+"
+                firstMedia?.videoProfile?.contains("hdr", ignoreCase = true) == true ||
+                    firstMedia?.videoProfile?.contains("main 10", ignoreCase = true) == true -> "HDR"
+                else -> null
+            },
         )
     }
 }

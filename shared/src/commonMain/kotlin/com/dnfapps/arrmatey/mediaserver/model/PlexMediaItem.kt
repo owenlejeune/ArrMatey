@@ -12,5 +12,6 @@ data class PlexMediaItem(
     @SerialName("audioChannels") val audioChannels: Int? = null,
     @SerialName("bitrate") val bitrate: Long? = null,
     @SerialName("container") val container: String? = null,
+    @SerialName("videoProfile") val videoProfile: String? = null,
     @SerialName("Part") val part: List<PlexPart>? = null,
 )

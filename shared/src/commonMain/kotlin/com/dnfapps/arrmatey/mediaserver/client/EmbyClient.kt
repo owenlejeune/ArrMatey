@@ -137,4 +137,11 @@ class EmbyClient(
         header("X-Emby-Authorization", buildAuthHeader())
         header("Accept", "application/json")
     }
+
+    suspend fun refreshItem(itemId: String): NetworkResult<Unit> = httpClient.safePost("$baseUrl/Items/$itemId/Refresh") {
+        header("X-Emby-Token", token)
+        header("X-Emby-Authorization", buildAuthHeader())
+        header("Accept", "application/json")
+        parameter("Recursive", true)
+    }
 }

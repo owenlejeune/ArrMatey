@@ -84,6 +84,8 @@ data class MediaBrowserMediaStream(
     @SerialName("Width") val width: Int? = null,
     @SerialName("Height") val height: Int? = null,
     @SerialName("Channels") val channels: Int? = null,
+    @SerialName("ChannelLayout") val channelLayout: String? = null,
+    @SerialName("VideoRange") val videoRange: String? = null,
 )
 
 @Serializable

@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.mediaserver.model.PlexMediaListing
 import com.dnfapps.arrmatey.mediaserver.model.PlexRootContainer
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeGet
+import com.dnfapps.networking.safePut
 import io.ktor.client.HttpClient
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -162,5 +163,14 @@ class PlexClient(
         header("X-Plex-Client-Identifier", clientIdentifier)
         parameter("X-Plex-Token", token)
         parameter("X-Plex-Client-Identifier", clientIdentifier)
+    }
+
+    suspend fun refreshItem(ratingKey: String): NetworkResult<Unit> = withDirectIpFallback {
+        httpClient.safePut("$baseUrl/library/metadata/$ratingKey/refresh") {
+            header("X-Plex-Token", token)
+            header("X-Plex-Client-Identifier", clientIdentifier)
+            parameter("X-Plex-Token", token)
+            parameter("X-Plex-Client-Identifier", clientIdentifier)
+        }
     }
 }

@@ -84,6 +84,7 @@ import com.dnfapps.arrmatey.ui.components.InstancePresenceChips
 import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
+import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerSourceChips
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrHistorySection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrSummaryChipRow
@@ -555,6 +556,16 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
+                                    if (mediaServerDetails.isNotEmpty()) {
+                                        MediaServerSourceChips(
+                                            details = mediaServerDetails,
+                                            onWatchClick = { url, provider, webUrl ->
+                                                handleWatchClick(url, provider, context, moko, webUrl)
+                                            },
+                                            modifier = Modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
+                                        )
+                                    }
+
                                     LaunchedEffect(successState.hasSeasonsOrFiles) {
                                         val prev = previousHasSeasonsOrFiles
                                         if (prev == null) {
@@ -721,6 +732,9 @@ fun UnifiedMediaDetailsScreen(
                                             },
                                             onMediaServerToggleWatched = { serverType, itemId, watched ->
                                                 viewModel.markMediaServerWatched(serverType, itemId, watched)
+                                            },
+                                            onMediaServerRefreshItem = { serverType, itemId ->
+                                                viewModel.refreshMediaServerItem(serverType, itemId)
                                             },
                                         )
                                     }
