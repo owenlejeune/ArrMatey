@@ -157,6 +157,14 @@ fun SeasonsArea(
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
                                 }
+
+                                season.sizeOnDisk?.let { sizeOnDisk ->
+                                    Text(
+                                        text = sizeOnDisk,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                             }
 
                             if (season.infoString.isNotBlank()) {

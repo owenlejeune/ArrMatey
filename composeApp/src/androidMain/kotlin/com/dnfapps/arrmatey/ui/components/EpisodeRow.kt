@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -103,7 +104,6 @@ fun EpisodeRow(
                 onLongClick = onLongClick,
             ),
     ) {
-        // 1. Title Row: Title & Finale Badge
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -140,7 +140,6 @@ fun EpisodeRow(
             }
         }
 
-        // 2. Metadata Row: Full Width! Quality, Size, Date, Runtime
         val airDate = episode.airDate?.takeIf { it.isTodayOrAfter() }
         val (statusText, statusColor) =
             when {
@@ -199,7 +198,6 @@ fun EpisodeRow(
             )
         }
 
-        // 3. Middle Content: Image & Overview (overview text full height with the episode image)
         if (hasImage) {
             Row(
                 verticalAlignment = Alignment.Top,
@@ -262,7 +260,6 @@ fun EpisodeRow(
             )
         }
 
-        // 4. Subtitles (if available)
         if (hasSubtitles) {
             episode.bazarrEpisode?.let { bazarrEp ->
                 EpisodeSubtitlesRow(
@@ -272,11 +269,11 @@ fun EpisodeRow(
             }
         }
 
-        // 5. Action Buttons: row of buttons of equal weights below image/text content
         if (hasActions) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 EpisodeActions(
                     arrEp = arrEp,
@@ -308,11 +305,11 @@ private fun RowScope.EpisodeActions(
     onAutomaticSearch: (Long) -> Unit,
     onToggleMonitor: (ArrEpisode) -> Unit,
 ) {
-    // Media Server Actions
     if (episodeDeepLink != null && onPlayEpisode != null) {
         IconButton(
             onClick = { onPlayEpisode(episodeDeepLink) },
             modifier = Modifier.weight(1f),
+            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
         ) {
             Icon(
                 imageVector = Icons.Default.PlayArrow,
@@ -326,6 +323,7 @@ private fun RowScope.EpisodeActions(
         IconButton(
             onClick = { onToggleMediaServerWatched(!isMediaServerWatched) },
             modifier = Modifier.weight(1f),
+            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
         ) {
             Icon(
                 imageVector = if (isMediaServerWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
@@ -343,6 +341,7 @@ private fun RowScope.EpisodeActions(
                 onNavigateToSeriesRelease(arrEp.id)
             },
             modifier = Modifier.weight(1f),
+            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
         ) {
             Icon(
                 imageVector = Icons.Default.Person,
@@ -357,6 +356,7 @@ private fun RowScope.EpisodeActions(
             },
             enabled = arrEp.monitored && !searchInProgress(arrEp.id),
             modifier = Modifier.weight(1f),
+            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
         ) {
             if (searchInProgress(arrEp.id)) {
                 CircularProgressIndicator(
@@ -384,6 +384,7 @@ private fun RowScope.EpisodeActions(
                 onToggleMonitor(arrEp)
             },
             modifier = Modifier.weight(1f),
+            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
         ) {
             AnimatedContent(
                 targetState = arrEp.monitored,
