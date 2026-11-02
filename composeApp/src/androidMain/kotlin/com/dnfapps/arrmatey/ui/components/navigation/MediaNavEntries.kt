@@ -19,6 +19,7 @@ import com.dnfapps.arrmatey.navigation.toBookRelease
 import com.dnfapps.arrmatey.navigation.toComicReleases
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toEpisodeDetails
+import com.dnfapps.arrmatey.navigation.toMediaDetails
 import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.navigation.toSeriesRelease
@@ -244,6 +245,9 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                 when (result) {
                     is SearchResult.ArrMediaResult -> {
                         navigation.toArrDetailsOrPreview(result.media, result.instanceType, result.instanceId)
+                    }
+                    is SearchResult.MediaServerResult -> {
+                        navigation.toMediaDetails(result.item)
                     }
                     is SearchResult.SeerrMediaResult -> {
                         navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)

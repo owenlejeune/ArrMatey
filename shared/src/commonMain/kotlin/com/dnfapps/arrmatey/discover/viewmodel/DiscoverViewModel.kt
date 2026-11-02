@@ -223,6 +223,7 @@ class DiscoverViewModel(
                     }
 
                     is SearchResult.SeerrPersonResult -> result
+                    is SearchResult.MediaServerResult -> result
                 }
             }
         }.stateIn(

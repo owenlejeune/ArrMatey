@@ -395,7 +395,7 @@ val useCaseModule =
         factory { GetRecommendationsUseCase() }
         factory { GetSimilarUseCase() }
         factory { SearchSeerrUseCase() }
-        factory { GlobalSearchUseCase(get()) }
+        factory { GlobalSearchUseCase(get(), getOrNull()) }
         factory { SubmitRequestUseCase() }
         factory { GetIssuesUseCase() }
         factory { GetPersonCreditsUseCase() }

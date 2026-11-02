@@ -192,6 +192,11 @@ fun SeasonsArea(
                                     append(season.year)
                                 }
 
+                                season.runtime?.let { runtime ->
+                                    append(BULLET)
+                                    append(runtime)
+                                }
+
                                 if (isPartiallyWatched) {
                                     append(BULLET)
                                     withStyle(SpanStyle(color = ArrGreen)) {

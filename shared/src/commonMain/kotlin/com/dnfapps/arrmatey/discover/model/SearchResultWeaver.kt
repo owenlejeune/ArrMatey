@@ -54,7 +54,7 @@ object SearchResultWeaver {
 
         score += (item.voteAverage * VOTE_AVERAGE_FACTOR)
 
-        if (item is SearchResult.ArrMediaResult && item.media.id != null) {
+        if ((item is SearchResult.ArrMediaResult && item.media.id != null) || item is SearchResult.MediaServerResult) {
             score += IN_LIBRARY_BONUS
         }
 

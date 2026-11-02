@@ -82,6 +82,7 @@ import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.entensions.PaddingValues
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
@@ -373,6 +374,7 @@ fun CombinedDashboard(
     onNavigateToSeerrMediaDetails: (tmdbId: Long, requestType: RequestType) -> Unit = { _, _ -> },
     onNavigateToSeerrPersonDetails: (personId: Long) -> Unit = {},
     onNavigateToArrMediaDetailsOrPreview: (media: ArrMedia, instanceType: InstanceType) -> Unit = { _, _ -> },
+    onNavigateToMediaServerDetails: (UnifiedMediaItem) -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToRequestsTab: () -> Unit = {},
     onNavigateToProwlarrTab: () -> Unit = {},
@@ -532,6 +534,10 @@ fun CombinedDashboard(
                         when (result) {
                             is SearchResult.ArrMediaResult -> {
                                 onNavigateToArrMediaDetailsOrPreview(result.media, result.instanceType)
+                            }
+
+                            is SearchResult.MediaServerResult -> {
+                                onNavigateToMediaServerDetails(result.item)
                             }
 
                             is SearchResult.SeerrMediaResult -> {

@@ -37,6 +37,7 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toDetails
+import com.dnfapps.arrmatey.navigation.toMediaDetails
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
@@ -79,6 +80,9 @@ fun DiscoverTab(
                             is SearchResult.ArrMediaResult -> {
                                 navigation.toArrDetailsOrPreview(result.media, result.instanceType)
                             }
+                            is SearchResult.MediaServerResult -> {
+                                navigation.toMediaDetails(result.item)
+                            }
                             is SearchResult.SeerrMediaResult -> {
                                 navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
                             }
@@ -98,6 +102,9 @@ fun DiscoverTab(
                         when (result) {
                             is SearchResult.ArrMediaResult -> {
                                 navigation.toArrDetailsOrPreview(result.media, result.instanceType)
+                            }
+                            is SearchResult.MediaServerResult -> {
+                                navigation.toMediaDetails(result.item)
                             }
                             is SearchResult.SeerrMediaResult -> {
                                 navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)

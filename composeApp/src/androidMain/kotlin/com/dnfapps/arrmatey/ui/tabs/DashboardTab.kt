@@ -20,6 +20,7 @@ import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toBookDetails
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toEpisodeDetails
+import com.dnfapps.arrmatey.navigation.toMediaDetails
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDisplay
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
@@ -54,6 +55,7 @@ fun DashboardTab(
                     onNavigateToSeerrMediaDetails = { tmdbId, type -> navigation.toDetails(tmdbId = tmdbId, requestType = type) },
                     onNavigateToSeerrPersonDetails = { personId -> navigation.toPersonDetails(personId) },
                     onNavigateToArrMediaDetailsOrPreview = { media, type -> navigation.toArrDetailsOrPreview(media, type) },
+                    onNavigateToMediaServerDetails = { item -> navigation.toMediaDetails(item) },
                     onNavigateToSettings = { navigationManager.openSettings() },
                     onNavigateToRequestsTab = { navigationManager.openRequestsTab() },
                     onNavigateToProwlarrTab = { navigation.navigateTo(DashboardScreen.Prowlarr) },

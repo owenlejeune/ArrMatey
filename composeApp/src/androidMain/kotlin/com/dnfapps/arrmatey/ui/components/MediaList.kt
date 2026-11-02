@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -83,6 +84,7 @@ import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
+import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
 fun <T : ArrMedia> MediaList(
@@ -202,6 +204,7 @@ fun SearchResultItem(
 
     when (item) {
         is SearchResult.ArrMediaResult -> {
+            val serverType = item.mediaServerType
             MediaItem(
                 aspectRatio = item.aspectRatio,
                 item = item.media,
@@ -209,6 +212,42 @@ fun SearchResultItem(
                 includeOverview = includeOverview,
                 showBannerBackground = showBanners,
                 edgeColor = edgeColor,
+                secondaryBadge = if (serverType != null) {
+                    {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(top = 2.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(serverType.icon),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(14.dp),
+                            )
+                            val label = item.mediaServerLabel ?: serverType.name
+                            Text(
+                                text = "Available on $label",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = serverType.brandColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                } else {
+                    null
+                },
+            )
+        }
+
+        is SearchResult.MediaServerResult -> {
+            MediaServerSearchResultItem(
+                result = item,
+                onItemClick = onItemClick,
+                includeOverview = includeOverview,
+                showBannerBackground = showBanners,
+                edgeColor = item.serverType.brandColor,
             )
         }
 
@@ -252,6 +291,7 @@ fun <T : ArrMedia> MediaItem(
     edgeColor: Color? = null,
     qualityProfiles: List<QualityProfile> = emptyList(),
     tags: List<Tag> = emptyList(),
+    secondaryBadge: @Composable (() -> Unit)? = null,
 ) {
     val isSelected = multiSelectState.isSelected(item.guid)
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
@@ -397,6 +437,8 @@ fun <T : ArrMedia> MediaItem(
                             tags = tags,
                         )
 
+                        secondaryBadge?.invoke()
+
                         if (includeOverview && item.overview != null) {
                             val parsed = item.overview?.rememberHtml() ?: ""
                             Text(
@@ -504,6 +546,132 @@ fun SeerrMediaItem(
                         if (includeOverview && item.overview != null) {
                             Text(
                                 text = item.overview ?: "",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (hasBanner) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 4,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun MediaServerSearchResultItem(
+    result: SearchResult.MediaServerResult,
+    onItemClick: (SearchResult) -> Unit,
+    modifier: Modifier = Modifier,
+    includeOverview: Boolean = true,
+    showBannerBackground: Boolean = true,
+    bannerModel: Any? = null,
+    edgeColor: Color? = null,
+) {
+    val item = result.item
+    val hasBanner =
+        remember(showBannerBackground, bannerModel, item) {
+            showBannerBackground && (bannerModel != null || item.backdropUrl != null)
+        }
+
+    Card(
+        modifier =
+        modifier
+            .fillMaxWidth()
+            .combinedClickable(onClick = { onItemClick(result) }),
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        colors =
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        ),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        ) {
+            if (edgeColor != null) {
+                Box(
+                    modifier =
+                    Modifier
+                        .width(6.dp)
+                        .fillMaxHeight()
+                        .background(edgeColor),
+                )
+            }
+
+            Box(
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                if (hasBanner) {
+                    BannerView(
+                        bannerModel = bannerModel ?: item.backdropUrl?.let { rememberRemoteImageData(it) },
+                        blur = Blur.Normal,
+                        modifier = Modifier.matchParentSize(),
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    BasePosterItem(
+                        model = item.posterUrl ?: "",
+                        modifier = Modifier.width(76.dp),
+                        aspectRatio = AspectRatio.Poster,
+                        additionalContent = {
+                            if (item.played) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                    shadowElevation = 2.dp,
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(4.dp),
+                                ) {
+                                    Box(
+                                        modifier = Modifier.padding(2.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = mokoString(MR.strings.watched),
+                                            tint = Color(0xFF50D27D),
+                                            modifier = Modifier.size(14.dp),
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                    )
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        val titleColor = if (hasBanner) Color.White else MaterialTheme.colorScheme.onSurface
+                        Text(
+                            text = item.title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = titleColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        val secondLine = listOfNotNull(item.year?.toString(), item.type.name, result.serverLabel).joinToString(BULLET)
+                        Text(
+                            text = secondLine,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (hasBanner) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+
+                        if (includeOverview && item.summary != null) {
+                            Text(
+                                text = item.summary ?: "",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = if (hasBanner) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 4,

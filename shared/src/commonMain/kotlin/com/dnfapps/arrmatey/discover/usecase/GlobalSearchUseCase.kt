@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.model.SearchResultWeaver
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.asSuccess
@@ -23,6 +24,7 @@ import kotlinx.coroutines.sync.withLock
 
 class GlobalSearchUseCase(
     private val instanceManager: InstanceManager,
+    private val mediaServerManager: MediaServerManager? = null,
 ) {
     operator fun invoke(query: String): Flow<List<SearchResult>> = channelFlow {
         if (query.isBlank()) {
@@ -32,8 +34,9 @@ class GlobalSearchUseCase(
 
         val arrRepos = (if (instanceManager.getAllArrRepositories().isEmpty()) instanceManager.awaitAllArrRepositories() else instanceManager.getAllArrRepositories()).sortedBy { it.instance.id }
         val seerrRepos = instanceManager.getAllSeerrRepositories().sortedBy { it.instance.id }
+        val mediaServerRepos = mediaServerManager?.activeRepositories?.value ?: emptyList()
 
-        if (arrRepos.isEmpty() && seerrRepos.isEmpty()) {
+        if (arrRepos.isEmpty() && seerrRepos.isEmpty() && mediaServerRepos.isEmpty()) {
             send(emptyList())
             return@channelFlow
         }
@@ -179,6 +182,38 @@ class GlobalSearchUseCase(
             searchJobs.add(job)
         }
 
+        mediaServerRepos.forEach { repo ->
+            val job =
+                launch {
+                    val result = repo.search(query, limit = 20)
+                    val data = if (result is NetworkResult.Success) result.data else emptyList()
+                    val mapped =
+                        data.mapIndexed { index, item ->
+                            SearchResult.MediaServerResult(
+                                item = item,
+                                serverType = repo.serverType,
+                                serverLabel = repo.integration.label,
+                                originalRank = index,
+                            )
+                        }
+                    if (mapped.isNotEmpty()) {
+                        val woven =
+                            mutex.withLock {
+                                accumulatedResults.addAll(mapped)
+                                processAndWeave(
+                                    query = query,
+                                    allResults = accumulatedResults,
+                                    libraryByTmdbId = libraryByTmdbId,
+                                    libraryByTvdbId = libraryByTvdbId,
+                                    libraryByCleanTitle = libraryByCleanTitle,
+                                )
+                            }
+                        send(woven)
+                    }
+                }
+            searchJobs.add(job)
+        }
+
         searchJobs.joinAll()
 
         if (accumulatedResults.isEmpty()) {
@@ -195,6 +230,7 @@ class GlobalSearchUseCase(
     ): List<SearchResult> {
         val resultsByTmdbId = mutableMapOf<Long, MutableList<SearchResult>>()
         val resultsByTvdbId = mutableMapOf<Long, MutableList<SearchResult>>()
+        val resultsByCleanTitle = mutableMapOf<String, MutableList<SearchResult>>()
         val resultsByAsin = mutableMapOf<String, MutableList<SearchResult>>()
         val resultsByAuthorId = mutableMapOf<String, MutableList<SearchResult>>()
         val resultsByMbId = mutableMapOf<String, MutableList<SearchResult>>()
@@ -260,6 +296,33 @@ class GlobalSearchUseCase(
                         others.add(result)
                     }
                 }
+                is SearchResult.MediaServerResult -> {
+                    var matched = false
+                    val tmdbId = result.item.tmdbId
+                    if (tmdbId != null && tmdbId != 0L) {
+                        val list = resultsByTmdbId.getOrPut(tmdbId) { mutableListOf() }
+                        list.add(result)
+                        libraryByTmdbId[tmdbId]?.let { list.addAll(it) }
+                        matched = true
+                    }
+                    val tvdbId = result.item.tvdbId
+                    if (tvdbId != null && tvdbId != 0L) {
+                        val list = resultsByTvdbId.getOrPut(tvdbId) { mutableListOf() }
+                        list.add(result)
+                        libraryByTvdbId[tvdbId]?.let { list.addAll(it) }
+                        matched = true
+                    }
+                    if (!matched) {
+                        val clean = result.cleanTitle.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
+                        if (clean.isNotBlank()) {
+                            val list = resultsByCleanTitle.getOrPut(clean) { mutableListOf() }
+                            list.add(result)
+                            libraryByCleanTitle[clean]?.let { list.addAll(it) }
+                        } else {
+                            others.add(result)
+                        }
+                    }
+                }
                 is SearchResult.SeerrPersonResult -> others.add(result)
             }
         }
@@ -267,6 +330,7 @@ class GlobalSearchUseCase(
         val combined = mutableListOf<SearchResult>()
         val processedTmdbIds = mutableSetOf<Long>()
         val processedTvdbIds = mutableSetOf<Long>()
+        val processedCleanTitles = mutableSetOf<String>()
         val processedAsins = mutableSetOf<String>()
         val processedAuthorIds = mutableSetOf<String>()
         val processedMbIds = mutableSetOf<String>()
@@ -282,6 +346,8 @@ class GlobalSearchUseCase(
                     if (media is ArrSeries) {
                         processedTvdbIds.add(media.tvdbId)
                     }
+                } else if (bestItem is SearchResult.MediaServerResult) {
+                    bestItem.item.tvdbId?.let { processedTvdbIds.add(it) }
                 }
             }
         }
@@ -294,6 +360,17 @@ class GlobalSearchUseCase(
                     combined.add(bestItem)
                 }
                 processedTvdbIds.add(tvdbId)
+            }
+        }
+
+        // Process by Clean Title
+        resultsByCleanTitle.forEach { (cleanTitle, items) ->
+            if (cleanTitle !in processedCleanTitles) {
+                val bestItem = selectBestItem(items)
+                if (bestItem !in combined) {
+                    combined.add(bestItem)
+                }
+                processedCleanTitles.add(cleanTitle)
             }
         }
 
@@ -335,7 +412,32 @@ class GlobalSearchUseCase(
         return SearchResultWeaver.weave(query, combined)
     }
 
-    private fun selectBestItem(items: List<SearchResult>): SearchResult = items.firstOrNull { it is SearchResult.ArrMediaResult && it.media.id != null && it.media.id != 0L }
-        ?: items.firstOrNull { it is SearchResult.ArrMediaResult }
-        ?: items.first()
+    private fun selectBestItem(items: List<SearchResult>): SearchResult {
+        val inLibraryArr = items.filterIsInstance<SearchResult.ArrMediaResult>().firstOrNull { it.media.id != null && it.media.id != 0L }
+        val anyArr = inLibraryArr ?: items.filterIsInstance<SearchResult.ArrMediaResult>().firstOrNull()
+
+        val matchingMediaServer = items.filterIsInstance<SearchResult.MediaServerResult>().firstOrNull()
+
+        if (anyArr != null) {
+            return if (matchingMediaServer != null) {
+                anyArr.copy(
+                    mediaServerType = matchingMediaServer.serverType,
+                    mediaServerLabel = matchingMediaServer.serverLabel,
+                )
+            } else {
+                anyArr
+            }
+        }
+
+        if (matchingMediaServer != null) {
+            return matchingMediaServer
+        }
+
+        val seerr = items.filterIsInstance<SearchResult.SeerrMediaResult>().firstOrNull()
+        if (seerr != null) {
+            return seerr
+        }
+
+        return items.first()
+    }
 }
