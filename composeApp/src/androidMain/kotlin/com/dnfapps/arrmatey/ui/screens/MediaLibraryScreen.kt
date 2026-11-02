@@ -6,6 +6,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryScrollableTabRow
@@ -39,9 +41,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerLibraryViewModel
@@ -51,6 +55,7 @@ import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerEmptyConfigView
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerFilterSortMenu
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerMediaView
+import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerOptionsMenu
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
@@ -74,6 +79,7 @@ fun MediaLibraryScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val watchedFilter by viewModel.watchedFilter.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
     var showViewCustomizationSheet by remember { mutableStateOf(false) }
 
     val textFieldState = rememberTextFieldState()
@@ -118,6 +124,25 @@ fun MediaLibraryScreen(
                 textFieldState = textFieldState,
                 textFieldEnabled = true,
                 searchPlaceholder = mokoString(MR.strings.search_placeholder, currentServer.label),
+                trailingIcon = {
+                    MediaServerOptionsMenu(
+                        onViewWebGui = {
+                            context.openLink(currentServer.getEffectiveBaseUrl())
+                        },
+                        onRefresh = {
+                            viewModel.refresh()
+                        },
+                        trigger = { onClick ->
+                            IconButton(onClick = onClick) {
+                                Image(
+                                    painter = painterResource(currentServer.serverType.icon),
+                                    contentDescription = mokoString(currentServer.serverType.resource),
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        },
+                    )
+                },
                 navigationIcon = {
                     if (!wideRailIsVisible) {
                         NavigationDrawerButton()

@@ -459,6 +459,10 @@ class UnifiedLibraryViewModel(
         loadMediaServerContents(server, library)
     }
 
+    fun refreshMediaServer(server: MediaServerIntegration) {
+        loadMediaServerLibrariesAndContents(server, _selectedMediaServerLibrary.value)
+    }
+
     fun setMediaServerViewType(viewType: ViewType) {
         updateViewType(viewType)
     }

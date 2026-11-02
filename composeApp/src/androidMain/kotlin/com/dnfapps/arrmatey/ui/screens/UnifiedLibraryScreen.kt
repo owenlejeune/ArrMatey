@@ -85,6 +85,7 @@ import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerFilterSortMenu
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerMediaView
+import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerOptionsMenu
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
@@ -309,31 +310,56 @@ fun UnifiedLibraryScreen(
                             textFieldEnabled = true,
                             searchPlaceholder = searchPlaceholder,
                             trailingIcon = {
-                                if (currentInstance != null && currentType != null) {
-                                    InstanceOptionsMenu(
-                                        onViewWebGui = {
-                                            context.openLink(currentInstance.url)
-                                        },
-                                        onRunRssSync = { unifiedLibraryViewModel.runRssSync() },
-                                        onSearchAllMissing = { unifiedLibraryViewModel.searchAllMissing() },
-                                        onSearchFiltered = { unifiedLibraryViewModel.searchFiltered() },
-                                        onUpdateLibrary = { unifiedLibraryViewModel.updateLibrary() },
-                                        onBackupDatabase = { unifiedLibraryViewModel.backupDatabase() },
-                                        onManualImport = if (currentInstance.supportsManualImport) {
-                                            { showManualImportSheet = true }
-                                        } else {
-                                            null
-                                        },
-                                        trigger = { onClick ->
-                                            IconButton(onClick = onClick) {
-                                                Image(
-                                                    painter = painterResource(currentType.icon),
-                                                    contentDescription = mokoString(currentType.resource),
-                                                    modifier = Modifier.size(24.dp),
-                                                )
-                                            }
-                                        },
-                                    )
+                                when (currentTab) {
+                                    is UnifiedLibraryTabTarget.Arr -> {
+                                        val currentInstance = currentTab.instance
+                                        val currentType = currentInstance.type
+                                        InstanceOptionsMenu(
+                                            onViewWebGui = {
+                                                context.openLink(currentInstance.url)
+                                            },
+                                            onRunRssSync = { unifiedLibraryViewModel.runRssSync() },
+                                            onSearchAllMissing = { unifiedLibraryViewModel.searchAllMissing() },
+                                            onSearchFiltered = { unifiedLibraryViewModel.searchFiltered() },
+                                            onUpdateLibrary = { unifiedLibraryViewModel.updateLibrary() },
+                                            onBackupDatabase = { unifiedLibraryViewModel.backupDatabase() },
+                                            onManualImport = if (currentInstance.supportsManualImport) {
+                                                { showManualImportSheet = true }
+                                            } else {
+                                                null
+                                            },
+                                            trigger = { onClick ->
+                                                IconButton(onClick = onClick) {
+                                                    Image(
+                                                        painter = painterResource(currentType.icon),
+                                                        contentDescription = mokoString(currentType.resource),
+                                                        modifier = Modifier.size(24.dp),
+                                                    )
+                                                }
+                                            },
+                                        )
+                                    }
+                                    is UnifiedLibraryTabTarget.MediaServer -> {
+                                        val integration = currentTab.integration
+                                        val serverType = integration.serverType
+                                        MediaServerOptionsMenu(
+                                            onViewWebGui = {
+                                                context.openLink(integration.getEffectiveBaseUrl())
+                                            },
+                                            onRefresh = {
+                                                unifiedLibraryViewModel.refreshMediaServer(integration)
+                                            },
+                                            trigger = { onClick ->
+                                                IconButton(onClick = onClick) {
+                                                    Image(
+                                                        painter = painterResource(serverType.icon),
+                                                        contentDescription = mokoString(serverType.resource),
+                                                        modifier = Modifier.size(24.dp),
+                                                    )
+                                                }
+                                            },
+                                        )
+                                    }
                                 }
                             },
                             navigationIcon = {
