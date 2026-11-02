@@ -85,7 +85,6 @@ import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerFilterSortMenu
 import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerMediaView
-import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerOptionsMenu
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
@@ -340,25 +339,17 @@ fun UnifiedLibraryScreen(
                                         )
                                     }
                                     is UnifiedLibraryTabTarget.MediaServer -> {
-                                        val integration = currentTab.integration
-                                        val serverType = integration.serverType
-                                        MediaServerOptionsMenu(
-                                            onViewWebGui = {
-                                                context.openLink(integration.getEffectiveBaseUrl())
-                                            },
-                                            onRefresh = {
-                                                unifiedLibraryViewModel.refreshMediaServer(integration)
-                                            },
-                                            trigger = { onClick ->
-                                                IconButton(onClick = onClick) {
-                                                    Image(
-                                                        painter = painterResource(serverType.icon),
-                                                        contentDescription = mokoString(serverType.resource),
-                                                        modifier = Modifier.size(24.dp),
-                                                    )
-                                                }
-                                            },
-                                        )
+                                        val serverType = currentTab.integration.serverType
+                                        Box(
+                                            modifier = Modifier.size(48.dp),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Image(
+                                                painter = painterResource(serverType.icon),
+                                                contentDescription = mokoString(serverType.resource),
+                                                modifier = Modifier.size(24.dp),
+                                            )
+                                        }
                                     }
                                 }
                             },
