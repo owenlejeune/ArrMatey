@@ -55,6 +55,9 @@ class PlexRepository(
         pageSize: Int,
         sort: String?,
     ): NetworkResult<List<UnifiedMediaItem>> {
+        if (pageSize <= 0) {
+            return getAllLibraryContents(libraryId, sort)
+        }
         var res = client.getSectionMedia(sectionId = libraryId, start = page * pageSize, size = pageSize, sort = sort)
         if (res is NetworkResult.Error && isRecoverableNetworkError(res)) {
             val healed = autoHealFromPlexTv()
@@ -68,6 +71,51 @@ class PlexRepository(
                     .filter { !it.ratingKey.isNullOrBlank() }
                     .map { it.toUnifiedMediaItem(libraryId) }
                 NetworkResult.Success(items)
+            }
+            is NetworkResult.Error -> res
+            is NetworkResult.Loading -> res
+        }
+    }
+
+    override suspend fun getAllLibraryContents(
+        libraryId: String,
+        sort: String?,
+    ): NetworkResult<List<UnifiedMediaItem>> {
+        var res = client.getSectionMedia(sectionId = libraryId, start = null, size = null, sort = sort)
+        if (res is NetworkResult.Error && isRecoverableNetworkError(res)) {
+            val healed = autoHealFromPlexTv()
+            if (healed) {
+                res = client.getSectionMedia(sectionId = libraryId, start = null, size = null, sort = sort)
+            }
+        }
+        return when (res) {
+            is NetworkResult.Success -> {
+                val container = res.data.mediaContainer
+                val initialMetadata = container.metadata.orEmpty().filter { !it.ratingKey.isNullOrBlank() }
+                val totalSize = container.totalSize ?: initialMetadata.size
+                if (initialMetadata.size >= totalSize) {
+                    NetworkResult.Success(initialMetadata.map { it.toUnifiedMediaItem(libraryId) })
+                } else {
+                    val allMetadata = initialMetadata.toMutableList()
+                    val batchSize = 500
+                    while (allMetadata.size < totalSize) {
+                        val nextBatchRes = client.getSectionMedia(
+                            sectionId = libraryId,
+                            start = allMetadata.size,
+                            size = batchSize,
+                            sort = sort,
+                        )
+                        if (nextBatchRes is NetworkResult.Success) {
+                            val nextItems = nextBatchRes.data.mediaContainer.metadata.orEmpty()
+                                .filter { !it.ratingKey.isNullOrBlank() }
+                            if (nextItems.isEmpty()) break
+                            allMetadata.addAll(nextItems)
+                        } else {
+                            break
+                        }
+                    }
+                    NetworkResult.Success(allMetadata.map { it.toUnifiedMediaItem(libraryId) })
+                }
             }
             is NetworkResult.Error -> res
             is NetworkResult.Loading -> res

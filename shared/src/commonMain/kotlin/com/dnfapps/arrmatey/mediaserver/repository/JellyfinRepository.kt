@@ -42,18 +42,65 @@ class JellyfinRepository(
         page: Int,
         pageSize: Int,
         sort: String?,
+    ): NetworkResult<List<UnifiedMediaItem>> {
+        if (pageSize <= 0) {
+            return getAllLibraryContents(libraryId, sort)
+        }
+        return when (
+            val res = client.getLibraryItems(
+                userId = userId,
+                parentId = libraryId,
+                startIndex = page * pageSize,
+                limit = pageSize,
+                sortBy = sort ?: "SortName",
+            )
+        ) {
+            is NetworkResult.Success -> {
+                val items = res.data.items.map { it.toUnifiedMediaItem(libraryId) }
+                NetworkResult.Success(items)
+            }
+            is NetworkResult.Error -> res
+            is NetworkResult.Loading -> res
+        }
+    }
+
+    override suspend fun getAllLibraryContents(
+        libraryId: String,
+        sort: String?,
     ): NetworkResult<List<UnifiedMediaItem>> = when (
         val res = client.getLibraryItems(
             userId = userId,
             parentId = libraryId,
-            startIndex = page * pageSize,
-            limit = pageSize,
+            startIndex = null,
+            limit = null,
             sortBy = sort ?: "SortName",
         )
     ) {
         is NetworkResult.Success -> {
-            val items = res.data.items.map { it.toUnifiedMediaItem(libraryId) }
-            NetworkResult.Success(items)
+            val initialItems = res.data.items
+            val totalCount = res.data.totalRecordCount
+            if (initialItems.size >= totalCount) {
+                NetworkResult.Success(initialItems.map { it.toUnifiedMediaItem(libraryId) })
+            } else {
+                val allItems = initialItems.toMutableList()
+                val batchSize = 500
+                while (allItems.size < totalCount) {
+                    val nextBatchRes = client.getLibraryItems(
+                        userId = userId,
+                        parentId = libraryId,
+                        startIndex = allItems.size,
+                        limit = batchSize,
+                        sortBy = sort ?: "SortName",
+                    )
+                    if (nextBatchRes is NetworkResult.Success) {
+                        if (nextBatchRes.data.items.isEmpty()) break
+                        allItems.addAll(nextBatchRes.data.items)
+                    } else {
+                        break
+                    }
+                }
+                NetworkResult.Success(allItems.map { it.toUnifiedMediaItem(libraryId) })
+            }
         }
         is NetworkResult.Error -> res
         is NetworkResult.Loading -> res

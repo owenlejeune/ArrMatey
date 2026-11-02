@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PlexRepositoryTest {
@@ -248,5 +249,89 @@ class PlexRepositoryTest {
         assertEquals("999", item.id)
         assertEquals("Legacy Movie", item.title)
         assertEquals(550L, item.tmdbId)
+    }
+
+    @Test
+    fun getAllLibraryContentsFetchesWithoutContainerLimits() = runTest {
+        val mockEngine = MockEngine { request ->
+            assertEquals("/library/sections/1/all", request.url.encodedPath)
+            assertNull(request.headers["X-Plex-Container-Start"])
+            assertNull(request.headers["X-Plex-Container-Size"])
+            respond(
+                content = """
+                    {
+                      "MediaContainer": {
+                        "size": 2,
+                        "totalSize": 2,
+                        "Metadata": [
+                          { "ratingKey": "1", "title": "Movie 1", "type": "movie" },
+                          { "ratingKey": "2", "title": "Movie 2", "type": "movie" }
+                        ]
+                      }
+                    }
+                """.trimIndent(),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+            )
+        }
+
+        val repository = PlexRepository(createClient(mockEngine))
+        val result = repository.getAllLibraryContents("1")
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(2, result.data.size)
+        assertEquals("Movie 1", result.data[0].title)
+        assertEquals("Movie 2", result.data[1].title)
+    }
+
+    @Test
+    fun getAllLibraryContentsPaginatesWhenServerCapsResults() = runTest {
+        val mockEngine = MockEngine { request ->
+            val start = request.headers["X-Plex-Container-Start"]
+            if (start == null) {
+                // First request without pagination headers returns first item and totalSize = 2
+                respond(
+                    content = """
+                        {
+                          "MediaContainer": {
+                            "size": 1,
+                            "totalSize": 2,
+                            "Metadata": [
+                              { "ratingKey": "1", "title": "Movie 1", "type": "movie" }
+                            ]
+                          }
+                        }
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+            } else {
+                // Follow up batch
+                assertEquals("1", start)
+                respond(
+                    content = """
+                        {
+                          "MediaContainer": {
+                            "size": 1,
+                            "totalSize": 2,
+                            "Metadata": [
+                              { "ratingKey": "2", "title": "Movie 2", "type": "movie" }
+                            ]
+                          }
+                        }
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+            }
+        }
+
+        val repository = PlexRepository(createClient(mockEngine))
+        val result = repository.getAllLibraryContents("1")
+
+        assertTrue(result is NetworkResult.Success)
+        assertEquals(2, result.data.size)
+        assertEquals("Movie 1", result.data[0].title)
+        assertEquals("Movie 2", result.data[1].title)
     }
 }

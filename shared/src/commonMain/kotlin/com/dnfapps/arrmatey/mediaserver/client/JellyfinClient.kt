@@ -51,8 +51,8 @@ class JellyfinClient(
     suspend fun getLibraryItems(
         userId: String,
         parentId: String,
-        startIndex: Int = 0,
-        limit: Int = 50,
+        startIndex: Int? = 0,
+        limit: Int? = 50,
         includeItemTypes: String? = null,
         sortBy: String = "SortName",
         sortOrder: String = "Ascending",
@@ -61,8 +61,8 @@ class JellyfinClient(
         header("Authorization", buildAuthHeader())
         header("Accept", "application/json")
         parameter("ParentId", parentId)
-        parameter("StartIndex", startIndex)
-        parameter("Limit", limit)
+        if (startIndex != null) parameter("StartIndex", startIndex)
+        if (limit != null) parameter("Limit", limit)
         if (includeItemTypes != null) parameter("IncludeItemTypes", includeItemTypes)
         parameter("SortBy", sortBy)
         parameter("SortOrder", sortOrder)

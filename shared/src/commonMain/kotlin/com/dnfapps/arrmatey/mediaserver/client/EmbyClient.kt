@@ -52,8 +52,8 @@ class EmbyClient(
     suspend fun getItems(
         userId: String,
         parentId: String,
-        startIndex: Int = 0,
-        limit: Int = 50,
+        startIndex: Int? = 0,
+        limit: Int? = 50,
         recursive: Boolean = true,
         includeItemTypes: String? = null,
         sortBy: String = "SortName",
@@ -64,8 +64,8 @@ class EmbyClient(
         header("X-Emby-Authorization", buildAuthHeader())
         header("Accept", "application/json")
         parameter("ParentId", parentId)
-        parameter("StartIndex", startIndex)
-        parameter("Limit", limit)
+        if (startIndex != null) parameter("StartIndex", startIndex)
+        if (limit != null) parameter("Limit", limit)
         parameter("Recursive", recursive)
         if (includeItemTypes != null) parameter("IncludeItemTypes", includeItemTypes)
         parameter("SortBy", sortBy)

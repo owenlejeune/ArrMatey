@@ -64,21 +64,25 @@ class PlexClient(
 
     suspend fun getSectionMedia(
         sectionId: String,
-        start: Int = 0,
-        size: Int = 50,
+        start: Int? = null,
+        size: Int? = null,
         filterType: Int? = null,
         sort: String? = null,
     ): NetworkResult<PlexRootContainer<PlexMediaListing>> = withDirectIpFallback {
         httpClient.safeGet("$baseUrl/library/sections/$sectionId/all") {
             header("X-Plex-Token", token)
             header("X-Plex-Client-Identifier", clientIdentifier)
-            header("X-Plex-Container-Start", start.toString())
-            header("X-Plex-Container-Size", size.toString())
+            if (start != null) {
+                header("X-Plex-Container-Start", start.toString())
+                parameter("X-Plex-Container-Start", start)
+            }
+            if (size != null) {
+                header("X-Plex-Container-Size", size.toString())
+                parameter("X-Plex-Container-Size", size)
+            }
             header("Accept", "application/json")
             parameter("X-Plex-Token", token)
             parameter("X-Plex-Client-Identifier", clientIdentifier)
-            parameter("X-Plex-Container-Start", start)
-            parameter("X-Plex-Container-Size", size)
             parameter("includeGuids", 1)
             if (filterType != null) parameter("type", filterType)
             if (sort != null) parameter("sort", sort)

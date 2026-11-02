@@ -19,6 +19,11 @@ interface MediaServerRepository {
         sort: String? = null,
     ): NetworkResult<List<UnifiedMediaItem>>
 
+    suspend fun getAllLibraryContents(
+        libraryId: String,
+        sort: String? = null,
+    ): NetworkResult<List<UnifiedMediaItem>> = getLibraryContents(libraryId, page = 0, pageSize = -1, sort = sort)
+
     suspend fun getItemDetail(itemId: String): NetworkResult<UnifiedMediaItem>
 
     suspend fun getContinueWatching(limit: Int = 20): NetworkResult<List<UnifiedMediaItem>>

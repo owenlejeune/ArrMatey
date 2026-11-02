@@ -554,7 +554,7 @@ class UnifiedLibraryViewModel(
         repo: MediaServerRepository,
         library: UnifiedMediaLibrary,
     ) {
-        when (val result = repo.getLibraryContents(library.id, page = 0, pageSize = 200)) {
+        when (val result = repo.getAllLibraryContents(library.id)) {
             is NetworkResult.Success -> {
                 _mediaServerRawItems.value = result.data
                 _mediaServerIsLoading.value = false
@@ -575,7 +575,7 @@ class UnifiedLibraryViewModel(
     ) = coroutineScope {
         try {
             val deferredList = libraries.map { lib ->
-                async { repo.getLibraryContents(lib.id, page = 0, pageSize = 100) }
+                async { repo.getAllLibraryContents(lib.id) }
             }
             val results = deferredList.awaitAll()
             val all = mutableListOf<UnifiedMediaItem>()
