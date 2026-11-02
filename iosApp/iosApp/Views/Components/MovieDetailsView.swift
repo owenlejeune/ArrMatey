@@ -13,12 +13,27 @@ struct MovieDetailsView: View {
     let isActive: Bool
     
     private var releaseDateString: String? {
-        guard let releaseDate = item.releaseDate else { return nil }
-        let timeInterval = TimeInterval(releaseDate.epochSeconds)
-        let date = Date(timeIntervalSince1970: timeInterval)
-        
+        if let digital = item.digitalRelease {
+            return "\(MR.strings().digital_release.localized()): \(formatDate(digital, format: "MMM d, yyyy"))"
+        }
+        if let physical = item.physicalRelease {
+            return "\(MR.strings().physical_release.localized()): \(formatDate(physical, format: "MMM d, yyyy"))"
+        }
+        if let inCinemas = item.inCinemas {
+            return "\(MR.strings().in_cinemas.localized()): \(formatDate(inCinemas, format: "MMM d, yyyy"))"
+        }
+        if let releaseDate = item.releaseDate {
+            return formatDate(releaseDate, format: "MMMM d, yyyy")
+        }
+        let year = item.year.intValue
+        guard year > 0 else { return nil }
+        return String(year)
+    }
+
+    private func formatDate(_ instant: KotlinInstant, format: String) -> String {
+        let date = Date(timeIntervalSince1970: TimeInterval(instant.epochSeconds))
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
+        formatter.dateFormat = format
         return formatter.string(from: date)
     }
     
@@ -38,6 +53,7 @@ struct MovieDetailsView: View {
     private var firstLine: String {
         [runtimeString, item.studio]
             .compactMap { $0 }
+            .filter { !$0.isEmpty }
             .joined(separator: " • ")
     }
     
