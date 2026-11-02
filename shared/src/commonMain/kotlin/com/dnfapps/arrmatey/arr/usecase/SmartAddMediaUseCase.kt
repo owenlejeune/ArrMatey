@@ -14,15 +14,13 @@ class SmartAddMediaUseCase(
         metadata: AudiobookMetadataResponse? = null,
         searchOnAdd: Boolean = false,
         targetInstanceId: Long? = null,
-    ) {
-        addMediaItemUseCase(
-            instanceType = instanceType,
-            item = item,
-            metadata = metadata,
-            searchOnAdd = searchOnAdd,
-            targetInstanceId = targetInstanceId,
-        )
-    }
+    ): ArrMedia? = addMediaItemUseCase(
+        instanceType = instanceType,
+        item = item,
+        metadata = metadata,
+        searchOnAdd = searchOnAdd,
+        targetInstanceId = targetInstanceId,
+    )
 
     suspend operator fun invoke(
         instanceType: InstanceType,
@@ -30,13 +28,11 @@ class SmartAddMediaUseCase(
         item: ArrMedia,
         metadata: AudiobookMetadataResponse? = null,
         searchOnAdd: Boolean = false,
-    ) {
-        addMediaItemUseCase(
-            instanceType = instanceType,
-            repository = repository,
-            item = item,
-            metadata = metadata,
-            searchOnAdd = searchOnAdd,
-        )
-    }
+    ): ArrMedia? = addMediaItemUseCase(
+        instanceType = instanceType,
+        repository = repository,
+        item = item,
+        metadata = metadata,
+        searchOnAdd = searchOnAdd,
+    )
 }

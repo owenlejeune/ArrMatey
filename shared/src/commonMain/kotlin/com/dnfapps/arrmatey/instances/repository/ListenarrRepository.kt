@@ -83,7 +83,7 @@ class ListenarrRepository(
         item: SearchAudiobook,
         metadata: AudiobookMetadataBody,
         searchOnAdd: Boolean,
-    ) {
+    ): ArrMedia? {
         libraryRepository.setEditItemStatus(OperationStatus.InProgress)
         delay(100.milliseconds)
 
@@ -104,7 +104,7 @@ class ListenarrRepository(
                 .addNewAudiobook(body)
                 .map { it.audiobook as ArrMedia }
 
-        libraryRepository.processAddResult(result, false)
+        return libraryRepository.processAddResult(result, false)
     }
 
     override suspend fun moveAudiobookFiles(
