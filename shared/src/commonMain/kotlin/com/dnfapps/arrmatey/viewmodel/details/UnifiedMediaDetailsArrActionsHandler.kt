@@ -577,6 +577,7 @@ class UnifiedMediaDetailsArrActionsHandler(
         logger: Logger,
         onFlowStart: (() -> Unit)? = null,
         onFlowComplete: (() -> Unit)? = null,
+        onItemAdded: ((instanceId: Long, item: ArrMedia) -> Unit)? = null,
     ) {
         scope.launch {
             onFlowStart?.invoke()
@@ -646,12 +647,16 @@ class UnifiedMediaDetailsArrActionsHandler(
                     "UnifiedMediaDetailsViewModel.smartAdd: adding '${item.title}' to instance ${targetRepo.instance.id} (${targetRepo.instance.label}) type=$type searchOnAdd=$searchOnAdd"
                 }
 
-                smartAddMediaUseCase(
-                    instanceType = type,
-                    repository = targetRepo,
-                    item = item,
-                    searchOnAdd = searchOnAdd,
-                )
+                val addedItem =
+                    smartAddMediaUseCase(
+                        instanceType = type,
+                        repository = targetRepo,
+                        item = item,
+                        searchOnAdd = searchOnAdd,
+                    )
+                if (addedItem?.id != null && addedItem.id != 0L) {
+                    onItemAdded?.invoke(targetRepo.instance.id, addedItem)
+                }
                 if (effectiveInstanceId != null) {
                     selectInstance(effectiveInstanceId)
                 }

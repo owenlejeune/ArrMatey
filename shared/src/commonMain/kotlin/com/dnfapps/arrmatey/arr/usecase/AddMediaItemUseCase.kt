@@ -19,7 +19,7 @@ class AddMediaItemUseCase(
         metadata: AudiobookMetadataResponse? = null,
         searchOnAdd: Boolean = false,
         targetInstanceId: Long? = null,
-    ) {
+    ): ArrMedia? {
         val repository =
             if (targetInstanceId != null) {
                 instanceManager.getArrRepository(targetInstanceId)
@@ -32,10 +32,10 @@ class AddMediaItemUseCase(
                 "AddMediaItemUseCase: no repository resolved (type=$instanceType, targetInstanceId=$targetInstanceId); " +
                     "add aborted for item '${item.title}'"
             }
-            return
+            return null
         }
 
-        invoke(instanceType, repository, item, metadata, searchOnAdd)
+        return invoke(instanceType, repository, item, metadata, searchOnAdd)
     }
 
     suspend operator fun invoke(
@@ -44,16 +44,14 @@ class AddMediaItemUseCase(
         item: ArrMedia,
         metadata: AudiobookMetadataResponse? = null,
         searchOnAdd: Boolean = false,
+    ): ArrMedia? = if (
+        instanceType == InstanceType.Listenarr &&
+        metadata != null &&
+        item is SearchAudiobook
     ) {
-        if (
-            instanceType == InstanceType.Listenarr &&
-            metadata != null &&
-            item is SearchAudiobook
-        ) {
-            val body = metadata.metadata.toBody(metadata.source)
-            repository.addNewAudiobook(item, body, searchOnAdd)
-        } else {
-            repository.addItem(item, searchOnAdd)
-        }
+        val body = metadata.metadata.toBody(metadata.source)
+        repository.addNewAudiobook(item, body, searchOnAdd)
+    } else {
+        repository.addItem(item, searchOnAdd)
     }
 }

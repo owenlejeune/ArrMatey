@@ -69,7 +69,6 @@ open class ArrInstanceRepository(
 
     val library: StateFlow<NetworkResult<List<ArrMedia>>?> = libraryRepository.library
     val lookupResults: StateFlow<NetworkResult<List<ArrMedia>>?> = libraryRepository.lookupResults
-    val lastAddedItemId: StateFlow<Long?> = libraryRepository.lastAddedItemId
     val releases: StateFlow<NetworkResult<List<ArrRelease>>?> = libraryRepository.releases
     val historyCache: StateFlow<Map<Long, List<HistoryItem>>> = libraryRepository.historyCache
     val history: StateFlow<List<HistoryItem>> = libraryRepository.history
@@ -228,9 +227,7 @@ open class ArrInstanceRepository(
     open suspend fun addItem(
         item: ArrMedia,
         searchOnAdd: Boolean,
-    ) {
-        libraryRepository.addItem(item, searchOnAdd)
-    }
+    ): ArrMedia? = libraryRepository.addItem(item, searchOnAdd)
 
     open suspend fun getReleases(params: ReleaseParams) {
         libraryRepository.getReleases(params)
@@ -441,9 +438,7 @@ open class ArrInstanceRepository(
         item: SearchAudiobook,
         metadata: AudiobookMetadataBody,
         searchOnAdd: Boolean,
-    ) {
-        (this as? ListenarrRepository)?.addNewAudiobook(item, metadata, searchOnAdd)
-    }
+    ): ArrMedia? = (this as? ListenarrRepository)?.addNewAudiobook(item, metadata, searchOnAdd)
 
     open suspend fun moveAudiobookFiles(
         id: Long,

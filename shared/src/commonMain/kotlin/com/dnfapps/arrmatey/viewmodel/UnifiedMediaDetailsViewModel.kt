@@ -471,6 +471,10 @@ class UnifiedMediaDetailsViewModel(
             logger = logger,
             onFlowStart = { _isAddOrRequestInProgress.value = true },
             onFlowComplete = { _isAddOrRequestInProgress.value = false },
+            // Seeding the presence lets the data observer re-resolve with the new arr id.
+            onItemAdded = { instanceId, addedItem ->
+                instanceHandler.updatePresencesMap(instanceHandler.instancePresencesMap.value + (instanceId to addedItem))
+            },
         )
     }
 

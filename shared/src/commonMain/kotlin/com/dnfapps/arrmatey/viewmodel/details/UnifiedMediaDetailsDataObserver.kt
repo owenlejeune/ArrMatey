@@ -86,6 +86,7 @@ class UnifiedMediaDetailsDataObserver(
                     map[current.selectedInstanceId]?.takeIf { it.id != null && it.id != 0L }
                         ?: current.arrMedia?.takeIf { it.id != null && it.id != 0L }
                         ?: map.values.firstOrNull { it != null && it.id != null && it.id != 0L }
+                        ?: current.arrMedia
                 uiStateFlow.value =
                     current.copy(
                         arrMedia = effectiveArrMedia,
@@ -265,6 +266,8 @@ class UnifiedMediaDetailsDataObserver(
                                 ?: activeRepo?.instance?.id?.let { map[it] }?.takeIf { it.id != null && it.id != 0L }
                                 ?: instanceHandler.selectedInstanceId.value?.let { map[it] }?.takeIf { it.id != null && it.id != 0L }
                                 ?: map.values.firstOrNull { it != null && it.id != null && it.id != 0L }
+                                // Unadded lookup result; keeps the title and direct-add sheet available.
+                                ?: rawState.arrMedia
 
                         uiStateFlow.value =
                             rawState.copy(
