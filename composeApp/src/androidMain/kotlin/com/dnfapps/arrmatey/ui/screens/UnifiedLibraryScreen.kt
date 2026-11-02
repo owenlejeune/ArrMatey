@@ -121,6 +121,7 @@ fun UnifiedLibraryScreen(
     val selectedMediaServerLibrary by unifiedLibraryViewModel.selectedMediaServerLibrary.collectAsStateWithLifecycle()
     val mediaServerFilteredItems by unifiedLibraryViewModel.mediaServerFilteredItems.collectAsStateWithLifecycle()
     val mediaServerIsLoading by unifiedLibraryViewModel.mediaServerIsLoading.collectAsStateWithLifecycle()
+    val mediaServerIsRefreshing by unifiedLibraryViewModel.mediaServerIsRefreshing.collectAsStateWithLifecycle()
     val mediaServerViewType by unifiedLibraryViewModel.mediaServerViewType.collectAsStateWithLifecycle()
     val mediaServerSortBy by unifiedLibraryViewModel.mediaServerSortBy.collectAsStateWithLifecycle()
     val mediaServerSortOrder by unifiedLibraryViewModel.mediaServerSortOrder.collectAsStateWithLifecycle()
@@ -513,19 +514,30 @@ fun UnifiedLibraryScreen(
                             }
                         }
 
-                        PullToRefreshBox(
-                            isRefreshing = mediaServerIsLoading,
-                            onRefresh = { unifiedLibraryViewModel.refreshMediaServer() },
+                        Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            MediaServerMediaView(
-                                items = mediaServerFilteredItems,
-                                preferences = preferences,
-                                onItemClick = { onNavigateToMediaServerDetails?.invoke(it) },
-                                onToggleWatched = { unifiedLibraryViewModel.toggleMediaServerWatched(it) },
-                            )
+                            if (mediaServerIsLoading && !mediaServerIsRefreshing) {
+                                LoadingIndicator(
+                                    modifier = Modifier.size(96.dp),
+                                )
+                            } else {
+                                PullToRefreshBox(
+                                    isRefreshing = mediaServerIsRefreshing,
+                                    onRefresh = { unifiedLibraryViewModel.refreshMediaServer() },
+                                    modifier = Modifier.fillMaxSize(),
+                                ) {
+                                    MediaServerMediaView(
+                                        items = mediaServerFilteredItems,
+                                        preferences = preferences,
+                                        onItemClick = { onNavigateToMediaServerDetails?.invoke(it) },
+                                        onToggleWatched = { unifiedLibraryViewModel.toggleMediaServerWatched(it) },
+                                    )
+                                }
+                            }
                         }
                     }
 

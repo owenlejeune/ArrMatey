@@ -176,6 +176,9 @@ class UnifiedLibraryViewModel(
     private val _mediaServerIsLoading = MutableStateFlow(false)
     val mediaServerIsLoading: StateFlow<Boolean> = _mediaServerIsLoading.asStateFlow()
 
+    private val _mediaServerIsRefreshing = MutableStateFlow(false)
+    val mediaServerIsRefreshing: StateFlow<Boolean> = _mediaServerIsRefreshing.asStateFlow()
+
     private val _mediaServerWatchedFilter = MutableStateFlow(WatchedFilter.ALL)
     val mediaServerWatchedFilter: StateFlow<WatchedFilter> = _mediaServerWatchedFilter.asStateFlow()
 
@@ -487,7 +490,8 @@ class UnifiedLibraryViewModel(
 
     fun refreshMediaServer() {
         val server = _selectedMediaServer.value ?: return
-        loadMediaServerLibrariesAndContents(server, _selectedMediaServerLibrary.value)
+        _mediaServerIsRefreshing.value = true
+        loadMediaServerLibrariesAndContents(server, _selectedMediaServerLibrary.value, isRefresh = true)
     }
 
     fun toggleMediaServerWatched(item: UnifiedMediaItem) {
@@ -506,30 +510,35 @@ class UnifiedLibraryViewModel(
     private fun loadMediaServerLibrariesAndContents(
         server: MediaServerIntegration,
         targetLibrary: UnifiedMediaLibrary?,
+        isRefresh: Boolean = false,
     ) {
         val manager = mediaServerManager ?: return
         viewModelScope.launch {
             val repo = manager.getOrCreateRepository(server)
-            _mediaServerIsLoading.value = true
-            when (val libResult = repo.getLibraries()) {
-                is NetworkResult.Success -> {
-                    val libs = libResult.data
-                    _mediaServerLibraries.value = libs
-                    val libraryToLoad = targetLibrary?.takeIf { libs.any { l -> l.id == it.id } }
-                    _selectedMediaServerLibrary.value = libraryToLoad
-                    if (libraryToLoad != null) {
-                        loadMediaServerContentsInternal(repo, libraryToLoad)
-                    } else {
-                        loadAllMediaServerContentsInternal(repo, libs)
+            if (!isRefresh) {
+                _mediaServerIsLoading.value = true
+            }
+            try {
+                when (val libResult = repo.getLibraries()) {
+                    is NetworkResult.Success -> {
+                        val libs = libResult.data
+                        _mediaServerLibraries.value = libs
+                        val libraryToLoad = targetLibrary?.takeIf { libs.any { l -> l.id == it.id } }
+                        _selectedMediaServerLibrary.value = libraryToLoad
+                        if (libraryToLoad != null) {
+                            loadMediaServerContentsInternal(repo, libraryToLoad)
+                        } else {
+                            loadAllMediaServerContentsInternal(repo, libs)
+                        }
                     }
+                    is NetworkResult.Error -> {
+                        _errorMessage.value = libResult.message ?: "Failed to load libraries"
+                    }
+                    else -> {}
                 }
-                is NetworkResult.Error -> {
-                    _errorMessage.value = libResult.message ?: "Failed to load libraries"
-                    _mediaServerIsLoading.value = false
-                }
-                else -> {
-                    _mediaServerIsLoading.value = false
-                }
+            } finally {
+                _mediaServerIsLoading.value = false
+                _mediaServerIsRefreshing.value = false
             }
         }
     }
@@ -542,10 +551,15 @@ class UnifiedLibraryViewModel(
         viewModelScope.launch {
             val repo = manager.getOrCreateRepository(server)
             _mediaServerIsLoading.value = true
-            if (library != null) {
-                loadMediaServerContentsInternal(repo, library)
-            } else {
-                loadAllMediaServerContentsInternal(repo, _mediaServerLibraries.value)
+            try {
+                if (library != null) {
+                    loadMediaServerContentsInternal(repo, library)
+                } else {
+                    loadAllMediaServerContentsInternal(repo, _mediaServerLibraries.value)
+                }
+            } finally {
+                _mediaServerIsLoading.value = false
+                _mediaServerIsRefreshing.value = false
             }
         }
     }
@@ -557,15 +571,11 @@ class UnifiedLibraryViewModel(
         when (val result = repo.getAllLibraryContents(library.id)) {
             is NetworkResult.Success -> {
                 _mediaServerRawItems.value = result.data
-                _mediaServerIsLoading.value = false
             }
             is NetworkResult.Error -> {
                 _errorMessage.value = result.message ?: "Failed to load library items"
-                _mediaServerIsLoading.value = false
             }
-            else -> {
-                _mediaServerIsLoading.value = false
-            }
+            else -> {}
         }
     }
 
@@ -585,8 +595,6 @@ class UnifiedLibraryViewModel(
             _mediaServerRawItems.value = all
         } catch (e: Exception) {
             _errorMessage.value = e.message ?: "Error loading media items"
-        } finally {
-            _mediaServerIsLoading.value = false
         }
     }
 

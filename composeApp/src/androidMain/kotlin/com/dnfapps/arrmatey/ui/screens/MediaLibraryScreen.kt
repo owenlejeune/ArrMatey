@@ -26,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryScrollableTabRow
@@ -74,6 +75,7 @@ fun MediaLibraryScreen(
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
     val filteredItems by viewModel.filteredItems.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val watchedFilter by viewModel.watchedFilter.collectAsStateWithLifecycle()
 
     var showViewCustomizationSheet by remember { mutableStateOf(false) }
@@ -227,19 +229,30 @@ fun MediaLibraryScreen(
             }
 
             // Content Area with PullToRefresh
-            PullToRefreshBox(
-                isRefreshing = isLoading,
-                onRefresh = { viewModel.refresh() },
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
+                contentAlignment = Alignment.Center,
             ) {
-                MediaServerMediaView(
-                    items = filteredItems,
-                    preferences = preferences,
-                    onItemClick = onNavigateToDetails,
-                    onToggleWatched = { viewModel.toggleWatched(it) },
-                )
+                if (isLoading && !isRefreshing) {
+                    LoadingIndicator(
+                        modifier = Modifier.size(96.dp),
+                    )
+                } else {
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = { viewModel.refresh() },
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        MediaServerMediaView(
+                            items = filteredItems,
+                            preferences = preferences,
+                            onItemClick = onNavigateToDetails,
+                            onToggleWatched = { viewModel.toggleWatched(it) },
+                        )
+                    }
+                }
             }
         }
 
