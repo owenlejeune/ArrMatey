@@ -71,6 +71,7 @@ import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.rememberHtml
 import com.dnfapps.arrmatey.entensions.unlessEmpty
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
@@ -85,7 +86,6 @@ import com.dnfapps.arrmatey.utils.PosterRadius
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
-import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
 fun <T : ArrMedia> MediaList(
@@ -208,7 +208,6 @@ fun SearchResultItem(
 
     when (item) {
         is SearchResult.ArrMediaResult -> {
-            val serverType = item.mediaServerType
             MediaItem(
                 aspectRatio = item.aspectRatio,
                 item = item.media,
@@ -216,32 +215,7 @@ fun SearchResultItem(
                 includeOverview = includeOverview,
                 showBannerBackground = showBanners,
                 edgeColor = edgeColor,
-                secondaryBadge = if (serverType != null) {
-                    {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.padding(top = 2.dp),
-                        ) {
-                            Icon(
-                                painter = painterResource(serverType.icon),
-                                contentDescription = null,
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(14.dp),
-                            )
-                            val label = item.mediaServerLabel ?: serverType.name
-                            Text(
-                                text = "Available on $label",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = serverType.brandColor,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    }
-                } else {
-                    null
-                },
+                mediaServerType = item.mediaServerType,
             )
         }
 
@@ -296,6 +270,7 @@ fun <T : ArrMedia> MediaItem(
     qualityProfiles: List<QualityProfile> = emptyList(),
     tags: List<Tag> = emptyList(),
     secondaryBadge: @Composable (() -> Unit)? = null,
+    mediaServerType: MediaServerType? = null,
 ) {
     val isSelected = multiSelectState.isSelected(item.guid)
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
@@ -415,6 +390,15 @@ fun <T : ArrMedia> MediaItem(
                                         )
                                     }
                                 }
+                            }
+                            if (mediaServerType != null) {
+                                MediaServerBadgeOverlay(
+                                    serverType = mediaServerType,
+                                    modifier =
+                                    Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(4.dp),
+                                )
                             }
                         },
                     )
@@ -631,14 +615,22 @@ fun MediaServerSearchResultItem(
                         modifier = Modifier.width(76.dp),
                         aspectRatio = AspectRatio.Poster,
                         additionalContent = {
+                            MediaServerBadgeOverlay(
+                                serverType = result.serverType,
+                                modifier =
+                                Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(4.dp),
+                            )
                             if (item.played) {
                                 Surface(
                                     shape = CircleShape,
                                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
                                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                                     shadowElevation = 2.dp,
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
+                                    modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
                                         .padding(4.dp),
                                 ) {
                                     Box(

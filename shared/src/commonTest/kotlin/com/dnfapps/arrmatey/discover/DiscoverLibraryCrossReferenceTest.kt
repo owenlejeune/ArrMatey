@@ -187,9 +187,12 @@ private class FakeMediaServerDao : com.dnfapps.arrmatey.mediaserver.database.Med
     override suspend fun delete(integration: com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration) {}
 }
 
-private class FakeHttpClientFactory : com.dnfapps.arrmatey.arr.api.client.HttpClientFactory(
-    kotlinx.serialization.json.Json { ignoreUnknownKeys = true },
-    object : io.ktor.client.plugins.logging.Logger { override fun log(message: String) {} },
-) {
+private class FakeHttpClientFactory :
+    com.dnfapps.arrmatey.arr.api.client.HttpClientFactory(
+        kotlinx.serialization.json.Json { ignoreUnknownKeys = true },
+        object : io.ktor.client.plugins.logging.Logger {
+            override fun log(message: String) {}
+        },
+    ) {
     override fun createMediaServerClient(integration: com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration): io.ktor.client.HttpClient = io.ktor.client.HttpClient()
 }
