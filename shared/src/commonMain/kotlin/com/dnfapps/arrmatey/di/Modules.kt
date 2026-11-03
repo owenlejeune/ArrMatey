@@ -671,7 +671,7 @@ val viewModelModule =
         viewModel { (item: QueueItem) ->
             ManualImportViewModel(item, get(), get())
         }
-        viewModelOf(::UnifiedSearchViewModel)
+        viewModel { UnifiedSearchViewModel(get(), get(), get(), getOrNull()) }
         viewModelOf(::MediaServerSettingsViewModel)
         viewModelOf(::MediaServerLibraryViewModel)
     }

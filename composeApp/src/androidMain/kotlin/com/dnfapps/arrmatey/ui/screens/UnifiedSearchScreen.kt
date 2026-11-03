@@ -60,14 +60,14 @@ fun UnifiedSearchScreen(
 ) {
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val filteredSearchState by viewModel.filteredSearchState.collectAsStateWithLifecycle()
-    val selectedTypeFilter by viewModel.selectedTypeFilter.collectAsStateWithLifecycle()
-    val availableTypeFilters by viewModel.availableTypeFilters.collectAsStateWithLifecycle()
+    val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
+    val availableFilters by viewModel.availableFilters.collectAsStateWithLifecycle()
     val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
     val showBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
 
     val itemCounts =
         remember(searchState) {
-            searchState.groupingBy { it.instanceType }.eachCount()
+            searchState.groupingBy { it.searchFilter }.eachCount()
         }
 
     val textFieldState = rememberTextFieldState(initialQuery)
@@ -106,9 +106,9 @@ fun UnifiedSearchScreen(
                 .fillMaxSize(),
         ) {
             MediaInstanceFilterRow(
-                selectedFilter = selectedTypeFilter,
-                onFilterSelected = { viewModel.selectTypeFilter(it) },
-                availableFilters = availableTypeFilters,
+                selectedFilter = selectedFilter,
+                onFilterSelected = { viewModel.selectFilter(it) },
+                availableFilters = availableFilters,
                 itemCounts = itemCounts,
                 totalCount = searchState.size,
             )
@@ -156,7 +156,7 @@ fun UnifiedSearchScreen(
                             textAlign = TextAlign.Center,
                         )
                     }
-                } else if (filteredSearchState.isEmpty() && selectedTypeFilter != null) {
+                } else if (filteredSearchState.isEmpty() && selectedFilter != null) {
                     Column(
                         modifier =
                         Modifier
@@ -166,13 +166,13 @@ fun UnifiedSearchScreen(
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Text(
-                            text = "No ${selectedTypeFilter?.name} results found",
+                            text = "No ${selectedFilter?.displayName} results found",
                             style = MaterialTheme.typography.titleMedium,
                             textAlign = TextAlign.Center,
                         )
                         Spacer(Modifier.height(12.dp))
                         Button(
-                            onClick = { viewModel.selectTypeFilter(null) },
+                            onClick = { viewModel.selectFilter(null) },
                         ) {
                             Text(mokoString(MR.strings.all))
                         }

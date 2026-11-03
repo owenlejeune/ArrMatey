@@ -13,14 +13,14 @@ enum class WatchedFilter(val resource: StringResource) {
 }
 
 @Serializable
-enum class MediaType {
-    MOVIE,
-    SHOW,
-    SEASON,
-    EPISODE,
-    TRACK,
-    ALBUM,
-    UNKNOWN,
+enum class MediaType(val displayName: String) {
+    MOVIE("Movie"),
+    SHOW("Show"),
+    SEASON("Season"),
+    EPISODE("Episode"),
+    TRACK("Track"),
+    ALBUM("Album"),
+    UNKNOWN("Unknown"),
     ;
 
     companion object {

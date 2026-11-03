@@ -71,6 +71,7 @@ import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.rememberHtml
 import com.dnfapps.arrmatey.entensions.unlessEmpty
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -199,7 +200,10 @@ fun SearchResultItem(
 ) {
     val edgeColor =
         remember(item) {
-            item.instanceType.associatedColor
+            when (item) {
+                is SearchResult.MediaServerResult -> item.serverType.brandColor
+                else -> item.instanceType?.associatedColor
+            }
         }
 
     when (item) {
@@ -662,7 +666,18 @@ fun MediaServerSearchResultItem(
                             overflow = TextOverflow.Ellipsis,
                         )
 
-                        val secondLine = listOfNotNull(item.year?.toString(), item.type.name, result.serverLabel).joinToString(BULLET)
+                        val secondLine = when (item.type) {
+                            MediaType.EPISODE -> listOfNotNull(
+                                item.seriesTitle,
+                                if (item.seasonNumber != null && item.episodeNumber != null) "S${item.seasonNumber}:E${item.episodeNumber}" else item.type.displayName,
+                                result.serverLabel,
+                            ).joinToString(BULLET)
+                            else -> listOfNotNull(
+                                item.year?.toString(),
+                                item.type.displayName,
+                                result.serverLabel,
+                            ).joinToString(BULLET)
+                        }
                         Text(
                             text = secondLine,
                             style = MaterialTheme.typography.bodyMedium,

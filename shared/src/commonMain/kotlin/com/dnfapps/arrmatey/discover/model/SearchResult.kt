@@ -14,7 +14,6 @@ import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.SeriesRatings
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
-import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.utils.AspectRatio
@@ -31,7 +30,9 @@ sealed interface SearchResult {
     val popularity: Double
     var originalRank: Int
 
-    val instanceType: InstanceType
+    val instanceType: InstanceType?
+
+    val searchFilter: SearchFilter
 
     @Serializable
     data class ArrMediaResult(
@@ -84,6 +85,8 @@ sealed interface SearchResult {
                 is MockMedia.Kapowarr,
                 -> InstanceType.Kapowarr
             }
+        override val searchFilter: SearchFilter
+            get() = SearchFilter.Instance(instanceType)
         val aspectRatio: AspectRatio =
             when (media) {
                 is SearchAudiobook, Audiobook, Author, Arrtist -> AspectRatio.Cover
@@ -105,12 +108,9 @@ sealed interface SearchResult {
         override val voteCount: Int = 0
         override val voteAverage: Double = item.rating ?: 0.0
         override val popularity: Double = 0.0
-        override val instanceType: InstanceType = when (item.type) {
-            MediaType.SHOW, MediaType.SEASON, MediaType.EPISODE -> InstanceType.Sonarr
-            MediaType.MOVIE -> InstanceType.Radarr
-            MediaType.TRACK, MediaType.ALBUM -> InstanceType.Lidarr
-            else -> InstanceType.Seerr
-        }
+        override val instanceType: InstanceType? = null
+        override val searchFilter: SearchFilter
+            get() = SearchFilter.MediaServer(serverType)
     }
 
     @Serializable
@@ -126,6 +126,8 @@ sealed interface SearchResult {
         override val voteAverage: Double = result.voteAverage
         override val popularity: Double = result.popularity
         override val instanceType: InstanceType = InstanceType.Seerr
+        override val searchFilter: SearchFilter
+            get() = SearchFilter.Instance(InstanceType.Seerr)
     }
 
     @Serializable
@@ -141,5 +143,7 @@ sealed interface SearchResult {
         override val voteAverage: Double = 0.0
         override val popularity: Double = result.popularity
         override val instanceType: InstanceType = InstanceType.Seerr
+        override val searchFilter: SearchFilter
+            get() = SearchFilter.Instance(InstanceType.Seerr)
     }
 }

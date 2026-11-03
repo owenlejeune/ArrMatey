@@ -31,7 +31,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
-import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.DiscoverScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
@@ -134,27 +133,32 @@ fun DiscoverSearchOverlay(
     showBanners: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    var selectedFilter by rememberSaveable { mutableStateOf<InstanceType?>(null) }
+    var selectedFilterId by rememberSaveable { mutableStateOf<String?>(null) }
 
     val availableFilters =
         remember(items) {
-            items.map { it.instanceType }.distinct()
+            items.map { it.searchFilter }.distinct()
+        }
+
+    val selectedFilter =
+        remember(availableFilters, selectedFilterId) {
+            availableFilters.firstOrNull { it.id == selectedFilterId }
         }
 
     val itemCounts =
         remember(items) {
-            items.groupingBy { it.instanceType }.eachCount()
+            items.groupingBy { it.searchFilter }.eachCount()
         }
 
     LaunchedEffect(items) {
-        if (selectedFilter != null && items.none { it.instanceType == selectedFilter }) {
-            selectedFilter = null
+        if (selectedFilterId != null && items.none { it.searchFilter.id == selectedFilterId }) {
+            selectedFilterId = null
         }
     }
 
     val filteredItems =
         remember(items, selectedFilter) {
-            if (selectedFilter == null) items else items.filter { it.instanceType == selectedFilter }
+            if (selectedFilter == null) items else items.filter { selectedFilter.matches(it) }
         }
 
     if (isLoading && items.isEmpty()) {
@@ -165,7 +169,7 @@ fun DiscoverSearchOverlay(
         Column(modifier = modifier.fillMaxSize()) {
             MediaInstanceFilterRow(
                 selectedFilter = selectedFilter,
-                onFilterSelected = { selectedFilter = it },
+                onFilterSelected = { selectedFilterId = it?.id },
                 availableFilters = availableFilters,
                 itemCounts = itemCounts,
                 totalCount = items.size,
@@ -181,13 +185,13 @@ fun DiscoverSearchOverlay(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Text(
-                        text = "No ${selectedFilter?.name} results found",
+                        text = "No ${selectedFilter.displayName} results found",
                         style = MaterialTheme.typography.titleMedium,
                         textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(12.dp))
                     Button(
-                        onClick = { selectedFilter = null },
+                        onClick = { selectedFilterId = null },
                     ) {
                         Text(mokoString(MR.strings.all))
                     }

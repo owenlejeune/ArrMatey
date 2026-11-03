@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.discover.model.SearchFilter
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
@@ -41,10 +41,10 @@ import dev.icerock.moko.resources.compose.painterResource
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MediaInstanceFilterRow(
-    selectedFilter: InstanceType?,
-    onFilterSelected: (InstanceType?) -> Unit,
-    availableFilters: List<InstanceType>,
-    itemCounts: Map<InstanceType, Int>,
+    selectedFilter: SearchFilter?,
+    onFilterSelected: (SearchFilter?) -> Unit,
+    availableFilters: List<SearchFilter>,
+    itemCounts: Map<SearchFilter, Int>,
     totalCount: Int,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
@@ -111,11 +111,11 @@ fun MediaInstanceFilterRow(
             )
         }
 
-        // Per-InstanceType chips
-        items(availableFilters, key = { it.name }) { type ->
-            val isSelected = selectedFilter == type
-            val count = itemCounts[type] ?: 0
-            val typeAccentColor = type.associatedColor
+        // Per-filter chips
+        items(availableFilters, key = { it.id }) { filter ->
+            val isSelected = selectedFilter == filter
+            val count = itemCounts[filter] ?: 0
+            val typeAccentColor = filter.color
 
             val containerColor by animateColorAsState(
                 targetValue =
@@ -124,7 +124,7 @@ fun MediaInstanceFilterRow(
                 } else {
                     MaterialTheme.colorScheme.surfaceContainerLow
                 },
-                label = "chip_bg_${type.name}",
+                label = "chip_bg_${filter.id}",
             )
 
             ElevatedFilterChip(
@@ -133,12 +133,12 @@ fun MediaInstanceFilterRow(
                     if (isSelected) {
                         onFilterSelected(null)
                     } else {
-                        onFilterSelected(type)
+                        onFilterSelected(filter)
                     }
                 },
                 label = {
                     FilterChipLabel(
-                        title = type.name,
+                        title = filter.displayName,
                         count = count,
                         isSelected = isSelected,
                         countContainerColor =
@@ -165,10 +165,10 @@ fun MediaInstanceFilterRow(
                         )
                     } else {
                         Icon(
-                            painter = painterResource(type.tabIcon),
+                            painter = painterResource(filter.icon),
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = typeAccentColor,
+                            tint = if (filter is SearchFilter.MediaServer) Color.Unspecified else typeAccentColor,
                         )
                     }
                 },

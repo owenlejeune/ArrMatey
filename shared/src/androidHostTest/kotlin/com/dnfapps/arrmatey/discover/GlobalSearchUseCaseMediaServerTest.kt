@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.datastore.DataStoreFactory
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.discover.model.SearchFilter
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
@@ -47,6 +48,8 @@ import kotlinx.serialization.json.Json
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -188,6 +191,53 @@ class GlobalSearchUseCaseMediaServerTest {
         assertEquals(MediaServerType.Plex, mediaServerResult.serverType)
         assertEquals("My Plex", mediaServerResult.serverLabel)
         assertEquals(27205L, mediaServerResult.item.tmdbId)
+        assertNull(mediaServerResult.instanceType)
+        assertEquals(SearchFilter.MediaServer(MediaServerType.Plex), mediaServerResult.searchFilter)
+    }
+
+    @Test
+    fun testMediaServerSearchFilterMatchingMovieAndEpisodeWithoutRadarr() = runBlocking {
+        val fakeDao = FakeInstanceDao(emptyList()) // No Radarr or Sonarr configured
+        val instanceRepo = InstanceRepository(fakeDao)
+        val mockFactory = MockHttpClientFactory(json) { MockEngine { respond("[]", HttpStatusCode.OK) } }
+        val instanceManager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings).also(managers::add)
+
+        val plexMovie = UnifiedMediaItem(
+            id = "plex-m1",
+            serverType = MediaServerType.Plex,
+            serverId = "srv-1",
+            title = "Inception",
+            type = MediaType.MOVIE,
+            year = 2010,
+            tmdbId = 27205L,
+        )
+        val plexEpisode = UnifiedMediaItem(
+            id = "plex-e1",
+            serverType = MediaServerType.Plex,
+            serverId = "srv-1",
+            title = "Pilot",
+            type = MediaType.EPISODE,
+            seriesTitle = "Breaking Bad",
+            seasonNumber = 1,
+            episodeNumber = 1,
+            tvdbId = 81189L,
+        )
+        val mockRepo = createMockMediaServerRepo(MediaServerType.Plex, "Home Plex", listOf(plexMovie, plexEpisode))
+        val mockMediaServerManager = mockk<MediaServerManager>()
+        every { mockMediaServerManager.activeRepositories } returns MutableStateFlow(listOf(mockRepo))
+
+        val useCase = GlobalSearchUseCase(instanceManager, mockMediaServerManager)
+        val results = useCase("test").toList().last()
+
+        assertEquals(2, results.size)
+        results.forEach { result ->
+            assertTrue(result is SearchResult.MediaServerResult)
+            assertNull(result.instanceType, "MediaServer results should not have an InstanceType like Radarr or Sonarr")
+            assertEquals(SearchFilter.MediaServer(MediaServerType.Plex), result.searchFilter)
+            assertTrue(SearchFilter.MediaServer(MediaServerType.Plex).matches(result))
+            assertFalse(SearchFilter.Instance(InstanceType.Radarr).matches(result))
+            assertFalse(SearchFilter.Instance(InstanceType.Sonarr).matches(result))
+        }
     }
 
     @Test
