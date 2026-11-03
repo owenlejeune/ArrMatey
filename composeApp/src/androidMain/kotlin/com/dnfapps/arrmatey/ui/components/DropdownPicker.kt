@@ -39,6 +39,7 @@ fun <T> DropdownPicker(
     modifier: Modifier = Modifier,
     getOptionLabel: @Composable (T) -> String = { it.toString() },
     getOptionIcon: (@Composable (T) -> ImageVector)? = null,
+    optionLeadingContent: (@Composable (T) -> Unit)? = null,
     label: @Composable () -> Unit = {},
     includeAllOption: Boolean = false,
     allLabel: String = mokoString(MR.strings.all),
@@ -72,6 +73,12 @@ fun <T> DropdownPicker(
                     else -> unknownValueLabel
                 },
                 onValueChange = {},
+                leadingIcon =
+                    if (selectedOption != null && optionLeadingContent != null) {
+                        { optionLeadingContent(selectedOption) }
+                    } else {
+                        null
+                    },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropDownExpanded) },
                 colors =
                 OutlinedTextFieldDefaults.colors(
@@ -120,14 +127,10 @@ fun <T> DropdownPicker(
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
-                    leadingIcon =
-                    when {
-                        selectedOption == t -> {
-                            { Icon(Icons.Default.Check, null) }
-                        }
-                        getOptionIcon != null -> {
-                            { Icon(getOptionIcon(t), null) }
-                        }
+                    leadingIcon = when {
+                        selectedOption == t -> { { Icon(Icons.Default.Check, null) } }
+                        optionLeadingContent != null -> { { optionLeadingContent(t) } }
+                        getOptionIcon != null -> { { Icon(getOptionIcon(t), null) } }
                         else -> null
                     },
                     onClick = {
