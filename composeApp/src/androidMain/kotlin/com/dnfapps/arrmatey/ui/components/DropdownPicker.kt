@@ -74,11 +74,11 @@ fun <T> DropdownPicker(
                 },
                 onValueChange = {},
                 leadingIcon =
-                    if (selectedOption != null && optionLeadingContent != null) {
-                        { optionLeadingContent(selectedOption) }
-                    } else {
-                        null
-                    },
+                if (selectedOption != null && optionLeadingContent != null) {
+                    { optionLeadingContent(selectedOption) }
+                } else {
+                    null
+                },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropDownExpanded) },
                 colors =
                 OutlinedTextFieldDefaults.colors(
@@ -128,9 +128,15 @@ fun <T> DropdownPicker(
                         )
                     },
                     leadingIcon = when {
-                        selectedOption == t -> { { Icon(Icons.Default.Check, null) } }
-                        optionLeadingContent != null -> { { optionLeadingContent(t) } }
-                        getOptionIcon != null -> { { Icon(getOptionIcon(t), null) } }
+                        selectedOption == t -> {
+                            { Icon(Icons.Default.Check, null) }
+                        }
+                        optionLeadingContent != null -> {
+                            { optionLeadingContent(t) }
+                        }
+                        getOptionIcon != null -> {
+                            { Icon(getOptionIcon(t), null) }
+                        }
                         else -> null
                     },
                     onClick = {
