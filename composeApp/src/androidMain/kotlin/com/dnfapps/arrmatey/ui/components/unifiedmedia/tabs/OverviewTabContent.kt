@@ -32,7 +32,6 @@ import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
 import com.dnfapps.arrmatey.ui.components.buildArrInfoItems
 import com.dnfapps.arrmatey.ui.components.buildSeerrInfoItems
-import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerSpecsCard
 import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
@@ -64,28 +63,6 @@ fun OverviewTabContent(
                 overview = overview,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
-        }
-
-        if (mediaServerDetails.isNotEmpty()) {
-            Column(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                mediaServerDetails.forEach { serverDetails ->
-                    MediaServerSpecsCard(
-                        details = serverDetails,
-                        onWatchClick = { url, provider, webUrl ->
-                            onMediaServerWatchClick?.invoke(url, provider, webUrl)
-                        },
-                        onToggleWatched = { watched ->
-                            onMediaServerToggleWatched?.invoke(serverDetails.serverType, serverDetails.itemId, watched)
-                        },
-                        onRefreshItem = onMediaServerRefreshItem?.let { refresh ->
-                            { refresh(serverDetails.serverType, serverDetails.itemId) }
-                        },
-                    )
-                }
-            }
         }
 
         state.seerrMedia?.credits?.let { credits ->

@@ -23,6 +23,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
@@ -114,6 +116,7 @@ import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.sheets.MediaRequestOrAddSheet
 import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.handleWatchClick
 import com.dnfapps.arrmatey.utils.mokoPlural
@@ -421,6 +424,26 @@ fun UnifiedMediaDetailsScreen(
                             }
                         }
 
+                        if (firstMediaServer != null && firstMediaServer.totalEpisodesCount == null) {
+                            val isWatched = firstMediaServer.played
+                            IconButton(
+                                onClick = {
+                                    viewModel.markMediaServerWatched(
+                                        firstMediaServer.serverType,
+                                        firstMediaServer.itemId,
+                                        !isWatched,
+                                    )
+                                },
+                                colors = IconButtonDefaults.headerBarColors(),
+                            ) {
+                                Icon(
+                                    imageVector = if (isWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                                    contentDescription = if (isWatched) mokoString(MR.strings.unwatched) else mokoString(MR.strings.watched),
+                                    tint = if (isWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+
                         val canDeleteFile = success.canDeleteFile(resolvedType)
 
                         UnifiedMediaDetailsToolbarMenu(
@@ -561,6 +584,9 @@ fun UnifiedMediaDetailsScreen(
                                             details = mediaServerDetails,
                                             onWatchClick = { url, provider, webUrl ->
                                                 handleWatchClick(url, provider, context, moko, webUrl)
+                                            },
+                                            onToggleWatched = { serverType, itemId, watched ->
+                                                viewModel.markMediaServerWatched(serverType, itemId, watched)
                                             },
                                             modifier = Modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
                                         )
