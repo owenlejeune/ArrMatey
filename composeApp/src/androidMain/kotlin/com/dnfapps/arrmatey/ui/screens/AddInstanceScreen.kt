@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,6 +42,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.InstanceInfoCard
 import com.dnfapps.arrmatey.utils.mokoString
+import dev.icerock.moko.resources.compose.painterResource
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -135,6 +137,14 @@ fun AddInstanceScreen(
                 options = InstanceType.entries,
                 selectedOption = selectedInstanceType,
                 onOptionSelected = { selectedInstanceType = it },
+                optionLeadingContent = { instanceType ->
+                    Icon(
+                        painter = painterResource(instanceType.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Unspecified,
+                    )
+                },
                 enabled = !isTypeLocked,
                 label = {
                     Text(
