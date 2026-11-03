@@ -247,14 +247,27 @@ class PlexRepository(
     private fun PlexMetadataItem.toUnifiedMediaItem(libraryId: String? = null): UnifiedMediaItem {
         val firstMedia = media?.firstOrNull()
         val rKey = ratingKey ?: ""
+        val mediaType = type?.let { MediaType.fromString(it) } ?: MediaType.UNKNOWN
+        val seriesPoster = grandparentThumb?.let { buildImageUrl(it, grandparentRatingKey ?: rKey) }
+            ?: parentThumb?.let { buildImageUrl(it, parentRatingKey ?: rKey) }
+            ?: grandparentRatingKey?.let { buildImageUrl("/library/metadata/$it/thumb", it) }
+        val episodeStill = thumb?.let { buildImageUrl(it, rKey) }
+        val effectivePosterUrl = if (mediaType == MediaType.EPISODE) {
+            seriesPoster ?: episodeStill
+        } else {
+            episodeStill
+        }
+
         return UnifiedMediaItem(
             id = rKey,
             title = title ?: "",
-            type = type?.let { MediaType.fromString(it) } ?: MediaType.UNKNOWN,
+            type = mediaType,
             year = year,
             summary = summary,
-            posterUrl = thumb?.let { buildImageUrl(it, rKey) },
-            backdropUrl = art?.let { buildImageUrl(it, rKey, maxWidth = 720) },
+            posterUrl = effectivePosterUrl,
+            seriesPosterUrl = seriesPoster,
+            stillUrl = if (mediaType == MediaType.EPISODE) episodeStill else null,
+            backdropUrl = (art ?: grandparentArt)?.let { buildImageUrl(it, rKey, maxWidth = 720) },
             tmdbId = extractTmdbId(),
             tvdbId = extractTvdbId(),
             imdbId = extractImdbId(),
@@ -269,6 +282,8 @@ class PlexRepository(
             episodeNumber = index,
             seriesTitle = grandparentTitle ?: parentTitle,
             lastPlayedDate = lastViewedAt?.times(1000),
+            studio = studio,
+            releaseDate = originallyAvailableAt,
             audioCodec = firstMedia?.audioCodec,
             videoCodec = firstMedia?.videoCodec,
             videoResolution = firstMedia?.videoResolution,

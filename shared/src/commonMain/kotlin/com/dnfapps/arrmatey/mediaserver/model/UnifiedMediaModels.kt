@@ -1,8 +1,11 @@
 package com.dnfapps.arrmatey.mediaserver.model
 
+import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.utils.format
 import dev.icerock.moko.resources.StringResource
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -52,6 +55,8 @@ data class UnifiedMediaItem(
     val year: Int? = null,
     val summary: String? = null,
     val posterUrl: String? = null,
+    val seriesPosterUrl: String? = null,
+    val stillUrl: String? = null,
     val backdropUrl: String? = null,
     val tmdbId: Long? = null,
     val tvdbId: Long? = null,
@@ -67,6 +72,8 @@ data class UnifiedMediaItem(
     val episodeNumber: Int? = null,
     val seriesTitle: String? = null,
     val lastPlayedDate: Long? = null,
+    val studio: String? = null,
+    val releaseDate: String? = null,
     val audioCodec: String? = null,
     val videoCodec: String? = null,
     val videoResolution: String? = null,
@@ -81,5 +88,22 @@ data class UnifiedMediaItem(
             val dur = durationTicks ?: return null
             if (dur <= 0) return null
             return (pos.toFloat() / dur.toFloat()).coerceIn(0f, 1f)
+        }
+
+    val formattedRuntime: String?
+        get() {
+            val ticks = durationTicks?.takeIf { it > 0 } ?: return null
+            val minutes = (ticks / 600_000_000L).toInt()
+            return if (minutes > 0) minutes.formatMinutesAsRuntime() else null
+        }
+
+    val formattedReleaseDate: String?
+        get() {
+            val date = releaseDate?.takeIf { it.isNotBlank() } ?: return null
+            return try {
+                LocalDate.parse(date.take(10)).format("MMM d, yyyy")
+            } catch (_: Exception) {
+                date
+            }
         }
 }

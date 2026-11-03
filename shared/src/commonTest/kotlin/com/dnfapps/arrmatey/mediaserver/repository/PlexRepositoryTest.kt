@@ -334,4 +334,98 @@ class PlexRepositoryTest {
         assertEquals("Movie 1", result.data[0].title)
         assertEquals("Movie 2", result.data[1].title)
     }
+
+    @Test
+    fun searchMapsEpisodeWithSeriesPosterAndMetadata() = runTest {
+        val mockEngine = MockEngine { request ->
+            assertEquals("/search", request.url.encodedPath)
+            assertEquals("breaking", request.url.parameters["query"])
+            respond(
+                content = """
+                    {
+                      "MediaContainer": {
+                        "size": 1,
+                        "Metadata": [
+                          {
+                            "ratingKey": "1001",
+                            "title": "Pilot",
+                            "type": "episode",
+                            "grandparentTitle": "Breaking Bad",
+                            "grandparentRatingKey": "500",
+                            "grandparentThumb": "/library/metadata/500/thumb",
+                            "thumb": "/library/metadata/1001/thumb",
+                            "parentIndex": 1,
+                            "index": 1,
+                            "studio": "AMC",
+                            "originallyAvailableAt": "2008-01-20",
+                            "duration": 3480000
+                          }
+                        ]
+                      }
+                    }
+                """.trimIndent(),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+            )
+        }
+
+        val repository = PlexRepository(createClient(mockEngine))
+        val result = repository.search("breaking")
+
+        assertTrue(result is NetworkResult.Success)
+        val items = result.data
+        assertEquals(1, items.size)
+        val ep = items.first()
+        assertEquals("Pilot", ep.title)
+        assertEquals("Breaking Bad", ep.seriesTitle)
+        assertEquals(1, ep.seasonNumber)
+        assertEquals(1, ep.episodeNumber)
+        assertEquals("AMC", ep.studio)
+        assertEquals("2008-01-20", ep.releaseDate)
+        assertEquals("Jan 20, 2008", ep.formattedReleaseDate)
+        assertEquals("58m", ep.formattedRuntime)
+        assertTrue(ep.posterUrl?.contains("/library/metadata/500/thumb") == true)
+        assertTrue(ep.seriesPosterUrl?.contains("/library/metadata/500/thumb") == true)
+    }
+
+    @Test
+    fun searchMapsMovieWithStudioAndRuntime() = runTest {
+        val mockEngine = MockEngine { request ->
+            assertEquals("/search", request.url.encodedPath)
+            assertEquals("inception", request.url.parameters["query"])
+            respond(
+                content = """
+                    {
+                      "MediaContainer": {
+                        "size": 1,
+                        "Metadata": [
+                          {
+                            "ratingKey": "2001",
+                            "title": "Inception",
+                            "type": "movie",
+                            "year": 2010,
+                            "studio": "Warner Bros. Pictures",
+                            "duration": 8880000
+                          }
+                        ]
+                      }
+                    }
+                """.trimIndent(),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+            )
+        }
+
+        val repository = PlexRepository(createClient(mockEngine))
+        val result = repository.search("inception")
+
+        assertTrue(result is NetworkResult.Success)
+        val items = result.data
+        assertEquals(1, items.size)
+        val movie = items.first()
+        assertEquals("Inception", movie.title)
+        assertEquals(2010, movie.year)
+        assertEquals("Warner Bros. Pictures", movie.studio)
+        assertEquals("2h 28m", movie.formattedRuntime)
+    }
 }

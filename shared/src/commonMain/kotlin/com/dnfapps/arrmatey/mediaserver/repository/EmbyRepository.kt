@@ -175,13 +175,30 @@ class EmbyRepository(
             null
         }
 
+        val mediaType = MediaType.fromString(type)
+        val seriesPoster = if (seriesId != null && seriesPrimaryImageTag != null) {
+            "$baseUrl/Items/$seriesId/Images/Primary?tag=$seriesPrimaryImageTag"
+        } else if (seriesId != null) {
+            "$baseUrl/Items/$seriesId/Images/Primary"
+        } else {
+            null
+        }
+        val episodeStill = primaryTag?.let { buildImageUrl(it, id) } ?: "$baseUrl/Items/$id/Images/Primary"
+        val effectivePoster = if (mediaType == MediaType.EPISODE) {
+            seriesPoster ?: episodeStill
+        } else {
+            episodeStill
+        }
+
         return UnifiedMediaItem(
             id = id,
             title = name,
-            type = MediaType.fromString(type),
+            type = mediaType,
             year = productionYear,
             summary = overview,
-            posterUrl = primaryTag?.let { buildImageUrl(it, id) } ?: "$baseUrl/Items/$id/Images/Primary",
+            posterUrl = effectivePoster,
+            seriesPosterUrl = seriesPoster,
+            stillUrl = if (mediaType == MediaType.EPISODE) episodeStill else null,
             backdropUrl = backdropTag?.let { "$baseUrl/Items/$id/Images/Backdrop/0?maxWidth=720&tag=$it" },
             tmdbId = extractTmdbId(),
             tvdbId = extractTvdbId(),
@@ -196,6 +213,8 @@ class EmbyRepository(
             seasonNumber = parentIndexNumber,
             episodeNumber = indexNumber,
             seriesTitle = seriesName,
+            studio = seriesStudio ?: studios?.firstOrNull()?.name,
+            releaseDate = premiereDate,
             audioCodec = audioStream?.codec,
             videoCodec = videoStream?.codec,
             videoResolution = resolution,

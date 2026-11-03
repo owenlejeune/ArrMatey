@@ -29,10 +29,16 @@ data class EpisodeWrapper(
         get() = arrEpisode?.overview ?: seerrEpisode?.overview ?: mediaServerEpisode?.summary
 
     val stillPath: String?
-        get() = seerrEpisode?.stillPath ?: arrEpisode?.images?.firstOrNull()?.remoteUrl ?: mediaServerEpisode?.posterUrl
+        get() = seerrEpisode?.stillPath ?: arrEpisode?.images?.firstOrNull()?.remoteUrl ?: mediaServerEpisode?.stillUrl ?: mediaServerEpisode?.posterUrl
 
     val airDate: LocalDate?
-        get() = arrEpisode?.airDate ?: seerrEpisode?.airDate
+        get() = arrEpisode?.airDate ?: seerrEpisode?.airDate ?: mediaServerEpisode?.releaseDate?.let {
+            try {
+                LocalDate.parse(it.take(10))
+            } catch (_: Exception) {
+                null
+            }
+        }
 
     val airDateUtc: Instant?
         get() = arrEpisode?.airDateUtc

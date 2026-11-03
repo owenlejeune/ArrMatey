@@ -30,6 +30,12 @@ data class MediaBrowserItemsResult(
 )
 
 @Serializable
+data class MediaBrowserStudio(
+    @SerialName("Name") val name: String? = null,
+    @SerialName("Id") val id: String? = null,
+)
+
+@Serializable
 data class MediaBrowserBaseItem(
     @SerialName("Id") val id: String,
     @SerialName("Name") val name: String,
@@ -47,6 +53,10 @@ data class MediaBrowserBaseItem(
     @SerialName("SeasonId") val seasonId: String? = null,
     @SerialName("IndexNumber") val indexNumber: Int? = null,
     @SerialName("ParentIndexNumber") val parentIndexNumber: Int? = null,
+    @SerialName("PremiereDate") val premiereDate: String? = null,
+    @SerialName("SeriesStudio") val seriesStudio: String? = null,
+    @SerialName("Studios") val studios: List<MediaBrowserStudio>? = null,
+    @SerialName("SeriesPrimaryImageTag") val seriesPrimaryImageTag: String? = null,
     @SerialName("ProviderIds") val providerIds: Map<String, String>? = null,
     @SerialName("MediaSources") val mediaSources: List<MediaBrowserMediaSource> = emptyList(),
 ) {

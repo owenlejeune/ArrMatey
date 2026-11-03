@@ -621,8 +621,13 @@ fun MediaServerSearchResultItem(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.Top,
                 ) {
+                    val posterModel = when (item.type) {
+                        MediaType.EPISODE -> item.seriesPosterUrl ?: item.posterUrl ?: ""
+                        else -> item.posterUrl ?: ""
+                    }
+
                     BasePosterItem(
-                        model = item.posterUrl ?: "",
+                        model = posterModel,
                         modifier = Modifier.width(76.dp),
                         aspectRatio = AspectRatio.Poster,
                         additionalContent = {
@@ -657,6 +662,9 @@ fun MediaServerSearchResultItem(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         val titleColor = if (hasBanner) Color.White else MaterialTheme.colorScheme.onSurface
+                        val subtitleColor = if (hasBanner) Color.White.copy(alpha = 0.9f) else MaterialTheme.colorScheme.onSurfaceVariant
+                        val metaColor = if (hasBanner) Color.White.copy(alpha = 0.75f) else MaterialTheme.colorScheme.onSurfaceVariant
+
                         Text(
                             text = item.title,
                             style = MaterialTheme.typography.bodyLarge,
@@ -666,30 +674,68 @@ fun MediaServerSearchResultItem(
                             overflow = TextOverflow.Ellipsis,
                         )
 
+                        val dateOrYear = when (item.type) {
+                            MediaType.EPISODE -> item.formattedReleaseDate ?: item.year?.toString()
+                            else -> item.year?.toString() ?: item.formattedReleaseDate
+                        }
+                        val runtime = item.formattedRuntime
+                        val studio = item.studio?.takeIf { it.isNotBlank() }
+
                         val secondLine = when (item.type) {
+                            MediaType.EPISODE -> {
+                                val seriesDetails = listOfNotNull(
+                                    item.seriesTitle?.takeIf { it.isNotBlank() },
+                                    if (item.seasonNumber != null && item.episodeNumber != null) "S${item.seasonNumber}:E${item.episodeNumber}" else item.type.displayName,
+                                ).joinToString(BULLET)
+                                seriesDetails.ifBlank { item.type.displayName }
+                            }
+                            else -> listOfNotNull(
+                                dateOrYear,
+                                runtime,
+                                item.type.displayName,
+                            ).joinToString(BULLET)
+                        }
+
+                        if (secondLine.isNotBlank()) {
+                            Text(
+                                text = secondLine,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = subtitleColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+
+                        val thirdLine = when (item.type) {
                             MediaType.EPISODE -> listOfNotNull(
-                                item.seriesTitle,
-                                if (item.seasonNumber != null && item.episodeNumber != null) "S${item.seasonNumber}:E${item.episodeNumber}" else item.type.displayName,
+                                dateOrYear,
+                                runtime,
+                                studio,
                                 result.serverLabel,
                             ).joinToString(BULLET)
                             else -> listOfNotNull(
-                                item.year?.toString(),
-                                item.type.displayName,
+                                studio,
                                 result.serverLabel,
                             ).joinToString(BULLET)
                         }
-                        Text(
-                            text = secondLine,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (hasBanner) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
 
-                        if (includeOverview && item.summary != null) {
+                        if (thirdLine.isNotBlank()) {
                             Text(
-                                text = item.summary ?: "",
+                                text = thirdLine,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (hasBanner) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 4,
+                                color = metaColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+
+                        val summary = item.summary
+                        if (includeOverview && !summary.isNullOrBlank()) {
+                            Text(
+                                text = summary,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = metaColor,
+                                maxLines = 3,
                                 overflow = TextOverflow.Ellipsis,
                             )
                         }

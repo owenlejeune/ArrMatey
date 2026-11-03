@@ -14,6 +14,9 @@ data class PlexMetadataItem(
     @SerialName("summary") val summary: String? = null,
     @SerialName("thumb") val thumb: String? = null,
     @SerialName("art") val art: String? = null,
+    @SerialName("grandparentThumb") val grandparentThumb: String? = null,
+    @SerialName("parentThumb") val parentThumb: String? = null,
+    @SerialName("grandparentArt") val grandparentArt: String? = null,
     @SerialName("viewOffset") val viewOffset: Long? = null,
     @SerialName("duration") val duration: Long? = null,
     @SerialName("viewCount") val viewCount: Int? = null,
@@ -25,6 +28,8 @@ data class PlexMetadataItem(
     @SerialName("grandparentTitle") val grandparentTitle: String? = null,
     @SerialName("index") val index: Int? = null,
     @SerialName("parentIndex") val parentIndex: Int? = null,
+    @SerialName("originallyAvailableAt") val originallyAvailableAt: String? = null,
+    @SerialName("studio") val studio: String? = null,
     @SerialName("Guid") val guids: List<PlexGuid>? = null,
     @SerialName("Media") val media: List<PlexMediaItem>? = null,
 ) {
