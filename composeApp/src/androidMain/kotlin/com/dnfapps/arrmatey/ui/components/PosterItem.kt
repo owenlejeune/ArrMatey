@@ -50,6 +50,7 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -252,11 +253,23 @@ fun PosterItem(
             additionalContent = {
                 if (showOverlays) {
                     MediaTypeOverlay(item.mediaType)
-                    item.mediaInfo?.let { info ->
-                        StatusOverlay(
-                            status = SeerrMediaStatus.fromValue(info.status),
+                    val mediaServerItem = item.mediaServerItem
+                    if (mediaServerItem != null) {
+                        MediaServerBadgeOverlay(
+                            serverType = mediaServerItem.serverType,
                             modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
                         )
+                    } else if (item.inArrLibrary) {
+                        InLibraryBadgeOverlay(
+                            modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
+                        )
+                    } else {
+                        item.mediaInfo?.let { info ->
+                            StatusOverlay(
+                                status = SeerrMediaStatus.fromValue(info.status),
+                                modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
+                            )
+                        }
                     }
                 }
             },
@@ -415,6 +428,56 @@ private fun BoxScope.MediaTypeOverlay(type: RequestType) {
             .align(Alignment.TopStart)
             .padding(8.dp),
     )
+}
+
+@Composable
+fun MediaServerBadgeOverlay(
+    serverType: MediaServerType,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        border = BorderStroke(1.5.dp, serverType.brandColor),
+        shadowElevation = 2.dp,
+        modifier = modifier,
+    ) {
+        Box(
+            modifier = Modifier.padding(4.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painter = painterResource(serverType.icon),
+                contentDescription = mokoString(serverType.resource),
+                modifier = Modifier.size(16.dp),
+            )
+        }
+    }
+}
+
+@Composable
+fun InLibraryBadgeOverlay(
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        shadowElevation = 2.dp,
+        modifier = modifier,
+    ) {
+        Box(
+            modifier = Modifier.padding(4.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = mokoString(MR.strings.in_library),
+                tint = Color(0xFF50d27d),
+                modifier = Modifier.size(16.dp),
+            )
+        }
+    }
 }
 
 @Composable

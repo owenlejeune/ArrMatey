@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.mediaserver.model.MediaBrowserAuthRequest
 import com.dnfapps.arrmatey.mediaserver.model.MediaBrowserAuthResult
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaLibrary
 import com.dnfapps.networking.NetworkResult
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -39,12 +41,24 @@ class MediaServerManager(
         _repositories.map { it.values.toList() }
             .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
+    private val _allMediaServerItems = MutableStateFlow<List<UnifiedMediaItem>>(emptyList())
+    val allMediaServerItems: StateFlow<List<UnifiedMediaItem>> = _allMediaServerItems.asStateFlow()
+
     private val cachedIntegrations = mutableMapOf<MediaServerType, MediaServerIntegration>()
 
     init {
         scope.launch {
             dao.observeAll().collect { integrations ->
                 updateRepositories(integrations)
+            }
+        }
+        scope.launch {
+            activeRepositories.collect { repos ->
+                if (repos.isNotEmpty()) {
+                    refreshAllMediaServerItems()
+                } else {
+                    _allMediaServerItems.value = emptyList()
+                }
             }
         }
     }
@@ -149,6 +163,69 @@ class MediaServerManager(
                 }
             }
         }.awaitAll().flatten()
+    }
+
+    suspend fun refreshAllMediaServerItems(): List<UnifiedMediaItem> = coroutineScope {
+        val repos = activeRepositories.value
+        if (repos.isEmpty()) {
+            _allMediaServerItems.value = emptyList()
+            return@coroutineScope emptyList()
+        }
+
+        val allItems = repos.map { repo ->
+            async {
+                when (val libRes = repo.getLibraries()) {
+                    is NetworkResult.Success -> {
+                        libRes.data.map { lib ->
+                            async {
+                                when (val itemsRes = repo.getAllLibraryContents(lib.id)) {
+                                    is NetworkResult.Success -> itemsRes.data
+                                    else -> emptyList()
+                                }
+                            }
+                        }.awaitAll().flatten()
+                    }
+                    else -> emptyList()
+                }
+            }
+        }.awaitAll().flatten()
+
+        _allMediaServerItems.value = allItems
+        allItems
+    }
+
+    fun findMatchingItem(
+        items: List<UnifiedMediaItem> = _allMediaServerItems.value,
+        tmdbId: Long? = null,
+        tvdbId: Long? = null,
+        title: String? = null,
+        year: Int? = null,
+        mediaType: MediaType? = null,
+    ): UnifiedMediaItem? {
+        if (items.isEmpty()) return null
+
+        if (tmdbId != null && tmdbId > 0) {
+            val tmdbMatch = items.firstOrNull { it.tmdbId == tmdbId }
+            if (tmdbMatch != null) return tmdbMatch
+        }
+
+        if (tvdbId != null && tvdbId > 0) {
+            val tvdbMatch = items.firstOrNull { it.tvdbId == tvdbId }
+            if (tvdbMatch != null) return tvdbMatch
+        }
+
+        if (!title.isNullOrBlank()) {
+            val cleanTitle = title.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
+            return items.firstOrNull { item ->
+                val itemCleanTitle = item.title.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
+                val titleMatches = itemCleanTitle == cleanTitle
+                val typeMatches = mediaType == null || item.type == mediaType
+                val yearMatches = year == null || item.year == null || item.year == year
+                titleMatches && typeMatches && yearMatches
+            }
+        }
+
+        return null
     }
 
     suspend fun testConnection(integration: MediaServerIntegration): NetworkResult<List<UnifiedMediaLibrary>> = try {

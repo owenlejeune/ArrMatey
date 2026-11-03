@@ -465,7 +465,20 @@ val useCaseModule =
 
 val viewModelModule =
     module {
-        viewModelOf(::DiscoverViewModel)
+        viewModel {
+            DiscoverViewModel(
+                instanceManager = get(),
+                instanceRepository = get(),
+                getTrendingUseCase = get(),
+                getDiscoverMoviesUseCase = get(),
+                getDiscoverTvUseCase = get(),
+                getUpcomingMoviesUseCase = get(),
+                getUpcomingTvUseCase = get(),
+                globalSearchUseCase = get(),
+                preferencesStore = get(),
+                mediaServerManager = getOrNull(),
+            )
+        }
         viewModelOf(::ActivityQueueViewModel)
         viewModel { params ->
             val firstParam: Any = params[0]

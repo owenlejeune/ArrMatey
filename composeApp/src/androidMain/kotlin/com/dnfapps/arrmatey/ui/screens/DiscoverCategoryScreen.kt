@@ -139,7 +139,20 @@ fun DiscoverCategoryScreen(
                         items(items) { item ->
                             PosterItem(
                                 item = item,
-                                onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                onItemClick = { clickedItem ->
+                                    val mediaServerItem = clickedItem.mediaServerItem
+                                    if (mediaServerItem != null) {
+                                        onItemClick(
+                                            SearchResult.MediaServerResult(
+                                                item = mediaServerItem,
+                                                serverType = mediaServerItem.serverType,
+                                                serverLabel = mediaServerItem.serverType.name,
+                                            ),
+                                        )
+                                    } else {
+                                        onItemClick(SearchResult.SeerrMediaResult(clickedItem))
+                                    }
+                                },
                             )
                         }
 
@@ -186,8 +199,15 @@ fun DiscoverCategoryScreen(
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         items(items) { item ->
+                            val searchResult = item.mediaServerItem?.let { serverItem ->
+                                SearchResult.MediaServerResult(
+                                    item = serverItem,
+                                    serverType = serverItem.serverType,
+                                    serverLabel = serverItem.serverType.name,
+                                )
+                            } ?: SearchResult.SeerrMediaResult(item)
                             SearchResultItem(
-                                item = SearchResult.SeerrMediaResult(item),
+                                item = searchResult,
                                 onItemClick = onItemClick,
                             )
                         }

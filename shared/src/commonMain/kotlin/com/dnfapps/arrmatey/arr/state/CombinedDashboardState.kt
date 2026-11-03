@@ -153,6 +153,10 @@ sealed interface CombinedDashboardState {
         fun isLoadingDiscoverFeed(category: DiscoverCategory): Boolean = isLoadingMoreDiscover[category] == true
 
         fun resolveMediaStatus(item: DiscoverResult): SeerrMediaStatus {
+            if (item.mediaServerItem != null || item.inArrLibrary) {
+                return SeerrMediaStatus.Available
+            }
+
             val directStatus =
                 item.mediaInfo?.status?.let {
                     SeerrMediaStatus.fromValue(it)

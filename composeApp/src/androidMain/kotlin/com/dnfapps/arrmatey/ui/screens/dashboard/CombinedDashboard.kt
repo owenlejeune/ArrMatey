@@ -359,6 +359,9 @@ fun DashboardCardContent(
                 onRequestClick = { item ->
                     if (!isEditing && enabled) onMediaRequestClick(item)
                 },
+                onPlayItem = { item ->
+                    if (!isEditing && enabled) onPlayMediaServerItem(item)
+                },
             )
 
         DashboardCards.DiscoverQuickPick ->
@@ -372,6 +375,9 @@ fun DashboardCardContent(
                 },
                 onRequestClick = { item ->
                     if (!isEditing && enabled) onMediaRequestClick(item)
+                },
+                onPlayItem = { item ->
+                    if (!isEditing && enabled) onPlayMediaServerItem(item)
                 },
             )
     }

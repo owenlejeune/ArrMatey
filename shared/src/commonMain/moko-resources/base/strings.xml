@@ -48,6 +48,10 @@
     <string name="reorganize_hide_sections">Reorganize/Hide Sections</string>
     <string name="view_customization">View Customization</string>
     <string name="discover_sections">Discover Sections</string>
+    <string name="hide_in_library_content">Hide In-Library Content</string>
+    <string name="hide_in_library_content_description">Hide movies and TV series that are already available in your media libraries</string>
+    <string name="available_on_server">Available on %s</string>
+    <string name="in_library">In Library</string>
     <string name="at_least_one_section_visible">At least one section must remain visible</string>
     <string name="reset">Reset</string>
     <string name="deep_links_title">Deep Links</string>
