@@ -15,7 +15,10 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
+import com.dnfapps.arrmatey.mediaserver.usecase.ResolveSonarrEpisodeUseCase
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * A generic navigator that manages a reactive backstack of screens.
@@ -254,6 +257,47 @@ fun Navigator<*>.toMediaDetails(item: UnifiedMediaItem) {
         initialTitle = item.title,
         initialYear = item.year,
     )
+}
+
+private var isResolvingMediaServerItem = false
+
+fun Navigator<*>.navigateToMediaServerItem(
+    item: UnifiedMediaItem,
+    scope: CoroutineScope,
+    resolveEpisodeUseCase: ResolveSonarrEpisodeUseCase,
+) {
+    if (item.type == MediaType.EPISODE) {
+        if (isResolvingMediaServerItem) return
+        isResolvingMediaServerItem = true
+        scope.launch {
+            try {
+                val match = resolveEpisodeUseCase(item)
+                if (match != null) {
+                    toDetails(
+                        id = match.series.id,
+                        tmdbId = match.series.tmdbId?.takeIf { it > 0 },
+                        tvdbId = match.series.tvdbId.takeIf { it > 0 },
+                        type = InstanceType.Sonarr,
+                        requestType = RequestType.Tv,
+                        instanceId = match.instanceId,
+                        initialTitle = match.series.title,
+                        initialYear = match.series.year,
+                    )
+                    toEpisodeDetails(
+                        series = match.series,
+                        episode = match.episode,
+                        instanceId = match.instanceId,
+                    )
+                } else {
+                    toMediaDetails(item)
+                }
+            } finally {
+                isResolvingMediaServerItem = false
+            }
+        }
+    } else {
+        toMediaDetails(item)
+    }
 }
 
 fun <T> Navigator<*>.toPreview(

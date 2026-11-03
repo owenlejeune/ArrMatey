@@ -168,7 +168,7 @@ fun MediaInstanceFilterRow(
                             painter = painterResource(filter.icon),
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = if (filter is SearchFilter.MediaServer) Color.Unspecified else typeAccentColor,
+                            tint = typeAccentColor,
                         )
                     }
                 },

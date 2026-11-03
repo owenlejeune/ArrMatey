@@ -151,6 +151,7 @@ import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
 import com.dnfapps.arrmatey.logging.FileSink
 import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.mediaserver.usecase.JellyfinQuickConnectUseCase
+import com.dnfapps.arrmatey.mediaserver.usecase.ResolveSonarrEpisodeUseCase
 import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerLibraryViewModel
 import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerSettingsViewModel
 import com.dnfapps.arrmatey.monitoring.usecase.GetPlaybackStreamsUseCase
@@ -345,6 +346,7 @@ val useCaseModule =
         factory { SeerrAuthUseCase(get()) }
         factory { PlexAuthUseCase(get()) }
         factory { JellyfinQuickConnectUseCase(get()) }
+        factory { ResolveSonarrEpisodeUseCase(get()) }
         factory { CreateInstanceUseCase(get(), get()) }
         factory { UpdateInstanceUseCase(get()) }
         factory { DismissInfoCardUseCase(get()) }

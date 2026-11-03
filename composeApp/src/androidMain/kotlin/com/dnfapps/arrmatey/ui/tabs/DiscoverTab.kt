@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,12 +32,13 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
+import com.dnfapps.arrmatey.mediaserver.usecase.ResolveSonarrEpisodeUseCase
 import com.dnfapps.arrmatey.navigation.DiscoverScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.navigation.navigateToMediaServerItem
 import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toDetails
-import com.dnfapps.arrmatey.navigation.toMediaDetails
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
@@ -68,6 +70,8 @@ fun DiscoverTab(
         entryProvider =
         entryProvider {
             entry<DiscoverScreen.Home> {
+                val coroutineScope = rememberCoroutineScope()
+                val resolveEpisodeUseCase: ResolveSonarrEpisodeUseCase = koinInject()
                 DiscoverHomeScreen(
                     viewModel = viewModel,
                     wideRailIsVisible = wideRailIsVisible,
@@ -80,7 +84,7 @@ fun DiscoverTab(
                                 navigation.toArrDetailsOrPreview(result.media, result.instanceType)
                             }
                             is SearchResult.MediaServerResult -> {
-                                navigation.toMediaDetails(result.item)
+                                navigation.navigateToMediaServerItem(result.item, coroutineScope, resolveEpisodeUseCase)
                             }
                             is SearchResult.SeerrMediaResult -> {
                                 navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
@@ -93,6 +97,8 @@ fun DiscoverTab(
                 )
             }
             entry<DiscoverScreen.Category> { entry ->
+                val coroutineScope = rememberCoroutineScope()
+                val resolveEpisodeUseCase: ResolveSonarrEpisodeUseCase = koinInject()
                 DiscoverCategoryScreen(
                     category = entry.category,
                     viewModel = viewModel,
@@ -103,7 +109,7 @@ fun DiscoverTab(
                                 navigation.toArrDetailsOrPreview(result.media, result.instanceType)
                             }
                             is SearchResult.MediaServerResult -> {
-                                navigation.toMediaDetails(result.item)
+                                navigation.navigateToMediaServerItem(result.item, coroutineScope, resolveEpisodeUseCase)
                             }
                             is SearchResult.SeerrMediaResult -> {
                                 navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.components.navigation
 
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -7,8 +8,10 @@ import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.usecase.ResolveSonarrEpisodeUseCase
 import com.dnfapps.arrmatey.navigation.MediaScreen
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.navigation.navigateToMediaServerItem
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.replaceDetails
 import com.dnfapps.arrmatey.navigation.toAlbumRelease
@@ -19,7 +22,6 @@ import com.dnfapps.arrmatey.navigation.toBookRelease
 import com.dnfapps.arrmatey.navigation.toComicReleases
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toEpisodeDetails
-import com.dnfapps.arrmatey.navigation.toMediaDetails
 import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.navigation.toSeriesRelease
@@ -36,6 +38,7 @@ import com.dnfapps.arrmatey.ui.screens.UnifiedMediaDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.UnifiedSearchScreen
 import com.dnfapps.arrmatey.ui.screens.WebViewScreen
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.koinInject
 
 fun EntryProviderScope<NavKey>.mediaNavEntries(
     navigation: Navigator<*>,
@@ -238,6 +241,8 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
         }
     }
     entry<MediaScreen.GlobalSearch> { search ->
+        val coroutineScope = rememberCoroutineScope()
+        val resolveEpisodeUseCase: ResolveSonarrEpisodeUseCase = koinInject()
         UnifiedSearchScreen(
             initialQuery = search.query,
             onBack = { navigation.popBackStack() },
@@ -247,7 +252,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                         navigation.toArrDetailsOrPreview(result.media, result.instanceType, result.instanceId)
                     }
                     is SearchResult.MediaServerResult -> {
-                        navigation.toMediaDetails(result.item)
+                        navigation.navigateToMediaServerItem(result.item, coroutineScope, resolveEpisodeUseCase)
                     }
                     is SearchResult.SeerrMediaResult -> {
                         navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
