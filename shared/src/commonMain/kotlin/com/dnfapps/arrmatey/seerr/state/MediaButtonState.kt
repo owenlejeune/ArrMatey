@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.seerr.state
 
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.seerr.api.model.MediaInfo
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
@@ -57,6 +58,12 @@ enum class MediaProvider {
     Plex,
     Jellyfin,
     Emby,
+}
+
+fun MediaServerType.toMediaProvider(): MediaProvider = when (this) {
+    MediaServerType.Plex -> MediaProvider.Plex
+    MediaServerType.Jellyfin -> MediaProvider.Jellyfin
+    MediaServerType.Emby -> MediaProvider.Emby
 }
 
 fun MediaInfo?.toButtonState(

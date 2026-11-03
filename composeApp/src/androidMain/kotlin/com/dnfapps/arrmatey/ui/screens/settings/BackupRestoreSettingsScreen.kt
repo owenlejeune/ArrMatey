@@ -162,6 +162,7 @@ fun BackupRestoreSettingsScreen(
                 onToggleInstanceSelection = { backupViewModel.toggleInstanceSelection(it) },
                 onToggleDownloadClientSelection = { backupViewModel.toggleDownloadClientSelection(it) },
                 onToggleCustomWebpageSelection = { backupViewModel.toggleCustomWebpageSelection(it) },
+                onToggleMediaServerSelection = { backupViewModel.toggleMediaServerSelection(it) },
             )
         }
 
@@ -179,6 +180,7 @@ fun BackupRestoreSettingsScreen(
                 onToggleInstanceSelection = { backupViewModel.toggleImportInstanceSelection(it) },
                 onToggleDownloadClientSelection = { backupViewModel.toggleImportDownloadClientSelection(it) },
                 onToggleCustomWebpageSelection = { backupViewModel.toggleImportCustomWebpageSelection(it) },
+                onToggleImportMediaServerSelection = { backupViewModel.toggleImportMediaServerSelection(it) },
                 onToggleImportTabPreferences = { backupViewModel.toggleImportTabPreferences() },
                 onToggleImportUiPreferences = { backupViewModel.toggleImportUiPreferences() },
                 onToggleImportIntegrationsPreferences = { backupViewModel.toggleImportIntegrationsPreferences() },

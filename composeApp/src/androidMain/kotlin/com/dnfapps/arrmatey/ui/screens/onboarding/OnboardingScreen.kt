@@ -279,6 +279,7 @@ fun OnboardingScreen(
             onToggleInstanceSelection = { backupViewModel.toggleImportInstanceSelection(it) },
             onToggleDownloadClientSelection = { backupViewModel.toggleImportDownloadClientSelection(it) },
             onToggleCustomWebpageSelection = { backupViewModel.toggleImportCustomWebpageSelection(it) },
+            onToggleImportMediaServerSelection = { backupViewModel.toggleImportMediaServerSelection(it) },
             onToggleImportTabPreferences = { backupViewModel.toggleImportTabPreferences() },
             onToggleImportUiPreferences = { backupViewModel.toggleImportUiPreferences() },
             onToggleImportIntegrationsPreferences = { backupViewModel.toggleImportIntegrationsPreferences() },

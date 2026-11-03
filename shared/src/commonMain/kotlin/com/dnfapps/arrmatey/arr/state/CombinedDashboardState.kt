@@ -31,6 +31,9 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
 import com.dnfapps.arrmatey.monitoring.model.PlaybackSummaryStats
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
@@ -85,6 +88,8 @@ sealed interface CombinedDashboardState {
         val upcomingMovies: List<DiscoverResult> = emptyList(),
         val upcomingTv: List<DiscoverResult> = emptyList(),
         val quickPickItem: DiscoverResult? = null,
+        val continueWatching: List<UnifiedMediaItem> = emptyList(),
+        val hasMediaServers: Boolean = false,
         val networkStatus: NetworkStatusState? = null,
         val wolDevices: List<WolDevice> = emptyList(),
         val isRefreshing: Boolean = false,
@@ -603,6 +608,21 @@ sealed interface CombinedDashboardState {
                 ),
                 calendarItems = listOf(DashboardCalendarItem(mockEpisode, today)),
                 upcomingCalendarItems = listOf(DashboardCalendarItem(mockEpisode, today)),
+                continueWatching =
+                listOf(
+                    UnifiedMediaItem(
+                        id = "mock-1",
+                        title = "Pilot",
+                        seriesTitle = "Severance",
+                        type = MediaType.EPISODE,
+                        seasonNumber = 1,
+                        episodeNumber = 1,
+                        playbackPositionTicks = 1200_0000_000L,
+                        durationTicks = 3000_0000_000L,
+                        serverType = MediaServerType.Plex,
+                    ),
+                ),
+                hasMediaServers = true,
                 networkStatus =
                 NetworkStatusState(
                     ssid = "Mock-WiFi",

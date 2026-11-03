@@ -748,6 +748,7 @@
     <string name="media_servers">Media Servers</string>
     <string name="media_library">Media Library</string>
     <string name="continue_watching">Continue Watching</string>
+    <string name="nothing_to_continue_watching">Nothing to continue watching</string>
     <string name="media_servers_description">Manage your Plex, Jellyfin, and Emby media server integrations to browse libraries and track playback.</string>
     <string name="not_configured">Not configured</string>
     <string name="connect">Connect</string>

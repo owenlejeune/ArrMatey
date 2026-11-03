@@ -89,6 +89,7 @@ import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.state.toMediaProvider
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
@@ -112,6 +113,7 @@ import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.tabs.DiscoverSearchOverlay
 import com.dnfapps.arrmatey.utils.MokoStrings
+import com.dnfapps.arrmatey.utils.handleWatchClick
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import com.dnfapps.arrmatey.wol.model.WolDevice
@@ -159,6 +161,8 @@ fun DashboardCardContent(
     onMediaRequestClick: (DiscoverResult) -> Unit = {},
     onLoadMoreDiscoverFeed: (DiscoverCategory) -> Unit = {},
     onSendWol: (WolDevice) -> Unit = {},
+    onNavigateToMediaServerDetails: (UnifiedMediaItem) -> Unit = {},
+    onPlayMediaServerItem: (UnifiedMediaItem) -> Unit = {},
 ) {
     when (cardType) {
         DashboardCards.ArrOverview ->
@@ -200,6 +204,19 @@ fun DashboardCardContent(
                 state = currentState,
                 onOpenItem = { id, type ->
                     onNavigateToMediaDetails(id, type)
+                },
+            )
+
+        DashboardCards.ContinueWatching ->
+            ContinueWatchingSection(
+                state = currentState,
+                enabled = !isEditing && enabled,
+                isEditing = isEditing,
+                onItemClick = { item ->
+                    if (!isEditing && enabled) onNavigateToMediaServerDetails(item)
+                },
+                onPlayItem = { item ->
+                    if (!isEditing && enabled) onPlayMediaServerItem(item)
                 },
             )
 
@@ -726,6 +743,19 @@ fun CombinedDashboard(
                                                         viewModel.loadNextDiscoverPage(category)
                                                     },
                                                     onSendWol = { device -> viewModel.sendWol(device) },
+                                                    onNavigateToMediaServerDetails = onNavigateToMediaServerDetails,
+                                                    onPlayMediaServerItem = { item ->
+                                                        val playLinks = viewModel.getPlayLinks(item)
+                                                        if (playLinks != null) {
+                                                            handleWatchClick(
+                                                                url = playLinks.first,
+                                                                provider = item.serverType.toMediaProvider(),
+                                                                context = context,
+                                                                moko = moko,
+                                                                webFallbackUrl = playLinks.second,
+                                                            )
+                                                        }
+                                                    },
                                                 )
                                             }
 

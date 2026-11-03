@@ -13,6 +13,8 @@ import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.database.MediaServerIntegrationDao
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
 import com.dnfapps.arrmatey.webpage.model.CustomWebpage
 import kotlinx.serialization.json.Json
 
@@ -24,6 +26,7 @@ class ImportDataUseCase(
     private val preferencesStore: PreferencesStore,
     private val transportEncryptor: TransportEncryptor,
     private val json: Json,
+    private val mediaServerIntegrationDao: MediaServerIntegrationDao? = null,
 ) {
     fun decryptBackup(
         encryptedData: String,
@@ -45,6 +48,7 @@ class ImportDataUseCase(
         selectedInstanceIndices: Set<Int>,
         selectedDownloadClientIndices: Set<Int>,
         selectedCustomWebpageIndices: Set<Int> = emptySet(),
+        selectedMediaServerIndices: Set<Int> = emptySet(),
         importTabPreferences: Boolean,
         importUiPreferences: Boolean,
         importIntegrationsPreferences: Boolean = true,
@@ -170,6 +174,30 @@ class ImportDataUseCase(
                 }
                 if (existing == null) existingWebpages += webpage.copy(id = importedId)
                 export.id?.let { webpageIdMap[it] = importedId }
+            }
+        }
+
+        backup.mediaServers.forEachIndexed { index, export ->
+            if (index in selectedMediaServerIndices && mediaServerIntegrationDao != null) {
+                val existing = mediaServerIntegrationDao.getByType(export.serverType)
+                val integration =
+                    MediaServerIntegration(
+                        id = existing?.id ?: 0L,
+                        serverType = export.serverType,
+                        label = export.label,
+                        url = export.url,
+                        token = EncryptedString(export.token),
+                        userId = export.userId,
+                        username = export.username,
+                        clientIdentifier = export.clientIdentifier,
+                        serverId = export.serverId,
+                        enabled = export.enabled,
+                        localNetworkEnabled = export.localNetworkEnabled,
+                        localNetworkSsids = export.localNetworkSsids,
+                        localNetworkEndpoint = export.localNetworkEndpoint,
+                        headers = export.headers,
+                    )
+                mediaServerIntegrationDao.insert(integration)
             }
         }
 

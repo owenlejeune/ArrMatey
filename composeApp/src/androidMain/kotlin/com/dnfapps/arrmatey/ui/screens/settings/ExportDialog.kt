@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -66,6 +67,7 @@ fun ExportDialog(
     onToggleInstanceSelection: (Long) -> Unit,
     onToggleDownloadClientSelection: (Long) -> Unit,
     onToggleCustomWebpageSelection: (Long) -> Unit,
+    onToggleMediaServerSelection: (Long) -> Unit = {},
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -321,6 +323,52 @@ fun ExportDialog(
                         }
                     }
                 }
+
+                if (exportState.mediaServers.isNotEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Tv,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Text(
+                                text = mokoString(MR.strings.media_servers),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+
+                        Text(
+                            text = "${exportState.selectedMediaServerIds.size}/${exportState.mediaServers.size}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+
+                    ContainerCard(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                        contentPadding = PaddingValues(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        exportState.mediaServers.forEach { server ->
+                            LabelledCheckbox(
+                                label = server.label.ifBlank { server.serverType.name },
+                                checked = exportState.selectedMediaServerIds.contains(server.id),
+                                onCheckedChange = { onToggleMediaServerSelection(server.id) },
+                            )
+                        }
+                    }
+                }
             }
 
             Row(
@@ -341,6 +389,7 @@ fun ExportDialog(
                             exportState.selectedInstanceIds.isNotEmpty() ||
                                 exportState.selectedDownloadClientIds.isNotEmpty() ||
                                 exportState.selectedCustomWebpageIds.isNotEmpty() ||
+                                exportState.selectedMediaServerIds.isNotEmpty() ||
                                 exportState.includeTabPreferences ||
                                 exportState.includeUiPreferences ||
                                 exportState.includeIntegrationsPreferences

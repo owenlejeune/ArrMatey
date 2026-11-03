@@ -457,8 +457,8 @@ val useCaseModule =
         factory { PerformBazarrAutomaticSearchUseCase() }
         factory { DownloadBazarrSubtitleToDeviceUseCase(get(), get(), get()) }
         factory { CredentialMigrationUseCase(get(), get(), get()) }
-        factory { ExportDataUseCase(get(), get(), get(), get(), get(), get(), get()) }
-        factory { ImportDataUseCase(get(), get(), get(), get(), get(), get(), get()) }
+        factory { ExportDataUseCase(get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
+        factory { ImportDataUseCase(get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
         factory { GetInstancePresencesUseCase() }
         factory { UpdateAllPreferencesUseCase(get(), get(), getOrNull()) }
     }
@@ -649,7 +649,7 @@ val viewModelModule =
         viewModel { (userRef: String) ->
             TracearrUserViewModel(userRef, get(), get(), get(), get())
         }
-        viewModelOf(::BackupViewModel)
+        viewModel { BackupViewModel(get(), get(), get(), get(), get(), getOrNull()) }
         viewModel {
             UnifiedLibraryViewModel(
                 get(),

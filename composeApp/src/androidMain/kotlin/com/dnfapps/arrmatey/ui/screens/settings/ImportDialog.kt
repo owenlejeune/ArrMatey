@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -66,6 +67,7 @@ fun ImportDialog(
     onToggleInstanceSelection: (Int) -> Unit,
     onToggleDownloadClientSelection: (Int) -> Unit,
     onToggleCustomWebpageSelection: (Int) -> Unit,
+    onToggleImportMediaServerSelection: (Int) -> Unit = {},
     onToggleImportTabPreferences: () -> Unit,
     onToggleImportUiPreferences: () -> Unit,
     onToggleImportIntegrationsPreferences: () -> Unit,
@@ -209,7 +211,8 @@ fun ImportDialog(
 
                 if (backup.instances.isNotEmpty() ||
                     backup.downloadClients.isNotEmpty() ||
-                    backup.customWebpages.isNotEmpty()
+                    backup.customWebpages.isNotEmpty() ||
+                    backup.mediaServers.isNotEmpty()
                 ) {
                     if (hasAnyPreferences) {
                         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -358,6 +361,52 @@ fun ImportDialog(
                             }
                         }
                     }
+
+                    if (backup.mediaServers.isNotEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Tv,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Text(
+                                    text = mokoString(MR.strings.media_servers),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+
+                            Text(
+                                text = "${importState.selectedMediaServerIndices.size}/${backup.mediaServers.size}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        ContainerCard(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                            contentPadding = PaddingValues(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            backup.mediaServers.forEachIndexed { index, server ->
+                                LabelledCheckbox(
+                                    label = server.label.ifBlank { server.serverType.name },
+                                    checked = importState.selectedMediaServerIndices.contains(index),
+                                    onCheckedChange = { onToggleImportMediaServerSelection(index) },
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -400,6 +449,7 @@ fun ImportDialog(
                         importState.selectedInstanceIndices.isNotEmpty() ||
                             importState.selectedDownloadClientIndices.isNotEmpty() ||
                             importState.selectedCustomWebpageIndices.isNotEmpty() ||
+                            importState.selectedMediaServerIndices.isNotEmpty() ||
                             hasGlobalPrefToImport,
                         onClick = onConfirmImport,
                         modifier = Modifier.weight(1f),
