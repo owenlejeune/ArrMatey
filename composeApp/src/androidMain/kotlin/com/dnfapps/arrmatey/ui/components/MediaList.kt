@@ -216,6 +216,7 @@ fun SearchResultItem(
                 showBannerBackground = showBanners,
                 edgeColor = edgeColor,
                 mediaServerType = item.mediaServerType,
+                isSearch = true,
             )
         }
 
@@ -271,6 +272,7 @@ fun <T : ArrMedia> MediaItem(
     tags: List<Tag> = emptyList(),
     secondaryBadge: @Composable (() -> Unit)? = null,
     mediaServerType: MediaServerType? = null,
+    isSearch: Boolean = false,
 ) {
     val isSelected = multiSelectState.isSelected(item.guid)
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
@@ -426,6 +428,7 @@ fun <T : ArrMedia> MediaItem(
                             showBannerBackground = hasBanner,
                             qualityProfiles = qualityProfiles,
                             tags = tags,
+                            isSearch = isSearch,
                         )
 
                         secondaryBadge?.invoke()
@@ -690,6 +693,11 @@ fun MediaServerSearchResultItem(
                                 ).joinToString(BULLET)
                                 seriesDetails.ifBlank { item.type.displayName }
                             }
+                            MediaType.MOVIE -> listOfNotNull(
+                                dateOrYear,
+                                runtime,
+                                studio,
+                            ).joinToString(BULLET)
                             else -> listOfNotNull(
                                 dateOrYear,
                                 runtime,
@@ -714,6 +722,7 @@ fun MediaServerSearchResultItem(
                                 studio,
                                 result.serverLabel,
                             ).joinToString(BULLET)
+                            MediaType.MOVIE -> result.serverLabel
                             else -> listOfNotNull(
                                 studio,
                                 result.serverLabel,
@@ -828,11 +837,12 @@ private fun MediaDetails(
     showBannerBackground: Boolean,
     qualityProfiles: List<QualityProfile> = emptyList(),
     tags: List<Tag> = emptyList(),
+    isSearch: Boolean = false,
 ) {
     Column {
         when (item) {
             is ArrSeries -> SeriesDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
-            is ArrMovie -> MovieDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
+            is ArrMovie -> MovieDetails(item, isActive, showBannerBackground, qualityProfiles, tags, isSearch = isSearch)
             is Arrtist -> ArtistDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
             is Author -> AuthorDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
             is Audiobook -> AudiobookDetails(item, isActive, showBannerBackground)
@@ -941,24 +951,50 @@ private fun MovieDetails(
     showBannerBackground: Boolean,
     qualityProfiles: List<QualityProfile> = emptyList(),
     tags: List<Tag> = emptyList(),
+    isSearch: Boolean = false,
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
 
-    val nextReleaseDate =
-        item.digitalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.digital_release)}: $it" }
-            ?: item.physicalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.physical_release)}: $it" }
-            ?: item.inCinemas?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.in_cinemas)}: $it" }
-            ?: item.releaseDate?.format("MMMM d, yyyy")
-            ?: item.year.takeIf { it > 0 }?.toString()
+    if (isSearch) {
+        val instantYears = listOfNotNull(
+            item.inCinemas,
+            item.digitalRelease,
+            item.physicalRelease,
+            item.releaseDate,
+        ).mapNotNull { it.format("yyyy").toIntOrNull() }.filter { it > 0 }
 
-    nextReleaseDate?.let {
-        Text(it, color = contentColor, style = MaterialTheme.typography.bodyMedium)
-    }
+        val allYears = instantYears + listOfNotNull(
+            item.year.takeIf { it > 0 },
+            item.secondaryYear?.takeIf { it > 0 },
+        )
+        val earliestYear = allYears.minOrNull()?.toString()
 
-    val firstLine = listOfNotNull(item.runtimeString, item.studio).filter { it.isNotBlank() }.joinToString(" • ")
-    firstLine.unlessEmpty { firstLine ->
-        Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+        val secondLine = listOfNotNull(
+            earliestYear,
+            item.runtimeString.takeIf { it.isNotBlank() },
+            item.studio?.takeIf { it.isNotBlank() },
+        ).joinToString(BULLET)
+
+        if (secondLine.isNotBlank()) {
+            Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+        }
+    } else {
+        val nextReleaseDate =
+            item.digitalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.digital_release)}: $it" }
+                ?: item.physicalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.physical_release)}: $it" }
+                ?: item.inCinemas?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.in_cinemas)}: $it" }
+                ?: item.releaseDate?.format("MMMM d, yyyy")
+                ?: item.year.takeIf { it > 0 }?.toString()
+
+        nextReleaseDate?.let {
+            Text(it, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+        }
+
+        val firstLine = listOfNotNull(item.runtimeString, item.studio).filter { it.isNotBlank() }.joinToString(" • ")
+        firstLine.unlessEmpty { firstLine ->
+            Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+        }
     }
 
     val qualityLabel =
