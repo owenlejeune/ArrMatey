@@ -407,37 +407,36 @@ class GlobalSearchUseCase(
 
         if (anyArr != null) {
             val serverMatch = matchingMediaServer ?: run {
-                if (mediaServerManager != null) {
-                    val tmdbId = when (val m = anyArr.media) {
-                        is ArrMovie -> m.tmdbId.takeIf { it != 0L }
-                        is ArrSeries -> m.tmdbId?.takeIf { it != 0L }
-                        else -> null
-                    }
-                    val tvdbId = when (val m = anyArr.media) {
-                        is ArrSeries -> m.tvdbId.takeIf { it != 0L }
-                        else -> null
-                    }
-                    val type = when (anyArr.media) {
-                        is ArrMovie -> MediaType.MOVIE
-                        is ArrSeries -> MediaType.SHOW
-                        else -> null
-                    }
-                    val match = mediaServerManager.findMatchingItem(
+                val manager = mediaServerManager ?: return@run null
+                val tmdbId = when (val m = anyArr.media) {
+                    is ArrMovie -> m.tmdbId.takeIf { it != 0L }
+                    is ArrSeries -> m.tmdbId?.takeIf { it != 0L }
+                    else -> null
+                }
+                val tvdbId = when (val m = anyArr.media) {
+                    is ArrSeries -> m.tvdbId.takeIf { it != 0L }
+                    else -> null
+                }
+                val type = when (anyArr.media) {
+                    is ArrMovie -> MediaType.MOVIE
+                    is ArrSeries -> MediaType.SHOW
+                    else -> null
+                }
+                val match = runCatching {
+                    manager.findMatchingItem(
                         tmdbId = tmdbId,
                         tvdbId = tvdbId,
                         title = anyArr.cleanTitle,
                         year = anyArr.year,
                         mediaType = type,
                     )
-                    match?.let {
-                        SearchResult.MediaServerResult(
-                            item = it,
-                            serverType = it.serverType,
-                            serverLabel = it.serverType.name,
-                        )
-                    }
-                } else {
-                    null
+                }.getOrNull()
+                match?.let {
+                    SearchResult.MediaServerResult(
+                        item = it,
+                        serverType = it.serverType,
+                        serverLabel = it.serverType.name,
+                    )
                 }
             }
 

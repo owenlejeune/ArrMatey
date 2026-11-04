@@ -195,28 +195,29 @@ class MediaServerManager(
     }
 
     fun findMatchingItem(
-        items: List<UnifiedMediaItem> = _allMediaServerItems.value,
+        items: List<UnifiedMediaItem>? = null,
         tmdbId: Long? = null,
         tvdbId: Long? = null,
         title: String? = null,
         year: Int? = null,
         mediaType: MediaType? = null,
     ): UnifiedMediaItem? {
-        if (items.isEmpty()) return null
+        val candidateItems = items ?: _allMediaServerItems.value
+        if (candidateItems.isEmpty()) return null
 
         if (tmdbId != null && tmdbId > 0) {
-            val tmdbMatch = items.firstOrNull { it.tmdbId == tmdbId }
+            val tmdbMatch = candidateItems.firstOrNull { it.tmdbId == tmdbId }
             if (tmdbMatch != null) return tmdbMatch
         }
 
         if (tvdbId != null && tvdbId > 0) {
-            val tvdbMatch = items.firstOrNull { it.tvdbId == tvdbId }
+            val tvdbMatch = candidateItems.firstOrNull { it.tvdbId == tvdbId }
             if (tvdbMatch != null) return tvdbMatch
         }
 
         if (!title.isNullOrBlank()) {
             val cleanTitle = title.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
-            return items.firstOrNull { item ->
+            return candidateItems.firstOrNull { item ->
                 val itemCleanTitle = item.title.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
                 val titleMatches = itemCleanTitle == cleanTitle
                 val typeMatches = mediaType == null || item.type == mediaType

@@ -160,6 +160,13 @@ class GlobalSearchUseCaseMediaServerTest {
         return repo
     }
 
+    private fun createMockMediaServerManager(repos: List<MediaServerRepository>): MediaServerManager {
+        val manager = mockk<MediaServerManager>()
+        every { manager.activeRepositories } returns MutableStateFlow(repos)
+        every { manager.findMatchingItem(any(), any(), any(), any(), any(), any()) } returns null
+        return manager
+    }
+
     @Test
     fun testMediaServerResultsIncludedInSearch() = runBlocking {
         val fakeDao = FakeInstanceDao(emptyList())
@@ -177,8 +184,7 @@ class GlobalSearchUseCaseMediaServerTest {
             tmdbId = 27205L,
         )
         val mockRepo = createMockMediaServerRepo(MediaServerType.Plex, "My Plex", listOf(plexItem))
-        val mockMediaServerManager = mockk<MediaServerManager>()
-        every { mockMediaServerManager.activeRepositories } returns MutableStateFlow(listOf(mockRepo))
+        val mockMediaServerManager = createMockMediaServerManager(listOf(mockRepo))
 
         val useCase = GlobalSearchUseCase(instanceManager, mockMediaServerManager)
         val emissions = useCase("Inception").toList()
@@ -223,8 +229,7 @@ class GlobalSearchUseCaseMediaServerTest {
             tvdbId = 81189L,
         )
         val mockRepo = createMockMediaServerRepo(MediaServerType.Plex, "Home Plex", listOf(plexMovie, plexEpisode))
-        val mockMediaServerManager = mockk<MediaServerManager>()
-        every { mockMediaServerManager.activeRepositories } returns MutableStateFlow(listOf(mockRepo))
+        val mockMediaServerManager = createMockMediaServerManager(listOf(mockRepo))
 
         val useCase = GlobalSearchUseCase(instanceManager, mockMediaServerManager)
         val results = useCase("test").toList().last()
@@ -296,8 +301,7 @@ class GlobalSearchUseCaseMediaServerTest {
             tmdbId = 27205L,
         )
         val mockRepo = createMockMediaServerRepo(MediaServerType.Plex, "Home Plex", listOf(plexItem))
-        val mockMediaServerManager = mockk<MediaServerManager>()
-        every { mockMediaServerManager.activeRepositories } returns MutableStateFlow(listOf(mockRepo))
+        val mockMediaServerManager = createMockMediaServerManager(listOf(mockRepo))
 
         val useCase = GlobalSearchUseCase(instanceManager, mockMediaServerManager)
         val emissions = useCase("Inception").toList()
@@ -368,8 +372,7 @@ class GlobalSearchUseCaseMediaServerTest {
             tmdbId = null,
         )
         val mockRepo = createMockMediaServerRepo(MediaServerType.Plex, "Home Plex", listOf(plexItem))
-        val mockMediaServerManager = mockk<MediaServerManager>()
-        every { mockMediaServerManager.activeRepositories } returns MutableStateFlow(listOf(mockRepo))
+        val mockMediaServerManager = createMockMediaServerManager(listOf(mockRepo))
 
         val useCase = GlobalSearchUseCase(instanceManager, mockMediaServerManager)
         val emissions = useCase("Avatar").toList()
@@ -437,8 +440,7 @@ class GlobalSearchUseCaseMediaServerTest {
             tmdbId = 27205L,
         )
         val mockRepo = createMockMediaServerRepo(MediaServerType.Jellyfin, "Jellyfin Server", listOf(jellyfinItem))
-        val mockMediaServerManager = mockk<MediaServerManager>()
-        every { mockMediaServerManager.activeRepositories } returns MutableStateFlow(listOf(mockRepo))
+        val mockMediaServerManager = createMockMediaServerManager(listOf(mockRepo))
 
         val useCase = GlobalSearchUseCase(instanceManager, mockMediaServerManager)
         val emissions = useCase("Inception").toList()
