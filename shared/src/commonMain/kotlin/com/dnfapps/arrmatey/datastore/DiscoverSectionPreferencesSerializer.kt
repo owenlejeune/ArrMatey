@@ -24,13 +24,17 @@ internal object DiscoverSectionPreferencesSerializer {
                 DiscoverSectionPreferences(
                     visibleCategories = listOf(hidden.first()),
                     hiddenCategories = hidden.drop(1),
+                    hideInLibraryContent = parsed.hideInLibraryContent,
                 )
             } else if (visible.isEmpty()) {
-                DiscoverSectionPreferences()
+                DiscoverSectionPreferences(
+                    hideInLibraryContent = parsed.hideInLibraryContent,
+                )
             } else {
                 DiscoverSectionPreferences(
                     visibleCategories = visible,
                     hiddenCategories = hidden,
+                    hideInLibraryContent = parsed.hideInLibraryContent,
                 )
             }
         } catch (e: Exception) {

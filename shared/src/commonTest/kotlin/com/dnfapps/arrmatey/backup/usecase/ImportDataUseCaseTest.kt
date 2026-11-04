@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.backup.TransportEncryptor
 import com.dnfapps.arrmatey.backup.model.BackupExport
 import com.dnfapps.arrmatey.backup.model.CustomWebpageExport
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
+import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.database.dao.CustomWebpageDao
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.datastore.DataStoreFactory
@@ -14,11 +15,15 @@ import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.database.MediaServerIntegrationDao
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.webpage.model.CustomWebpage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -482,5 +487,99 @@ class ImportDataUseCaseTest {
         } finally {
             Dispatchers.resetMain()
         }
+    }
+
+    @Test
+    fun testMediaServerExportAndImport() = runTest {
+        val servers = mutableListOf<MediaServerIntegration>()
+        val mediaServerDao = object : MediaServerIntegrationDao {
+            override fun observeAll(): Flow<List<MediaServerIntegration>> = flowOf(servers)
+            override fun observeByType(type: MediaServerType): Flow<MediaServerIntegration?> = flowOf(servers.find { it.serverType == type })
+            override suspend fun getById(id: Long): MediaServerIntegration? = servers.find { it.id == id }
+            override suspend fun getByType(type: MediaServerType): MediaServerIntegration? = servers.find { it.serverType == type }
+            override suspend fun getAll(): List<MediaServerIntegration> = servers.toList()
+            override suspend fun insert(integration: MediaServerIntegration): Long {
+                val idx = servers.indexOfFirst { it.serverType == integration.serverType }
+                val id = if (idx >= 0) servers[idx].id else (servers.size + 1).toLong()
+                val saved = integration.copy(id = id)
+                if (idx >= 0) servers[idx] = saved else servers.add(saved)
+                return id
+            }
+            override suspend fun update(integration: MediaServerIntegration) {
+                val idx = servers.indexOfFirst { it.id == integration.id }
+                if (idx >= 0) servers[idx] = integration
+            }
+            override suspend fun delete(integration: MediaServerIntegration) {
+                servers.removeAll { it.id == integration.id }
+            }
+            override suspend fun deleteByType(type: MediaServerType) {
+                servers.removeAll { it.serverType == type }
+            }
+        }
+
+        mediaServerDao.insert(
+            MediaServerIntegration(
+                id = 1L,
+                serverType = MediaServerType.Plex,
+                label = "My Plex",
+                url = "http://192.168.1.100:32400",
+                token = EncryptedString("plex-token-123"),
+                clientIdentifier = "plex-client-id",
+            ),
+        )
+
+        val instancePreferences = InstancePreferenceStoreRepository(dataStoreFactory)
+        val preferences = PreferencesStore(dataStoreFactory)
+        val exporter = ExportDataUseCase(
+            dummyInstanceDao,
+            dummyDownloadClientDao,
+            dummyCustomWebpageDao,
+            instancePreferences,
+            preferences,
+            fakeEncryptor,
+            json,
+            mediaServerDao,
+        )
+        val exportJson = exporter.invoke(
+            password = "test",
+            selectedInstanceIds = emptySet(),
+            selectedDownloadClientIds = emptySet(),
+            selectedMediaServerIds = setOf(1L),
+            includeInstancePreferences = false,
+            includeTabPreferences = false,
+            includeUiPreferences = false,
+            includeIntegrationsPreferences = false,
+        )
+
+        val importer = ImportDataUseCase(
+            dummyInstanceDao,
+            dummyDownloadClientDao,
+            dummyCustomWebpageDao,
+            instancePreferences,
+            preferences,
+            fakeEncryptor,
+            json,
+            mediaServerDao,
+        )
+        val decrypted = importer.decryptBackup(exportJson, "test")
+        assertEquals(1, decrypted.mediaServers.size)
+        assertEquals("My Plex", decrypted.mediaServers[0].label)
+        assertEquals("plex-token-123", decrypted.mediaServers[0].token)
+
+        servers.clear()
+        importer.importSelected(
+            backup = decrypted,
+            selectedInstanceIndices = emptySet(),
+            selectedDownloadClientIndices = emptySet(),
+            selectedMediaServerIndices = setOf(0),
+            importTabPreferences = false,
+            importUiPreferences = false,
+            importIntegrationsPreferences = false,
+        )
+
+        assertEquals(1, servers.size)
+        assertEquals(MediaServerType.Plex, servers[0].serverType)
+        assertEquals("My Plex", servers[0].label)
+        assertEquals("plex-token-123", servers[0].token.value)
     }
 }

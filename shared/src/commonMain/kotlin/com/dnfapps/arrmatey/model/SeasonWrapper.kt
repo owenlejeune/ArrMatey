@@ -80,7 +80,7 @@ data class SeasonWrapper(
 
     val infoString: String
         get() {
-            val seasonInfo = listOfNotNull(customTitle, year, runtime, sizeOnDisk)
+            val seasonInfo = listOfNotNull(customTitle, year, runtime)
             return seasonInfo.joinToString(" • ")
         }
 }

@@ -186,6 +186,35 @@ private val MIGRATION_15_16 =
         }
     }
 
+private val MIGRATION_16_17 =
+    object : Migration(16, 17) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `media_server_integrations` (
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    `serverType` TEXT NOT NULL,
+                    `label` TEXT NOT NULL,
+                    `url` TEXT NOT NULL,
+                    `token` TEXT NOT NULL,
+                    `userId` TEXT,
+                    `username` TEXT,
+                    `clientIdentifier` TEXT NOT NULL,
+                    `serverId` TEXT,
+                    `enabled` INTEGER NOT NULL,
+                    `localNetworkEnabled` INTEGER NOT NULL,
+                    `localNetworkSsids` TEXT NOT NULL,
+                    `localNetworkEndpoint` TEXT,
+                    `headers` TEXT NOT NULL
+                )
+                """.trimIndent(),
+            )
+            connection.execSQL(
+                "CREATE UNIQUE INDEX IF NOT EXISTS `index_media_server_integrations_serverType` ON `media_server_integrations` (`serverType`)",
+            )
+        }
+    }
+
 val migrations =
     arrayOf(
         MIGRATION_1_2,
@@ -203,4 +232,5 @@ val migrations =
         MIGRATION_13_14,
         MIGRATION_14_15,
         MIGRATION_15_16,
+        MIGRATION_16_17,
     )

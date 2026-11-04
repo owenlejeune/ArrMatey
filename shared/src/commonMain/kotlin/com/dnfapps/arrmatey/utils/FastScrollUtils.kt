@@ -34,16 +34,22 @@ object FastScrollUtils {
     /**
      * Builds a map from section letter ("#", "A".."Z") to the first item index in [items].
      */
-    fun buildLetterIndexMap(items: List<ArrMedia>, sortBy: SortBy): Map<String, Int> {
+    fun <T> buildLetterIndexMap(items: List<T>, titleSelector: (T) -> String): Map<String, Int> {
         val map = mutableMapOf<String, Int>()
         items.forEachIndexed { index, item ->
-            val section = getSectionLetter(item, sortBy)
+            val firstChar = titleSelector(item).trimStart().firstOrNull()?.uppercaseChar()
+            val section = if (firstChar != null && firstChar in 'A'..'Z') firstChar.toString() else "#"
             if (!map.containsKey(section)) {
                 map[section] = index
             }
         }
         return map
     }
+
+    /**
+     * Builds a map from section letter ("#", "A".."Z") to the first item index in [items].
+     */
+    fun buildLetterIndexMap(items: List<ArrMedia>, sortBy: SortBy): Map<String, Int> = buildLetterIndexMap(items) { getSortKey(it, sortBy) }
 
     /**
      * Calculates the target item index when a section letter is selected during fast scroll.

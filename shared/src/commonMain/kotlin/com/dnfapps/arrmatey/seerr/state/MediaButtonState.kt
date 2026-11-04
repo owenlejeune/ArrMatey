@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.seerr.state
 
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.seerr.api.model.MediaInfo
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
@@ -38,14 +39,31 @@ data class MediaButtonState(
     val showClearDataButton: Boolean = false,
     val showMarkAsAvailableButton: Boolean = false,
     val mediaProvider: MediaProvider = MediaProvider.None,
+    val watchOptions: List<WatchOption> = emptyList(),
 ) {
     constructor() : this(false) // empty ios constructor
 }
+
+@Serializable
+data class WatchOption(
+    val provider: MediaProvider,
+    val serverName: String,
+    val url: String,
+    val webFallbackUrl: String? = null,
+    @Contextual val label: StringResource,
+)
 
 enum class MediaProvider {
     None,
     Plex,
     Jellyfin,
+    Emby,
+}
+
+fun MediaServerType.toMediaProvider(): MediaProvider = when (this) {
+    MediaServerType.Plex -> MediaProvider.Plex
+    MediaServerType.Jellyfin -> MediaProvider.Jellyfin
+    MediaServerType.Emby -> MediaProvider.Emby
 }
 
 fun MediaInfo?.toButtonState(

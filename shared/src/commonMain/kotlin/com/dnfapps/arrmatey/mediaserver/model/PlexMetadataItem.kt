@@ -1,0 +1,65 @@
+package com.dnfapps.arrmatey.mediaserver.model
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class PlexMetadataItem(
+    @SerialName("ratingKey") val ratingKey: String? = null,
+    @SerialName("key") val key: String? = null,
+    @SerialName("guid") val guid: String? = null,
+    @SerialName("title") val title: String? = null,
+    @SerialName("type") val type: String? = null,
+    @SerialName("year") val year: Int? = null,
+    @SerialName("summary") val summary: String? = null,
+    @SerialName("thumb") val thumb: String? = null,
+    @SerialName("art") val art: String? = null,
+    @SerialName("grandparentThumb") val grandparentThumb: String? = null,
+    @SerialName("parentThumb") val parentThumb: String? = null,
+    @SerialName("grandparentArt") val grandparentArt: String? = null,
+    @SerialName("viewOffset") val viewOffset: Long? = null,
+    @SerialName("duration") val duration: Long? = null,
+    @SerialName("viewCount") val viewCount: Int? = null,
+    @SerialName("lastViewedAt") val lastViewedAt: Long? = null,
+    @SerialName("rating") val rating: Double? = null,
+    @SerialName("parentRatingKey") val parentRatingKey: String? = null,
+    @SerialName("grandparentRatingKey") val grandparentRatingKey: String? = null,
+    @SerialName("parentTitle") val parentTitle: String? = null,
+    @SerialName("grandparentTitle") val grandparentTitle: String? = null,
+    @SerialName("index") val index: Int? = null,
+    @SerialName("parentIndex") val parentIndex: Int? = null,
+    @SerialName("originallyAvailableAt") val originallyAvailableAt: String? = null,
+    @SerialName("studio") val studio: String? = null,
+    @SerialName("Guid") val guids: List<PlexGuid>? = null,
+    @SerialName("Media") val media: List<PlexMediaItem>? = null,
+) {
+    fun extractTmdbId(): Long? {
+        val tmdbGuid = guids?.firstOrNull { it.id.startsWith("tmdb://") }?.id
+            ?: guid?.takeIf { it.startsWith("tmdb://") }
+        if (tmdbGuid != null) {
+            return tmdbGuid.removePrefix("tmdb://").toLongOrNull()
+        }
+        val legacy = guid?.takeIf { it.contains("themoviedb://") }
+        return legacy?.substringAfter("themoviedb://")?.substringBefore("?")?.toLongOrNull()
+    }
+
+    fun extractTvdbId(): Long? {
+        val tvdbGuid = guids?.firstOrNull { it.id.startsWith("tvdb://") }?.id
+            ?: guid?.takeIf { it.startsWith("tvdb://") }
+        if (tvdbGuid != null) {
+            return tvdbGuid.removePrefix("tvdb://").toLongOrNull()
+        }
+        val legacy = guid?.takeIf { it.contains("thetvdb://") }
+        return legacy?.substringAfter("thetvdb://")?.substringBefore("?")?.toLongOrNull()
+    }
+
+    fun extractImdbId(): String? {
+        val imdbGuid = guids?.firstOrNull { it.id.startsWith("imdb://") }?.id
+            ?: guid?.takeIf { it.startsWith("imdb://") }
+        if (imdbGuid != null) {
+            return imdbGuid.removePrefix("imdb://")
+        }
+        val legacy = guid?.takeIf { it.contains("imdb://") }
+        return legacy?.substringAfter("imdb://")?.substringBefore("?")
+    }
+}

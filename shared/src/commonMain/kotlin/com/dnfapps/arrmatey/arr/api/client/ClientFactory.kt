@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.model.SeerrAuthType
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ClientRequestException
@@ -175,5 +176,36 @@ open class HttpClientFactory(
         }
     }
 
-    fun createGeneric(): HttpClient = createInstanceClient(null, json, logger)
+    open fun createGeneric(): HttpClient = createInstanceClient(null, json, logger)
+
+    open fun createMediaServerClient(integration: MediaServerIntegration): HttpClient = HttpClient {
+        expectSuccess = true
+        install(ContentNegotiation) {
+            json(json)
+        }
+        install(HttpTimeout) {
+            requestTimeoutMillis = 30_000
+            socketTimeoutMillis = 30_000
+        }
+        install(Logging) {
+            this.logger = this@HttpClientFactory.logger
+            level = LogLevel.ALL
+        }
+        defaultRequest {
+            integration.headers.forEach { header ->
+                val shouldSend =
+                    when (header.restrictionType) {
+                        HeaderRestrictionType.Always -> true
+                        HeaderRestrictionType.RemoteOnly -> !integration.isUsingLocalNetwork()
+                        HeaderRestrictionType.SpecificSsids -> {
+                            val currentSsid = getNetworkUtils().getCurrentWifiSsid()
+                            currentSsid != null && header.restrictedSsids.contains(currentSsid)
+                        }
+                    }
+                if (shouldSend) {
+                    header(header.key, header.value)
+                }
+            }
+        }
+    }
 }

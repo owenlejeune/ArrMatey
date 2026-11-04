@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -74,6 +75,34 @@ fun DiscoverSectionCustomizationSheet(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
+                item(key = "setting_hide_in_library") {
+                    ContainerCard {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+                                Text(
+                                    text = mokoString(MR.strings.hide_in_library_content),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                                Text(
+                                    text = mokoString(MR.strings.hide_in_library_content_description),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Switch(
+                                checked = preferences.hideInLibraryContent,
+                                onCheckedChange = { checked ->
+                                    onUpdatePreferences(preferences.copy(hideInLibraryContent = checked))
+                                },
+                            )
+                        }
+                    }
+                }
+
                 if (preferences.visibleCategories.isNotEmpty()) {
                     item(key = "header_visible") {
                         Text(

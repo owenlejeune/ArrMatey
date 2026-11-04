@@ -38,6 +38,9 @@ import com.dnfapps.arrmatey.instances.repository.PlaybackMonitoringRepository
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.TracearrRepository
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
@@ -88,11 +91,15 @@ class CombinedDashboardViewModel(
     private val deleteQueueItemUseCase: DeleteQueueItemUseCase,
     private val wolDeviceRepository: WolDeviceRepository,
     private val logger: Logger,
+    private val mediaServerManager: MediaServerManager? = null,
 ) : ViewModel() {
     private val _removeItemState = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val removeItemState: StateFlow<OperationStatus> = _removeItemState.asStateFlow()
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    private val _continueWatching = MutableStateFlow<List<UnifiedMediaItem>>(emptyList())
+    val continueWatching: StateFlow<List<UnifiedMediaItem>> = _continueWatching.asStateFlow()
 
     private val _cardLoadingStates = MutableStateFlow<Map<DashboardCards, Boolean>>(emptyMap())
     val cardLoadingStates: StateFlow<Map<DashboardCards, Boolean>> = _cardLoadingStates.asStateFlow()
@@ -467,7 +474,18 @@ class CombinedDashboardViewModel(
                         if (DashboardCards.DownloadClients in newlyAdded) {
                             launch { refreshDownloadClientsData(currentSet) }
                         }
+                        if (DashboardCards.ContinueWatching in newlyAdded) {
+                            launch { refreshContinueWatchingData(currentSet) }
+                        }
                     }
+                }
+            }
+        }
+        viewModelScope.launch {
+            mediaServerManager?.activeRepositories?.collect {
+                val visible = cards.value.toSet()
+                if (DashboardCards.ContinueWatching in visible) {
+                    refreshContinueWatchingData(visible)
                 }
             }
         }
@@ -531,6 +549,8 @@ class CombinedDashboardViewModel(
                     playbackInstancesFlow,
                     wolDeviceRepository.getAllWolDevices(),
                     _cardLoadingStates,
+                    _continueWatching,
+                    mediaServerManager?.activeRepositories ?: MutableStateFlow(emptyList<com.dnfapps.arrmatey.mediaserver.repository.MediaServerRepository>()),
                 ),
             ) { args ->
                 @Suppress("UNCHECKED_CAST")
@@ -599,6 +619,18 @@ class CombinedDashboardViewModel(
                 @Suppress("UNCHECKED_CAST")
                 val cardLoadingStates = (args[21] as? Map<DashboardCards, Boolean>) ?: emptyMap()
 
+                @Suppress("UNCHECKED_CAST")
+                val continueWatching = (args[22] as? List<UnifiedMediaItem>) ?: emptyList()
+
+                @Suppress("UNCHECKED_CAST")
+                val activeMediaServers = (args[23] as? List<com.dnfapps.arrmatey.mediaserver.repository.MediaServerRepository>) ?: emptyList()
+
+                val serverItems = mediaServerManager?.allMediaServerItems?.value ?: emptyList()
+                val arrLibs = instances.flatMap { it.library }
+                val enrichItem: (DiscoverResult) -> DiscoverResult = { res ->
+                    enrichDiscoverResultWithLibrary(res, serverItems, arrLibs)
+                }
+
                 CombinedDashboardState.Success(
                     instances = instances,
                     seerrInstances = seerrInstances,
@@ -613,12 +645,14 @@ class CombinedDashboardViewModel(
                     bazarrStats = bazarrStats,
                     tracearrStats = tracearrStats,
                     playbackStats = playbackStats,
-                    trendingMedia = trending,
-                    popularMovies = popularMovies,
-                    popularTv = popularTv,
-                    upcomingMovies = upcomingMovies,
-                    upcomingTv = upcomingTv,
-                    quickPickItem = quickPick,
+                    trendingMedia = trending.map(enrichItem),
+                    popularMovies = popularMovies.map(enrichItem),
+                    popularTv = popularTv.map(enrichItem),
+                    upcomingMovies = upcomingMovies.map(enrichItem),
+                    upcomingTv = upcomingTv.map(enrichItem),
+                    quickPickItem = quickPick?.let(enrichItem),
+                    continueWatching = continueWatching,
+                    hasMediaServers = activeMediaServers.isNotEmpty(),
                     wolDevices = wolDevices,
                     networkStatus =
                     resolveNetworkStatus(
@@ -684,6 +718,50 @@ class CombinedDashboardViewModel(
         }
     } catch (_: Exception) {
         item
+    }
+
+    private fun enrichDiscoverResultWithLibrary(
+        item: DiscoverResult,
+        serverItems: List<UnifiedMediaItem>,
+        arrLibraries: List<ArrMedia>,
+    ): DiscoverResult {
+        val expectedMediaType = when (item.mediaType) {
+            RequestType.Movie -> MediaType.MOVIE
+            RequestType.Tv -> MediaType.SHOW
+            RequestType.Person -> MediaType.UNKNOWN
+        }
+        val year = (item.releaseDate ?: item.firstAirDate)?.take(4)?.toIntOrNull()
+        val mediaServerMatch = mediaServerManager?.findMatchingItem(
+            items = serverItems,
+            tmdbId = item.id,
+            tvdbId = item.mediaInfo?.tvdbId,
+            title = item.title ?: item.name,
+            year = year,
+            mediaType = expectedMediaType,
+        )
+        val cleanTitle = (item.title ?: item.name)?.replace(Regex("[^a-zA-Z0-9]"), "")?.lowercase()
+        val arrMatch = when (item.mediaType) {
+            RequestType.Movie -> {
+                arrLibraries.filterIsInstance<com.dnfapps.arrmatey.arr.api.model.ArrMovie>().firstOrNull {
+                    (it.tmdbId != 0L && it.tmdbId == item.id) ||
+                        (item.mediaInfo?.tmdbId != null && it.tmdbId == item.mediaInfo.tmdbId) ||
+                        (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
+                }
+            }
+            RequestType.Tv -> {
+                arrLibraries.filterIsInstance<com.dnfapps.arrmatey.arr.api.model.ArrSeries>().firstOrNull {
+                    (it.tmdbId != null && it.tmdbId != 0L && it.tmdbId == item.id) ||
+                        (item.mediaInfo?.tvdbId != null && it.tvdbId == item.mediaInfo.tvdbId) ||
+                        (item.mediaInfo?.tmdbId != null && it.tmdbId == item.mediaInfo.tmdbId) ||
+                        (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
+                }
+            }
+            RequestType.Person -> null
+        }
+        return item.copy(
+            mediaServerItem = mediaServerMatch,
+            inArrLibrary = arrMatch != null,
+        )
     }
 
     private suspend fun fetchDiscoverData() {
@@ -1218,6 +1296,25 @@ class CombinedDashboardViewModel(
         }
     }
 
+    private suspend fun refreshContinueWatchingData(visibleCards: Set<DashboardCards>) {
+        if (DashboardCards.ContinueWatching !in visibleCards) return
+        val manager = mediaServerManager ?: return
+        setCardsLoading(setOf(DashboardCards.ContinueWatching), true)
+        try {
+            val items = manager.getContinueWatching(limit = 20)
+            _continueWatching.value = items
+        } catch (e: Exception) {
+            logger.error(e) { "Error refreshing continue watching data" }
+        } finally {
+            setCardsLoading(setOf(DashboardCards.ContinueWatching), false)
+        }
+    }
+
+    fun getPlayLinks(item: UnifiedMediaItem): Pair<String, String?>? {
+        val repo = mediaServerManager?.getRepository(item.serverType) ?: return null
+        return repo.buildDeepLinkUrl(item) to repo.buildWebUrl(item)
+    }
+
     fun refresh() {
         if (_isRefreshing.value) return
 
@@ -1236,6 +1333,7 @@ class CombinedDashboardViewModel(
                     launch { refreshBazarrData(visible) }
                     launch { refreshPlaybackData(visible) }
                     launch { refreshDownloadClientsData(visible) }
+                    launch { refreshContinueWatchingData(visible) }
                 }
             } finally {
                 _isRefreshing.value = false

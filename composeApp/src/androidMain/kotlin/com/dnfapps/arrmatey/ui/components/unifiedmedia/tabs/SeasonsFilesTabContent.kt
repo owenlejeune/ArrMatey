@@ -24,6 +24,7 @@ import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.compose.utils.BookMediaFilterBy
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
@@ -66,6 +67,12 @@ fun SeasonsFilesTabContent(
     selectedBookMediaFilter: BookMediaFilterBy = BookMediaFilterBy.All,
     onBookMediaTypeFilterChanged: (BookMediaFilterBy) -> Unit = {},
     onEditAuthor: (() -> Unit)? = null,
+    episodeWatchStatus: Map<Pair<Int, Int>, Boolean> = emptyMap(),
+    episodeDeepLinks: Map<Pair<Int, Int>, String> = emptyMap(),
+    episodeItemIds: Map<Pair<Int, Int>, String> = emptyMap(),
+    mediaServerType: MediaServerType? = null,
+    onToggleEpisodeWatched: ((Int, Int, Boolean) -> Unit)? = null,
+    onPlayEpisode: ((String) -> Unit)? = null,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -89,6 +96,12 @@ fun SeasonsFilesTabContent(
                 deleteEpisodeFile = onDeleteEpisodeFile,
                 onNavigateToSeriesRelease = onNavigateToSeriesRelease,
                 bazarrDetailsIntegration = state.bazarrDetailsIntegration,
+                episodeWatchStatus = episodeWatchStatus,
+                episodeDeepLinks = episodeDeepLinks,
+                episodeItemIds = episodeItemIds,
+                mediaServerType = mediaServerType,
+                onToggleEpisodeWatched = onToggleEpisodeWatched,
+                onPlayEpisode = onPlayEpisode,
             )
         }
 

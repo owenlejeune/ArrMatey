@@ -23,6 +23,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
@@ -69,10 +71,12 @@ import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsTab
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.state.MediaProvider
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
@@ -82,6 +86,7 @@ import com.dnfapps.arrmatey.ui.components.InstancePresenceChips
 import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.UnifiedDetailsHeader
+import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerSourceChips
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrAnalyticsSection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrHistorySection
 import com.dnfapps.arrmatey.ui.components.tracearr.TracearrSummaryChipRow
@@ -111,6 +116,7 @@ import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.sheets.MediaRequestOrAddSheet
 import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.handleWatchClick
 import com.dnfapps.arrmatey.utils.mokoPlural
@@ -129,6 +135,10 @@ fun UnifiedMediaDetailsScreen(
     instanceType: InstanceType? = null,
     requestType: RequestType? = null,
     initialEpisodeId: Long? = null,
+    mediaServerItemId: String? = null,
+    mediaServerType: MediaServerType? = null,
+    initialTitle: String? = null,
+    initialYear: Int? = null,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit,
@@ -145,8 +155,8 @@ fun UnifiedMediaDetailsScreen(
     onNavigateToUser: ((String) -> Unit)? = null,
     instanceId: Long? = null,
     viewModel: UnifiedMediaDetailsViewModel =
-        koinViewModel(key = "${arrId}_${tmdbId}_${tvdbId}_${instanceType}_${requestType}_$instanceId", parameters = {
-            parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId)
+        koinViewModel(key = "${arrId}_${tmdbId}_${tvdbId}_${instanceType}_${requestType}_${instanceId}_${mediaServerItemId}_$mediaServerType", parameters = {
+            parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId, mediaServerItemId, mediaServerType, initialTitle, initialYear)
         }),
     moko: MokoStrings = koinInject(),
 ) {
@@ -243,6 +253,11 @@ fun UnifiedMediaDetailsScreen(
     val addSheetUiState by viewModel.addSheetUiState.collectAsStateWithLifecycle()
     val activeInstance by viewModel.activeInstance.collectAsStateWithLifecycle()
     val activeSeerrInstance by viewModel.activeSeerrInstance.collectAsStateWithLifecycle()
+    val mediaServerDetails by viewModel.mediaServerDetails.collectAsStateWithLifecycle()
+    val firstMediaServer = mediaServerDetails.firstOrNull()
+    val episodeWatchStatus = firstMediaServer?.episodeWatchStatus ?: emptyMap()
+    val episodeDeepLinks = firstMediaServer?.episodeDeepLinks ?: emptyMap()
+    val episodeItemIds = firstMediaServer?.episodeItemIds ?: emptyMap()
 
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
@@ -409,6 +424,26 @@ fun UnifiedMediaDetailsScreen(
                             }
                         }
 
+                        if (firstMediaServer != null && firstMediaServer.totalEpisodesCount == null) {
+                            val isWatched = firstMediaServer.played
+                            IconButton(
+                                onClick = {
+                                    viewModel.markMediaServerWatched(
+                                        firstMediaServer.serverType,
+                                        firstMediaServer.itemId,
+                                        !isWatched,
+                                    )
+                                },
+                                colors = IconButtonDefaults.headerBarColors(),
+                            ) {
+                                Icon(
+                                    imageVector = if (isWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                                    contentDescription = if (isWatched) mokoString(MR.strings.unwatched) else mokoString(MR.strings.watched),
+                                    tint = if (isWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+
                         val canDeleteFile = success.canDeleteFile(resolvedType)
 
                         UnifiedMediaDetailsToolbarMenu(
@@ -544,6 +579,19 @@ fun UnifiedMediaDetailsScreen(
                                         )
                                     }
 
+                                    if (mediaServerDetails.isNotEmpty()) {
+                                        MediaServerSourceChips(
+                                            details = mediaServerDetails,
+                                            onWatchClick = { url, provider, webUrl ->
+                                                handleWatchClick(url, provider, context, moko, webUrl)
+                                            },
+                                            onToggleWatched = { serverType, itemId, watched ->
+                                                viewModel.markMediaServerWatched(serverType, itemId, watched)
+                                            },
+                                            modifier = Modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
+                                        )
+                                    }
+
                                     LaunchedEffect(successState.hasSeasonsOrFiles) {
                                         val prev = previousHasSeasonsOrFiles
                                         if (prev == null) {
@@ -662,6 +710,29 @@ fun UnifiedMediaDetailsScreen(
                                             selectedBookMediaFilter = selectedBookMediaFilter,
                                             onBookMediaTypeFilterChanged = { selectedBookMediaFilter = it },
                                             onEditAuthor = { showEditSheet = true },
+                                            episodeWatchStatus = episodeWatchStatus,
+                                            episodeDeepLinks = episodeDeepLinks,
+                                            episodeItemIds = episodeItemIds,
+                                            mediaServerType = firstMediaServer?.serverType,
+                                            onToggleEpisodeWatched = { sNum, eNum, watched ->
+                                                firstMediaServer?.let { server ->
+                                                    val itemId = server.episodeItemIds[sNum to eNum]
+                                                    if (itemId != null) {
+                                                        viewModel.markMediaServerWatched(server.serverType, itemId, watched)
+                                                    } else {
+                                                        viewModel.markEpisodeWatched(server.serverType, sNum, eNum, watched)
+                                                    }
+                                                }
+                                            },
+                                            onPlayEpisode = { url ->
+                                                val provider = when (firstMediaServer?.serverType) {
+                                                    MediaServerType.Plex -> MediaProvider.Plex
+                                                    MediaServerType.Jellyfin -> MediaProvider.Jellyfin
+                                                    MediaServerType.Emby -> MediaProvider.Emby
+                                                    else -> MediaProvider.None
+                                                }
+                                                handleWatchClick(url, provider, context, moko, firstMediaServer?.webFallbackUrl)
+                                            },
                                         )
                                     }
 
@@ -681,6 +752,16 @@ fun UnifiedMediaDetailsScreen(
                                             onMediaClick = { id, type -> onMediaClick?.invoke(id, type) },
                                             onLoadMoreRecommendations = { viewModel.loadNextRecommendationsPage() },
                                             onLoadMoreSimilar = { viewModel.loadNextSimilarPage() },
+                                            mediaServerDetails = mediaServerDetails,
+                                            onMediaServerWatchClick = { url, provider, webUrl ->
+                                                handleWatchClick(url, provider, context, moko, webUrl)
+                                            },
+                                            onMediaServerToggleWatched = { serverType, itemId, watched ->
+                                                viewModel.markMediaServerWatched(serverType, itemId, watched)
+                                            },
+                                            onMediaServerRefreshItem = { serverType, itemId ->
+                                                viewModel.refreshMediaServerItem(serverType, itemId)
+                                            },
                                         )
                                     }
 

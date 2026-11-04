@@ -1,15 +1,15 @@
 package com.dnfapps.arrmatey.utils
 
-import android.icu.text.SimpleDateFormat
-import android.icu.util.Calendar
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Instant
-import android.icu.util.TimeZone as JavaTimeZone
+import java.util.TimeZone as JavaTimeZone
 
 actual fun getCurrentSystemTimeMillis(): Long = System.currentTimeMillis()
 
@@ -27,7 +27,7 @@ actual fun LocalDate.format(pattern: String): String {
         SimpleDateFormat(pattern, Locale.getDefault()).apply {
             timeZone = JavaTimeZone.getTimeZone("UTC")
         }
-    return sdf.format(Date(toEpochDays() * 86_400_000))
+    return sdf.format(Date(toEpochDays() * 86_400_000L))
 }
 
 actual fun formatLocalDateTime(

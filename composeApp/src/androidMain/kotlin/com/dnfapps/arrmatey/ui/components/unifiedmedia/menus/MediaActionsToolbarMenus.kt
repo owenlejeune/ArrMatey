@@ -55,17 +55,19 @@ fun MediaActionsToolbarMenus(
 ) {
     if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
         var showWatchMenu by remember { mutableStateOf(false) }
+        val hasMultipleOptions = buttonState.watchOptions.size > 1
         val serviceIconRes: Any =
             when (buttonState.mediaProvider) {
                 MediaProvider.Plex -> MR.images.plex
                 MediaProvider.Jellyfin -> MR.images.jellyfin
+                MediaProvider.Emby -> MR.images.emby
                 MediaProvider.None -> Icons.Default.PlayArrow
             }
 
         Box {
             IconButton(
                 onClick = {
-                    if (buttonState.showWatchButton && !buttonState.showWatchTrailerOption) {
+                    if (buttonState.showWatchButton && !buttonState.showWatchTrailerOption && !hasMultipleOptions) {
                         buttonState.watchButtonUrl?.let { onWatchClicked(it, buttonState.mediaProvider) }
                     } else {
                         showWatchMenu = true
@@ -81,7 +83,34 @@ fun MediaActionsToolbarMenus(
                 onDismissRequest = { showWatchMenu = false },
             ) {
                 DropdownMenuGroup(shapes = MenuDefaults.groupShape(0, 1)) {
-                    if (buttonState.showWatchButton) {
+                    if (hasMultipleOptions) {
+                        buttonState.watchOptions.forEach { option ->
+                            val optIcon: Any = when (option.provider) {
+                                MediaProvider.Plex -> MR.images.plex
+                                MediaProvider.Jellyfin -> MR.images.jellyfin
+                                MediaProvider.Emby -> MR.images.emby
+                                MediaProvider.None -> Icons.Default.PlayArrow
+                            }
+                            DropdownMenuItem(
+                                text = { Text("${mokoString(option.label)} (${option.serverName})") },
+                                onClick = {
+                                    onWatchClicked(option.url, option.provider)
+                                    showWatchMenu = false
+                                },
+                                leadingIcon = {
+                                    if (optIcon is ImageResource) {
+                                        Image(
+                                            painter = painterResource(optIcon),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp),
+                                        )
+                                    } else if (optIcon is ImageVector) {
+                                        Icon(optIcon, null)
+                                    }
+                                },
+                            )
+                        }
+                    } else if (buttonState.showWatchButton) {
                         DropdownMenuItem(
                             text = { Text(mokoString(buttonState.watchButtonLabel)) },
                             onClick = {

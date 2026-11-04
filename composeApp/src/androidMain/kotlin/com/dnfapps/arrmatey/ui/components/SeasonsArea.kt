@@ -13,8 +13,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExpandCircleDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -48,11 +47,15 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.entensions.BULLET
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
@@ -75,6 +78,12 @@ fun SeasonsArea(
     onNavigateToEpisodeDetails: (ArrEpisode) -> Unit = {},
     onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?) -> Unit = { _, _, _ -> },
     bazarrDetailsIntegration: Boolean = true,
+    episodeWatchStatus: Map<Pair<Int, Int>, Boolean> = emptyMap(),
+    episodeDeepLinks: Map<Pair<Int, Int>, String> = emptyMap(),
+    episodeItemIds: Map<Pair<Int, Int>, String> = emptyMap(),
+    mediaServerType: MediaServerType? = null,
+    onToggleEpisodeWatched: ((Int, Int, Boolean) -> Unit)? = null,
+    onPlayEpisode: ((String) -> Unit)? = null,
 ) {
     if (seasons.isEmpty()) return
 
@@ -106,59 +115,103 @@ fun SeasonsArea(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    text =
-                                    if (season.seasonNumber == 0) {
-                                        mokoString(MR.strings.specials)
-                                    } else {
-                                        mokoString(MR.strings.season_label, season.seasonNumber)
-                                    },
-                                    style = MaterialTheme.typography.titleMediumEmphasized,
-                                )
-                                val activeCount = season.activeEpisodeCount
-                                val statsAnnotatedString =
-                                    if (activeCount > 0) {
-                                        val fileCount = season.episodeFileCount ?: 0
-                                        buildAnnotatedString {
-                                            append(fileCount.toString())
-                                            withStyle(SpanStyle(color = ArrLightPurple, fontWeight = FontWeight.Bold)) {
-                                                append("+$activeCount")
-                                            }
-                                            append("/${season.totalEpisodeCount}")
-                                        }
-                                    } else {
-                                        val statsText =
-                                            season.episodeFileCount?.let {
-                                                "$it/${season.totalEpisodeCount}"
-                                            } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
-                                        buildAnnotatedString { append(statsText) }
-                                    }
+                            val totalEpCount = season.totalEpisodeCount.coerceAtLeast(season.episodes.size)
+                            val watchedInSeason = if (episodeWatchStatus.isNotEmpty()) {
+                                season.episodes.count { ep ->
+                                    episodeWatchStatus[season.seasonNumber to ep.episodeNumber] == true
+                                }
+                            } else {
+                                0
+                            }
+                            val isFullyWatched = episodeWatchStatus.isNotEmpty() && totalEpCount > 0 && watchedInSeason >= totalEpCount
+                            val isPartiallyWatched = episodeWatchStatus.isNotEmpty() && watchedInSeason > 0 && !isFullyWatched
 
-                                AnimatedContent(
-                                    targetState = statsAnnotatedString,
-                                    transitionSpec = {
-                                        (fadeIn() + slideInVertically { it }).togetherWith(fadeOut() + slideOutVertically { -it })
-                                    },
-                                    label = "SeasonStatsTextAnimation",
-                                ) { text ->
-                                    Text(
-                                        text = text,
-                                        style = MaterialTheme.typography.bodyMedium,
+                            // Line 1: Season Title (with custom name if present) & Watched Checkmark if 100%
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                val baseSeasonTitle = if (season.seasonNumber == 0) {
+                                    mokoString(MR.strings.specials)
+                                } else {
+                                    mokoString(MR.strings.season_label, season.seasonNumber)
+                                }
+
+                                val displayTitle = if (season.customTitle != null) {
+                                    "$baseSeasonTitle: ${season.customTitle}"
+                                } else {
+                                    baseSeasonTitle
+                                }
+
+                                Text(
+                                    text = displayTitle,
+                                    style = MaterialTheme.typography.titleMediumEmphasized,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false),
+                                )
+
+                                if (isFullyWatched) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = mokoString(MR.strings.watched),
+                                        tint = ArrGreen,
+                                        modifier = Modifier.size(16.dp),
                                     )
                                 }
                             }
 
-                            if (season.infoString.isNotBlank()) {
-                                Text(
-                                    text = season.infoString,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                            // Line 2: Unified Metadata (Arr files stats, size on disk, air year, and partial watch progress)
+                            val activeCount = season.activeEpisodeCount
+                            val fileStatsString = if (activeCount > 0) {
+                                val fileCount = season.episodeFileCount ?: 0
+                                buildAnnotatedString {
+                                    append(fileCount.toString())
+                                    withStyle(SpanStyle(color = ArrLightPurple, fontWeight = FontWeight.Bold)) {
+                                        append("+$activeCount")
+                                    }
+                                    append("/${season.totalEpisodeCount}")
+                                }
+                            } else {
+                                val statsText = season.episodeFileCount?.let {
+                                    "$it/${season.totalEpisodeCount}"
+                                } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
+                                buildAnnotatedString { append(statsText) }
                             }
+
+                            val metadataString = buildAnnotatedString {
+                                append(fileStatsString)
+
+                                season.sizeOnDisk?.let { size ->
+                                    append(BULLET)
+                                    append(size)
+                                }
+
+                                if (season.year.isNotBlank() && season.year != mokoString(MR.strings.tba)) {
+                                    append(BULLET)
+                                    append(season.year)
+                                }
+
+                                season.runtime?.let { runtime ->
+                                    append(BULLET)
+                                    append(runtime)
+                                }
+
+                                if (isPartiallyWatched) {
+                                    append(BULLET)
+                                    withStyle(SpanStyle(color = ArrGreen)) {
+                                        append("$watchedInSeason/$totalEpCount watched")
+                                    }
+                                }
+                            }
+
+                            Text(
+                                text = metadataString,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
 
                         val showArrControls = season.arrSeason != null && seriesId != null && seriesId > 0
@@ -260,6 +313,8 @@ fun SeasonsArea(
                         season.episodes.forEachIndexed { index, episode ->
                             val arrEp = episode.arrEpisode
 
+                            val key = season.seasonNumber to episode.episodeNumber
+                            val canToggleWatched = onToggleEpisodeWatched != null && (episodeItemIds.containsKey(key) || episode.mediaServerEpisode != null)
                             EpisodeRow(
                                 episode = episode,
                                 onClick = arrEp?.let { ep -> { onNavigateToEpisodeDetails(ep) } },
@@ -271,6 +326,15 @@ fun SeasonsArea(
                                 },
                                 searchInProgress = { searchIds.contains(it) },
                                 bazarrDetailsIntegration = bazarrDetailsIntegration,
+                                isMediaServerWatched = episodeWatchStatus[key] == true,
+                                episodeDeepLink = episodeDeepLinks[key],
+                                mediaServerType = mediaServerType,
+                                onToggleMediaServerWatched = if (canToggleWatched) {
+                                    { watched -> onToggleEpisodeWatched(season.seasonNumber, episode.episodeNumber, watched) }
+                                } else {
+                                    null
+                                },
+                                onPlayEpisode = onPlayEpisode,
                             )
 
                             if (index < season.episodes.size - 1) {

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -52,6 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrMediaStatus
@@ -68,6 +70,7 @@ fun DashboardDiscoverQuickPickSection(
     onShuffleClick: () -> Unit,
     onMediaClick: (tmdbId: Long, requestType: RequestType) -> Unit,
     onRequestClick: ((DiscoverResult) -> Unit)? = null,
+    onPlayItem: ((UnifiedMediaItem) -> Unit)? = null,
     isEditing: Boolean = false,
     enabled: Boolean = true,
 ) {
@@ -280,71 +283,99 @@ fun DashboardDiscoverQuickPickSection(
                                 )
                             }
 
-                            val mediaStatus = state.resolveMediaStatus(item)
-                            val (buttonLabel, buttonIcon, isTonal) =
-                                when (mediaStatus) {
-                                    SeerrMediaStatus.Available -> {
-                                        if (item.mediaType == RequestType.Tv) {
-                                            Triple(MR.strings.request_more, Icons.Default.Add, false)
-                                        } else {
-                                            Triple(MR.strings.available, Icons.Default.Check, true)
-                                        }
-                                    }
-                                    SeerrMediaStatus.Pending -> Triple(MR.strings.pending, Icons.Default.Schedule, true)
-                                    SeerrMediaStatus.Processing -> Triple(MR.strings.processing, Icons.Default.Schedule, true)
-                                    SeerrMediaStatus.PartiallyAvailable -> Triple(MR.strings.request_more, Icons.Default.Add, false)
-                                    else -> Triple(MR.strings.request, Icons.Default.Add, false)
-                                }
-
-                            if (isTonal) {
-                                FilledTonalButton(
+                            val mediaServerItem = item.mediaServerItem
+                            if (mediaServerItem != null) {
+                                Button(
                                     onClick = {
                                         if (enabled) {
-                                            if (onRequestClick != null) {
-                                                onRequestClick(item)
-                                            } else {
-                                                onMediaClick(item.id, item.mediaType)
-                                            }
+                                            onPlayItem?.invoke(mediaServerItem)
                                         }
                                     },
                                     modifier = Modifier.weight(1f),
                                     enabled = enabled,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = mediaServerItem.serverType.brandColor,
+                                        contentColor = Color.White,
+                                    ),
                                 ) {
-                                    Icon(
-                                        imageVector = buttonIcon,
+                                    Image(
+                                        painter = painterResource(mediaServerItem.serverType.icon),
                                         contentDescription = null,
                                         modifier = Modifier.size(16.dp),
                                     )
                                     Spacer(Modifier.width(4.dp))
                                     Text(
-                                        text = mokoString(buttonLabel),
+                                        text = mokoString(MR.strings.watch),
                                         style = MaterialTheme.typography.labelMedium,
                                     )
                                 }
                             } else {
-                                Button(
-                                    onClick = {
-                                        if (enabled) {
-                                            if (onRequestClick != null) {
-                                                onRequestClick(item)
+                                val mediaStatus = state.resolveMediaStatus(item)
+                                val (buttonLabel, buttonIcon, isTonal) =
+                                    when (mediaStatus) {
+                                        SeerrMediaStatus.Available -> {
+                                            if (item.mediaType == RequestType.Tv) {
+                                                Triple(MR.strings.request_more, Icons.Default.Add, false)
                                             } else {
-                                                onMediaClick(item.id, item.mediaType)
+                                                Triple(MR.strings.available, Icons.Default.Check, true)
                                             }
                                         }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    enabled = enabled,
-                                ) {
-                                    Icon(
-                                        imageVector = buttonIcon,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                    )
-                                    Spacer(Modifier.width(4.dp))
-                                    Text(
-                                        text = mokoString(buttonLabel),
-                                        style = MaterialTheme.typography.labelMedium,
-                                    )
+                                        SeerrMediaStatus.Pending -> Triple(MR.strings.pending, Icons.Default.Schedule, true)
+                                        SeerrMediaStatus.Processing -> Triple(MR.strings.processing, Icons.Default.Schedule, true)
+                                        SeerrMediaStatus.PartiallyAvailable -> Triple(MR.strings.request_more, Icons.Default.Add, false)
+                                        else -> Triple(MR.strings.request, Icons.Default.Add, false)
+                                    }
+
+                                if (isTonal) {
+                                    FilledTonalButton(
+                                        onClick = {
+                                            if (enabled) {
+                                                if (onRequestClick != null) {
+                                                    onRequestClick(item)
+                                                } else {
+                                                    onMediaClick(item.id, item.mediaType)
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        enabled = enabled,
+                                    ) {
+                                        Icon(
+                                            imageVector = buttonIcon,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(
+                                            text = mokoString(buttonLabel),
+                                            style = MaterialTheme.typography.labelMedium,
+                                        )
+                                    }
+                                } else {
+                                    Button(
+                                        onClick = {
+                                            if (enabled) {
+                                                if (onRequestClick != null) {
+                                                    onRequestClick(item)
+                                                } else {
+                                                    onMediaClick(item.id, item.mediaType)
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        enabled = enabled,
+                                    ) {
+                                        Icon(
+                                            imageVector = buttonIcon,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(
+                                            text = mokoString(buttonLabel),
+                                            style = MaterialTheme.typography.labelMedium,
+                                        )
+                                    }
                                 }
                             }
                         }

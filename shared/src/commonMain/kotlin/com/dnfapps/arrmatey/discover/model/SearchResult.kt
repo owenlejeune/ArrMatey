@@ -13,6 +13,8 @@ import com.dnfapps.arrmatey.arr.api.model.MovieRatings
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.SeriesRatings
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.utils.AspectRatio
 import kotlinx.serialization.Serializable
@@ -28,7 +30,9 @@ sealed interface SearchResult {
     val popularity: Double
     var originalRank: Int
 
-    val instanceType: InstanceType
+    val instanceType: InstanceType?
+
+    val searchFilter: SearchFilter
 
     @Serializable
     data class ArrMediaResult(
@@ -36,6 +40,8 @@ sealed interface SearchResult {
         val instanceId: Long? = null,
         override var originalRank: Int = 0,
         val instanceTypeOverride: InstanceType? = null,
+        val mediaServerType: MediaServerType? = null,
+        val mediaServerLabel: String? = null,
     ) : SearchResult {
         override val id: String = "arr_${instanceId ?: 0}_${media.guid}"
         override val title: String = media.title.orEmpty()
@@ -79,11 +85,32 @@ sealed interface SearchResult {
                 is MockMedia.Kapowarr,
                 -> InstanceType.Kapowarr
             }
+        override val searchFilter: SearchFilter
+            get() = SearchFilter.Instance(instanceType)
         val aspectRatio: AspectRatio =
             when (media) {
                 is SearchAudiobook, Audiobook, Author, Arrtist -> AspectRatio.Cover
                 else -> AspectRatio.Poster
             }
+    }
+
+    @Serializable
+    data class MediaServerResult(
+        val item: UnifiedMediaItem,
+        val serverType: MediaServerType,
+        val serverLabel: String,
+        override var originalRank: Int = 0,
+    ) : SearchResult {
+        override val id: String = "mediaserver_${serverType.name.lowercase()}_${item.id}"
+        override val title: String = item.title
+        override val cleanTitle: String = item.title
+        override val year: Int? = item.year
+        override val voteCount: Int = 0
+        override val voteAverage: Double = item.rating ?: 0.0
+        override val popularity: Double = 0.0
+        override val instanceType: InstanceType? = null
+        override val searchFilter: SearchFilter
+            get() = SearchFilter.MediaServer(serverType)
     }
 
     @Serializable
@@ -99,6 +126,8 @@ sealed interface SearchResult {
         override val voteAverage: Double = result.voteAverage
         override val popularity: Double = result.popularity
         override val instanceType: InstanceType = InstanceType.Seerr
+        override val searchFilter: SearchFilter
+            get() = SearchFilter.Instance(InstanceType.Seerr)
     }
 
     @Serializable
@@ -114,5 +143,7 @@ sealed interface SearchResult {
         override val voteAverage: Double = 0.0
         override val popularity: Double = result.popularity
         override val instanceType: InstanceType = InstanceType.Seerr
+        override val searchFilter: SearchFilter
+            get() = SearchFilter.Instance(InstanceType.Seerr)
     }
 }

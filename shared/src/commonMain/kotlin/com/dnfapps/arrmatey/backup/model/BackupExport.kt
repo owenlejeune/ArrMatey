@@ -9,4 +9,5 @@ data class BackupExport(
     val downloadClients: List<DownloadClientExport> = emptyList(),
     val customWebpages: List<CustomWebpageExport> = emptyList(),
     val globalPreferences: GlobalPreferencesExport? = null,
+    val mediaServers: List<MediaServerExport> = emptyList(),
 )

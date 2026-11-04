@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.model
 
 import com.dnfapps.arrmatey.arr.api.model.FinaleType
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisode
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 import com.dnfapps.arrmatey.arr.api.model.Episode as ArrEpisode
@@ -11,26 +12,33 @@ data class EpisodeWrapper(
     val arrEpisode: ArrEpisode? = null,
     val seerrEpisode: SeerrEpisode? = null,
     val bazarrEpisode: BazarrEpisode? = null,
+    val mediaServerEpisode: UnifiedMediaItem? = null,
     val isActive: Boolean = false,
     val activityProgress: String? = null,
 ) {
     val seasonNumber: Int
-        get() = arrEpisode?.seasonNumber ?: seerrEpisode?.seasonNumber ?: 0
+        get() = arrEpisode?.seasonNumber ?: seerrEpisode?.seasonNumber ?: mediaServerEpisode?.seasonNumber ?: 0
 
     val episodeNumber: Int
-        get() = arrEpisode?.episodeNumber ?: seerrEpisode?.episodeNumber ?: 0
+        get() = arrEpisode?.episodeNumber ?: seerrEpisode?.episodeNumber ?: mediaServerEpisode?.episodeNumber ?: 0
 
     val title: String?
-        get() = arrEpisode?.displayTitle ?: seerrEpisode?.name
+        get() = arrEpisode?.displayTitle ?: seerrEpisode?.name ?: mediaServerEpisode?.title
 
     val overview: String?
-        get() = arrEpisode?.overview ?: seerrEpisode?.overview
+        get() = arrEpisode?.overview ?: seerrEpisode?.overview ?: mediaServerEpisode?.summary
 
     val stillPath: String?
-        get() = seerrEpisode?.stillPath ?: arrEpisode?.images?.firstOrNull()?.remoteUrl
+        get() = seerrEpisode?.stillPath ?: arrEpisode?.images?.firstOrNull()?.remoteUrl ?: mediaServerEpisode?.stillUrl ?: mediaServerEpisode?.posterUrl
 
     val airDate: LocalDate?
-        get() = arrEpisode?.airDate ?: seerrEpisode?.airDate
+        get() = arrEpisode?.airDate ?: seerrEpisode?.airDate ?: mediaServerEpisode?.releaseDate?.let {
+            try {
+                LocalDate.parse(it.take(10))
+            } catch (_: Exception) {
+                null
+            }
+        }
 
     val airDateUtc: Instant?
         get() = arrEpisode?.airDateUtc

@@ -493,6 +493,28 @@ struct DashboardCardView: View {
             case .activeStreams: DashboardActiveStreamsSection(state: state, isEditing: isEditing, onItemClick: onStreamClick)
             case .instanceDashboard: DashboardInstanceDashboardSection(state: state, isEditing: isEditing)
             case .wolDevices: DashboardWolSection(state: state, isEditing: isEditing)
+            case .continueWatching:
+                DashboardContinueWatchingSection(
+                    state: state,
+                    isEditing: isEditing,
+                    onItemClick: { item in
+                        if !isEditing {
+                            navigationManager.navigateToMediaServerItemOnDashboard(item: item)
+                        }
+                    },
+                    onPlayItem: { item in
+                        if !isEditing {
+                            if let playLinks = KoinBridge.shared.getDashboardViewModel().getPlayLinks(item: item), let primary = playLinks.first as String? {
+                                let fallback = playLinks.second as String?
+                                if let pUrl = URL(string: primary), UIApplication.shared.canOpenURL(pUrl) {
+                                    UIApplication.shared.open(pUrl)
+                                } else if let fb = fallback, let fbUrl = URL(string: fb) {
+                                    UIApplication.shared.open(fbUrl)
+                                }
+                            }
+                        }
+                    }
+                )
             case .discoverFeed:
                 DashboardDiscoverFeedSection(
                     state: state,
@@ -1788,6 +1810,10 @@ struct AddDashboardCardSheet: View {
                     .foregroundColor(.accentColor)
             case .wakeOnLan:
                 Image(systemName: "power")
+                    .font(.system(size: 20))
+                    .foregroundColor(.accentColor)
+            case .mediaServer:
+                Image(systemName: "tv.fill")
                     .font(.system(size: 20))
                     .foregroundColor(.accentColor)
             default:

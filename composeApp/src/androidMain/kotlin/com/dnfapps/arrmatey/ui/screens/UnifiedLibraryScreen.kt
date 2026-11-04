@@ -18,6 +18,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
@@ -33,6 +36,7 @@ import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,10 +65,12 @@ import com.dnfapps.arrmatey.arr.api.model.ComicVolume
 import com.dnfapps.arrmatey.arr.api.model.getChangedRootFolderPath
 import com.dnfapps.arrmatey.arr.api.model.hasRootFolderChanged
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
+import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryTabTarget
 import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.*
@@ -77,6 +83,8 @@ import com.dnfapps.arrmatey.ui.components.MediaView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
+import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerFilterSortMenu
+import com.dnfapps.arrmatey.ui.components.mediaserver.MediaServerMediaView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
@@ -99,11 +107,25 @@ fun UnifiedLibraryScreen(
     onNavigateToSearch: (String, InstanceType, Long?) -> Unit,
     onNavigateToGlobalSearch: (String) -> Unit = {},
     onNavigateToDetails: (ArrMedia, InstanceType, Long?) -> Unit,
+    onNavigateToMediaServerDetails: ((UnifiedMediaItem) -> Unit)? = null,
     unifiedLibraryViewModel: UnifiedLibraryViewModel = koinViewModel(),
     globalPreferencesStore: PreferencesStore = org.koin.compose.koinInject(),
 ) {
     val context = LocalContext.current
     val navigationManager = navigationManager
+
+    val allTabs by unifiedLibraryViewModel.allTabs.collectAsStateWithLifecycle()
+    val selectedTab by unifiedLibraryViewModel.selectedTab.collectAsStateWithLifecycle()
+
+    val mediaServerLibraries by unifiedLibraryViewModel.mediaServerLibraries.collectAsStateWithLifecycle()
+    val selectedMediaServerLibrary by unifiedLibraryViewModel.selectedMediaServerLibrary.collectAsStateWithLifecycle()
+    val mediaServerFilteredItems by unifiedLibraryViewModel.mediaServerFilteredItems.collectAsStateWithLifecycle()
+    val mediaServerIsLoading by unifiedLibraryViewModel.mediaServerIsLoading.collectAsStateWithLifecycle()
+    val mediaServerIsRefreshing by unifiedLibraryViewModel.mediaServerIsRefreshing.collectAsStateWithLifecycle()
+    val mediaServerViewType by unifiedLibraryViewModel.mediaServerViewType.collectAsStateWithLifecycle()
+    val mediaServerSortBy by unifiedLibraryViewModel.mediaServerSortBy.collectAsStateWithLifecycle()
+    val mediaServerSortOrder by unifiedLibraryViewModel.mediaServerSortOrder.collectAsStateWithLifecycle()
+    val mediaServerWatchedFilter by unifiedLibraryViewModel.mediaServerWatchedFilter.collectAsStateWithLifecycle()
 
     val arrInstances by unifiedLibraryViewModel.arrInstances.collectAsStateWithLifecycle()
     val selectedInstance by unifiedLibraryViewModel.selectedInstance.collectAsStateWithLifecycle()
@@ -175,7 +197,9 @@ fun UnifiedLibraryScreen(
         unifiedLibraryViewModel.updateSearchQuery(textFieldState.text.toString())
     }
 
-    if (arrInstances.isEmpty() || selectedInstance == null) {
+    val currentTab = selectedTab ?: allTabs.firstOrNull()
+
+    if (allTabs.isEmpty() || currentTab == null) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -203,19 +227,21 @@ fun UnifiedLibraryScreen(
             }
         }
     } else {
-        val currentInstance = selectedInstance!!
-        val currentType = currentInstance.type
-        val showFab = !wideRailIsVisible && !isInSelectionMode
+        val currentInstance = (currentTab as? UnifiedLibraryTabTarget.Arr)?.instance
+        val currentType = currentInstance?.type
+        val showFab = currentInstance != null && !wideRailIsVisible && !isInSelectionMode
         val isFloatingBarVisible = LocalFloatingBarVisible.current
         val searchAllInstances by globalPreferencesStore.unifiedLibrarySearchAllInstances.collectAsStateWithLifecycle(
             true,
         )
 
         val handleAddSearch: (String) -> Unit = { query ->
-            if (searchAllInstances) {
-                onNavigateToGlobalSearch(query)
-            } else {
-                onNavigateToSearch(query, currentType, currentInstance.id)
+            if (currentInstance != null && currentType != null) {
+                if (searchAllInstances) {
+                    onNavigateToGlobalSearch(query)
+                } else {
+                    onNavigateToSearch(query, currentType, currentInstance.id)
+                }
             }
         }
 
@@ -273,39 +299,60 @@ fun UnifiedLibraryScreen(
                             isAllSelected = unifiedLibraryViewModel.areAllItemsSelected(),
                         )
                     } else {
+                        val searchPlaceholder =
+                            when (currentTab) {
+                                is UnifiedLibraryTabTarget.Arr -> mokoString(MR.strings.search_placeholder, currentTab.instance.label)
+                                is UnifiedLibraryTabTarget.MediaServer -> mokoString(MR.strings.search_placeholder, currentTab.integration.label)
+                            }
+
                         ArrAppBarWithSearch(
                             textFieldState = textFieldState,
                             textFieldEnabled = true,
-                            searchPlaceholder =
-                            mokoString(
-                                MR.strings.search_placeholder,
-                                currentInstance.label,
-                            ),
+                            searchPlaceholder = searchPlaceholder,
                             trailingIcon = {
-                                InstanceOptionsMenu(
-                                    onViewWebGui = {
-                                        context.openLink(currentInstance.url)
-                                    },
-                                    onRunRssSync = { unifiedLibraryViewModel.runRssSync() },
-                                    onSearchAllMissing = { unifiedLibraryViewModel.searchAllMissing() },
-                                    onSearchFiltered = { unifiedLibraryViewModel.searchFiltered() },
-                                    onUpdateLibrary = { unifiedLibraryViewModel.updateLibrary() },
-                                    onBackupDatabase = { unifiedLibraryViewModel.backupDatabase() },
-                                    onManualImport = if (currentInstance.supportsManualImport) {
-                                        { showManualImportSheet = true }
-                                    } else {
-                                        null
-                                    },
-                                    trigger = { onClick ->
-                                        IconButton(onClick = onClick) {
+                                when (currentTab) {
+                                    is UnifiedLibraryTabTarget.Arr -> {
+                                        val currentInstance = currentTab.instance
+                                        val currentType = currentInstance.type
+                                        InstanceOptionsMenu(
+                                            onViewWebGui = {
+                                                context.openLink(currentInstance.url)
+                                            },
+                                            onRunRssSync = { unifiedLibraryViewModel.runRssSync() },
+                                            onSearchAllMissing = { unifiedLibraryViewModel.searchAllMissing() },
+                                            onSearchFiltered = { unifiedLibraryViewModel.searchFiltered() },
+                                            onUpdateLibrary = { unifiedLibraryViewModel.updateLibrary() },
+                                            onBackupDatabase = { unifiedLibraryViewModel.backupDatabase() },
+                                            onManualImport = if (currentInstance.supportsManualImport) {
+                                                { showManualImportSheet = true }
+                                            } else {
+                                                null
+                                            },
+                                            trigger = { onClick ->
+                                                IconButton(onClick = onClick) {
+                                                    Image(
+                                                        painter = painterResource(currentType.icon),
+                                                        contentDescription = mokoString(currentType.resource),
+                                                        modifier = Modifier.size(24.dp),
+                                                    )
+                                                }
+                                            },
+                                        )
+                                    }
+                                    is UnifiedLibraryTabTarget.MediaServer -> {
+                                        val serverType = currentTab.integration.serverType
+                                        Box(
+                                            modifier = Modifier.size(48.dp),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
                                             Image(
-                                                painter = painterResource(currentType.icon),
-                                                contentDescription = mokoString(currentType.resource),
+                                                painter = painterResource(serverType.icon),
+                                                contentDescription = mokoString(serverType.resource),
                                                 modifier = Modifier.size(24.dp),
                                             )
                                         }
-                                    },
-                                )
+                                    }
+                                }
                             },
                             navigationIcon = {
                                 if (!wideRailIsVisible) {
@@ -313,19 +360,35 @@ fun UnifiedLibraryScreen(
                                 }
                             },
                             actions = {
-                                LibraryFilterMenu(
-                                    type = currentType,
-                                    filterBy = preferences.filterBy,
-                                    onFilterByChanged = { unifiedLibraryViewModel.updateFilterBy(it) },
-                                    customFilters = instanceData?.customFilters ?: emptyList(),
-                                    selectedCustomFilterId = preferences.customFilterId,
-                                    onCustomFilterChanged = { unifiedLibraryViewModel.updateCustomFilter(it) },
-                                    sortBy = preferences.sortBy,
-                                    onSortByChanged = { unifiedLibraryViewModel.updateSortBy(it) },
-                                    sortOrder = preferences.sortOrder,
-                                    onSortOrderChanged = { unifiedLibraryViewModel.updateSortOrder(it) },
-                                    onOpenViewCustomization = { showViewCustomizationSheet = true },
-                                )
+                                when (currentTab) {
+                                    is UnifiedLibraryTabTarget.MediaServer -> {
+                                        MediaServerFilterSortMenu(
+                                            sortBy = preferences.sortBy,
+                                            onSortByChanged = { unifiedLibraryViewModel.updateSortBy(it) },
+                                            sortOrder = preferences.sortOrder,
+                                            onSortOrderChanged = { unifiedLibraryViewModel.updateSortOrder(it) },
+                                            watchedFilter = mediaServerWatchedFilter,
+                                            onWatchedFilterChanged = { unifiedLibraryViewModel.setMediaServerWatchedFilter(it) },
+                                            onOpenViewCustomization = { showViewCustomizationSheet = true },
+                                        )
+                                    }
+
+                                    is UnifiedLibraryTabTarget.Arr -> {
+                                        LibraryFilterMenu(
+                                            type = currentTab.instance.type,
+                                            filterBy = preferences.filterBy,
+                                            onFilterByChanged = { unifiedLibraryViewModel.updateFilterBy(it) },
+                                            customFilters = instanceData?.customFilters ?: emptyList(),
+                                            selectedCustomFilterId = preferences.customFilterId,
+                                            onCustomFilterChanged = { unifiedLibraryViewModel.updateCustomFilter(it) },
+                                            sortBy = preferences.sortBy,
+                                            onSortByChanged = { unifiedLibraryViewModel.updateSortBy(it) },
+                                            sortOrder = preferences.sortOrder,
+                                            onSortOrderChanged = { unifiedLibraryViewModel.updateSortOrder(it) },
+                                            onOpenViewCustomization = { showViewCustomizationSheet = true },
+                                        )
+                                    }
+                                }
                             },
                         )
                     }
@@ -340,11 +403,11 @@ fun UnifiedLibraryScreen(
                     .fillMaxSize(),
             ) {
                 AnimatedVisibility(
-                    visible = arrInstances.size > 1 && !isInSelectionMode,
+                    visible = allTabs.size > 1 && !isInSelectionMode,
                     enter = expandVertically(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
                     exit = shrinkVertically(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
                 ) {
-                    val selectedIndex = arrInstances.indexOfFirst { it.id == currentInstance.id }.coerceAtLeast(0)
+                    val selectedIndex = allTabs.indexOfFirst { it.tabId == currentTab.tabId }.coerceAtLeast(0)
                     SecondaryScrollableTabRow(
                         selectedTabIndex = selectedIndex,
                         edgePadding = 16.dp,
@@ -352,105 +415,197 @@ fun UnifiedLibraryScreen(
                         contentColor = MaterialTheme.colorScheme.onSurface,
                         divider = {},
                     ) {
-                        arrInstances.forEach { tabInstance ->
-                            val isOffline = tabInstance.id in offlineInstanceIds
-                            Tab(
-                                selected = tabInstance.id == currentInstance.id,
-                                onClick = {
-                                    textFieldState.setTextAndPlaceCursorAtEnd("")
-                                    unifiedLibraryViewModel.selectInstance(tabInstance)
-                                },
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(tabInstance.type.tabIcon),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp),
-                                            tint = tabInstance.type.associatedColor,
-                                        )
-                                        Text(
-                                            text = tabInstance.label,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                        if (isOffline) {
-                                            Icon(
-                                                imageVector = Icons.Default.WifiOff,
-                                                contentDescription = mokoString(MR.strings.offline),
-                                                tint = MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.size(16.dp),
-                                            )
-                                        }
-                                    }
-                                },
-                            )
+                        allTabs.forEach { tabTarget ->
+                            when (tabTarget) {
+                                is UnifiedLibraryTabTarget.Arr -> {
+                                    val tabInstance = tabTarget.instance
+                                    val isOffline = tabInstance.id in offlineInstanceIds
+                                    Tab(
+                                        selected = tabTarget.tabId == currentTab.tabId,
+                                        onClick = {
+                                            textFieldState.setTextAndPlaceCursorAtEnd("")
+                                            unifiedLibraryViewModel.selectTab(tabTarget, userInitiated = true)
+                                        },
+                                        text = {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(tabInstance.type.tabIcon),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = tabInstance.type.associatedColor,
+                                                )
+                                                Text(
+                                                    text = tabInstance.label,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                )
+                                                if (isOffline) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.WifiOff,
+                                                        contentDescription = mokoString(MR.strings.offline),
+                                                        tint = MaterialTheme.colorScheme.error,
+                                                        modifier = Modifier.size(16.dp),
+                                                    )
+                                                }
+                                            }
+                                        },
+                                    )
+                                }
+
+                                is UnifiedLibraryTabTarget.MediaServer -> {
+                                    val integration = tabTarget.integration
+                                    Tab(
+                                        selected = tabTarget.tabId == currentTab.tabId,
+                                        onClick = {
+                                            textFieldState.setTextAndPlaceCursorAtEnd("")
+                                            unifiedLibraryViewModel.selectTab(tabTarget, userInitiated = true)
+                                        },
+                                        text = {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(integration.serverType.tabIcon),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = integration.serverType.brandColor,
+                                                )
+                                                Text(
+                                                    text = integration.label,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                )
+                                            }
+                                        },
+                                    )
+                                }
+                            }
                         }
                     }
                 }
 
-                Box(
-                    modifier =
-                    Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    when (val state = uiState) {
-                        is ArrLibrary.Initial -> {
-                            NoInstanceView(currentType)
-                        }
-
-                        is ArrLibrary.Loading -> {
-                            LoadingIndicator(
-                                modifier = Modifier.size(96.dp),
-                            )
-                        }
-
-                        is ArrLibrary.Error -> {
-                            ErrorView(
-                                errorType = state.type,
-                                message = state.message,
-                                onOpenSettings = {
-                                    navigationManager.openEditInstanceScreen(currentInstance.id)
-                                },
-                                onRetry = {
-                                    unifiedLibraryViewModel.refreshSelected()
-                                },
-                            )
-                        }
-
-                        is ArrLibrary.Success -> {
-                            PullToRefreshBox(
-                                isRefreshing = false,
-                                onRefresh = {
-                                    unifiedLibraryViewModel.refreshSelected()
-                                },
-                                modifier = Modifier.fillMaxSize(),
+                when (currentTab) {
+                    is UnifiedLibraryTabTarget.MediaServer -> {
+                        if (mediaServerLibraries.isNotEmpty()) {
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
-                                val items = state.items
-                                if (items.isEmpty() && textFieldState.text.isEmpty()) {
-                                    EmptyLibraryView(modifier = Modifier.align(Alignment.Center))
-                                } else if (items.isNotEmpty()) {
-                                    MediaView(
-                                        type = currentType,
-                                        items = items,
-                                        onItemClick = {
-                                            onNavigateToDetails(it, currentType, currentInstance.id)
-                                        },
-                                        preferences = preferences,
-                                        itemIsActive = { item ->
-                                            activeMediaIdsByInstance[currentInstance.id]?.contains(item.id) == true
-                                        },
-                                        multiSelectState = unifiedLibraryViewModel.selectionState,
-                                        qualityProfiles = instanceData?.qualityProfiles ?: emptyList(),
-                                        tags = instanceData?.tags ?: emptyList(),
+                                item {
+                                    FilterChip(
+                                        selected = selectedMediaServerLibrary == null,
+                                        onClick = { unifiedLibraryViewModel.selectMediaServerLibrary(null) },
+                                        label = { Text(mokoString(MR.strings.all)) },
                                     )
-                                } else {
-                                    EmptySearchResultsView(currentType, textFieldState.text.toString()) {
-                                        handleAddSearch(textFieldState.text.toString())
+                                }
+                                items(mediaServerLibraries, key = { it.id }) { lib ->
+                                    FilterChip(
+                                        selected = selectedMediaServerLibrary?.id == lib.id,
+                                        onClick = { unifiedLibraryViewModel.selectMediaServerLibrary(lib) },
+                                        label = { Text(lib.title) },
+                                    )
+                                }
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (mediaServerIsLoading && !mediaServerIsRefreshing) {
+                                LoadingIndicator(
+                                    modifier = Modifier.size(96.dp),
+                                )
+                            } else {
+                                PullToRefreshBox(
+                                    isRefreshing = mediaServerIsRefreshing,
+                                    onRefresh = { unifiedLibraryViewModel.refreshMediaServer() },
+                                    modifier = Modifier.fillMaxSize(),
+                                ) {
+                                    MediaServerMediaView(
+                                        items = mediaServerFilteredItems,
+                                        preferences = preferences,
+                                        onItemClick = { onNavigateToMediaServerDetails?.invoke(it) },
+                                        onToggleWatched = { unifiedLibraryViewModel.toggleMediaServerWatched(it) },
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    is UnifiedLibraryTabTarget.Arr -> {
+                        val tabInstance = currentTab.instance
+                        val tabType = tabInstance.type
+                        Box(
+                            modifier =
+                            Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            when (val state = uiState) {
+                                is ArrLibrary.Initial -> {
+                                    NoInstanceView(tabType)
+                                }
+
+                                is ArrLibrary.Loading -> {
+                                    LoadingIndicator(
+                                        modifier = Modifier.size(96.dp),
+                                    )
+                                }
+
+                                is ArrLibrary.Error -> {
+                                    ErrorView(
+                                        errorType = state.type,
+                                        message = state.message,
+                                        onOpenSettings = {
+                                            navigationManager.openEditInstanceScreen(tabInstance.id)
+                                        },
+                                        onRetry = {
+                                            unifiedLibraryViewModel.refreshSelected()
+                                        },
+                                    )
+                                }
+
+                                is ArrLibrary.Success -> {
+                                    PullToRefreshBox(
+                                        isRefreshing = false,
+                                        onRefresh = {
+                                            unifiedLibraryViewModel.refreshSelected()
+                                        },
+                                        modifier = Modifier.fillMaxSize(),
+                                    ) {
+                                        val items = state.items
+                                        if (items.isEmpty() && textFieldState.text.isEmpty()) {
+                                            EmptyLibraryView(modifier = Modifier.align(Alignment.Center))
+                                        } else if (items.isNotEmpty()) {
+                                            MediaView(
+                                                type = tabType,
+                                                items = items,
+                                                onItemClick = {
+                                                    onNavigateToDetails(it, tabType, tabInstance.id)
+                                                },
+                                                preferences = preferences,
+                                                itemIsActive = { item ->
+                                                    activeMediaIdsByInstance[tabInstance.id]?.contains(item.id) == true
+                                                },
+                                                multiSelectState = unifiedLibraryViewModel.selectionState,
+                                                qualityProfiles = instanceData?.qualityProfiles ?: emptyList(),
+                                                tags = instanceData?.tags ?: emptyList(),
+                                            )
+                                        } else {
+                                            EmptySearchResultsView(tabType, textFieldState.text.toString()) {
+                                                handleAddSearch(textFieldState.text.toString())
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -459,26 +614,7 @@ fun UnifiedLibraryScreen(
                 }
             }
 
-            if (showViewCustomizationSheet) {
-                ArrViewCustomizationSheet(
-                    onDismissRequest = { showViewCustomizationSheet = false },
-                    preferences = preferences,
-                    type = currentType,
-                    onViewTypeChanged = { unifiedLibraryViewModel.updateViewType(it) },
-                    onShowFullDetailsChanged = { unifiedLibraryViewModel.updateShowFullDetails(it) },
-                    onShowOverlayChanged = { unifiedLibraryViewModel.updateShowOverlay(it) },
-                    onShowBannerBackgroundChanged = { unifiedLibraryViewModel.updateShowBannerBackground(it) },
-                    onIncludeOverviewChanged = { unifiedLibraryViewModel.updateIncludeOverview(it) },
-                    onBannerBlurChanged = { unifiedLibraryViewModel.updateBannerBlur(it) },
-                    onGridDensityChanged = { unifiedLibraryViewModel.updateGridDensity(it) },
-                    onGridSpacingChanged = { unifiedLibraryViewModel.updateGridSpacing(it) },
-                    onPosterElevationChanged = { unifiedLibraryViewModel.updatePosterElevation(it) },
-                    onPosterRadiusChanged = { unifiedLibraryViewModel.updatePosterRadius(it) },
-                    onApplyGloballyChanged = { unifiedLibraryViewModel.updateApplyGlobally(it) },
-                )
-            }
-
-            if (isInSelectionMode) {
+            if (isInSelectionMode && currentInstance != null && currentType != null) {
                 FlexibleBottomSheet(
                     onDismissRequest = { unifiedLibraryViewModel.exitSelectionMode() },
                     sheetState =
@@ -575,7 +711,7 @@ fun UnifiedLibraryScreen(
                 )
             }
 
-            if (confirmBulkDelete) {
+            if (confirmBulkDelete && currentType != null) {
                 val isKapowarr = currentType == InstanceType.Kapowarr
                 ConfirmDeleteAlert(
                     deleteInProgress = false,
@@ -590,7 +726,7 @@ fun UnifiedLibraryScreen(
                 )
             }
 
-            if (showMonitorOptionsSheet) {
+            if (showMonitorOptionsSheet && currentType != null) {
                 MonitorOptionsSheet(
                     type = currentType,
                     onDismissRequest = { showMonitorOptionsSheet = false },
@@ -600,7 +736,7 @@ fun UnifiedLibraryScreen(
                 )
             }
 
-            if (showManualImportSheet) {
+            if (showManualImportSheet && currentInstance != null) {
                 DirectoryManualImportSheet(
                     instances = listOf(currentInstance),
                     initialInstanceId = currentInstance.id,
@@ -608,6 +744,29 @@ fun UnifiedLibraryScreen(
                     onSuccess = { unifiedLibraryViewModel.refreshSelected() },
                 )
             }
+        }
+
+        if (showViewCustomizationSheet) {
+            val customizationType = when (currentTab) {
+                is UnifiedLibraryTabTarget.Arr -> currentTab.instance.type
+                is UnifiedLibraryTabTarget.MediaServer -> InstanceType.Radarr
+            }
+            ArrViewCustomizationSheet(
+                onDismissRequest = { showViewCustomizationSheet = false },
+                preferences = preferences,
+                type = customizationType,
+                onViewTypeChanged = { unifiedLibraryViewModel.updateViewType(it) },
+                onShowFullDetailsChanged = { unifiedLibraryViewModel.updateShowFullDetails(it) },
+                onShowOverlayChanged = { unifiedLibraryViewModel.updateShowOverlay(it) },
+                onShowBannerBackgroundChanged = { unifiedLibraryViewModel.updateShowBannerBackground(it) },
+                onIncludeOverviewChanged = { unifiedLibraryViewModel.updateIncludeOverview(it) },
+                onBannerBlurChanged = { unifiedLibraryViewModel.updateBannerBlur(it) },
+                onGridDensityChanged = { unifiedLibraryViewModel.updateGridDensity(it) },
+                onGridSpacingChanged = { unifiedLibraryViewModel.updateGridSpacing(it) },
+                onPosterElevationChanged = { unifiedLibraryViewModel.updatePosterElevation(it) },
+                onPosterRadiusChanged = { unifiedLibraryViewModel.updatePosterRadius(it) },
+                onApplyGloballyChanged = { unifiedLibraryViewModel.updateApplyGlobally(it) },
+            )
         }
     }
 }

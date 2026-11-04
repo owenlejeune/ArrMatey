@@ -193,26 +193,30 @@ struct DiscoverSearchOverlay: View {
     let showBanners: Bool
     let onItemClick: (SearchResult) -> Void
 
-    @State private var selectedFilter: InstanceType? = nil
+    @State private var selectedFilter: SearchFilter? = nil
 
-    private var availableFilters: [InstanceType] {
-        var seen = Set<InstanceType>()
+    private var availableFilters: [SearchFilter] {
+        var seen = Set<String>()
         return items.compactMap { item in
-            if seen.insert(item.instanceType).inserted {
-                return item.instanceType
+            let filter = item.searchFilter
+            if seen.insert(filter.id).inserted {
+                return filter
             }
             return nil
         }
     }
 
-    private var itemCounts: [InstanceType: Int] {
-        Dictionary(grouping: items, by: { $0.instanceType })
-            .mapValues { $0.count }
+    private var itemCounts: [String: Int] {
+        var counts: [String: Int] = [:]
+        for item in items {
+            counts[item.searchFilter.id, default: 0] += 1
+        }
+        return counts
     }
 
     private var filteredItems: [SearchResult] {
         if let selectedFilter {
-            return items.filter { $0.instanceType == selectedFilter }
+            return items.filter { $0.searchFilter.id == selectedFilter.id }
         }
         return items
     }
@@ -224,7 +228,7 @@ struct DiscoverSearchOverlay: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if !items.isEmpty {
                 VStack(spacing: 0) {
-                    MediaInstanceFilterGlassRow(
+                    SearchFilterGlassRow(
                         selectedFilter: selectedFilter,
                         availableFilters: availableFilters,
                         itemCounts: itemCounts,
@@ -236,7 +240,7 @@ struct DiscoverSearchOverlay: View {
 
                     if filteredItems.isEmpty && selectedFilter != nil {
                         ContentUnavailableView {
-                            Label("No \(selectedFilter?.name ?? "") Results", systemImage: "line.3.horizontal.decrease.circle")
+                            Label("No \(filterTitle(for: selectedFilter)) Results", systemImage: "line.3.horizontal.decrease.circle")
                         } description: {
                             Text("No results match the selected media type filter.")
                         } actions: {
@@ -261,13 +265,23 @@ struct DiscoverSearchOverlay: View {
                         .listStyle(.plain)
                     }
                 }
-                .onChange(of: availableFilters) { _, newFilters in
-                    if let current = selectedFilter, !newFilters.contains(current) {
+                .onChange(of: availableFilters.map(\.id)) { _, newIds in
+                    if let current = selectedFilter, !newIds.contains(current.id) {
                         selectedFilter = nil
                     }
                 }
             }
         }
+    }
+
+    private func filterTitle(for filter: SearchFilter?) -> String {
+        guard let filter else { return "" }
+        if let inst = filter as? SearchFilterInstance {
+            return inst.type.name
+        } else if let ms = filter as? SearchFilterMediaServer {
+            return ms.serverType.name
+        }
+        return ""
     }
 }
 
@@ -277,7 +291,10 @@ struct DiscoverSearchResultRow: View {
     let onItemClick: (SearchResult) -> Void
 
     private var edgeColor: Color {
-        item.instanceType.associatedColor.toSwiftUI()
+        if let ms = item as? SearchResultMediaServerResult {
+            return ms.serverType.brandColor.toSwiftUI()
+        }
+        return item.instanceType?.associatedColor.toSwiftUI() ?? .accentColor
     }
 
     var body: some View {
@@ -289,6 +306,13 @@ struct DiscoverSearchResultRow: View {
                     instanceType: arrResult.instanceType,
                     showBannerBackground: showBanners,
                     includeOverview: true,
+                    edgeColor: edgeColor,
+                    mediaServerType: arrResult.mediaServerType
+                )
+            } else if let msResult = item as? SearchResultMediaServerResult {
+                MediaServerSearchResultView(
+                    result: msResult,
+                    showBannerBackground: showBanners,
                     edgeColor: edgeColor
                 )
             } else if let seerrMedia = item as? SearchResultSeerrMediaResult {
@@ -307,6 +331,110 @@ struct DiscoverSearchResultRow: View {
         .onTapGesture {
             onItemClick(item)
         }
+    }
+}
+
+struct MediaServerSearchResultView: View {
+    let result: SearchResultMediaServerResult
+    let showBannerBackground: Bool
+    var edgeColor: Color? = nil
+
+    var body: some View {
+        let item = result.item
+        HStack(spacing: 0) {
+            if let edgeColor = edgeColor {
+                Rectangle()
+                    .fill(edgeColor)
+                    .frame(width: 6)
+            }
+
+            HStack(alignment: .top, spacing: 16) {
+                let posterModel: String? = {
+                    if item.type == .episode {
+                        return item.seriesPosterUrl ?? item.posterUrl
+                    }
+                    return item.posterUrl
+                }()
+
+                GenericPosterItem(
+                    posterUrl: posterModel,
+                    aspectRatio: .poster,
+                    posterHeight: 150,
+                    additionalContent: {
+                        ZStack(alignment: .topTrailing) {
+                            Color.clear
+                            MediaServerBadgeOverlay(
+                                serverType: result.serverType,
+                                iconSize: 12,
+                                innerPadding: 3,
+                                borderWidth: 1
+                            )
+                            .padding(4)
+                        }
+                    }
+                )
+                .frame(width: 100, height: 150)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.title)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(showBannerBackground ? .white : .primary)
+                        .lineLimit(1)
+
+                    let subtitle: String = {
+                        let dateOrYear: String? = {
+                            if item.type == .episode {
+                                return item.formattedReleaseDate ?? item.year?.stringValue
+                            } else {
+                                return item.year?.stringValue ?? item.formattedReleaseDate
+                            }
+                        }()
+
+                        var metaParts: [String] = []
+                        if let dy = dateOrYear, !dy.isEmpty { metaParts.append(dy) }
+                        if let rt = item.formattedRuntime, !rt.isEmpty { metaParts.append(rt) }
+                        if let st = item.studio, !st.isEmpty { metaParts.append(st) }
+                        return metaParts.joined(separator: " • ")
+                    }()
+
+                    if !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(.system(size: 14))
+                            .foregroundColor(showBannerBackground ? .white.opacity(0.8) : .secondary)
+                            .lineLimit(1)
+                    }
+
+                    if let summary = item.summary, !summary.isEmpty {
+                        Text(summary)
+                            .font(.system(size: 14))
+                            .lineLimit(4)
+                            .foregroundColor(showBannerBackground ? .white.opacity(0.7) : .secondary)
+                            .padding(.top, 4)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+        }
+        .background {
+            ZStack {
+                if showBannerBackground {
+                    if let backdrop = item.backdropUrl {
+                        CachedAsyncImage(url: URL(string: backdrop)) { image in
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Color.gray
+                        }
+                        .blur(radius: 10)
+                    }
+                    Color.black.opacity(0.5)
+                } else {
+                    Color(.systemBackground)
+                }
+            }
+        }
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
     }
 }
 

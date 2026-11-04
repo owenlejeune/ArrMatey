@@ -56,6 +56,7 @@ struct EpisodeRow: View {
             arrEpisode: episode,
             seerrEpisode: nil,
             bazarrEpisode: nil,
+            mediaServerEpisode: nil,
             isActive: false,
             activityProgress: nil
         )

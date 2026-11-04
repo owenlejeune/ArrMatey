@@ -7,11 +7,13 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.discover.model.SearchFilter
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.extensions.mergeWithLibrary
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -34,6 +36,7 @@ class UnifiedSearchViewModel(
     private val globalSearchUseCase: GlobalSearchUseCase,
     private val preferencesStore: PreferencesStore,
     private val instanceManager: InstanceManager,
+    private val mediaServerManager: MediaServerManager? = null,
 ) : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -104,6 +107,7 @@ class UnifiedSearchViewModel(
                     }
 
                     is SearchResult.SeerrPersonResult -> result
+                    is SearchResult.MediaServerResult -> result
                 }
             }
         }.stateIn(
@@ -112,32 +116,40 @@ class UnifiedSearchViewModel(
             initialValue = emptyList(),
         )
 
-    private val _selectedTypeFilter = MutableStateFlow<InstanceType?>(null)
-    val selectedTypeFilter: StateFlow<InstanceType?> = _selectedTypeFilter.asStateFlow()
+    private val _selectedFilter = MutableStateFlow<SearchFilter?>(null)
+    val selectedFilter: StateFlow<SearchFilter?> = _selectedFilter.asStateFlow()
 
-    val availableTypeFilters: StateFlow<List<InstanceType>> =
-        instanceManager
-            .observeAllInstances()
-            .map { instances ->
-                val searchableTypes = InstanceType.arrs() + InstanceType.Seerr
-                instances
-                    .map { it.type }
-                    .distinct()
-                    .filter { it in searchableTypes }
-                    .sorted()
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList(),
-            )
+    val availableFilters: StateFlow<List<SearchFilter>> =
+        combine(
+            instanceManager.observeAllInstances(),
+            mediaServerManager?.activeRepositories ?: MutableStateFlow(emptyList()),
+        ) { instances, mediaRepos ->
+            val searchableTypes = InstanceType.arrs() + InstanceType.Seerr
+            val instanceFilters = instances
+                .map { it.type }
+                .distinct()
+                .filter { it in searchableTypes }
+                .sorted()
+                .map { SearchFilter.Instance(it) }
+
+            val mediaServerFilters = mediaRepos
+                .map { it.serverType }
+                .distinct()
+                .map { SearchFilter.MediaServer(it) }
+
+            instanceFilters + mediaServerFilters
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
 
     val filteredSearchState: StateFlow<List<SearchResult>> =
-        combine(searchState, _selectedTypeFilter) { results, filter ->
+        combine(searchState, _selectedFilter) { results, filter ->
             if (filter == null) {
                 results
             } else {
-                results.filter { it.instanceType == filter }
+                results.filter { filter.matches(it) }
             }
         }.stateIn(
             scope = viewModelScope,
@@ -145,8 +157,8 @@ class UnifiedSearchViewModel(
             initialValue = emptyList(),
         )
 
-    fun selectTypeFilter(type: InstanceType?) {
-        _selectedTypeFilter.value = type
+    fun selectFilter(filter: SearchFilter?) {
+        _selectedFilter.value = filter
     }
 
     private val _isSearching = MutableStateFlow(false)
@@ -175,7 +187,7 @@ class UnifiedSearchViewModel(
                     } else {
                         searchJob?.cancel()
                         _searchState.value = emptyList()
-                        _selectedTypeFilter.value = null
+                        _selectedFilter.value = null
                         _isSearching.value = false
                     }
                 }
@@ -202,7 +214,7 @@ class UnifiedSearchViewModel(
             _searchQuery.value = query
             if (query.isEmpty()) {
                 _searchState.value = emptyList()
-                _selectedTypeFilter.value = null
+                _selectedFilter.value = null
             }
         }
     }
@@ -211,7 +223,7 @@ class UnifiedSearchViewModel(
         searchJob?.cancel()
         _searchQuery.value = ""
         _searchState.value = emptyList()
-        _selectedTypeFilter.value = null
+        _selectedFilter.value = null
         _isSearching.value = false
     }
 }

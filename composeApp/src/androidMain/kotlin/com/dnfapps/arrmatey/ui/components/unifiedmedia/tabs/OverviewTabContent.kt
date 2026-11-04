@@ -16,9 +16,12 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerMediaDetails
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.seerr.state.MediaProvider
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DiscoverSection
@@ -47,6 +50,10 @@ fun OverviewTabContent(
     onMediaClick: (Long, RequestType) -> Unit,
     onLoadMoreRecommendations: () -> Unit,
     onLoadMoreSimilar: () -> Unit,
+    mediaServerDetails: List<MediaServerMediaDetails> = emptyList(),
+    onMediaServerWatchClick: ((String, MediaProvider, String?) -> Unit)? = null,
+    onMediaServerToggleWatched: ((MediaServerType, String, Boolean) -> Unit)? = null,
+    onMediaServerRefreshItem: ((MediaServerType, String) -> Unit)? = null,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(24.dp),

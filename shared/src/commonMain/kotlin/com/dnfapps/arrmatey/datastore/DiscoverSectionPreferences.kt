@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class DiscoverSectionPreferences(
     val visibleCategories: List<DiscoverCategory> = DiscoverCategory.entries,
     val hiddenCategories: List<DiscoverCategory> = emptyList(),
+    val hideInLibraryContent: Boolean = false,
 ) {
-    constructor() : this(DiscoverCategory.entries, emptyList())
+    constructor() : this(DiscoverCategory.entries, emptyList(), false)
 }

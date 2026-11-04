@@ -1,21 +1,27 @@
 package com.dnfapps.arrmatey.ui.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,7 +55,9 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.seerr.state.MediaProvider
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrStreamSession
@@ -69,7 +78,11 @@ import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.sheets.QueueItemInfoSheet
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.utils.MokoStrings
+import com.dnfapps.arrmatey.utils.handleWatchClick
 import com.dnfapps.arrmatey.utils.mokoString
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -89,9 +102,10 @@ fun EpisodeDetailsScreen(
     onBack: () -> Unit = {},
     onNavigateToSeriesRelease: (Long) -> Unit = {},
     viewModel: EpisodeDetailsViewModel =
-        koinViewModel(key = "${series.id}_${episode.id}", parameters = { parametersOf(series.id, episode) }),
+        koinViewModel(key = "${series.id}_${episode.id}", parameters = { parametersOf(series.id, episode, series) }),
 ) {
     val context = LocalContext.current
+    val moko: MokoStrings = koinInject()
     val scrollState = rememberScrollState()
 
     val currentEpisode by viewModel.episode.collectAsStateWithLifecycle()
@@ -101,6 +115,8 @@ fun EpisodeDetailsScreen(
     val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
     val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
     val tracearrState by viewModel.tracearrState.collectAsStateWithLifecycle()
+    val mediaServerList by viewModel.mediaServerDetails.collectAsStateWithLifecycle()
+    val firstMediaServer = mediaServerList.firstOrNull()
 
     var confirmDelete by remember { mutableStateOf(false) }
     var selectedQueueItem by remember { mutableStateOf<QueueItem?>(null) }
@@ -158,6 +174,48 @@ fun EpisodeDetailsScreen(
                     }
                 },
                 actions = {
+                    if (firstMediaServer != null) {
+                        val provider = when (firstMediaServer.serverType) {
+                            MediaServerType.Plex -> MediaProvider.Plex
+                            MediaServerType.Jellyfin -> MediaProvider.Jellyfin
+                            MediaServerType.Emby -> MediaProvider.Emby
+                        }
+                        IconButton(
+                            onClick = {
+                                handleWatchClick(
+                                    firstMediaServer.deepLinkUrl,
+                                    provider,
+                                    context,
+                                    moko,
+                                    firstMediaServer.webFallbackUrl,
+                                )
+                            },
+                            colors = IconButtonDefaults.headerBarColors(),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Watch",
+                                tint = firstMediaServer.serverType.brandColor,
+                            )
+                        }
+                        val isWatched = firstMediaServer.played
+                        IconButton(
+                            onClick = {
+                                viewModel.markMediaServerWatched(
+                                    firstMediaServer.serverType,
+                                    firstMediaServer.itemId,
+                                    !isWatched,
+                                )
+                            },
+                            colors = IconButtonDefaults.headerBarColors(),
+                        ) {
+                            Icon(
+                                imageVector = if (isWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                                contentDescription = if (isWatched) "Mark as Unwatched" else "Mark as Watched",
+                                tint = if (isWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                     IconButton(
                         onClick = { viewModel.toggleMonitor() },
                         colors = IconButtonDefaults.headerBarColors(),
@@ -226,11 +284,46 @@ fun EpisodeDetailsScreen(
                                 currentEpisode.runtimeString,
                                 currentEpisode.formatAirDateUtc(),
                             ).joinToString(BULLET)
-                        Text(
-                            text = statusRow,
-                            style = MaterialTheme.typography.bodySmall,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.padding(horizontal = 24.dp),
-                        )
+                        ) {
+                            Text(
+                                text = statusRow,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            if (firstMediaServer != null) {
+                                val isWatched = firstMediaServer.played
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier
+                                        .clip(MaterialTheme.shapes.small)
+                                        .clickable {
+                                            viewModel.markMediaServerWatched(
+                                                firstMediaServer.serverType,
+                                                firstMediaServer.itemId,
+                                                !isWatched,
+                                            )
+                                        }
+                                        .padding(vertical = 2.dp, horizontal = 4.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = if (isWatched) Icons.Default.CheckCircle else Icons.Default.CheckCircleOutline,
+                                        contentDescription = if (isWatched) "Mark as Unwatched" else "Mark as Watched",
+                                        tint = if (isWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Text(
+                                        text = if (isWatched) "Watched" else "Unwatched",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (isWatched) ArrGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = FontWeight.Medium,
+                                    )
+                                }
+                            }
+                        }
                         if (tracearrState.isTracearrConfigured) {
                             TracearrSummaryChipRow(
                                 uiState = tracearrState,

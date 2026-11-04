@@ -193,10 +193,13 @@ private fun WatchButton(
         when (buttonState.mediaProvider) {
             MediaProvider.Plex -> Color(0xFFE5A00D) to MR.images.plex
             MediaProvider.Jellyfin -> Color(0xff4747ed) to MR.images.jellyfin
+            MediaProvider.Emby -> Color(0xFF52B54B) to MR.images.emby
             MediaProvider.None -> MaterialTheme.colorScheme.primary to Icons.Default.PlayArrow
         }
 
-    if (buttonState.showWatchButton && buttonState.showWatchTrailerOption) {
+    val hasMultipleWatchOptions = buttonState.watchOptions.size > 1
+
+    if (buttonState.showWatchButton && (buttonState.showWatchTrailerOption || hasMultipleWatchOptions)) {
         var showWatchMenu by remember { mutableStateOf(false) }
         SplitButtonLayout(
             modifier = modifier,
@@ -243,16 +246,46 @@ private fun WatchButton(
                         DropdownMenuGroup(
                             shapes = MenuDefaults.groupShape(0, 1),
                         ) {
-                            DropdownMenuItem(
-                                text = { Text(mokoString(MR.strings.watch_trailer)) },
-                                onClick = {
-                                    buttonState.trailerUrl?.let(onWatchTrailerClicked)
-                                    showWatchMenu = false
-                                },
-                                leadingIcon = {
-                                    Icon(Icons.Default.PlayArrow, null)
-                                },
-                            )
+                            if (hasMultipleWatchOptions) {
+                                buttonState.watchOptions.forEach { option ->
+                                    val optIcon: Any = when (option.provider) {
+                                        MediaProvider.Plex -> MR.images.plex
+                                        MediaProvider.Jellyfin -> MR.images.jellyfin
+                                        MediaProvider.Emby -> MR.images.emby
+                                        MediaProvider.None -> Icons.Default.PlayArrow
+                                    }
+                                    DropdownMenuItem(
+                                        text = { Text("${mokoString(option.label)} (${option.serverName})") },
+                                        onClick = {
+                                            onWatchClicked(option.url, option.provider)
+                                            showWatchMenu = false
+                                        },
+                                        leadingIcon = {
+                                            if (optIcon is ImageResource) {
+                                                Image(
+                                                    painter = painterResource(optIcon),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(24.dp),
+                                                )
+                                            } else if (optIcon is ImageVector) {
+                                                Icon(optIcon, null)
+                                            }
+                                        },
+                                    )
+                                }
+                            }
+                            if (buttonState.showWatchTrailerOption) {
+                                DropdownMenuItem(
+                                    text = { Text(mokoString(MR.strings.watch_trailer)) },
+                                    onClick = {
+                                        buttonState.trailerUrl?.let(onWatchTrailerClicked)
+                                        showWatchMenu = false
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.PlayArrow, null)
+                                    },
+                                )
+                            }
                         }
                     }
                 }

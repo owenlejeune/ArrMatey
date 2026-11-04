@@ -269,9 +269,11 @@ class UnifiedMediaDetailsDataObserver(
                                 // Unadded lookup result; keeps the title and direct-add sheet available.
                                 ?: rawState.arrMedia
 
+                        val currentMediaServerItem = (uiStateFlow.value as? UnifiedMediaDetailsUiState.Success)?.mediaServerItem
                         uiStateFlow.value =
                             rawState.copy(
                                 arrMedia = effectiveArrMedia,
+                                mediaServerItem = currentMediaServerItem,
                                 availableInstances = if (!combineMedia && !rawState.hasArrId) emptyList() else allRepos.map { it.instance },
                                 selectedInstanceId = activeRepo?.instance?.id ?: instanceHandler.selectedInstanceId.value,
                                 instancePresences = if (!combineMedia && !rawState.hasArrId) emptyList() else presences,

@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
@@ -18,10 +19,15 @@ import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetPlaybackMonitoringRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerMediaDetails
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.model.TracearrMediaUiState
 import com.dnfapps.arrmatey.model.TracearrStatsWindowType
+import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsMediaServerHandler
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsTracearrHandler
+import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -45,12 +51,23 @@ class EpisodeDetailsViewModel(
     private val getTracearrInstanceRepositoryUseCase: GetTracearrInstanceRepositoryUseCase,
     private val getPlaybackMonitoringRepositoryUseCase: GetPlaybackMonitoringRepositoryUseCase? = null,
     private val preferencesStore: PreferencesStore,
+    private val mediaServerManager: MediaServerManager? = null,
+    private val initialSeries: ArrSeries? = null,
 ) : ViewModel() {
     private val _episode = MutableStateFlow(episode)
     val episode: StateFlow<Episode> = _episode.asStateFlow()
 
     private val tracearrHandler = UnifiedMediaDetailsTracearrHandler()
     val tracearrState: StateFlow<TracearrMediaUiState> = tracearrHandler.tracearrState
+
+    private val mediaServerHandler =
+        mediaServerManager?.let {
+            UnifiedMediaDetailsMediaServerHandler(viewModelScope, it)
+        }
+    val mediaServerDetails: StateFlow<List<MediaServerMediaDetails>> =
+        mediaServerHandler?.mediaServerDetails ?: MutableStateFlow(emptyList())
+    val isMediaServerSearching: StateFlow<Boolean> =
+        mediaServerHandler?.isSearching ?: MutableStateFlow(false)
 
     private val _history = MutableStateFlow<HistoryState>(HistoryState.Initial)
     val history: StateFlow<HistoryState> = _history.asStateFlow()
@@ -103,6 +120,22 @@ class EpisodeDetailsViewModel(
             getPlaybackMonitoringRepositoryUseCase = getPlaybackMonitoringRepositoryUseCase,
             preferencesStore = preferencesStore,
         )
+
+        val targetSeries = initialSeries ?: episode.series
+        if (targetSeries != null) {
+            searchMediaServersForEpisode(targetSeries)
+        }
+    }
+
+    private fun searchMediaServersForEpisode(series: ArrSeries) {
+        mediaServerHandler?.findEpisode(
+            tmdbId = null,
+            tvdbId = series.tvdbId,
+            title = series.title,
+            year = series.year,
+            seasonNumber = _episode.value.seasonNumber,
+            episodeNumber = _episode.value.episodeNumber,
+        )
     }
 
     private fun observeSelectedInstance() {
@@ -133,6 +166,21 @@ class EpisodeDetailsViewModel(
                 _monitorStatus.value = status
             }
         }
+
+        viewModelScope.launch {
+            repository.library.collect { result ->
+                if (result is NetworkResult.Success) {
+                    val s = result.data.firstOrNull { it.id == seriesId } as? ArrSeries
+                    if (s != null && mediaServerDetails.value.isEmpty()) {
+                        searchMediaServersForEpisode(s)
+                    }
+                }
+            }
+        }
+    }
+
+    fun markMediaServerWatched(serverType: MediaServerType, itemId: String, watched: Boolean) {
+        mediaServerHandler?.markWatched(serverType, itemId, watched)
     }
 
     fun toggleMonitor() {

@@ -106,4 +106,9 @@ class DashboardViewModelS: ObservableObject {
     func sendWol(device: WolDevice) {
         viewModel.sendWol(device: device)
     }
+
+    func getPlayLinks(for item: UnifiedMediaItem) -> (String, String?)? {
+        guard let pair = viewModel.getPlayLinks(item: item), let first = pair.first as String? else { return nil }
+        return (first, pair.second as String?)
+    }
 }

@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.client.GenericClient
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
 import com.dnfapps.arrmatey.arr.api.client.logging.DynamicLogger
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
@@ -148,6 +149,11 @@ import com.dnfapps.arrmatey.instances.usecase.UpdateCalendarFilterPreferenceUseC
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstanceUseCase
 import com.dnfapps.arrmatey.logging.FileSink
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
+import com.dnfapps.arrmatey.mediaserver.usecase.JellyfinQuickConnectUseCase
+import com.dnfapps.arrmatey.mediaserver.usecase.ResolveSonarrEpisodeUseCase
+import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerLibraryViewModel
+import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerSettingsViewModel
 import com.dnfapps.arrmatey.monitoring.usecase.GetPlaybackStreamsUseCase
 import com.dnfapps.arrmatey.monitoring.usecase.TerminatePlaybackStreamUseCase
 import com.dnfapps.arrmatey.monitoring.viewmodel.MonitoringHistoryViewModel
@@ -253,6 +259,7 @@ val databaseModule =
         single { get<ArrMateyDatabase>().getDownloadClientDao() }
         single { get<ArrMateyDatabase>().getCustomWebpageDao() }
         single { get<ArrMateyDatabase>().getWolDeviceDao() }
+        single { get<ArrMateyDatabase>().getMediaServerIntegrationDao() }
     }
 
 val networkModule =
@@ -296,6 +303,8 @@ val repositoryModule =
         single { DownloadClientRepository(get()) }
         single { DownloadClientManager(get(), get()) }
 
+        single { MediaServerManager(get(), get()) }
+
         single { CustomWebpageRepository(get()) }
         single { WolDeviceRepository(get()) }
 
@@ -336,6 +345,8 @@ val useCaseModule =
         factory { TestNewInstanceConnectionUseCase(get()) }
         factory { SeerrAuthUseCase(get()) }
         factory { PlexAuthUseCase(get()) }
+        factory { JellyfinQuickConnectUseCase(get()) }
+        factory { ResolveSonarrEpisodeUseCase(get()) }
         factory { CreateInstanceUseCase(get(), get()) }
         factory { UpdateInstanceUseCase(get()) }
         factory { DismissInfoCardUseCase(get()) }
@@ -386,7 +397,7 @@ val useCaseModule =
         factory { GetRecommendationsUseCase() }
         factory { GetSimilarUseCase() }
         factory { SearchSeerrUseCase() }
-        factory { GlobalSearchUseCase(get()) }
+        factory { GlobalSearchUseCase(get(), getOrNull()) }
         factory { SubmitRequestUseCase() }
         factory { GetIssuesUseCase() }
         factory { GetPersonCreditsUseCase() }
@@ -446,15 +457,28 @@ val useCaseModule =
         factory { PerformBazarrAutomaticSearchUseCase() }
         factory { DownloadBazarrSubtitleToDeviceUseCase(get(), get(), get()) }
         factory { CredentialMigrationUseCase(get(), get(), get()) }
-        factory { ExportDataUseCase(get(), get(), get(), get(), get(), get(), get()) }
-        factory { ImportDataUseCase(get(), get(), get(), get(), get(), get(), get()) }
+        factory { ExportDataUseCase(get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
+        factory { ImportDataUseCase(get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
         factory { GetInstancePresencesUseCase() }
-        factory { UpdateAllPreferencesUseCase(get(), get()) }
+        factory { UpdateAllPreferencesUseCase(get(), get(), getOrNull()) }
     }
 
 val viewModelModule =
     module {
-        viewModelOf(::DiscoverViewModel)
+        viewModel {
+            DiscoverViewModel(
+                instanceManager = get(),
+                instanceRepository = get(),
+                getTrendingUseCase = get(),
+                getDiscoverMoviesUseCase = get(),
+                getDiscoverTvUseCase = get(),
+                getUpcomingMoviesUseCase = get(),
+                getUpcomingTvUseCase = get(),
+                globalSearchUseCase = get(),
+                preferencesStore = get(),
+                mediaServerManager = getOrNull(),
+            )
+        }
         viewModelOf(::ActivityQueueViewModel)
         viewModel { params ->
             val firstParam: Any = params[0]
@@ -488,6 +512,10 @@ val viewModelModule =
                 instanceType = if (params.size() > 3) params[3] else null,
                 requestType = if (params.size() > 4) params[4] else null,
                 initialForcedInstanceId = if (params.size() > 5) params[5] else null,
+                mediaServerItemId = if (params.size() > 6) params[6] else null,
+                mediaServerType = if (params.size() > 7) params[7] else null,
+                initialTitle = if (params.size() > 8) params[8] else null,
+                initialYear = if (params.size() > 9) params[9] else null,
                 getUnifiedMediaDetailsUseCase = get(),
                 smartAddMediaUseCase = get(),
                 getArrInstanceRepositoryUseCase = get(),
@@ -522,6 +550,7 @@ val viewModelModule =
                 getSimilarUseCase = get(),
                 preferencesStore = get(),
                 logger = get(),
+                mediaServerManager = getOrNull(),
             )
         }
         viewModel { params ->
@@ -543,8 +572,26 @@ val viewModelModule =
             InteractiveSearchViewModel(type, defaultFilter, instanceId, get(), get(), get(), get())
         }
 
-        viewModel { (seriesId: Long, episode: Episode) ->
-            EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+        viewModel { params ->
+            val seriesId: Long = params[0]
+            val episode: Episode = params[1]
+            val series: ArrSeries? = if (params.size() > 2) params[2] else null
+            EpisodeDetailsViewModel(
+                seriesId = seriesId,
+                episode = episode,
+                getArrInstanceRepositoryUseCase = get(),
+                toggleMonitorUseCase = get(),
+                performAutomaticSearchUseCase = get(),
+                getEpisodeHistoryUseCase = get(),
+                deleteEpisodeUseCase = get(),
+                getActivityTasksUseCase = get(),
+                deleteQueueItemUseCase = get(),
+                getTracearrInstanceRepositoryUseCase = get(),
+                getPlaybackMonitoringRepositoryUseCase = getOrNull(),
+                preferencesStore = get(),
+                mediaServerManager = getOrNull(),
+                initialSeries = series,
+            )
         }
         viewModelOf(::MoreScreenViewModel)
         viewModelOf(::AddInstanceViewModel)
@@ -615,7 +662,7 @@ val viewModelModule =
         viewModel { (userRef: String) ->
             TracearrUserViewModel(userRef, get(), get(), get(), get())
         }
-        viewModelOf(::BackupViewModel)
+        viewModel { BackupViewModel(get(), get(), get(), get(), get(), getOrNull()) }
         viewModel {
             UnifiedLibraryViewModel(
                 get(),
@@ -633,12 +680,15 @@ val viewModelModule =
                 get(),
                 get(),
                 get(),
+                getOrNull(),
             )
         }
         viewModel { (item: QueueItem) ->
             ManualImportViewModel(item, get(), get())
         }
-        viewModelOf(::UnifiedSearchViewModel)
+        viewModel { UnifiedSearchViewModel(get(), get(), get(), getOrNull()) }
+        viewModelOf(::MediaServerSettingsViewModel)
+        viewModelOf(::MediaServerLibraryViewModel)
     }
 
 val resourcesModule =

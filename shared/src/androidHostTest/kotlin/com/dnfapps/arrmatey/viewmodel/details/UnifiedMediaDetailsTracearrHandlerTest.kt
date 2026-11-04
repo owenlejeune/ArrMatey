@@ -18,12 +18,15 @@ import com.dnfapps.networking.NetworkResult
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -31,6 +34,15 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UnifiedMediaDetailsTracearrHandlerTest {
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
+    @AfterTest
+    fun tearDown() {
+        // Keep Dispatchers.Main set so background continuations don't fail when resetting
+    }
     private val handler = UnifiedMediaDetailsTracearrHandler()
 
     @Test
@@ -41,22 +53,28 @@ class UnifiedMediaDetailsTracearrHandlerTest {
 
     @Test
     fun testObserveTracearrDataWhenDisabled() = runTest(UnconfinedTestDispatcher()) {
-        val repoUseCase = mockk<GetTracearrInstanceRepositoryUseCase>()
-        every { repoUseCase.observeSelected() } returns flowOf(null)
+        val testJob = kotlinx.coroutines.Job()
+        val testScope = kotlinx.coroutines.CoroutineScope(testJob + UnconfinedTestDispatcher())
+        try {
+            val repoUseCase = mockk<GetTracearrInstanceRepositoryUseCase>()
+            every { repoUseCase.observeSelected() } returns flowOf(null)
 
-        val prefsStore = mockk<PreferencesStore>()
-        every { prefsStore.tracearrDetailsIntegration } returns flowOf(false)
+            val prefsStore = mockk<PreferencesStore>()
+            every { prefsStore.tracearrDetailsIntegration } returns flowOf(false)
 
-        handler.observeTracearrData(
-            scope = TestScope(UnconfinedTestDispatcher()),
-            uiStateFlow = flowOf(UnifiedMediaDetailsUiState.Initial),
-            getTracearrInstanceRepositoryUseCase = repoUseCase,
-            preferencesStore = prefsStore,
-            initialTmdbId = 100L,
-            initialRequestType = null,
-        )
+            handler.observeTracearrData(
+                scope = testScope,
+                uiStateFlow = flowOf(UnifiedMediaDetailsUiState.Initial),
+                getTracearrInstanceRepositoryUseCase = repoUseCase,
+                preferencesStore = prefsStore,
+                initialTmdbId = 100L,
+                initialRequestType = null,
+            )
 
-        assertFalse(handler.tracearrState.value.isTracearrConfigured)
+            assertFalse(handler.tracearrState.value.isTracearrConfigured)
+        } finally {
+            testJob.cancel()
+        }
     }
 
     @Test

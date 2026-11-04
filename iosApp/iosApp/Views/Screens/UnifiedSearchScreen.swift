@@ -19,20 +19,23 @@ struct UnifiedSearchScreen: View {
         self._searchQuery = State(initialValue: query)
     }
     
-    private var itemCounts: [InstanceType: Int] {
-        Dictionary(grouping: viewModel.searchState, by: { $0.instanceType })
-            .mapValues { $0.count }
+    private var itemCounts: [String: Int] {
+        var counts: [String: Int] = [:]
+        for filter in viewModel.availableFilters {
+            counts[filter.id] = viewModel.searchState.filter { filter.matches(result: $0) }.count
+        }
+        return counts
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            MediaInstanceFilterGlassRow(
-                selectedFilter: viewModel.selectedTypeFilter,
-                availableFilters: viewModel.availableTypeFilters,
+            SearchFilterGlassRow(
+                selectedFilter: viewModel.selectedFilter,
+                availableFilters: viewModel.availableFilters,
                 itemCounts: itemCounts,
                 totalCount: viewModel.searchState.count,
                 onFilterSelected: { filter in
-                    viewModel.selectTypeFilter(filter)
+                    viewModel.selectFilter(filter)
                 }
             )
 
@@ -41,14 +44,14 @@ struct UnifiedSearchScreen: View {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if !viewModel.searchState.isEmpty {
-                    if viewModel.filteredSearchState.isEmpty && viewModel.selectedTypeFilter != nil {
+                    if viewModel.filteredSearchState.isEmpty && viewModel.selectedFilter != nil {
                         ContentUnavailableView {
-                            Label("No \(viewModel.selectedTypeFilter?.name ?? "") Results", systemImage: "line.3.horizontal.decrease.circle")
+                            Label("No \(viewModel.selectedFilter?.displayName ?? "") Results", systemImage: "line.3.horizontal.decrease.circle")
                         } description: {
-                            Text("No results match the selected media type filter.")
+                            Text("No results match the selected filter.")
                         } actions: {
                             Button(MR.strings().all.localized()) {
-                                viewModel.selectTypeFilter(nil)
+                                viewModel.selectFilter(nil)
                             }
                             .buttonStyle(.borderedProminent)
                         }
@@ -99,6 +102,8 @@ struct UnifiedSearchScreen: View {
     private func handleItemClick(_ result: SearchResult) {
         if let arrResult = result as? SearchResultArrMediaResult {
             navigationManager.goToArrDetailsOrPreview(item: arrResult.media, type: arrResult.instanceType, instanceId: arrResult.instanceId?.int64Value)
+        } else if let mediaServer = result as? SearchResultMediaServerResult {
+            navigationManager.navigateToMediaServerItem(item: mediaServer.item)
         } else if let seerrMedia = result as? SearchResultSeerrMediaResult {
             navigationManager.goToSeerrDetails(tmdbId: seerrMedia.result.id, requestType: seerrMedia.result.mediaType)
         } else if let seerrPerson = result as? SearchResultSeerrPersonResult {

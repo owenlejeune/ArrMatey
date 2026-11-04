@@ -5,11 +5,14 @@ import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -17,6 +20,15 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UnifiedMediaDetailsIssueHandlerTest {
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
+    @AfterTest
+    fun tearDown() {
+        // Keep Dispatchers.Main set so background continuations don't fail when resetting
+    }
     private val submitIssueUseCase: SubmitIssueUseCase = mockk()
     private val handler = UnifiedMediaDetailsIssueHandler(submitIssueUseCase)
 
@@ -50,7 +62,7 @@ class UnifiedMediaDetailsIssueHandlerTest {
 
         handler.setIssueMessage("Broken video")
         handler.submitIssue(
-            scope = TestScope(UnconfinedTestDispatcher()),
+            scope = this,
             seerrMediaIdProvider = { 999L },
         )
 

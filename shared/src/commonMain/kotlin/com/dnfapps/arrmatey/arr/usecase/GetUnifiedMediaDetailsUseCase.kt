@@ -201,13 +201,16 @@ class GetUnifiedMediaDetailsUseCase(
             if (arrState is MediaDetailsUiState.Error && seerrState is SeerrDetailsState.Error) {
                 return UnifiedMediaDetailsUiState.Error(arrState.message ?: seerrState.message)
             }
-            if (arrState is MediaDetailsUiState.Error) {
+            if (arrState is MediaDetailsUiState.Error && seerrState !is SeerrDetailsState.Loading) {
                 return UnifiedMediaDetailsUiState.Error(arrState.message)
             }
-            if (seerrState is SeerrDetailsState.Error) {
+            if (seerrState is SeerrDetailsState.Error && arrState !is MediaDetailsUiState.Loading) {
                 return UnifiedMediaDetailsUiState.Error(seerrState.message)
             }
-            return UnifiedMediaDetailsUiState.Loading
+            if (arrState is MediaDetailsUiState.Loading || seerrState is SeerrDetailsState.Loading) {
+                return UnifiedMediaDetailsUiState.Loading
+            }
+            return UnifiedMediaDetailsUiState.Error("Media details not found")
         }
 
         val arrSuccess = arrState as? MediaDetailsUiState.Success

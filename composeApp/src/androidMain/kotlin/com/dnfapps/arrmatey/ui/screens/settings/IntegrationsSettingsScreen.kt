@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerSettingsViewModel
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
 import com.dnfapps.arrmatey.model.SmartAddSeerrAction
@@ -55,6 +57,7 @@ import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
+import com.dnfapps.arrmatey.ui.sheets.MediaServerConfigurationSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import org.koin.compose.viewmodel.koinViewModel
@@ -64,9 +67,13 @@ import org.koin.compose.viewmodel.koinViewModel
 fun IntegrationsSettingsScreen(
     onBack: () -> Unit,
     viewModel: MoreScreenViewModel = koinViewModel(),
+    mediaServerViewModel: MediaServerSettingsViewModel = koinViewModel(),
 ) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    val configuredServers by mediaServerViewModel.configuredServers.collectAsStateWithLifecycle()
+    val configState by mediaServerViewModel.configState.collectAsStateWithLifecycle()
 
     val smartAddAction by viewModel.smartAddSeerrAction.collectAsStateWithLifecycle()
     val combineSeerrArrMedia by viewModel.combineSeerrArrMedia.collectAsStateWithLifecycle()
@@ -100,6 +107,98 @@ fun IntegrationsSettingsScreen(
                 .padding(bottom = navigationBarBottomInset() + 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            val plexIntegration = configuredServers[MediaServerType.Plex]
+            val jellyfinIntegration = configuredServers[MediaServerType.Jellyfin]
+            val embyIntegration = configuredServers[MediaServerType.Emby]
+
+            SettingsGroup(
+                title = mokoString(MR.strings.media_servers),
+                items = listOf(
+                    SettingItem(
+                        icon = IconSource.Resource(MediaServerType.Plex.icon),
+                        title = mokoString(MR.strings.plex),
+                        subtitle = if (plexIntegration != null) {
+                            val userPart = if (!plexIntegration.username.isNullOrBlank()) " • ${plexIntegration.username}" else ""
+                            "${mokoString(MR.strings.connected)}$userPart • ${plexIntegration.label}"
+                        } else {
+                            mokoString(MR.strings.not_configured)
+                        },
+                        onClick = { mediaServerViewModel.openConfiguration(MediaServerType.Plex) },
+                        trailingContent = {
+                            if (plexIntegration != null) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Resource(MediaServerType.Jellyfin.icon),
+                        title = mokoString(MR.strings.jellyfin),
+                        subtitle = if (jellyfinIntegration != null) {
+                            val userPart = if (!jellyfinIntegration.username.isNullOrBlank()) " • ${jellyfinIntegration.username}" else ""
+                            "${mokoString(MR.strings.connected)}$userPart • ${jellyfinIntegration.label}"
+                        } else {
+                            mokoString(MR.strings.not_configured)
+                        },
+                        onClick = { mediaServerViewModel.openConfiguration(MediaServerType.Jellyfin) },
+                        trailingContent = {
+                            if (jellyfinIntegration != null) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Resource(MediaServerType.Emby.icon),
+                        title = mokoString(MR.strings.emby),
+                        subtitle = if (embyIntegration != null) {
+                            val userPart = if (!embyIntegration.username.isNullOrBlank()) " • ${embyIntegration.username}" else ""
+                            "${mokoString(MR.strings.connected)}$userPart • ${embyIntegration.label}"
+                        } else {
+                            mokoString(MR.strings.not_configured)
+                        },
+                        onClick = { mediaServerViewModel.openConfiguration(MediaServerType.Emby) },
+                        trailingContent = {
+                            if (embyIntegration != null) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        },
+                    ),
+                ),
+                footer = mokoString(MR.strings.media_servers_description),
+            )
+
             SettingsGroup(
                 title = mokoString(MR.strings.seerr),
                 items =
@@ -261,5 +360,12 @@ fun IntegrationsSettingsScreen(
                 footer = mokoString(MR.strings.tmdb_links_description),
             )
         }
+    }
+
+    if (configState != null) {
+        MediaServerConfigurationSheet(
+            onDismiss = { mediaServerViewModel.closeConfiguration() },
+            viewModel = mediaServerViewModel,
+        )
     }
 }

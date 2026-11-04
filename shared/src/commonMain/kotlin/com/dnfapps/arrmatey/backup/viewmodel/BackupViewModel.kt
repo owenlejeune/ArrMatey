@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.database.dao.CustomWebpageDao
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import com.dnfapps.arrmatey.extensions.nowTimestamp
+import com.dnfapps.arrmatey.mediaserver.database.MediaServerIntegrationDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,7 @@ class BackupViewModel(
     private val instanceDao: InstanceDao,
     private val downloadClientDao: DownloadClientDao,
     private val customWebpageDao: CustomWebpageDao,
+    private val mediaServerIntegrationDao: MediaServerIntegrationDao? = null,
 ) : ViewModel() {
     private val _exportUiState = MutableStateFlow(ExportUiState())
     val exportUiState: StateFlow<ExportUiState> = _exportUiState.asStateFlow()
@@ -37,14 +39,17 @@ class BackupViewModel(
         val instances = instanceDao.getAllInstances()
         val downloadClients = downloadClientDao.getAllDownloadClients()
         val customWebpages = customWebpageDao.getAllWebpagesList()
+        val mediaServers = mediaServerIntegrationDao?.getAll() ?: emptyList()
         _exportUiState.update {
             it.copy(
                 instances = instances,
                 downloadClients = downloadClients,
                 customWebpages = customWebpages,
+                mediaServers = mediaServers,
                 selectedInstanceIds = instances.map { i -> i.id }.toSet(),
                 selectedDownloadClientIds = downloadClients.map { c -> c.id }.toSet(),
                 selectedCustomWebpageIds = customWebpages.map { w -> w.id }.toSet(),
+                selectedMediaServerIds = mediaServers.map { s -> s.id }.toSet(),
             )
         }
     }
@@ -74,6 +79,14 @@ class BackupViewModel(
             val newSelected = state.selectedCustomWebpageIds.toMutableSet()
             if (newSelected.contains(id)) newSelected.remove(id) else newSelected.add(id)
             state.copy(selectedCustomWebpageIds = newSelected)
+        }
+    }
+
+    fun toggleMediaServerSelection(id: Long) {
+        _exportUiState.update { state ->
+            val newSelected = state.selectedMediaServerIds.toMutableSet()
+            if (newSelected.contains(id)) newSelected.remove(id) else newSelected.add(id)
+            state.copy(selectedMediaServerIds = newSelected)
         }
     }
 
@@ -109,6 +122,7 @@ class BackupViewModel(
                     selectedInstanceIds = state.selectedInstanceIds,
                     selectedDownloadClientIds = state.selectedDownloadClientIds,
                     selectedCustomWebpageIds = state.selectedCustomWebpageIds,
+                    selectedMediaServerIds = state.selectedMediaServerIds,
                     includeInstancePreferences = state.includeInstancePreferences,
                     includeTabPreferences = state.includeTabPreferences,
                     includeUiPreferences = state.includeUiPreferences,
@@ -134,6 +148,7 @@ class BackupViewModel(
                 selectedInstanceIndices = emptySet(),
                 selectedDownloadClientIndices = emptySet(),
                 selectedCustomWebpageIndices = emptySet(),
+                selectedMediaServerIndices = emptySet(),
                 error = null,
             )
         }
@@ -146,6 +161,7 @@ class BackupViewModel(
                         selectedInstanceIndices = backup.instances.indices.toSet(),
                         selectedDownloadClientIndices = backup.downloadClients.indices.toSet(),
                         selectedCustomWebpageIndices = backup.customWebpages.indices.toSet(),
+                        selectedMediaServerIndices = backup.mediaServers.indices.toSet(),
                         error = null,
                     )
                 }
@@ -179,6 +195,14 @@ class BackupViewModel(
         }
     }
 
+    fun toggleImportMediaServerSelection(index: Int) {
+        _importUiState.update { state ->
+            val newSelected = state.selectedMediaServerIndices.toMutableSet()
+            if (newSelected.contains(index)) newSelected.remove(index) else newSelected.add(index)
+            state.copy(selectedMediaServerIndices = newSelected)
+        }
+    }
+
     fun toggleImportTabPreferences() {
         _importUiState.update { it.copy(importTabPreferences = !it.importTabPreferences) }
     }
@@ -202,6 +226,7 @@ class BackupViewModel(
                 selectedInstanceIndices = state.selectedInstanceIndices,
                 selectedDownloadClientIndices = state.selectedDownloadClientIndices,
                 selectedCustomWebpageIndices = state.selectedCustomWebpageIndices,
+                selectedMediaServerIndices = state.selectedMediaServerIndices,
                 importTabPreferences = state.importTabPreferences,
                 importUiPreferences = state.importUiPreferences,
                 importIntegrationsPreferences = state.importIntegrationsPreferences,

@@ -234,6 +234,21 @@ fun DiscoverHomeScreen(
                     onRefresh = { viewModel.refresh() },
                     modifier = Modifier.fillMaxSize(),
                 ) {
+                    val handleDiscoverItemClick: (com.dnfapps.arrmatey.seerr.api.model.DiscoverResult) -> Unit = { item ->
+                        val mediaServerItem = item.mediaServerItem
+                        if (mediaServerItem != null) {
+                            onItemClick(
+                                SearchResult.MediaServerResult(
+                                    item = mediaServerItem,
+                                    serverType = mediaServerItem.serverType,
+                                    serverLabel = mediaServerItem.serverType.name,
+                                ),
+                            )
+                        } else {
+                            onItemClick(SearchResult.SeerrMediaResult(item))
+                        }
+                    }
+
                     Column(
                         modifier =
                         Modifier
@@ -248,7 +263,7 @@ fun DiscoverHomeScreen(
                                         title = MR.strings.trending,
                                         icon = Icons.AutoMirrored.Filled.TrendingUp,
                                         data = trendingState,
-                                        onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                        onItemClick = handleDiscoverItemClick,
                                         onLoadMore = { viewModel.loadNextTrendingPage() },
                                         onSeeMore = { onSeeMore(DiscoverCategory.TRENDING) },
                                     )
@@ -258,7 +273,7 @@ fun DiscoverHomeScreen(
                                         title = MR.strings.popular_movies,
                                         icon = Icons.Default.Movie,
                                         data = moviesState,
-                                        onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                        onItemClick = handleDiscoverItemClick,
                                         onLoadMore = { viewModel.loadNextMoviesPage() },
                                         onSeeMore = { onSeeMore(DiscoverCategory.POPULAR_MOVIES) },
                                     )
@@ -268,7 +283,7 @@ fun DiscoverHomeScreen(
                                         title = MR.strings.popular_series,
                                         icon = Icons.Default.Tv,
                                         data = tvState,
-                                        onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                        onItemClick = handleDiscoverItemClick,
                                         onLoadMore = { viewModel.loadNextTvPage() },
                                         onSeeMore = { onSeeMore(DiscoverCategory.POPULAR_SERIES) },
                                     )
@@ -278,7 +293,7 @@ fun DiscoverHomeScreen(
                                         title = MR.strings.upcoming_movies,
                                         icon = Icons.Default.Event,
                                         data = upcomingMoviesState,
-                                        onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                        onItemClick = handleDiscoverItemClick,
                                         onLoadMore = { viewModel.loadNextUpcomingMoviesPage() },
                                         onSeeMore = { onSeeMore(DiscoverCategory.UPCOMING_MOVIES) },
                                     )
@@ -288,7 +303,7 @@ fun DiscoverHomeScreen(
                                         title = MR.strings.upcoming_series,
                                         icon = Icons.Default.Event,
                                         data = upcomingTvState,
-                                        onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
+                                        onItemClick = handleDiscoverItemClick,
                                         onLoadMore = { viewModel.loadNextUpcomingTvPage() },
                                         onSeeMore = { onSeeMore(DiscoverCategory.UPCOMING_SERIES) },
                                     )

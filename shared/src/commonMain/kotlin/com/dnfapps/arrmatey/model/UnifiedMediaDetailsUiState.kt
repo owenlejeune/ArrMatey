@@ -22,6 +22,8 @@ import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.getUpcomingDateString
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.seerr.api.model.ImdbRating
 import com.dnfapps.arrmatey.seerr.api.model.Keyword
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
@@ -45,6 +47,7 @@ sealed interface UnifiedMediaDetailsUiState {
     data class Success(
         val arrMedia: ArrMedia? = null,
         val seerrMedia: RequestMediaDetails? = null,
+        val mediaServerItem: UnifiedMediaItem? = null,
         val bazarrMedia: BazarrDetails? = null,
         val rtRatings: RottenTomatoesRating? = null,
         val imdbRatings: ImdbRating? = null,
@@ -85,7 +88,9 @@ sealed interface UnifiedMediaDetailsUiState {
                 arrMedia is ArrMovie ||
                     arrMedia is ArrSeries ||
                     seerrMedia is MovieDetails ||
-                    seerrMedia is TvDetails
+                    seerrMedia is TvDetails ||
+                    mediaServerItem?.type == MediaType.MOVIE ||
+                    mediaServerItem?.type == MediaType.SHOW
 
         val canDeleteFile: Boolean
             get() = canDeleteFile()
@@ -132,19 +137,19 @@ sealed interface UnifiedMediaDetailsUiState {
         }
 
         val displayTitle: String?
-            get() = seerrMedia?.displayTitle ?: arrMedia?.title
+            get() = seerrMedia?.displayTitle ?: arrMedia?.title ?: mediaServerItem?.title
 
         val tagline: String?
             get() = seerrMedia?.tagline
 
         val overview: String?
-            get() = seerrMedia?.overview ?: arrMedia?.overview
+            get() = seerrMedia?.overview ?: arrMedia?.overview ?: mediaServerItem?.summary
 
         val bannerUrl: String?
-            get() = seerrMedia?.fullBackdropPath ?: arrMedia?.getBanner()?.remoteUrl
+            get() = seerrMedia?.fullBackdropPath ?: arrMedia?.getBanner()?.remoteUrl ?: mediaServerItem?.backdropUrl
 
         val posterUrl: String?
-            get() = seerrMedia?.fullPosterPath ?: arrMedia?.getPoster()?.remoteUrl
+            get() = seerrMedia?.fullPosterPath ?: arrMedia?.getPoster()?.remoteUrl ?: mediaServerItem?.posterUrl
 
         val clearLogo: String?
             get() = arrMedia?.getClearLogo()?.remoteUrl
@@ -193,10 +198,12 @@ sealed interface UnifiedMediaDetailsUiState {
             }
 
         val year: String?
-            get() = seerrMedia?.displayDate?.format("yyyy") ?: arrMedia?.year?.toString()
+            get() = seerrMedia?.displayDate?.format("yyyy") ?: arrMedia?.year?.toString() ?: mediaServerItem?.year?.toString()
 
         val runtimeString: String?
-            get() = (seerrMedia as? MovieDetails)?.runtime?.formatMinutesAsRuntime() ?: arrMedia?.runtimeString
+            get() = (seerrMedia as? MovieDetails)?.runtime?.formatMinutesAsRuntime()
+                ?: arrMedia?.runtimeString
+                ?: mediaServerItem?.durationTicks?.let { (it / 600_000_000L).toInt().formatMinutesAsRuntime() }
 
         val releasedBy: String?
             get() = arrMedia?.releasedBy

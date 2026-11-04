@@ -6,11 +6,13 @@ import com.dnfapps.arrmatey.backup.model.CustomWebpageExport
 import com.dnfapps.arrmatey.backup.model.DownloadClientExport
 import com.dnfapps.arrmatey.backup.model.GlobalPreferencesExport
 import com.dnfapps.arrmatey.backup.model.InstanceExport
+import com.dnfapps.arrmatey.backup.model.MediaServerExport
 import com.dnfapps.arrmatey.database.dao.CustomWebpageDao
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
+import com.dnfapps.arrmatey.mediaserver.database.MediaServerIntegrationDao
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 
@@ -22,12 +24,14 @@ class ExportDataUseCase(
     private val preferencesStore: PreferencesStore,
     private val transportEncryptor: TransportEncryptor,
     private val json: Json,
+    private val mediaServerIntegrationDao: MediaServerIntegrationDao? = null,
 ) {
     suspend operator fun invoke(
         password: String,
         selectedInstanceIds: Set<Long>,
         selectedDownloadClientIds: Set<Long>,
         selectedCustomWebpageIds: Set<Long> = emptySet(),
+        selectedMediaServerIds: Set<Long> = emptySet(),
         includeInstancePreferences: Boolean,
         includeTabPreferences: Boolean,
         includeUiPreferences: Boolean,
@@ -109,6 +113,31 @@ class ExportDataUseCase(
                 )
             }
 
+        val mediaServers =
+            mediaServerIntegrationDao
+                ?.getAll()
+                ?.filter { it.id in selectedMediaServerIds }
+                ?: emptyList()
+
+        val mediaServerExports =
+            mediaServers.map { server ->
+                MediaServerExport(
+                    serverType = server.serverType,
+                    label = server.label,
+                    url = server.url,
+                    token = server.token.value,
+                    userId = server.userId,
+                    username = server.username,
+                    clientIdentifier = server.clientIdentifier,
+                    serverId = server.serverId,
+                    enabled = server.enabled,
+                    localNetworkEnabled = server.localNetworkEnabled,
+                    localNetworkSsids = server.localNetworkSsids,
+                    localNetworkEndpoint = server.localNetworkEndpoint,
+                    headers = server.headers,
+                )
+            }
+
         val globalPreferences =
             if (includeTabPreferences || includeUiPreferences || includeIntegrationsPreferences) {
                 GlobalPreferencesExport(
@@ -154,6 +183,7 @@ class ExportDataUseCase(
                 downloadClients = downloadClientExports,
                 customWebpages = customWebpageExports,
                 globalPreferences = globalPreferences,
+                mediaServers = mediaServerExports,
             )
 
         val jsonString = json.encodeToString(backup)

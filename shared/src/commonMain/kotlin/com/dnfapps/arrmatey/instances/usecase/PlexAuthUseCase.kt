@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.instances.usecase
 
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
 import com.dnfapps.arrmatey.instances.model.PlexPinResponse
+import com.dnfapps.arrmatey.mediaserver.model.PlexServerResource
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeGet
 import com.dnfapps.networking.safePost
@@ -38,6 +39,12 @@ class PlexAuthUseCase(
 
     suspend fun checkPin(pinId: Long, pinCode: String, clientIdentifier: String): NetworkResult<PlexPinResponse> = httpClient.safeGet<PlexPinResponse>("https://plex.tv/api/v2/pins/$pinId?code=$pinCode") {
         header("Accept", "application/json")
+        header("X-Plex-Client-Identifier", clientIdentifier)
+    }
+
+    suspend fun fetchPlexServers(authToken: String, clientIdentifier: String): NetworkResult<List<PlexServerResource>> = httpClient.safeGet<List<PlexServerResource>>("https://plex.tv/api/v2/resources?includeHttps=1") {
+        header("Accept", "application/json")
+        header("X-Plex-Token", authToken)
         header("X-Plex-Client-Identifier", clientIdentifier)
     }
 

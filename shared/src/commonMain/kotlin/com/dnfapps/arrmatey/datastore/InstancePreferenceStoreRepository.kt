@@ -10,4 +10,10 @@ class InstancePreferenceStoreRepository(
     fun getInstancePreferences(instanceId: Long, defaultSortBy: SortBy = SortBy.Title) = dataStoreMap.getOrPut(instanceId) {
         InstancePreferenceStore(instanceId, dataStoreFactory, defaultSortBy)
     }
+
+    fun getMediaServerPreferences(serverId: Long, defaultSortBy: SortBy = SortBy.Title): InstancePreferenceStore = getInstancePreferences(mediaServerPrefId(serverId), defaultSortBy)
+
+    companion object {
+        fun mediaServerPrefId(serverId: Long): Long = -10_000L - serverId
+    }
 }

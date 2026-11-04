@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -70,6 +71,8 @@ import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.entensions.BULLET
 import com.dnfapps.arrmatey.entensions.rememberHtml
 import com.dnfapps.arrmatey.entensions.unlessEmpty
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
@@ -197,7 +200,10 @@ fun SearchResultItem(
 ) {
     val edgeColor =
         remember(item) {
-            item.instanceType.associatedColor
+            when (item) {
+                is SearchResult.MediaServerResult -> item.serverType.brandColor
+                else -> item.instanceType?.associatedColor
+            }
         }
 
     when (item) {
@@ -209,6 +215,18 @@ fun SearchResultItem(
                 includeOverview = includeOverview,
                 showBannerBackground = showBanners,
                 edgeColor = edgeColor,
+                mediaServerType = item.mediaServerType,
+                isSearch = true,
+            )
+        }
+
+        is SearchResult.MediaServerResult -> {
+            MediaServerSearchResultItem(
+                result = item,
+                onItemClick = onItemClick,
+                includeOverview = includeOverview,
+                showBannerBackground = showBanners,
+                edgeColor = item.serverType.brandColor,
             )
         }
 
@@ -252,6 +270,9 @@ fun <T : ArrMedia> MediaItem(
     edgeColor: Color? = null,
     qualityProfiles: List<QualityProfile> = emptyList(),
     tags: List<Tag> = emptyList(),
+    secondaryBadge: @Composable (() -> Unit)? = null,
+    mediaServerType: MediaServerType? = null,
+    isSearch: Boolean = false,
 ) {
     val isSelected = multiSelectState.isSelected(item.guid)
     val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
@@ -372,6 +393,18 @@ fun <T : ArrMedia> MediaItem(
                                     }
                                 }
                             }
+                            if (mediaServerType != null) {
+                                MediaServerBadgeOverlay(
+                                    serverType = mediaServerType,
+                                    modifier =
+                                    Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(4.dp),
+                                    iconSize = 12.dp,
+                                    innerPadding = 3.dp,
+                                    borderWidth = 1.dp,
+                                )
+                            }
                         },
                     )
 
@@ -395,7 +428,10 @@ fun <T : ArrMedia> MediaItem(
                             showBannerBackground = hasBanner,
                             qualityProfiles = qualityProfiles,
                             tags = tags,
+                            isSearch = isSearch,
                         )
+
+                        secondaryBadge?.invoke()
 
                         if (includeOverview && item.overview != null) {
                             val parsed = item.overview?.rememberHtml() ?: ""
@@ -476,6 +512,9 @@ fun SeerrMediaItem(
                         item = item,
                         modifier = Modifier.width(76.dp),
                         showFooter = false,
+                        badgeIconSize = 12.dp,
+                        badgeInnerPadding = 3.dp,
+                        badgePadding = 4.dp,
                     )
 
                     Column(
@@ -507,6 +546,206 @@ fun SeerrMediaItem(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = if (hasBanner) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 4,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun MediaServerSearchResultItem(
+    result: SearchResult.MediaServerResult,
+    onItemClick: (SearchResult) -> Unit,
+    modifier: Modifier = Modifier,
+    includeOverview: Boolean = true,
+    showBannerBackground: Boolean = true,
+    bannerModel: Any? = null,
+    edgeColor: Color? = null,
+) {
+    val item = result.item
+    val hasBanner =
+        remember(showBannerBackground, bannerModel, item) {
+            showBannerBackground && (bannerModel != null || item.backdropUrl != null)
+        }
+
+    Card(
+        modifier =
+        modifier
+            .fillMaxWidth()
+            .combinedClickable(onClick = { onItemClick(result) }),
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        colors =
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        ),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        ) {
+            if (edgeColor != null) {
+                Box(
+                    modifier =
+                    Modifier
+                        .width(6.dp)
+                        .fillMaxHeight()
+                        .background(edgeColor),
+                )
+            }
+
+            Box(
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                if (hasBanner) {
+                    BannerView(
+                        bannerModel = bannerModel ?: item.backdropUrl?.let { rememberRemoteImageData(it) },
+                        blur = Blur.Normal,
+                        modifier = Modifier.matchParentSize(),
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    val posterModel = when (item.type) {
+                        MediaType.EPISODE -> item.seriesPosterUrl ?: item.posterUrl ?: ""
+                        else -> item.posterUrl ?: ""
+                    }
+
+                    BasePosterItem(
+                        model = posterModel,
+                        modifier = Modifier.width(76.dp),
+                        aspectRatio = AspectRatio.Poster,
+                        additionalContent = {
+                            MediaServerBadgeOverlay(
+                                serverType = result.serverType,
+                                modifier =
+                                Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(4.dp),
+                                iconSize = 12.dp,
+                                innerPadding = 3.dp,
+                                borderWidth = 1.dp,
+                            )
+                            if (item.played) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                    shadowElevation = 2.dp,
+                                    modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(4.dp),
+                                ) {
+                                    Box(
+                                        modifier = Modifier.padding(2.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = mokoString(MR.strings.watched),
+                                            tint = Color(0xFF50D27D),
+                                            modifier = Modifier.size(14.dp),
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                    )
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        val titleColor = if (hasBanner) Color.White else MaterialTheme.colorScheme.onSurface
+                        val subtitleColor = if (hasBanner) Color.White.copy(alpha = 0.9f) else MaterialTheme.colorScheme.onSurfaceVariant
+                        val metaColor = if (hasBanner) Color.White.copy(alpha = 0.75f) else MaterialTheme.colorScheme.onSurfaceVariant
+
+                        Text(
+                            text = item.title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = titleColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        val dateOrYear = when (item.type) {
+                            MediaType.EPISODE -> item.formattedReleaseDate ?: item.year?.toString()
+                            else -> item.year?.toString() ?: item.formattedReleaseDate
+                        }
+                        val runtime = item.formattedRuntime
+                        val studio = item.studio?.takeIf { it.isNotBlank() }
+
+                        val secondLine = when (item.type) {
+                            MediaType.EPISODE -> {
+                                val seriesDetails = listOfNotNull(
+                                    item.seriesTitle?.takeIf { it.isNotBlank() },
+                                    if (item.seasonNumber != null && item.episodeNumber != null) "S${item.seasonNumber}:E${item.episodeNumber}" else item.type.displayName,
+                                ).joinToString(BULLET)
+                                seriesDetails.ifBlank { item.type.displayName }
+                            }
+                            MediaType.MOVIE -> listOfNotNull(
+                                dateOrYear,
+                                runtime,
+                                studio,
+                            ).joinToString(BULLET)
+                            else -> listOfNotNull(
+                                dateOrYear,
+                                runtime,
+                                item.type.displayName,
+                            ).joinToString(BULLET)
+                        }
+
+                        if (secondLine.isNotBlank()) {
+                            Text(
+                                text = secondLine,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = subtitleColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+
+                        val thirdLine = when (item.type) {
+                            MediaType.EPISODE -> listOfNotNull(
+                                dateOrYear,
+                                runtime,
+                                studio,
+                                result.serverLabel,
+                            ).joinToString(BULLET)
+                            MediaType.MOVIE -> result.serverLabel
+                            else -> listOfNotNull(
+                                studio,
+                                result.serverLabel,
+                            ).joinToString(BULLET)
+                        }
+
+                        if (thirdLine.isNotBlank()) {
+                            Text(
+                                text = thirdLine,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = metaColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+
+                        val summary = item.summary
+                        if (includeOverview && !summary.isNullOrBlank()) {
+                            Text(
+                                text = summary,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = metaColor,
+                                maxLines = 3,
                                 overflow = TextOverflow.Ellipsis,
                             )
                         }
@@ -598,11 +837,12 @@ private fun MediaDetails(
     showBannerBackground: Boolean,
     qualityProfiles: List<QualityProfile> = emptyList(),
     tags: List<Tag> = emptyList(),
+    isSearch: Boolean = false,
 ) {
     Column {
         when (item) {
             is ArrSeries -> SeriesDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
-            is ArrMovie -> MovieDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
+            is ArrMovie -> MovieDetails(item, isActive, showBannerBackground, qualityProfiles, tags, isSearch = isSearch)
             is Arrtist -> ArtistDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
             is Author -> AuthorDetails(item, isActive, showBannerBackground, qualityProfiles, tags)
             is Audiobook -> AudiobookDetails(item, isActive, showBannerBackground)
@@ -711,24 +951,50 @@ private fun MovieDetails(
     showBannerBackground: Boolean,
     qualityProfiles: List<QualityProfile> = emptyList(),
     tags: List<Tag> = emptyList(),
+    isSearch: Boolean = false,
 ) {
     val contentColor = if (showBannerBackground) Color.White else MaterialTheme.colorScheme.onSurface
     val secondaryContentColor = if (showBannerBackground) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
 
-    val nextReleaseDate =
-        item.digitalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.digital_release)}: $it" }
-            ?: item.physicalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.physical_release)}: $it" }
-            ?: item.inCinemas?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.in_cinemas)}: $it" }
-            ?: item.releaseDate?.format("MMMM d, yyyy")
-            ?: item.year.takeIf { it > 0 }?.toString()
+    if (isSearch) {
+        val instantYears = listOfNotNull(
+            item.inCinemas,
+            item.digitalRelease,
+            item.physicalRelease,
+            item.releaseDate,
+        ).mapNotNull { it.format("yyyy").toIntOrNull() }.filter { it > 0 }
 
-    nextReleaseDate?.let {
-        Text(it, color = contentColor, style = MaterialTheme.typography.bodyMedium)
-    }
+        val allYears = instantYears + listOfNotNull(
+            item.year.takeIf { it > 0 },
+            item.secondaryYear?.takeIf { it > 0 },
+        )
+        val earliestYear = allYears.minOrNull()?.toString()
 
-    val firstLine = listOfNotNull(item.runtimeString, item.studio).filter { it.isNotBlank() }.joinToString(" • ")
-    firstLine.unlessEmpty { firstLine ->
-        Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+        val secondLine = listOfNotNull(
+            earliestYear,
+            item.runtimeString.takeIf { it.isNotBlank() },
+            item.studio?.takeIf { it.isNotBlank() },
+        ).joinToString(BULLET)
+
+        if (secondLine.isNotBlank()) {
+            Text(secondLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+        }
+    } else {
+        val nextReleaseDate =
+            item.digitalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.digital_release)}: $it" }
+                ?: item.physicalRelease?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.physical_release)}: $it" }
+                ?: item.inCinemas?.format("MMM d, yyyy")?.let { "${mokoString(MR.strings.in_cinemas)}: $it" }
+                ?: item.releaseDate?.format("MMMM d, yyyy")
+                ?: item.year.takeIf { it > 0 }?.toString()
+
+        nextReleaseDate?.let {
+            Text(it, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+        }
+
+        val firstLine = listOfNotNull(item.runtimeString, item.studio).filter { it.isNotBlank() }.joinToString(" • ")
+        firstLine.unlessEmpty { firstLine ->
+            Text(firstLine, color = contentColor, style = MaterialTheme.typography.bodyMedium)
+        }
     }
 
     val qualityLabel =

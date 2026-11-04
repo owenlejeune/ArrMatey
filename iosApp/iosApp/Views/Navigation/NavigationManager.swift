@@ -368,7 +368,11 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         instanceType: InstanceType? = nil,
         requestType: RequestType? = nil,
         instanceId: Int64? = nil,
-        episodeId: Int64? = nil
+        episodeId: Int64? = nil,
+        mediaServerItemId: String? = nil,
+        mediaServerType: MediaServerType? = nil,
+        initialTitle: String? = nil,
+        initialYear: Int32? = nil
     ) {
         let route = MediaRoute.details(
             arrId: arrId,
@@ -377,7 +381,11 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             instanceType: instanceType,
             requestType: requestType,
             instanceId: instanceId,
-            episodeId: episodeId
+            episodeId: episodeId,
+            mediaServerItemId: mediaServerItemId,
+            mediaServerType: mediaServerType,
+            initialTitle: initialTitle,
+            initialYear: initialYear
         )
         if showLauncher {
             push(route)
@@ -425,7 +433,11 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         instanceType: InstanceType? = nil,
         requestType: RequestType? = nil,
         instanceId: Int64? = nil,
-        episodeId: Int64? = nil
+        episodeId: Int64? = nil,
+        mediaServerItemId: String? = nil,
+        mediaServerType: MediaServerType? = nil,
+        initialTitle: String? = nil,
+        initialYear: Int32? = nil
     ) {
         let route = MediaRoute.details(
             arrId: arrId,
@@ -434,7 +446,11 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             instanceType: instanceType,
             requestType: requestType,
             instanceId: instanceId,
-            episodeId: episodeId
+            episodeId: episodeId,
+            mediaServerItemId: mediaServerItemId,
+            mediaServerType: mediaServerType,
+            initialTitle: initialTitle,
+            initialYear: initialYear
         )
         if showLauncher {
             push(route)
@@ -490,6 +506,124 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             }
         } else {
             goToDetailsOnDashboard(arrId: item.id?.int64Value, tmdbId: tmdbId, tvdbId: tvdbId, instanceType: type, instanceId: instanceId)
+        }
+    }
+
+    func goToMediaServerDetails(item: UnifiedMediaItem) {
+        let reqType: RequestType? = {
+            switch item.type {
+            case .movie: return .movie
+            case .show, .season, .episode: return .tv
+            default: return nil
+            }
+        }()
+        let instType: InstanceType? = {
+            switch item.type {
+            case .movie: return .radarr
+            case .show, .season, .episode: return .sonarr
+            case .track, .album: return .lidarr
+            default: return nil
+            }
+        }()
+        goToDetails(
+            arrId: nil,
+            tmdbId: item.tmdbId?.int64Value,
+            tvdbId: item.tvdbId?.int64Value,
+            instanceType: instType,
+            requestType: reqType,
+            mediaServerItemId: item.id,
+            mediaServerType: item.serverType,
+            initialTitle: item.title,
+            initialYear: item.year?.int32Value
+        )
+    }
+
+    func goToMediaServerDetailsOnDashboard(item: UnifiedMediaItem) {
+        let reqType: RequestType? = {
+            switch item.type {
+            case .movie: return .movie
+            case .show, .season, .episode: return .tv
+            default: return nil
+            }
+        }()
+        let instType: InstanceType? = {
+            switch item.type {
+            case .movie: return .radarr
+            case .show, .season, .episode: return .sonarr
+            case .track, .album: return .lidarr
+            default: return nil
+            }
+        }()
+        goToDetailsOnDashboard(
+            arrId: nil,
+            tmdbId: item.tmdbId?.int64Value,
+            tvdbId: item.tvdbId?.int64Value,
+            instanceType: instType,
+            requestType: reqType,
+            mediaServerItemId: item.id,
+            mediaServerType: item.serverType,
+            initialTitle: item.title,
+            initialYear: item.year?.int32Value
+        )
+    }
+
+    func navigateToMediaServerItem(item: UnifiedMediaItem) {
+        if item.type == .episode {
+            Task { @MainActor in
+                let resolveUseCase = KoinBridge.shared.getResolveSonarrEpisodeUseCase()
+                if let match = try? await resolveUseCase.invoke(item: item) {
+                    let series = match.series
+                    let episode = match.episode
+                    let instanceId = match.instanceId
+                    self.goToDetails(
+                        arrId: series.id?.int64Value,
+                        tmdbId: series.tmdbId?.int64Value,
+                        tvdbId: series.tvdbId,
+                        instanceType: .sonarr,
+                        requestType: .tv,
+                        instanceId: instanceId,
+                        initialTitle: series.title,
+                        initialYear: series.year.int32Value
+                    )
+                    let epRoute = MediaRoute.episodeDetails(series.toJson(), episode.toJson(), instanceId: instanceId)
+                    self.go(to: epRoute, of: .sonarr)
+                } else {
+                    self.goToMediaServerDetails(item: item)
+                }
+            }
+        } else {
+            goToMediaServerDetails(item: item)
+        }
+    }
+
+    func navigateToMediaServerItemOnDashboard(item: UnifiedMediaItem) {
+        if item.type == .episode {
+            Task { @MainActor in
+                let resolveUseCase = KoinBridge.shared.getResolveSonarrEpisodeUseCase()
+                if let match = try? await resolveUseCase.invoke(item: item) {
+                    let series = match.series
+                    let episode = match.episode
+                    let instanceId = match.instanceId
+                    self.goToDetailsOnDashboard(
+                        arrId: series.id?.int64Value,
+                        tmdbId: series.tmdbId?.int64Value,
+                        tvdbId: series.tvdbId,
+                        instanceType: .sonarr,
+                        requestType: .tv,
+                        instanceId: instanceId,
+                        initialTitle: series.title,
+                        initialYear: series.year.int32Value
+                    )
+                    let epRoute = MediaRoute.episodeDetails(series.toJson(), episode.toJson(), instanceId: instanceId)
+                    var dPath = self.paths[TabItemStandard.dashboard.key] ?? NavigationPath()
+                    dPath.append(epRoute)
+                    self.paths[TabItemStandard.dashboard.key] = dPath
+                } else {
+                    self.goToMediaServerDetailsOnDashboard(item: item)
+                }
+            }
+        } else {
+            goToMediaServerDetailsOnDashboard(item: item)
         }
     }
 
@@ -669,7 +803,11 @@ enum MediaRoute: Hashable {
         instanceType: InstanceType? = nil,
         requestType: RequestType? = nil,
         instanceId: Int64? = nil,
-        episodeId: Int64? = nil
+        episodeId: Int64? = nil,
+        mediaServerItemId: String? = nil,
+        mediaServerType: MediaServerType? = nil,
+        initialTitle: String? = nil,
+        initialYear: Int32? = nil
     )
     case search(query: String, type: InstanceType, instanceId: Int64? = nil)
     case globalSearch(query: String = "")

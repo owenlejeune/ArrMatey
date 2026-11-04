@@ -12,7 +12,13 @@ import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
+import com.dnfapps.arrmatey.mediaserver.usecase.ResolveSonarrEpisodeUseCase
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * A generic navigator that manages a reactive backstack of screens.
@@ -108,6 +114,8 @@ class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
 
 class TracearrTabNavigator : BaseNavigator<NavKey>(TracearrScreen.Main)
 
+class MediaServerLibraryTabNavigator : BaseNavigator<NavKey>(MediaServerLibraryScreen.Library)
+
 /**
  * Shared media navigation extensions.
  */
@@ -157,7 +165,25 @@ fun Navigator<*>.toDetails(
     type: InstanceType? = null,
     instanceId: Long? = null,
     episodeId: Long? = null,
-) = nav().navigateTo(MediaScreen.Details(id?.takeIf { it > 0 }, tmdbId, tvdbId, requestType, type, instanceId, episodeId))
+    mediaServerItemId: String? = null,
+    mediaServerType: MediaServerType? = null,
+    initialTitle: String? = null,
+    initialYear: Int? = null,
+) = nav().navigateTo(
+    MediaScreen.Details(
+        id = id?.takeIf { it > 0 },
+        tmdbId = tmdbId,
+        tvdbId = tvdbId,
+        requestType = requestType,
+        type = type,
+        instanceId = instanceId,
+        episodeId = episodeId,
+        mediaServerItemId = mediaServerItemId,
+        mediaServerType = mediaServerType,
+        initialTitle = initialTitle,
+        initialYear = initialYear,
+    ),
+)
 
 fun Navigator<*>.replaceDetails(
     id: Long? = null,
@@ -167,7 +193,25 @@ fun Navigator<*>.replaceDetails(
     type: InstanceType? = null,
     instanceId: Long? = null,
     episodeId: Long? = null,
-) = nav().replaceCurrent(MediaScreen.Details(id?.takeIf { it > 0 }, tmdbId, tvdbId, requestType, type, instanceId, episodeId))
+    mediaServerItemId: String? = null,
+    mediaServerType: MediaServerType? = null,
+    initialTitle: String? = null,
+    initialYear: Int? = null,
+) = nav().replaceCurrent(
+    MediaScreen.Details(
+        id = id?.takeIf { it > 0 },
+        tmdbId = tmdbId,
+        tvdbId = tvdbId,
+        requestType = requestType,
+        type = type,
+        instanceId = instanceId,
+        episodeId = episodeId,
+        mediaServerItemId = mediaServerItemId,
+        mediaServerType = mediaServerType,
+        initialTitle = initialTitle,
+        initialYear = initialYear,
+    ),
+)
 
 fun Navigator<*>.toMediaDetails(
     media: ArrMedia,
@@ -188,6 +232,72 @@ fun Navigator<*>.toMediaDetails(
         type = type,
         instanceId = instanceId,
     )
+}
+
+fun Navigator<*>.toMediaDetails(item: UnifiedMediaItem) {
+    val reqType = when (item.type) {
+        MediaType.MOVIE -> RequestType.Movie
+        MediaType.SHOW, MediaType.SEASON, MediaType.EPISODE -> RequestType.Tv
+        else -> null
+    }
+    val instanceType = when (item.type) {
+        MediaType.MOVIE -> InstanceType.Radarr
+        MediaType.SHOW, MediaType.SEASON, MediaType.EPISODE -> InstanceType.Sonarr
+        MediaType.TRACK, MediaType.ALBUM -> InstanceType.Lidarr
+        else -> null
+    }
+    toDetails(
+        id = null,
+        tmdbId = item.tmdbId,
+        tvdbId = item.tvdbId,
+        requestType = reqType,
+        type = instanceType,
+        mediaServerItemId = item.id,
+        mediaServerType = item.serverType,
+        initialTitle = item.title,
+        initialYear = item.year,
+    )
+}
+
+private var isResolvingMediaServerItem = false
+
+fun Navigator<*>.navigateToMediaServerItem(
+    item: UnifiedMediaItem,
+    scope: CoroutineScope,
+    resolveEpisodeUseCase: ResolveSonarrEpisodeUseCase,
+) {
+    if (item.type == MediaType.EPISODE) {
+        if (isResolvingMediaServerItem) return
+        isResolvingMediaServerItem = true
+        scope.launch {
+            try {
+                val match = resolveEpisodeUseCase(item)
+                if (match != null) {
+                    toDetails(
+                        id = match.series.id,
+                        tmdbId = match.series.tmdbId?.takeIf { it > 0 },
+                        tvdbId = match.series.tvdbId.takeIf { it > 0 },
+                        type = InstanceType.Sonarr,
+                        requestType = RequestType.Tv,
+                        instanceId = match.instanceId,
+                        initialTitle = match.series.title,
+                        initialYear = match.series.year,
+                    )
+                    toEpisodeDetails(
+                        series = match.series,
+                        episode = match.episode,
+                        instanceId = match.instanceId,
+                    )
+                } else {
+                    toMediaDetails(item)
+                }
+            } finally {
+                isResolvingMediaServerItem = false
+            }
+        }
+    } else {
+        toMediaDetails(item)
+    }
 }
 
 fun <T> Navigator<*>.toPreview(

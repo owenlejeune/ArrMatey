@@ -19,6 +19,9 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
+import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverMoviesUseCase
@@ -54,6 +57,7 @@ class DiscoverViewModel(
     private val getUpcomingTvUseCase: GetUpcomingTvUseCase,
     private val globalSearchUseCase: GlobalSearchUseCase,
     private val preferencesStore: PreferencesStore,
+    private val mediaServerManager: MediaServerManager? = null,
 ) : ViewModel() {
     private val seerrRepository: StateFlow<SeerrInstanceRepository?> =
         instanceManager
@@ -93,24 +97,99 @@ class DiscoverViewModel(
     private var searchPagingController: PagingController<DiscoverResult>? = null
     private var searchJob: Job? = null
 
-    private val _trendingState = MutableStateFlow(PagedData<DiscoverResult>())
-    val trendingState: StateFlow<PagedData<DiscoverResult>> = _trendingState.asStateFlow()
+    private val allLibraries: StateFlow<List<ArrMedia>> =
+        instanceManager
+            .observeAllArrLibraries()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList(),
+            )
 
-    private val _moviesState = MutableStateFlow(PagedData<DiscoverResult>())
-    val moviesState: StateFlow<PagedData<DiscoverResult>> = _moviesState.asStateFlow()
-
-    private val _tvState = MutableStateFlow(PagedData<DiscoverResult>())
-    val tvState: StateFlow<PagedData<DiscoverResult>> = _tvState.asStateFlow()
-
-    private val _upcomingMoviesState = MutableStateFlow(PagedData<DiscoverResult>())
-    val upcomingMoviesState: StateFlow<PagedData<DiscoverResult>> = _upcomingMoviesState.asStateFlow()
-
-    private val _upcomingTvState = MutableStateFlow(PagedData<DiscoverResult>())
-    val upcomingTvState: StateFlow<PagedData<DiscoverResult>> = _upcomingTvState.asStateFlow()
+    val allMediaServerItems: StateFlow<List<UnifiedMediaItem>> =
+        mediaServerManager?.allMediaServerItems ?: MutableStateFlow(emptyList())
 
     val discoverSectionPreferences: StateFlow<DiscoverSectionPreferences> =
         preferencesStore.discoverSectionPreferences
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DiscoverSectionPreferences())
+
+    private fun enrichAndFilter(
+        sourceFlow: StateFlow<PagedData<DiscoverResult>>,
+    ): StateFlow<PagedData<DiscoverResult>> = combine(
+        sourceFlow,
+        allMediaServerItems,
+        allLibraries,
+        discoverSectionPreferences,
+    ) { pagedData, mediaServerItems, arrLibraries, prefs ->
+        val enrichedItems = pagedData.items.map { item ->
+            val expectedMediaType = when (item.mediaType) {
+                RequestType.Movie -> MediaType.MOVIE
+                RequestType.Tv -> MediaType.SHOW
+                RequestType.Person -> MediaType.UNKNOWN
+            }
+            val year = (item.releaseDate ?: item.firstAirDate)?.take(4)?.toIntOrNull()
+            val mediaServerMatch = mediaServerManager?.findMatchingItem(
+                items = mediaServerItems,
+                tmdbId = item.id,
+                tvdbId = item.mediaInfo?.tvdbId,
+                title = item.title ?: item.name,
+                year = year,
+                mediaType = expectedMediaType,
+            )
+
+            val cleanTitle = (item.title ?: item.name)?.replace(Regex("[^a-zA-Z0-9]"), "")?.lowercase()
+            val arrMatch = when (item.mediaType) {
+                RequestType.Movie -> {
+                    arrLibraries.filterIsInstance<ArrMovie>().firstOrNull {
+                        (it.tmdbId != 0L && it.tmdbId == item.id) ||
+                            (item.mediaInfo?.tmdbId != null && it.tmdbId == item.mediaInfo.tmdbId) ||
+                            (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
+                    }
+                }
+                RequestType.Tv -> {
+                    arrLibraries.filterIsInstance<ArrSeries>().firstOrNull {
+                        (it.tmdbId != null && it.tmdbId != 0L && it.tmdbId == item.id) ||
+                            (item.mediaInfo?.tvdbId != null && it.tvdbId == item.mediaInfo.tvdbId) ||
+                            (item.mediaInfo?.tmdbId != null && it.tmdbId == item.mediaInfo.tmdbId) ||
+                            (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
+                    }
+                }
+                RequestType.Person -> null
+            }
+
+            item.copy(
+                mediaServerItem = mediaServerMatch,
+                inArrLibrary = arrMatch != null,
+            )
+        }
+
+        val filteredItems = if (prefs.hideInLibraryContent) {
+            enrichedItems.filter { !it.isAvailableInLibrary }
+        } else {
+            enrichedItems
+        }
+
+        pagedData.copy(items = filteredItems)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = PagedData(),
+    )
+
+    private val _trendingState = MutableStateFlow(PagedData<DiscoverResult>())
+    val trendingState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_trendingState)
+
+    private val _moviesState = MutableStateFlow(PagedData<DiscoverResult>())
+    val moviesState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_moviesState)
+
+    private val _tvState = MutableStateFlow(PagedData<DiscoverResult>())
+    val tvState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_tvState)
+
+    private val _upcomingMoviesState = MutableStateFlow(PagedData<DiscoverResult>())
+    val upcomingMoviesState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_upcomingMoviesState)
+
+    private val _upcomingTvState = MutableStateFlow(PagedData<DiscoverResult>())
+    val upcomingTvState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_upcomingTvState)
 
     val isInitialLoading: StateFlow<Boolean> =
         combine(
@@ -160,15 +239,6 @@ class DiscoverViewModel(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _searchState = MutableStateFlow<List<SearchResult>>(emptyList())
-
-    private val allLibraries: StateFlow<List<ArrMedia>> =
-        instanceManager
-            .observeAllArrLibraries()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList(),
-            )
 
     val searchState: StateFlow<List<SearchResult>> =
         combine(_searchState, allLibraries) { results, libraries ->
@@ -223,6 +293,7 @@ class DiscoverViewModel(
                     }
 
                     is SearchResult.SeerrPersonResult -> result
+                    is SearchResult.MediaServerResult -> result
                 }
             }
         }.stateIn(
@@ -397,6 +468,7 @@ class DiscoverViewModel(
     fun refresh() {
         viewModelScope.launch {
             _isRefreshing.value = true
+            mediaServerManager?.refreshAllMediaServerItems()
             trendingPagingController?.refresh()
             moviesPagingController?.refresh()
             tvPagingController?.refresh()

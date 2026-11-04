@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.compose
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR.strings
+import com.dnfapps.arrmatey.shared.continue_watching
 import com.dnfapps.arrmatey.shared.dashboard_activity_queue_overview
 import com.dnfapps.arrmatey.shared.dashboard_arr_overview
 import com.dnfapps.arrmatey.shared.dashboard_bazarr_overview
@@ -19,6 +20,7 @@ import com.dnfapps.arrmatey.shared.dashboard_todays_releases
 import com.dnfapps.arrmatey.shared.dashboard_tracearr_active_streams
 import com.dnfapps.arrmatey.shared.dashboard_upcoming_releases
 import com.dnfapps.arrmatey.shared.issues
+import com.dnfapps.arrmatey.shared.media_servers
 import com.dnfapps.arrmatey.shared.requests
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.CoroutineScope
@@ -92,6 +94,7 @@ enum class DashboardCardService(
     DownloadClients(strings.download_clients),
     Network(strings.network),
     WakeOnLan(strings.wake_on_lan),
+    MediaServer(strings.media_servers),
     ;
 
     val cards: List<DashboardCards>
@@ -118,6 +121,8 @@ enum class DashboardCards(
 
     PlaybackOverview(strings.dashboard_playback_overview),
     ActiveStreams(strings.dashboard_tracearr_active_streams),
+
+    ContinueWatching(strings.continue_watching),
 
     DiscoverFeed(strings.dashboard_discover_feed),
     DiscoverSpotlight(strings.dashboard_discover_spotlight),
@@ -149,6 +154,7 @@ enum class DashboardCards(
             DownloadClients -> DashboardCardService.DownloadClients
             Network -> DashboardCardService.Network
             WolDevices -> DashboardCardService.WakeOnLan
+            ContinueWatching -> DashboardCardService.MediaServer
         }
 
     companion object {
@@ -160,6 +166,7 @@ enum class DashboardCards(
                     ProwlarrOverview,
                     BazarrOverview,
                     ActiveStreams,
+                    ContinueWatching,
                     ActivityQueue,
                     OnToday,
                     RecentlyAdded,

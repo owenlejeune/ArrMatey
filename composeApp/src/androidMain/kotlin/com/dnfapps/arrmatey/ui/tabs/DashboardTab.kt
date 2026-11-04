@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.tabs
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation3.runtime.entryProvider
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
@@ -10,11 +11,13 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
+import com.dnfapps.arrmatey.mediaserver.usecase.ResolveSonarrEpisodeUseCase
 import com.dnfapps.arrmatey.navigation.BazarrScreen
 import com.dnfapps.arrmatey.navigation.DashboardScreen
 import com.dnfapps.arrmatey.navigation.DashboardTabNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.TracearrScreen
+import com.dnfapps.arrmatey.navigation.navigateToMediaServerItem
 import com.dnfapps.arrmatey.navigation.openArrDashboard
 import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toBookDetails
@@ -39,6 +42,8 @@ fun DashboardTab(
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val isLargeScreen = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+    val coroutineScope = rememberCoroutineScope()
+    val resolveEpisodeUseCase: ResolveSonarrEpisodeUseCase = koinInject()
     TwoPaneMasterDetailNavDisplay(
         navigation = navigation,
         isExpanded = isExpanded,
@@ -54,6 +59,9 @@ fun DashboardTab(
                     onNavigateToSeerrMediaDetails = { tmdbId, type -> navigation.toDetails(tmdbId = tmdbId, requestType = type) },
                     onNavigateToSeerrPersonDetails = { personId -> navigation.toPersonDetails(personId) },
                     onNavigateToArrMediaDetailsOrPreview = { media, type -> navigation.toArrDetailsOrPreview(media, type) },
+                    onNavigateToMediaServerDetails = { item ->
+                        navigation.navigateToMediaServerItem(item, coroutineScope, resolveEpisodeUseCase)
+                    },
                     onNavigateToSettings = { navigationManager.openSettings() },
                     onNavigateToRequestsTab = { navigationManager.openRequestsTab() },
                     onNavigateToProwlarrTab = { navigation.navigateTo(DashboardScreen.Prowlarr) },

@@ -199,11 +199,17 @@ struct DiscoverPosterItem: View {
                             RequestTypeChip(type: item.mediaType, solid: true)
                                 .padding(8)
                             
-                            if let status = item.mediaInfo?.status {
-                                StatusBadge(status: status)
-                                    .padding(8)
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                            HStack(spacing: 4) {
+                                Spacer()
+                                if let ms = item.mediaServerItem {
+                                    MediaServerBadgeOverlay(serverType: ms.serverType, iconSize: 14, innerPadding: 3, borderWidth: 1.5)
+                                } else if item.isAvailableInLibrary {
+                                    InLibraryBadgeOverlay(iconSize: 14, innerPadding: 3, borderWidth: 1)
+                                } else if let status = item.mediaInfo?.status {
+                                    StatusBadge(status: status)
+                                }
                             }
+                            .padding(8)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     }

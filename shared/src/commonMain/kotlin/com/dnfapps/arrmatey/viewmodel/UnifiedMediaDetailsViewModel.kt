@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
@@ -41,8 +43,14 @@ import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCa
 import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerMediaDetails
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.model.MediaType
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.model.AddSheetUiState
+import com.dnfapps.arrmatey.model.EpisodeWrapper
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.model.SmartAddSeerrAction
 import com.dnfapps.arrmatey.model.TracearrMediaUiState
 import com.dnfapps.arrmatey.model.TracearrStatsWindowType
@@ -50,6 +58,7 @@ import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.IssueType
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
+import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.api.model.Service
@@ -59,6 +68,7 @@ import com.dnfapps.arrmatey.seerr.policy.SeerrPermissionPolicy
 import com.dnfapps.arrmatey.seerr.policy.SeerrRequestPermissions
 import com.dnfapps.arrmatey.seerr.state.MediaButtonState
 import com.dnfapps.arrmatey.seerr.state.ReportIssueUiState
+import com.dnfapps.arrmatey.seerr.state.WatchOption
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.ClearSeerrMediaDataUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRecommendationsUseCase
@@ -72,10 +82,12 @@ import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsArrActionsHandl
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsDataObserver
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsInstanceHandler
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsIssueHandler
+import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsMediaServerHandler
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsRecommendationsHandler
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsSeerrHandler
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsSeerrServiceHandler
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsTracearrHandler
+import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -83,7 +95,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -95,6 +109,10 @@ class UnifiedMediaDetailsViewModel(
     private val instanceType: InstanceType?,
     private val requestType: RequestType?,
     initialForcedInstanceId: Long? = null,
+    private val mediaServerItemId: String? = null,
+    private val mediaServerType: MediaServerType? = null,
+    private val initialTitle: String? = null,
+    private val initialYear: Int? = null,
     getUnifiedMediaDetailsUseCase: GetUnifiedMediaDetailsUseCase,
     smartAddMediaUseCase: SmartAddMediaUseCase,
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
@@ -129,6 +147,7 @@ class UnifiedMediaDetailsViewModel(
     getSimilarUseCase: GetSimilarUseCase,
     private val preferencesStore: PreferencesStore,
     private val logger: Logger,
+    private val mediaServerManager: MediaServerManager? = null,
 ) : ViewModel() {
     private var seerrMediaId: Long? = null
 
@@ -199,6 +218,14 @@ class UnifiedMediaDetailsViewModel(
         )
 
     private val tracearrHandler = UnifiedMediaDetailsTracearrHandler()
+
+    private val mediaServerHandler =
+        mediaServerManager?.let {
+            UnifiedMediaDetailsMediaServerHandler(
+                scope = viewModelScope,
+                mediaServerManager = it,
+            )
+        }
 
     private val recommendationsHandler =
         UnifiedMediaDetailsRecommendationsHandler(
@@ -289,7 +316,56 @@ class UnifiedMediaDetailsViewModel(
     val activeSeerrInstance: StateFlow<Instance?> = instanceHandler.activeSeerrInstance
     val isSeerrConfigured: StateFlow<Boolean> = instanceHandler.isSeerrConfigured
     val isArrConfigured: StateFlow<Boolean> = instanceHandler.isArrConfigured
-    val buttonState: StateFlow<MediaButtonState> = seerrServiceHandler.buttonState
+    val mediaServerDetails: StateFlow<List<MediaServerMediaDetails>> =
+        mediaServerHandler?.mediaServerDetails ?: MutableStateFlow<List<MediaServerMediaDetails>>(emptyList()).asStateFlow()
+
+    fun markMediaServerWatched(serverType: MediaServerType, itemId: String, watched: Boolean) {
+        mediaServerHandler?.markWatched(serverType, itemId, watched)
+    }
+
+    fun markEpisodeWatched(serverType: MediaServerType, seasonNumber: Int, episodeNumber: Int, watched: Boolean) {
+        mediaServerHandler?.markEpisodeWatched(serverType, seasonNumber, episodeNumber, watched)
+    }
+
+    fun refreshMediaServerItem(serverType: MediaServerType, itemId: String) {
+        mediaServerHandler?.refreshItem(serverType, itemId)
+    }
+
+    val buttonState: StateFlow<MediaButtonState> =
+        if (mediaServerHandler != null) {
+            combine(
+                seerrServiceHandler.buttonState,
+                mediaServerHandler.watchOptions,
+            ) { seerrState, serverOptions ->
+                val allOptions = buildList {
+                    addAll(serverOptions)
+                    if (seerrState.showWatchButton && seerrState.watchButtonUrl != null && serverOptions.none { it.url == seerrState.watchButtonUrl }) {
+                        add(
+                            WatchOption(
+                                provider = seerrState.mediaProvider,
+                                serverName = "Seerr",
+                                url = seerrState.watchButtonUrl,
+                                label = seerrState.watchButtonLabel,
+                            ),
+                        )
+                    }
+                }
+                if (allOptions.isNotEmpty()) {
+                    val primary = allOptions.first()
+                    seerrState.copy(
+                        showWatchButton = true,
+                        watchButtonUrl = primary.url,
+                        watchButtonLabel = primary.label,
+                        mediaProvider = primary.provider,
+                        watchOptions = allOptions,
+                    )
+                } else {
+                    seerrState
+                }
+            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), seerrServiceHandler.buttonState.value)
+        } else {
+            seerrServiceHandler.buttonState
+        }
     val addSheetUiState: StateFlow<AddSheetUiState> = instanceHandler.addSheetUiState
     val preferences: StateFlow<InstancePreferences> = instanceHandler.preferences
     val requestPermissions: StateFlow<SeerrRequestPermissions> =
@@ -322,6 +398,101 @@ class UnifiedMediaDetailsViewModel(
         )
         // No-op if already polling; restarts it if another screen's onCleared stopped it.
         activityQueueService.startPolling()
+
+        if (mediaServerHandler != null) {
+            viewModelScope.launch {
+                _uiState
+                    .filterIsInstance<UnifiedMediaDetailsUiState.Success>()
+                    .collectLatest { success ->
+                        val title = success.displayTitle ?: success.arrMedia?.title ?: (success.seerrMedia as? MovieDetails)?.title ?: (success.seerrMedia as? TvDetails)?.name ?: initialTitle
+                        val year = (success.arrMedia as? ArrMovie)?.year
+                            ?: (success.arrMedia as? ArrSeries)?.year
+                            ?: (success.seerrMedia as? MovieDetails)?.releaseDate?.year
+                            ?: (success.seerrMedia as? TvDetails)?.firstAirDate?.year
+                            ?: success.mediaServerItem?.year
+                            ?: initialYear
+                        val isShow = resolvedRequestType == RequestType.Tv || resolvedInstanceType == InstanceType.Sonarr || success.arrMedia is ArrSeries || success.seerrMedia is TvDetails || success.mediaServerItem?.type == MediaType.SHOW
+                        val targetTmdbId = tmdbId ?: (success.arrMedia as? ArrMovie)?.tmdbId ?: (success.arrMedia as? ArrSeries)?.tmdbId ?: (success.seerrMedia as? MovieDetails)?.id ?: (success.seerrMedia as? TvDetails)?.id ?: success.mediaServerItem?.tmdbId
+                        val targetTvdbId = tvdbId ?: (success.arrMedia as? ArrSeries)?.tvdbId ?: success.mediaServerItem?.tvdbId
+                        mediaServerHandler.findMedia(
+                            tmdbId = targetTmdbId,
+                            tvdbId = targetTvdbId,
+                            title = title,
+                            year = year,
+                            isShow = isShow,
+                        )
+                    }
+            }
+        }
+
+        if (mediaServerManager != null && mediaServerType != null && mediaServerItemId != null) {
+            viewModelScope.launch {
+                val repo = mediaServerManager.getRepository(mediaServerType)
+                if (repo != null) {
+                    when (val detailResult = repo.getItemDetail(mediaServerItemId)) {
+                        is NetworkResult.Success -> {
+                            val item = detailResult.data
+                            val isShow = item.type == MediaType.SHOW
+                            var showSeasons = emptyList<SeasonWrapper>()
+                            var showEpisodes = emptyList<EpisodeWrapper>()
+                            if (isShow) {
+                                val epResult = repo.getShowEpisodes(item.id)
+                                if (epResult is NetworkResult.Success) {
+                                    val sGroups = epResult.data.groupBy { it.seasonNumber ?: 1 }
+                                    val seasonWrappers = mutableListOf<SeasonWrapper>()
+                                    val allEpisodeWrappers = mutableListOf<EpisodeWrapper>()
+                                    sGroups.keys.sorted().forEach { sNum ->
+                                        val eps = sGroups[sNum].orEmpty()
+                                        val epWrappers = eps.map { epItem ->
+                                            EpisodeWrapper(
+                                                mediaServerEpisode = epItem,
+                                            )
+                                        }
+                                        seasonWrappers.add(SeasonWrapper(seasonNumber = sNum, episodes = epWrappers))
+                                        allEpisodeWrappers.addAll(epWrappers)
+                                    }
+                                    showSeasons = seasonWrappers
+                                    showEpisodes = allEpisodeWrappers
+                                }
+                            }
+
+                            val current = _uiState.value
+                            if (current !is UnifiedMediaDetailsUiState.Success) {
+                                _uiState.value = UnifiedMediaDetailsUiState.Success(
+                                    mediaServerItem = item,
+                                    seasons = showSeasons,
+                                    episodes = showEpisodes,
+                                )
+                            } else {
+                                _uiState.value = current.copy(
+                                    mediaServerItem = item,
+                                    seasons = if (current.seasons.isEmpty()) showSeasons else current.seasons,
+                                    episodes = if (current.episodes.isEmpty()) showEpisodes else current.episodes,
+                                )
+                            }
+
+                            mediaServerHandler?.findMedia(
+                                tmdbId = tmdbId ?: item.tmdbId,
+                                tvdbId = tvdbId ?: item.tvdbId,
+                                title = item.title,
+                                year = item.year,
+                                isShow = isShow,
+                            )
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        } else if (mediaServerHandler != null && (tmdbId != null || tvdbId != null || !initialTitle.isNullOrBlank())) {
+            val isShow = resolvedRequestType == RequestType.Tv || resolvedInstanceType == InstanceType.Sonarr
+            mediaServerHandler.findMedia(
+                tmdbId = tmdbId,
+                tvdbId = tvdbId,
+                title = initialTitle,
+                year = initialYear,
+                isShow = isShow,
+            )
+        }
     }
 
     fun loadNextRecommendationsPage() {
@@ -375,6 +546,28 @@ class UnifiedMediaDetailsViewModel(
                 }
                 if (seerrRepository != null && tmdbId != null && resolvedRequestType != null) {
                     launch { seerrRepository.refreshMediaDetails(tmdbId, resolvedRequestType) }
+                }
+                if (mediaServerHandler != null) {
+                    val success = _uiState.value as? UnifiedMediaDetailsUiState.Success
+                    if (success != null) {
+                        val title = success.displayTitle ?: success.arrMedia?.title ?: (success.seerrMedia as? MovieDetails)?.title ?: (success.seerrMedia as? TvDetails)?.name
+                        val year = (success.arrMedia as? ArrMovie)?.year
+                            ?: (success.arrMedia as? ArrSeries)?.year
+                            ?: (success.seerrMedia as? MovieDetails)?.releaseDate?.year
+                            ?: (success.seerrMedia as? TvDetails)?.firstAirDate?.year
+                        val isShow = resolvedRequestType == RequestType.Tv || resolvedInstanceType == InstanceType.Sonarr || success.arrMedia is ArrSeries || success.seerrMedia is TvDetails
+                        val targetTmdbId = tmdbId ?: (success.arrMedia as? ArrMovie)?.tmdbId ?: (success.arrMedia as? ArrSeries)?.tmdbId ?: (success.seerrMedia as? MovieDetails)?.id ?: (success.seerrMedia as? TvDetails)?.id
+                        val targetTvdbId = tvdbId ?: (success.arrMedia as? ArrSeries)?.tvdbId
+                        launch {
+                            mediaServerHandler.findMedia(
+                                tmdbId = targetTmdbId,
+                                tvdbId = targetTvdbId,
+                                title = title,
+                                year = year,
+                                isShow = isShow,
+                            )
+                        }
+                    }
                 }
                 launch { activityQueueService.refreshActivity() }
                 launch { recommendationsHandler.refresh() }
