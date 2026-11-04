@@ -143,10 +143,39 @@ struct ArrConfigurationView: View {
     private var instanceSection: some View {
         Section {
             if (showInstancePicker) {
-                Picker(MR.strings().instance_type.localized(), selection: $instanceType) {
-                    ForEach(InstanceType.allCases,  id: \.self) { type in
-                        Text(String(localized: LocalizedStringResource(stringLiteral: type.name)))
-                            .tag(type)
+                LabeledContent(MR.strings().instance_type.localized()) {
+                    Menu {
+                        ForEach(InstanceType.allCases, id: \.self) { type in
+                            Button {
+                                instanceType = type
+                            } label: {
+                                HStack(spacing: 8) {
+                                    if type == instanceType {
+                                        Image(systemName: "checkmark")
+                                            .frame(width: 18, height: 18)
+                                    } else {
+                                        Image(resource: type.icon)
+                                            .resizable()
+                                            .renderingMode(.original)
+                                            .scaledToFit()
+                                            .frame(width: 18, height: 18)
+                                    }
+                                    Text(String(localized: LocalizedStringResource(stringLiteral: type.name)))
+                                }
+                            }
+                        }
+                    }
+                    label: {
+                        HStack(spacing: 8) {
+                            Image(resource: instanceType.icon)
+                                .resizable()
+                                .renderingMode(.original)
+                                .scaledToFit()
+                                .frame(width: 18, height: 18)
+                            Text(String(localized: LocalizedStringResource(stringLiteral: instanceType.name)))
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption)
+                        }
                     }
                 }
                 .tint(.primary)
