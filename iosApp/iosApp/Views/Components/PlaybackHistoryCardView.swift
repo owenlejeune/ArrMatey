@@ -142,7 +142,7 @@ struct PlaybackHistoryCardView: View {
         let s = seconds % 60
         let m = (seconds / 60) % 60
         let h = seconds / 3600
-        let sStr = String(format: "%02d", seconds)
+        let sStr = String(format: "%02d", s)
         if h > 0 {
             let mStr = String(format: "%02d", m)
             return "\(h):\(mStr):\(sStr)"

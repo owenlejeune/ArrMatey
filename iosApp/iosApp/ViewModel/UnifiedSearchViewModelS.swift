@@ -14,8 +14,8 @@ class UnifiedSearchViewModelS: ObservableObject {
 
     @Published private(set) var searchState: [SearchResult] = []
     @Published private(set) var filteredSearchState: [SearchResult] = []
-    @Published private(set) var availableTypeFilters: [InstanceType] = []
-    @Published private(set) var selectedTypeFilter: InstanceType? = nil
+    @Published private(set) var availableFilters: [SearchFilter] = []
+    @Published private(set) var selectedFilter: SearchFilter? = nil
     @Published private(set) var isSearching: Bool = false
     @Published private(set) var searchShowBanners: Bool = true
     @Published var searchQuery: String = ""
@@ -28,8 +28,8 @@ class UnifiedSearchViewModelS: ObservableObject {
     private func startObserving() {
         viewModel.searchState.observeAsync(on: self, to: \.searchState)
         viewModel.filteredSearchState.observeAsync(on: self, to: \.filteredSearchState)
-        viewModel.availableTypeFilters.observeAsync(on: self, to: \.availableTypeFilters)
-        viewModel.selectedTypeFilter.observeAsync(on: self, to: \.selectedTypeFilter)
+        viewModel.availableFilters.observeAsync(on: self, to: \.availableFilters)
+        viewModel.selectedFilter.observeAsync(on: self, to: \.selectedFilter)
         viewModel.isSearching.observeAsync(on: self) { owner, searching in
             owner.isSearching = searching.boolValue
         }
@@ -38,8 +38,8 @@ class UnifiedSearchViewModelS: ObservableObject {
         }
     }
 
-    func selectTypeFilter(_ type: InstanceType?) {
-        viewModel.selectTypeFilter(type: type)
+    func selectFilter(_ filter: SearchFilter?) {
+        viewModel.selectFilter(filter: filter)
     }
 
     func updateSearchQuery(_ query: String) {

@@ -22,6 +22,7 @@ struct MediaItemView<T: ArrMedia>: View {
     
     let instanceType: InstanceType?
     let edgeColor: Color?
+    let mediaServerType: MediaServerType?
     
     init(
         item: T,
@@ -35,7 +36,8 @@ struct MediaItemView<T: ArrMedia>: View {
         posterRadius: Shared.PosterRadius = .medium,
         posterImage: Shared.ImageResource? = nil,
         bannerImage: Shared.ImageResource? = nil,
-        edgeColor: Color? = nil
+        edgeColor: Color? = nil,
+        mediaServerType: MediaServerType? = nil
     ) {
         self.item = item
         self.aspectRatio = aspectRatio
@@ -49,6 +51,7 @@ struct MediaItemView<T: ArrMedia>: View {
         self.posterImage = posterImage
         self.bannerImage = bannerImage
         self.edgeColor = edgeColor
+        self.mediaServerType = mediaServerType
     }
     
     private var itemTitle: String {
@@ -76,7 +79,16 @@ struct MediaItemView<T: ArrMedia>: View {
                     elevation: posterElevation,
                     radius: posterRadius,
                     posterHeight: pHeight,
-                    posterImage: posterImage
+                    posterImage: posterImage,
+                    additionalContent: {
+                        if let msType = mediaServerType {
+                            ZStack(alignment: .topTrailing) {
+                                Color.clear
+                                MediaServerBadgeOverlay(serverType: msType, iconSize: 12, innerPadding: 3, borderWidth: 1)
+                                    .padding(4)
+                            }
+                        }
+                    }
                 )
                 .frame(width: 100, height: pHeight)
                 

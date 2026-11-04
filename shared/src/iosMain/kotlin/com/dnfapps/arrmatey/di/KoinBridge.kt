@@ -42,6 +42,7 @@ import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
 import com.dnfapps.arrmatey.mediaserver.usecase.ResolveSonarrEpisodeUseCase
 import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerLibraryViewModel
 import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerSettingsViewModel
@@ -130,7 +131,24 @@ object KoinBridge : KoinComponent {
         instanceType: InstanceType?,
         requestType: RequestType?,
         instanceId: Long?,
-    ): UnifiedMediaDetailsViewModel = getKoin().get { parametersOf(arrId, tmdbId, tvdbId, instanceType, requestType, instanceId) }
+        mediaServerItemId: String? = null,
+        mediaServerType: MediaServerType? = null,
+        initialTitle: String? = null,
+        initialYear: Int? = null,
+    ): UnifiedMediaDetailsViewModel = getKoin().get {
+        parametersOf(
+            arrId,
+            tmdbId,
+            tvdbId,
+            instanceType,
+            requestType,
+            instanceId,
+            mediaServerItemId,
+            mediaServerType,
+            initialTitle,
+            initialYear,
+        )
+    }
 
     fun getIssueDetailsViewModel(issuePackage: MediaIssuePackage): IssueDetailsViewModel = getKoin().get { parametersOf(issuePackage) }
 

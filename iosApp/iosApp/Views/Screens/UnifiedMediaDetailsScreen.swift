@@ -63,7 +63,11 @@ struct UnifiedMediaDetailsScreen: View {
         instanceType: InstanceType? = nil,
         requestType: RequestType? = nil,
         instanceId: Int64? = nil,
-        initialEpisodeId: Int64? = nil
+        initialEpisodeId: Int64? = nil,
+        mediaServerItemId: String? = nil,
+        mediaServerType: MediaServerType? = nil,
+        initialTitle: String? = nil,
+        initialYear: Int32? = nil
     ) {
         self.initialEpisodeId = initialEpisodeId
         _viewModel = StateObject(wrappedValue: UnifiedMediaDetailsViewModelS(
@@ -72,7 +76,11 @@ struct UnifiedMediaDetailsScreen: View {
             tvdbId: tvdbId,
             instanceType: instanceType,
             requestType: requestType,
-            instanceId: instanceId
+            instanceId: instanceId,
+            mediaServerItemId: mediaServerItemId,
+            mediaServerType: mediaServerType,
+            initialTitle: initialTitle,
+            initialYear: initialYear
         ))
     }
 
@@ -227,6 +235,16 @@ extension UnifiedMediaDetailsScreen {
                                 onAddInstance: { missingInst in
                                     viewModel.setAddSheetTargetInstance(instance: missingInst)
                                     showAddSheet = true
+                                }
+                            )
+                            .padding(.top, 4)
+                        }
+
+                        if !viewModel.mediaServerDetails.isEmpty {
+                            MediaServerSourceChips(
+                                details: viewModel.mediaServerDetails,
+                                onToggleWatched: { serverType, itemId, watched in
+                                    viewModel.markWatched(serverType: serverType, itemId: itemId, watched: watched)
                                 }
                             )
                             .padding(.top, 4)

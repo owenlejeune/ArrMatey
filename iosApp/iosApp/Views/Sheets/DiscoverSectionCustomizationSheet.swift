@@ -29,6 +29,35 @@ struct DiscoverSectionCustomizationSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Toggle(isOn: Binding(
+                            get: { currentPreferences.hideInLibraryContent },
+                            set: { newValue in
+                                let newPrefs = DiscoverSectionPreferences(
+                                    visibleCategories: currentPreferences.visibleCategories,
+                                    hiddenCategories: currentPreferences.hiddenCategories,
+                                    hideInLibraryContent: newValue
+                                )
+                                withAnimation {
+                                    currentPreferences = newPrefs
+                                }
+                                onUpdatePreferences(newPrefs)
+                            }
+                        )) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(MR.strings().hide_in_library_content.localized())
+                                    .font(.body)
+                                Text(MR.strings().hide_in_library_content_description.localized())
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(12)
+
                     if !currentPreferences.visibleCategories.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             Text(MR.strings().navigation_items_selected.localized())
@@ -42,19 +71,7 @@ struct DiscoverSectionCustomizationSheet: View {
                                     Spacer()
                                     HStack(spacing: 8) {
                                         Button {
-                                            if index > 0 {
-                                                var newVisible = currentPreferences.visibleCategories
-                                                let item = newVisible.remove(at: index)
-                                                newVisible.insert(item, at: index - 1)
-                                                let newPrefs = DiscoverSectionPreferences(
-                                                    visibleCategories: newVisible,
-                                                    hiddenCategories: currentPreferences.hiddenCategories
-                                                )
-                                                withAnimation {
-                                                    currentPreferences = newPrefs
-                                                }
-                                                onUpdatePreferences(newPrefs)
-                                            }
+                                            moveVisibleUp(at: index)
                                         } label: {
                                             Image(systemName: "chevron.up")
                                                 .font(.system(size: 16, weight: .semibold))
@@ -65,19 +82,7 @@ struct DiscoverSectionCustomizationSheet: View {
                                         .disabled(index == 0)
 
                                         Button {
-                                            if index < currentPreferences.visibleCategories.count - 1 {
-                                                var newVisible = currentPreferences.visibleCategories
-                                                let item = newVisible.remove(at: index)
-                                                newVisible.insert(item, at: index + 1)
-                                                let newPrefs = DiscoverSectionPreferences(
-                                                    visibleCategories: newVisible,
-                                                    hiddenCategories: currentPreferences.hiddenCategories
-                                                )
-                                                withAnimation {
-                                                    currentPreferences = newPrefs
-                                                }
-                                                onUpdatePreferences(newPrefs)
-                                            }
+                                            moveVisibleDown(at: index)
                                         } label: {
                                             Image(systemName: "chevron.down")
                                                 .font(.system(size: 16, weight: .semibold))
@@ -88,20 +93,7 @@ struct DiscoverSectionCustomizationSheet: View {
                                         .disabled(index == currentPreferences.visibleCategories.count - 1)
 
                                         Button {
-                                            if currentPreferences.visibleCategories.count > 1 {
-                                                var newVisible = currentPreferences.visibleCategories
-                                                let item = newVisible.remove(at: index)
-                                                var newHidden = currentPreferences.hiddenCategories
-                                                newHidden.append(item)
-                                                let newPrefs = DiscoverSectionPreferences(
-                                                    visibleCategories: newVisible,
-                                                    hiddenCategories: newHidden
-                                                )
-                                                withAnimation {
-                                                    currentPreferences = newPrefs
-                                                }
-                                                onUpdatePreferences(newPrefs)
-                                            }
+                                            hideCategory(at: index)
                                         } label: {
                                             Image(systemName: "minus.circle.fill")
                                                 .font(.system(size: 20))
@@ -133,18 +125,7 @@ struct DiscoverSectionCustomizationSheet: View {
                                         .font(.body)
                                     Spacer()
                                     Button {
-                                        var newHidden = currentPreferences.hiddenCategories
-                                        let item = newHidden.remove(at: index)
-                                        var newVisible = currentPreferences.visibleCategories
-                                        newVisible.append(item)
-                                        let newPrefs = DiscoverSectionPreferences(
-                                            visibleCategories: newVisible,
-                                            hiddenCategories: newHidden
-                                        )
-                                        withAnimation {
-                                            currentPreferences = newPrefs
-                                        }
-                                        onUpdatePreferences(newPrefs)
+                                        unhideCategory(at: index)
                                     } label: {
                                         Image(systemName: "plus.circle.fill")
                                             .font(.system(size: 20))
@@ -186,5 +167,54 @@ struct DiscoverSectionCustomizationSheet: View {
                 currentPreferences = newPrefs
             }
         }
+    }
+
+    private func moveVisibleUp(at index: Int) {
+        guard index > 0 else { return }
+        var newVisible = currentPreferences.visibleCategories
+        let item = newVisible.remove(at: index)
+        newVisible.insert(item, at: index - 1)
+        updateVisible(newVisible)
+    }
+
+    private func moveVisibleDown(at index: Int) {
+        guard index < currentPreferences.visibleCategories.count - 1 else { return }
+        var newVisible = currentPreferences.visibleCategories
+        let item = newVisible.remove(at: index)
+        newVisible.insert(item, at: index + 1)
+        updateVisible(newVisible)
+    }
+
+    private func hideCategory(at index: Int) {
+        guard currentPreferences.visibleCategories.count > 1 else { return }
+        var newVisible = currentPreferences.visibleCategories
+        let item = newVisible.remove(at: index)
+        var newHidden = currentPreferences.hiddenCategories
+        newHidden.append(item)
+        applyPreferences(visible: newVisible, hidden: newHidden)
+    }
+
+    private func unhideCategory(at index: Int) {
+        var newHidden = currentPreferences.hiddenCategories
+        let item = newHidden.remove(at: index)
+        var newVisible = currentPreferences.visibleCategories
+        newVisible.append(item)
+        applyPreferences(visible: newVisible, hidden: newHidden)
+    }
+
+    private func updateVisible(_ newVisible: [DiscoverCategory]) {
+        applyPreferences(visible: newVisible, hidden: currentPreferences.hiddenCategories)
+    }
+
+    private func applyPreferences(visible: [DiscoverCategory], hidden: [DiscoverCategory]) {
+        let newPrefs = DiscoverSectionPreferences(
+            visibleCategories: visible,
+            hiddenCategories: hidden,
+            hideInLibraryContent: currentPreferences.hideInLibraryContent
+        )
+        withAnimation {
+            currentPreferences = newPrefs
+        }
+        onUpdatePreferences(newPrefs)
     }
 }

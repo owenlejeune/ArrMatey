@@ -59,6 +59,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var recommendationsState: PagedData<DiscoverResult> = PagedData()
     @Published private(set) var similarState: PagedData<DiscoverResult> = PagedData()
     @Published private(set) var requestPermissions: SeerrRequestPermissions = SeerrRequestPermissions()
+    @Published private(set) var mediaServerDetails: [MediaServerMediaDetails] = []
 
     var resolvedInstanceType: InstanceType? {
         return viewModel.resolvedInstanceType
@@ -74,7 +75,11 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         tvdbId: Int64?,
         instanceType: InstanceType?,
         requestType: RequestType?,
-        instanceId: Int64? = nil
+        instanceId: Int64? = nil,
+        mediaServerItemId: String? = nil,
+        mediaServerType: MediaServerType? = nil,
+        initialTitle: String? = nil,
+        initialYear: Int32? = nil
     ) {
         self.viewModel = KoinBridge.shared.getUnifiedMediaDetailsViewModel(
             arrId: arrId.map { KotlinLong(value: $0) },
@@ -82,7 +87,11 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
             tvdbId: tvdbId.map { KotlinLong(value: $0) },
             instanceType: instanceType,
             requestType: requestType,
-            instanceId: instanceId.map { KotlinLong(value: $0) }
+            instanceId: instanceId.map { KotlinLong(value: $0) },
+            mediaServerItemId: mediaServerItemId,
+            mediaServerType: mediaServerType,
+            initialTitle: initialTitle,
+            initialYear: initialYear.map { KotlinInt(value: $0) }
         )
         startObserving()
     }
@@ -133,6 +142,7 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         viewModel.preferences.observeAsync(on: self, to: \.preferences)
         viewModel.recommendationsState.observeAsync(on: self, to: \.recommendationsState)
         viewModel.similarState.observeAsync(on: self, to: \.similarState)
+        viewModel.mediaServerDetails.observeAsync(on: self, to: \.mediaServerDetails)
 
         viewModel.addItemStatus.observeAsync(on: self, to: \.addItemStatus)
         viewModel.requestStatus.observeAsync(on: self, to: \.requestStatus)
@@ -434,5 +444,17 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
 
     func loadNextSimilarPage() {
         viewModel.loadNextSimilarPage()
+    }
+
+    func markWatched(serverType: MediaServerType, itemId: String, watched: Bool) {
+        viewModel.markMediaServerWatched(serverType: serverType, itemId: itemId, watched: watched)
+    }
+
+    func markEpisodeWatched(serverType: MediaServerType, seasonNumber: Int32, episodeNumber: Int32, watched: Bool) {
+        viewModel.markEpisodeWatched(serverType: serverType, seasonNumber: seasonNumber, episodeNumber: episodeNumber, watched: watched)
+    }
+
+    func refreshMediaServerItem(serverType: MediaServerType, itemId: String) {
+        viewModel.refreshMediaServerItem(serverType: serverType, itemId: itemId)
     }
 }
