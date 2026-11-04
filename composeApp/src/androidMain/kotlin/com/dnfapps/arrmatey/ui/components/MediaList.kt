@@ -398,6 +398,9 @@ fun <T : ArrMedia> MediaItem(
                                     Modifier
                                         .align(Alignment.TopEnd)
                                         .padding(4.dp),
+                                    iconSize = 12.dp,
+                                    innerPadding = 3.dp,
+                                    borderWidth = 1.dp,
                                 )
                             }
                         },
@@ -506,6 +509,9 @@ fun SeerrMediaItem(
                         item = item,
                         modifier = Modifier.width(76.dp),
                         showFooter = false,
+                        badgeIconSize = 12.dp,
+                        badgeInnerPadding = 3.dp,
+                        badgePadding = 4.dp,
                     )
 
                     Column(
@@ -621,6 +627,9 @@ fun MediaServerSearchResultItem(
                                 Modifier
                                     .align(Alignment.TopEnd)
                                     .padding(4.dp),
+                                iconSize = 12.dp,
+                                innerPadding = 3.dp,
+                                borderWidth = 1.dp,
                             )
                             if (item.played) {
                                 Surface(

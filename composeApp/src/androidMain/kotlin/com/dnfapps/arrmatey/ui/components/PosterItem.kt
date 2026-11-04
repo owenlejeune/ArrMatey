@@ -205,6 +205,9 @@ fun PosterItem(
     showOverlays: Boolean = true,
     showFooter: Boolean = true,
     includeCredits: Boolean = false,
+    badgeIconSize: Dp = 16.dp,
+    badgeInnerPadding: Dp = 4.dp,
+    badgePadding: Dp = 6.dp,
 ) {
     if (item.mediaType == RequestType.Person) {
         CastCrewItem(
@@ -257,17 +260,23 @@ fun PosterItem(
                     if (mediaServerItem != null) {
                         MediaServerBadgeOverlay(
                             serverType = mediaServerItem.serverType,
-                            modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
+                            modifier = Modifier.align(Alignment.TopEnd).padding(badgePadding),
+                            iconSize = badgeIconSize,
+                            innerPadding = badgeInnerPadding,
                         )
                     } else if (item.inArrLibrary) {
                         InLibraryBadgeOverlay(
-                            modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
+                            modifier = Modifier.align(Alignment.TopEnd).padding(badgePadding),
+                            iconSize = badgeIconSize,
+                            innerPadding = badgeInnerPadding,
                         )
                     } else {
                         item.mediaInfo?.let { info ->
                             StatusOverlay(
                                 status = SeerrMediaStatus.fromValue(info.status),
-                                modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
+                                modifier = Modifier.align(Alignment.TopEnd).padding(badgePadding),
+                                iconSize = badgeIconSize,
+                                innerPadding = badgeInnerPadding,
                             )
                         }
                     }
@@ -434,22 +443,25 @@ private fun BoxScope.MediaTypeOverlay(type: RequestType) {
 fun MediaServerBadgeOverlay(
     serverType: MediaServerType,
     modifier: Modifier = Modifier,
+    iconSize: Dp = 16.dp,
+    innerPadding: Dp = 4.dp,
+    borderWidth: Dp = 1.5.dp,
 ) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-        border = BorderStroke(1.5.dp, serverType.brandColor),
+        border = BorderStroke(borderWidth, serverType.brandColor),
         shadowElevation = 2.dp,
         modifier = modifier,
     ) {
         Box(
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier.padding(innerPadding),
             contentAlignment = Alignment.Center,
         ) {
             Image(
                 painter = painterResource(serverType.icon),
                 contentDescription = mokoString(serverType.resource),
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(iconSize),
             )
         }
     }
@@ -458,23 +470,26 @@ fun MediaServerBadgeOverlay(
 @Composable
 fun InLibraryBadgeOverlay(
     modifier: Modifier = Modifier,
+    iconSize: Dp = 16.dp,
+    innerPadding: Dp = 4.dp,
+    borderWidth: Dp = 1.dp,
 ) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        border = BorderStroke(borderWidth, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         shadowElevation = 2.dp,
         modifier = modifier,
     ) {
         Box(
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier.padding(innerPadding),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Default.CheckCircle,
                 contentDescription = mokoString(MR.strings.in_library),
                 tint = Color(0xFF50d27d),
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(iconSize),
             )
         }
     }
@@ -484,6 +499,9 @@ fun InLibraryBadgeOverlay(
 fun StatusOverlay(
     status: SeerrMediaStatus,
     modifier: Modifier = Modifier,
+    iconSize: Dp = 16.dp,
+    innerPadding: Dp = 4.dp,
+    borderWidth: Dp = 1.dp,
 ) {
     val (icon, color) =
         when (status) {
@@ -496,19 +514,19 @@ fun StatusOverlay(
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        border = BorderStroke(borderWidth, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
         shadowElevation = 2.dp,
         modifier = modifier,
     ) {
         Box(
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier.padding(innerPadding),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(iconSize),
             )
         }
     }

@@ -313,6 +313,78 @@ class GlobalSearchUseCaseMediaServerTest {
     }
 
     @Test
+    fun testDuplicatePrecedenceArrOverMediaServerWhenMediaServerTmdbIdIsNull() = runBlocking {
+        val radarrInstance = Instance(
+            id = 1L,
+            type = InstanceType.Radarr,
+            url = "http://localhost:7878",
+            apiKey = EncryptedString("key"),
+            label = "Radarr",
+            enabled = true,
+            selected = true,
+        )
+        val fakeDao = FakeInstanceDao(listOf(radarrInstance))
+        val instanceRepo = InstanceRepository(fakeDao)
+
+        val radarrLookupJson =
+            json.encodeToString(
+                listOf(
+                    ArrMovie(
+                        title = "Avatar",
+                        cleanTitle = "avatar",
+                        originalLanguage = Language(1, "English"),
+                        year = 2009,
+                        qualityProfileId = 1,
+                        monitored = true,
+                        runtime = 162,
+                        status = MediaStatus.Released,
+                        minimumAvailability = MediaStatus.Released,
+                        tmdbId = 19995,
+                        secondaryYearSourceId = 0,
+                    ),
+                ),
+            )
+
+        val mockFactory = MockHttpClientFactory(json) {
+            MockEngine { request ->
+                val path = request.url.encodedPath
+                if (path.contains("movie/lookup")) {
+                    respond(radarrLookupJson, HttpStatusCode.OK, headersOf("Content-Type", "application/json"))
+                } else {
+                    respond("[]", HttpStatusCode.OK, headersOf("Content-Type", "application/json"))
+                }
+            }
+        }
+        val instanceManager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger, fakeMokoStrings).also(managers::add)
+        instanceManager.awaitRepos(1)
+
+        val plexItem = UnifiedMediaItem(
+            id = "plex-avatar-1",
+            serverType = MediaServerType.Plex,
+            serverId = "srv-1",
+            title = "Avatar",
+            type = MediaType.MOVIE,
+            year = 2009,
+            tmdbId = null,
+        )
+        val mockRepo = createMockMediaServerRepo(MediaServerType.Plex, "Home Plex", listOf(plexItem))
+        val mockMediaServerManager = mockk<MediaServerManager>()
+        every { mockMediaServerManager.activeRepositories } returns MutableStateFlow(listOf(mockRepo))
+
+        val useCase = GlobalSearchUseCase(instanceManager, mockMediaServerManager)
+        val emissions = useCase("Avatar").toList()
+
+        assertTrue(emissions.isNotEmpty())
+        val finalResults = emissions.last()
+        assertEquals(1, finalResults.size, "Arr and Plex should be deduplicated even when Plex tmdbId is null")
+
+        val result = finalResults.first()
+        assertTrue(result is SearchResult.ArrMediaResult, "Arr should take precedence over MediaServer")
+        assertEquals(MediaServerType.Plex, result.mediaServerType)
+        assertEquals("Home Plex", result.mediaServerLabel)
+    }
+
+    @Test
     fun testDuplicatePrecedenceMediaServerOverSeerr() = runBlocking {
         val seerrInstance = Instance(
             id = 2L,
