@@ -1,0 +1,32 @@
+### Announcements
+* ArrMatey is now on F-Droid! Updates will still be pushed to GitHub first, but if you prefer to manage your apps through F-Droid, keep an eye out for ArrMatey in the F-Droid store in the coming days.
+* Support ArrMatey: Thank you to everyone who's used and supported ArrMatey over the past few months. If you enjoy using ArrMatey, consider supporting ongoing development via [Buy Me a Coffee](https://buymeacoffee.com/owenlejeune). Your support helps keep new features coming!
+
+### New Features
+* Media Server Libraries: Added native support for Plex, Jellyfin, and Emby media server libraries directly within ArrMatey with unified browsing, searching, and playback status.
+* Unified Media Details & Playback: View media server availability badges, mark episodes or movies as watched/unwatched, and launch direct playback from media details.
+* Continue Watching Dashboard: Added a dedicated "Continue Watching" dashboard card for your configured Plex, Jellyfin, and Emby media servers.
+* Chaptarr Integration: Manage audiobook chapters seamlessly with full Chaptarr integration.
+* Kapowarr Integration: Added full support for Kapowarr comic book library management.
+* Tautulli Integration: Added integration with Tautulli for Plex stream tracking and activity statistics.
+* Wake-on-LAN Support: Add and configure Wake-on-LAN devices to easily wake up sleeping servers directly from the app.
+* NZBGet & rTorrent Support: Added support for NZBGet and rTorrent download clients alongside existing clients.
+* Blocklist Management: Dedicated Blocklist screen to view and manage blocklisted releases across instances.
+* Activity Queue Multi-Select: Long-press to multi-select and bulk-remove queue items with improved responsiveness.
+
+### Improvements
+* Service Dashboard Screens: Added dedicated dashboard screens for all service and download client types in settings.
+* Add Instance Polish: Streamlined add/edit instance and download client flows with combined test & save, and grouped service cards.
+* Seerr Authentication: Added support for additional Seerr authentication methods, like local auth, Plex, and Jellyfin logins.
+* First Day of Week Setting: Added an option to use Monday as the first day of the week in the calendar.
+* Download Client External IPs: Added option to display external IP addresses for qBittorrent and Deluge clients.
+* Granular Dashboard Loading: Refined loading states across individual dashboard cards.
+
+### Bug Fixes
+* Media Details: Fixed media details not showing media as added immediately after adding.
+* Global Search: Resolved null pointer exception during global search fallback lookup.
+* Navigation & UI: Fixed floating navigation bar hiding the floating action button on drawer tabs.
+* Backups: Fixed repeated restores, preserved Custom Webpage settings, and corrected backup file naming.
+* Activity Queue: Resolved UI freezing when adding media or removing items from queue, and fixed multi-select overlaying the last item.
+* Customization: Removed animation from static list headers to prevent scroll crashes in customization screens.
+* Notifications: Fixed episode notification navigation trap.

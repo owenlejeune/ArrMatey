@@ -1,17 +1,19 @@
-ArrMatey is an all-in-one mobile companion for your home server media stack. Support for Sonarr, Radarr, Lidarr, Bookshelf, Listenarr, Prowlarr, Seerr, Bazarr, and Tracearr is included, along with download clients (qBittorrent, SABnzbd, Deluge, and Transmission) with many more coming!
+ArrMatey is an all-in-one mobile companion for your home server media stack. Support for Sonarr, Radarr, Lidarr, Bookshelf, Listenarr, Kapowarr, Prowlarr, Seerr, Bazarr, Tracearr, and Tautulli is included, alongside media server integrations (Plex, Jellyfin, and Emby), Wake-on-LAN management, and download clients (qBittorrent, SABnzbd, Deluge, Transmission, NZBGet, and rTorrent)!
 
 <b>Combined Dashboard</b>
 <ul>
-<li>Centralized overview of all instances, download clients, and requests</li>
+<li>Centralized overview of all instances, download clients, requests, and continue watching</li>
 <li>Customizable layout: add, remove, and reorder cards to fit your workflow</li>
-<li>Real-time network status and detailed disk space monitoring</li>
+<li>Continue Watching card for Plex, Jellyfin, and Emby media servers</li>
+<li>Real-time network status, Wake-on-LAN controls, and detailed disk space monitoring</li>
 <li>Quick-access shortcuts to your recently added media and upcoming schedule</li>
 </ul>
 
-<b>Multi-Instance Support</b>
+<b>Multi-Instance & Media Server Support</b>
 <ul>
-<li>Manage multiple Sonarr, Radarr, Lidarr, Bookshelf, and Listenarr instances</li>
-<li>Seamless integration with Prowlarr for indexer management, Seerr for requests, Bazarr for subtitles, and Tracearr for stream monitoring</li>
+<li>Manage multiple Sonarr, Radarr, Lidarr, Bookshelf, Listenarr, and Kapowarr instances</li>
+<li>Browse and sync Plex, Jellyfin, and Emby media server libraries with playback controls and watch status</li>
+<li>Seamless integration with Prowlarr for indexers, Seerr for requests, Bazarr for subtitles, Chaptarr for audiobook chapters, and Tracearr/Tautulli for stream monitoring</li>
 <li>Quick instance switching and custom instance labels</li>
 </ul>
 
@@ -21,7 +23,7 @@ ArrMatey is an all-in-one mobile companion for your home server media stack. Sup
 <li>Search and filter by title, quality, and monitored status</li>
 <li>Sort by name, date added, size, and more</li>
 <li>View detailed media information, including episode lists, season management, and file status</li>
-<li>Dedicated management for Audiobooks with metadata and file tracking</li>
+<li>Dedicated management for Audiobooks and Comics with metadata and file tracking</li>
 </ul>
 
 <b>Interactive Search</b>
@@ -34,22 +36,24 @@ ArrMatey is an all-in-one mobile companion for your home server media stack. Sup
 
 <b>Calendar View</b>
 <ul>
-<li>View upcoming episodes, movies, albums, and books</li>
-<li>Switch between list and month views</li>
+<li>View upcoming episodes, movies, albums, books, and audiobooks</li>
+<li>Switch between list and month views with configurable first day of the week</li>
 <li>Filter by content type, monitored status, and premieres/finales</li>
 <li>Scroll-to-today for easy navigation</li>
 </ul>
 
-<b>Activity Queue</b>
+<b>Activity Queue & Blocklist</b>
 <ul>
-<li>Real-time download monitoring across all download clients</li>
+<li>Real-time download monitoring across all download clients (qBittorrent, SABnzbd, Deluge, Transmission, NZBGet, rTorrent)</li>
 <li>View progress, ETA, and detailed status</li>
-<li>Manage downloads with options to remove, blocklist, or skip redownload</li>
+<li>Multi-select queue management with bulk removal options</li>
+<li>Inspect and manage blocklisted releases across instances</li>
 </ul>
 
 <b>Advanced Features</b>
 <ul>
 <li><b>Android App Shortcuts:</b> Jump to services or search directly from your home screen</li>
+<li><b>Wake-on-LAN:</b> Wake sleeping servers directly from within the app</li>
 <li><b>Custom Headers:</b> Add custom HTTP headers per instance</li>
 <li><b>Local Network Switching:</b> Automatically use local URLs when connected to home Wi-Fi</li>
 <li><b>Slow Instance Mode:</b> Configurable timeout for remote or slower instances</li>

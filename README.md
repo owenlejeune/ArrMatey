@@ -14,6 +14,9 @@
 
 ## Downloads
 
+<a href="https://f-droid.org/packages/com.dnfapps.arrmatey/" target="_blank">
+<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" align="center" height="80">
+</a>
 <a href="https://github.com/owenlejeune/ArrMatey/releases" target="_blank">
 <img src="https://github.com/machiav3lli/oandbackupx/blob/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png" alt="Get it on Github" align="center" height="80">
 </a>
@@ -24,27 +27,36 @@
 ## Features
 
 ### Combined Dashboard
-- Centralized overview of all instances, download clients, and requests
+- Centralized overview of all instances, download clients, requests, and watch activity
 - Customizable layout: add, remove, and reorder cards to fit your workflow
+- Continue Watching card for Plex, Jellyfin, and Emby media servers
 - Dashboard cards for Universal Search, Seerr Requests, Seerr Issues, and Discover Cards (Discover Feed, Quick Pick, Spotlight)
-- Tracearr Active Streams card for real-time stream monitoring and statistics
-- Real-time network status and detailed disk space monitoring
+- Tracearr & Tautulli stream monitoring cards with active streams and playback statistics
+- Real-time network status, Wake-on-LAN controls, and detailed disk space monitoring
 - Quick-access shortcuts to your recently added media and upcoming schedule
 
-### Multi-Instance Support
-- Manage multiple Sonarr, Radarr, Lidarr, Bookshelf, and Listenarr instances
-- Seamless integration with Prowlarr for indexer management, Seerr for requests and issues, Bazarr for subtitles, and Tracearr for stream monitoring
+### Multi-Instance & Media Server Support
+- Manage multiple Sonarr, Radarr, Lidarr, Bookshelf, Listenarr, and Kapowarr instances
+- Browse and sync Plex, Jellyfin, and Emby media server libraries with live presence detection, playback controls, and watch status
+- Seamless integration with Prowlarr for indexer management, Seerr for requests and issues, Bazarr for subtitles, Chaptarr for audiobook chapters, and Tracearr/Tautulli for stream monitoring
+- Wake-on-LAN device management to power on sleeping servers directly from the app
 - Quick instance switching and custom instance labels
 - Live presence detection showing which instances contain a media item
 
 ### Unified Media Details
-- Blends Arr library data, Seerr metadata, and Bazarr subtitle controls into a single cohesive view
+- Blends Arr library data, Media Server availability, Seerr metadata, and Bazarr subtitle controls into a single cohesive view
 - **Instance Switching**: View media presence across multiple instances and switch between them instantly while preserving local instance context
+- **Media Server Availability & Playback**: View media server badges, mark episodes/movies as watched or unwatched, and launch direct playback
 - **Smart Add & Requests**: Add media directly to any configured Arr instance or submit custom Seerr requests with custom profiles, root folders, and tags
 - **Seasons & Episodes**: Full episode monitoring, release search, playback statistics, and integrated Bazarr subtitle tracking
 - **Cast & Crew Filmography**: Browse actor and crew credits with one-tap navigation to detailed filmographies
 - **Similar Recommendations**: Browse similar media suggestions directly on media detail pages
 - **Information & Keywords**: Distinct metadata cards with instance indicators and staggered keyword tags
+
+### Media Server Libraries
+- Dedicated media server library browsing for Plex, Jellyfin, and Emby
+- Unified search integration with clustered results by title and year, badges, and source chips
+- Sync view customizations across instances with global layout options
 
 ### Discover & Requests (Seerr)
 - Dedicated Discover tab to browse trending, popular, and upcoming movies and TV shows
@@ -57,7 +69,7 @@
 - Search and filter by title, quality, and monitored status
 - Sort by name, date added, size, and more
 - View detailed media information, including episode lists, season management, and file status
-- Dedicated management for Audiobooks with metadata and file tracking
+- Dedicated management for Audiobooks and Comics (Kapowarr) with metadata and file tracking
 
 ### Interactive Search
 - Manual search for releases via Arr instances or Prowlarr
@@ -73,22 +85,24 @@
 
 ### Calendar View
 - View upcoming episodes, movies, albums, books, and audiobooks
-- Switch between list and month views
+- Switch between list and month views with configurable first day of the week (Sunday/Monday)
 - Filter by content type, monitored status, and premieres/finales
 - Scroll-to-today for easy navigation
 
-### Activity Queue
+### Activity Queue & Blocklist
 - Real-time download monitoring across all download clients
 - View progress, ETA, and detailed status
-- Manage downloads with options to remove, blocklist, or skip redownload
+- Manage downloads with multi-select bulk removal, options to blocklist, or skip redownload
+- Dedicated Blocklist view to inspect and manage blocked releases across all configured instances
 
 ### Advanced Features
 - **Floating Navigation Bar**: Modern floating navigation bar option for clean, fluid screen transitions
+- **Wake-on-LAN**: Wake sleeping servers directly from within the app
 - **Interactive Onboarding**: Guided setup wizard to configure your initial instances and app preferences
 - **Android App Shortcuts & Monochrome Icon**: Jump to services directly from your home screen with Material You icon support
 - **Local Network Switching**: Automatically use local URLs when connected to home Wi-Fi
 - **Large Screen & Adaptive Layouts**: Responsive dual-panel layouts for tablets and large screens
-- **Custom Webpages**: Pin your favorite status pages or secondary dashboards (like Tautulli) directly in the app
+- **Custom Webpages**: Pin your favorite status pages or secondary dashboards directly in the app
 - **Custom Headers**: Add custom HTTP headers per instance
 - **Slow Instance Mode**: Configurable timeout for remote or slower instances
 - **Pull-to-refresh**: Update data across all screens
@@ -96,8 +110,9 @@
 - **Import/Export**: Back up and restore your settings and instances across devices
 - **Credential Encryption**: Securely store API keys and credentials in the local database
 
-### Download Client
-- **Multiple Integrations**: Support for Transmission, Deluge, qBittorrent, and SABnzbd
+### Download Clients
+- **Multiple Integrations**: Support for Transmission, Deluge, qBittorrent, SABnzbd, NZBGet, and rTorrent
+- Display external IP address for torrent clients
 
 ## Screenshots
 
@@ -173,40 +188,6 @@
   </tr>
 </table>
 
-## Getting Started
-
-This is a Kotlin Multiplatform project targeting Android, iOS.
-
-- [/composeApp](./composeApp/src) contains the Android application. This is where all Jetpack Compose and other Android-app specific code should go.
-
-- [/iosApp](./iosApp/iosApp) contains iOS applications. This is where all SwiftUI and other iOS-app specific code should go
-
-- [/shared](./shared/src) is for the code that will be shared between all targets in the project.
-  The most important subfolder is [commonMain](./shared/src/commonMain/kotlin). Any code that is shared between projects (networking/database/viewmodel/data models, etc.) goes here. There are also [androidMain](./shared/src/androidMain/kotlin) and [iosMain](./shared/src/iosMain/kotlin) for shard code that targets a specifc platform.
-
-### Build and Run Android Application
-
-To build and run the development version of the Android app, build and run the composeApp target in AndroidStudio
-
-### Build and Run iOS Application
-
-To build and run the development version of the iOS app, build and run the iosApp target in AndroidStudio or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
-
-To build the app locally Xcode must be signed into an Apple Account:
-```
-Xcode → Settings → Accounts
-```
-
-Next, select the Apple Account's team for the `iosApp` target:
-```
-iosApp → Signing & Capabilities → Targets → iosApp -> Signing -> Team
-```
-
-### Adding Localized String
-
-ArrMatey uses [moko-resources](https://github.com/icerockdev/moko-resources) for string resources across platforms.
-Any new strings should be added to strings.xml, or plurals.xml for plural strings. Build your targets, and new strings will be accessible using MR.strings
-
 ## Configuration
 
 ### Adding Your First Instance
@@ -241,6 +222,40 @@ Example:
 - Header: `X-Forwarded-For`
 - Value: `192.168.1.1`
 
+## Build Locally
+
+This is a Kotlin Multiplatform project targeting Android, iOS.
+
+- [/composeApp](./composeApp/src) contains the Android application. This is where all Jetpack Compose and other Android-app specific code should go.
+
+- [/iosApp](./iosApp/iosApp) contains iOS applications. This is where all SwiftUI and other iOS-app specific code should go
+
+- [/shared](./shared/src) is for the code that will be shared between all targets in the project.
+  The most important subfolder is [commonMain](./shared/src/commonMain/kotlin). Any code that is shared between projects (networking/database/viewmodel/data models, etc.) goes here. There are also [androidMain](./shared/src/androidMain/kotlin) and [iosMain](./shared/src/iosMain/kotlin) for shard code that targets a specifc platform.
+
+### Build and Run Android Application
+
+To build and run the development version of the Android app, build and run the composeApp target in AndroidStudio
+
+### Build and Run iOS Application
+
+To build and run the development version of the iOS app, build and run the iosApp target in AndroidStudio or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+
+To build the app locally Xcode must be signed into an Apple Account:
+```
+Xcode → Settings → Accounts
+```
+
+Next, select the Apple Account's team for the `iosApp` target:
+```
+iosApp → Signing & Capabilities → Targets → iosApp -> Signing -> Team
+```
+
+### Adding Localized String
+
+ArrMatey uses [moko-resources](https://github.com/icerockdev/moko-resources) for string resources across platforms.
+Any new strings should be added to strings.xml, or plurals.xml for plural strings. Build your targets, and new strings will be accessible using MR.strings
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -274,7 +289,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## AI Disclaimer
 
-AI has assisted in the development of this application but all architecture/design decisions and the majority of code are written by humans.
+AI has assisted in the development of this application but all architecture/design decisions and the majority of code is written by humans.
 
 ## Acknowledgments
 
@@ -283,10 +298,18 @@ AI has assisted in the development of this application but all architecture/desi
 - [Lidarr](https://lidarr.audio/) - Music collection manager
 - [Bookshelf](https://github.com/pennydreadful/bookshelf) - Ebook and audiobook collection manager
 - [Listenarr](https://github.com/Listenarrs/Listenarr) - Audiobook management server
+- [Kapowarr](https://github.com/Casvt/Kapowarr) - Comic book collection manager
+- [Chaptarr](https://github.com/ignisda/chaptarr) - Audiobook chapter editor and extractor
+- [Plex](https://www.plex.tv/) - Media server streaming platform
+- [Jellyfin](https://jellyfin.org/) - The Free Software Media System
+- [Emby](https://emby.media/) - Personal Media Server
 - [Prowlarr](https://prowlarr.com/) - Indexer manager
 - [Seerr](https://docs.seerr.dev/) - Request management
 - [Bazarr](https://www.bazarr.media/) - Subtitle management for Sonarr and Radarr
 - [Tracearr](https://github.com/Tracearr/Tracearr) - Active stream monitoring and playback analytics
+- [Tautulli](https://tautulli.com/) - Monitoring and tracking tool for Plex Media Server
+- [NZBGet](https://nzbget.com/) - Efficient Usenet downloader
+- [rTorrent](https://github.com/rakshasa/rtorrent) - High-performance BitTorrent client
 - [Material Design 3](https://m3.material.io/) - Design system
 - [Jetpack Compose](https://developer.android.com/jetpack/compose) - Modern UI toolkit
 - [SwiftUI](https://developer.apple.com/xcode/swiftui/) - Apple's declarative framework for building user interfaces
