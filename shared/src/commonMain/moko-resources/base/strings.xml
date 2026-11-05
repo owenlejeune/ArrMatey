@@ -1000,6 +1000,7 @@
     <string name="v15_title">Bug Fixes</string>
     <string name="v16_title">Activity History &amp; Enhancements</string>
     <string name="v17_title">Media History, Fast Scroll &amp; Enhancements</string>
+    <string name="v18_title">It's a big one!</string>
 
     <!-- Backup & Restore -->
     <string name="backup_restore">Backup &amp; Restore</string>
