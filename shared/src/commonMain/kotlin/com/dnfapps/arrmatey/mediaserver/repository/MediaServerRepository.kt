@@ -10,7 +10,7 @@ interface MediaServerRepository {
     val serverType: MediaServerType
     val integration: MediaServerIntegration
 
-    suspend fun getLibraries(): NetworkResult<List<UnifiedMediaLibrary>>
+    suspend fun getLibraries(forceRefresh: Boolean = false): NetworkResult<List<UnifiedMediaLibrary>>
 
     suspend fun getLibraryContents(
         libraryId: String,
@@ -22,6 +22,7 @@ interface MediaServerRepository {
     suspend fun getAllLibraryContents(
         libraryId: String,
         sort: String? = null,
+        forceRefresh: Boolean = false,
     ): NetworkResult<List<UnifiedMediaItem>> = getLibraryContents(libraryId, page = 0, pageSize = -1, sort = sort)
 
     suspend fun getItemDetail(itemId: String): NetworkResult<UnifiedMediaItem>
@@ -35,6 +36,14 @@ interface MediaServerRepository {
     suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit>
 
     suspend fun refreshItem(itemId: String): NetworkResult<Unit>
+
+    fun hasCachedLibraries(): Boolean = false
+
+    fun hasCachedContents(libraryId: String): Boolean = false
+
+    fun hasAllCachedContents(libraryIds: List<String>): Boolean = false
+
+    fun clearCache() {}
 
     fun buildImageUrl(imageKeyOrTag: String, itemId: String, maxWidth: Int = 400): String
 

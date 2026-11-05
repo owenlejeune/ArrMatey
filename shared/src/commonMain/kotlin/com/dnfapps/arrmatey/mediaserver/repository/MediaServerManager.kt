@@ -174,11 +174,11 @@ class MediaServerManager(
 
         val allItems = repos.map { repo ->
             async {
-                when (val libRes = repo.getLibraries()) {
+                when (val libRes = repo.getLibraries(forceRefresh = true)) {
                     is NetworkResult.Success -> {
                         libRes.data.map { lib ->
                             async {
-                                when (val itemsRes = repo.getAllLibraryContents(lib.id)) {
+                                when (val itemsRes = repo.getAllLibraryContents(lib.id, forceRefresh = true)) {
                                     is NetworkResult.Success -> itemsRes.data
                                     else -> emptyList()
                                 }
@@ -192,6 +192,12 @@ class MediaServerManager(
 
         _allMediaServerItems.value = allItems
         allItems
+    }
+
+    fun updateItemWatched(itemId: String, watched: Boolean) {
+        _allMediaServerItems.value = _allMediaServerItems.value.map {
+            if (it.id == itemId) it.copy(played = watched) else it
+        }
     }
 
     fun findMatchingItem(

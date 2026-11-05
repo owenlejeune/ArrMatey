@@ -161,6 +161,8 @@ class MediaServerLibraryViewModel(
             initialValue = emptyList(),
         )
 
+    private val selectedLibraryByServer = mutableMapOf<Long, UnifiedMediaLibrary?>()
+
     init {
         viewModelScope.launch {
             configuredServers.collect { servers ->
@@ -179,11 +181,12 @@ class MediaServerLibraryViewModel(
 
     fun selectServer(server: MediaServerIntegration) {
         _selectedServer.value = server
-        _selectedLibrary.value = null
+        val targetLibrary = selectedLibraryByServer[server.id]
+        _selectedLibrary.value = targetLibrary
         viewModelScope.launch {
             updateAllPreferencesUseCase?.syncGlobalPreferencesToMediaServer(server.id)
         }
-        loadLibrariesAndContents(server, null)
+        loadLibrariesAndContents(server, targetLibrary)
     }
 
     fun selectServerByType(type: MediaServerType) {
@@ -195,6 +198,7 @@ class MediaServerLibraryViewModel(
     fun selectLibrary(library: UnifiedMediaLibrary?) {
         _selectedLibrary.value = library
         val server = _selectedServer.value ?: return
+        selectedLibraryByServer[server.id] = library
         loadContents(server, library)
     }
 
@@ -304,6 +308,7 @@ class MediaServerLibraryViewModel(
                     _rawItems.value = _rawItems.value.map {
                         if (it.id == item.id) it.copy(played = newPlayed) else it
                     }
+                    mediaServerManager.updateItemWatched(item.id, newPlayed)
                 }
                 is NetworkResult.Error -> {}
                 is NetworkResult.Loading -> {}
@@ -318,21 +323,23 @@ class MediaServerLibraryViewModel(
     ) {
         viewModelScope.launch {
             val repo = mediaServerManager.getOrCreateRepository(server)
-            if (!isRefresh) {
+            val hasCachedLibs = repo.hasCachedLibraries()
+            if (!isRefresh && !hasCachedLibs) {
                 _isLoading.value = true
             }
             _error.value = null
 
             try {
-                when (val libResult = repo.getLibraries()) {
+                when (val libResult = repo.getLibraries(forceRefresh = isRefresh)) {
                     is NetworkResult.Success -> {
                         val libs = libResult.data
                         _libraries.value = libs
                         val libraryToLoad = targetLibrary?.takeIf { libs.any { l -> l.id == it.id } }
                             ?: libs.firstOrNull()
                         _selectedLibrary.value = libraryToLoad
+                        selectedLibraryByServer[server.id] = libraryToLoad
                         if (libraryToLoad != null) {
-                            loadContentsInternal(repo, libraryToLoad)
+                            loadContentsInternal(repo, libraryToLoad, isRefresh)
                         } else {
                             _rawItems.value = emptyList()
                         }
@@ -355,15 +362,22 @@ class MediaServerLibraryViewModel(
     ) {
         viewModelScope.launch {
             val repo = mediaServerManager.getOrCreateRepository(server)
-            _isLoading.value = true
+            val hasCache = if (library != null) {
+                repo.hasCachedContents(library.id)
+            } else {
+                repo.hasAllCachedContents(_libraries.value.map { it.id })
+            }
+            if (!hasCache) {
+                _isLoading.value = true
+            }
             _error.value = null
 
             try {
                 if (library != null) {
-                    loadContentsInternal(repo, library)
+                    loadContentsInternal(repo, library, isRefresh = false)
                 } else {
                     // Load all libraries
-                    loadAllLibrariesContentsInternal(repo, _libraries.value)
+                    loadAllLibrariesContentsInternal(repo, _libraries.value, isRefresh = false)
                 }
             } finally {
                 _isLoading.value = false
@@ -375,8 +389,13 @@ class MediaServerLibraryViewModel(
     private suspend fun loadContentsInternal(
         repo: MediaServerRepository,
         library: UnifiedMediaLibrary,
+        isRefresh: Boolean = false,
     ) {
-        when (val result = repo.getAllLibraryContents(library.id)) {
+        val hasCache = repo.hasCachedContents(library.id)
+        if (!hasCache && !isRefresh) {
+            _isLoading.value = true
+        }
+        when (val result = repo.getAllLibraryContents(library.id, forceRefresh = isRefresh)) {
             is NetworkResult.Success -> {
                 _rawItems.value = result.data
             }
@@ -390,10 +409,15 @@ class MediaServerLibraryViewModel(
     private suspend fun loadAllLibrariesContentsInternal(
         repo: MediaServerRepository,
         libraries: List<UnifiedMediaLibrary>,
+        isRefresh: Boolean = false,
     ) = coroutineScope {
+        val hasAllCache = repo.hasAllCachedContents(libraries.map { it.id })
+        if (!hasAllCache && !isRefresh) {
+            _isLoading.value = true
+        }
         try {
             val deferredList = libraries.map { lib ->
-                async { repo.getAllLibraryContents(lib.id) }
+                async { repo.getAllLibraryContents(lib.id, forceRefresh = isRefresh) }
             }
             val results = deferredList.awaitAll()
             val allItems = mutableListOf<UnifiedMediaItem>()
