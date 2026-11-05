@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -142,11 +143,10 @@ private fun MediaServerConfigurationContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Icon(
+                Image(
                     painter = painterResource(state.serverType.icon),
                     contentDescription = null,
-                    modifier = Modifier.size(28.dp),
-                    tint = state.serverType.brandColor,
+                    modifier = Modifier.size(28.dp)
                 )
                 Text(
                     text = mokoString(MR.strings.configure_server, mokoString(state.serverType.resource)),
@@ -158,8 +158,6 @@ private fun MediaServerConfigurationContent(
                 Icon(Icons.Default.Close, contentDescription = null)
             }
         }
-
-        HorizontalDivider()
 
         AMOutlinedTextField(
             value = state.label,
@@ -176,8 +174,8 @@ private fun MediaServerConfigurationContent(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             placeholder = when (state.serverType) {
-                MediaServerType.Plex -> "http://192.168.1.50:32400"
-                MediaServerType.Jellyfin, MediaServerType.Emby -> "http://192.168.1.50:8096"
+                MediaServerType.Plex -> mokoString(MR.strings.plex_url_placeholder)
+                MediaServerType.Jellyfin, MediaServerType.Emby -> mokoString(MR.strings.jellyfin_emby_url_placeholder)
             },
         )
 
@@ -403,10 +401,11 @@ private fun PlexOAuthSection(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
+                        val linkLabel = mokoString(MR.strings.plex_sign_in_link)
                         OutlinedButton(
                             onClick = {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                clipboard.setPrimaryClip(ClipData.newPlainText("Plex Sign-in Link", url))
+                                clipboard.setPrimaryClip(ClipData.newPlainText(linkLabel, url))
                                 Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
                             },
                             modifier = Modifier.weight(1f),
@@ -464,92 +463,33 @@ private fun PlexOAuthSection(
 
         selectedServer?.let { server ->
             if (server.connections.isNotEmpty()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Text(
-                            text = "Available Endpoints:",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-
-                        PlexConnectionUtils.sortConnections(server.connections).forEach { conn ->
-                            val isDocker = PlexConnectionUtils.isDockerBridgeIp(conn.address)
-                            val directHttp = "http://${conn.address}:${conn.port}"
-                            val isCurrentDirect = state.url == directHttp
-                            val isCurrentSecure = state.url == conn.uri
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                ) {
-                                    Text(
-                                        text = "${conn.address}:${conn.port}",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = if (isCurrentDirect || isCurrentSecure) FontWeight.Bold else FontWeight.Normal,
-                                    )
-                                    if (conn.local && !isDocker) {
-                                        Text(
-                                            text = "LAN",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.SemiBold,
-                                        )
-                                    } else if (!conn.local) {
-                                        Text(
-                                            text = "Remote",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.secondary,
-                                        )
-                                    } else if (isDocker) {
-                                        Text(
-                                            text = "Docker Bridge (Unroutable)",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.error,
-                                        )
-                                    }
-                                }
-
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    OutlinedButton(
-                                        onClick = { onSelectConnection(conn, true) },
-                                        modifier = Modifier.weight(1f),
-                                    ) {
-                                        Text(
-                                            text = if (isCurrentDirect) "Direct HTTP (Active)" else "Direct HTTP",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            maxLines = 1,
-                                        )
-                                    }
-                                    OutlinedButton(
-                                        onClick = { onSelectConnection(conn, false) },
-                                        modifier = Modifier.weight(1f),
-                                    ) {
-                                        Text(
-                                            text = if (isCurrentSecure) "Secure HTTPS (Active)" else "Secure HTTPS",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            maxLines = 1,
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                val endpointOptions = remember(server) {
+                    PlexConnectionUtils.sortConnections(server.connections).flatMap { conn ->
+                        listOf(
+                            PlexEndpointOption(connection = conn, isDirect = true),
+                            PlexEndpointOption(connection = conn, isDirect = false),
+                        ).filter { it.url.isNotBlank() }
                     }
                 }
+                val selectedEndpointOption = endpointOptions.firstOrNull { it.url == state.url }
+
+                DropdownPicker(
+                    options = endpointOptions,
+                    selectedOption = selectedEndpointOption,
+                    onOptionSelected = { option ->
+                        onSelectConnection(option.connection, option.isDirect)
+                    },
+                    getOptionLabel = { option -> option.getLabel() },
+                    label = {
+                        Text(
+                            text = mokoString(MR.strings.available_endpoints),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    },
+                    unknownValueLabel = state.url.ifBlank { mokoString(MR.strings.unknown) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }
@@ -754,8 +694,8 @@ private fun LocalNetworkSection(
                         onValueChange = onLocalNetworkEndpointChanged,
                         label = mokoString(MR.strings.local_network_endpoint),
                         placeholder = when (state.serverType) {
-                            MediaServerType.Plex -> "http://192.168.1.50:32400"
-                            MediaServerType.Jellyfin, MediaServerType.Emby -> "http://192.168.1.50:8096"
+                            MediaServerType.Plex -> mokoString(MR.strings.plex_url_placeholder)
+                            MediaServerType.Jellyfin, MediaServerType.Emby -> mokoString(MR.strings.jellyfin_emby_url_placeholder)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
@@ -768,12 +708,31 @@ private fun LocalNetworkSection(
                             onLocalNetworkSsidsChanged(ssids)
                         },
                         label = mokoString(MR.strings.wifi_network_name),
-                        placeholder = "Home-WiFi, Home-5G",
+                        placeholder = mokoString(MR.strings.wifi_network_placeholder),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                     )
                 }
             }
         }
+    }
+}
+
+private data class PlexEndpointOption(
+    val connection: PlexServerConnection,
+    val isDirect: Boolean,
+) {
+    val url: String = if (isDirect) "http://${connection.address}:${connection.port}" else connection.uri
+
+    @Composable
+    fun getLabel(): String {
+        val isDocker = PlexConnectionUtils.isDockerBridgeIp(connection.address)
+        val location = when {
+            isDocker -> mokoString(MR.strings.docker_bridge_unroutable)
+            connection.local -> mokoString(MR.strings.lan)
+            else -> mokoString(MR.strings.remote)
+        }
+        val protocol = if (isDirect) mokoString(MR.strings.direct_http) else mokoString(MR.strings.secure_https)
+        return "${connection.address}:${connection.port} ($protocol • $location)"
     }
 }
