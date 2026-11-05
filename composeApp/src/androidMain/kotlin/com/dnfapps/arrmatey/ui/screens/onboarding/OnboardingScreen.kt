@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.datastore.TabPreferences
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.settings.ImportDialog
@@ -75,10 +76,7 @@ fun OnboardingScreen(
     val appColor by moreViewModel.appColor.collectAsStateWithLifecycle()
     val useServiceNavLogos by moreViewModel.useServiceNavLogos.collectAsStateWithLifecycle()
     val useFloatingNavigationBar by moreViewModel.useFloatingNavigationBar.collectAsStateWithLifecycle()
-    val tabPreferences by preferences.tabPreferences.collectAsStateWithLifecycle(
-        com.dnfapps.arrmatey.datastore
-            .TabPreferences(),
-    )
+    val tabPreferences by preferences.tabPreferences.collectAsStateWithLifecycle(TabPreferences())
 
     var showAddInstanceSheet by remember { mutableStateOf(false) }
     var showAddDownloadClientSheet by remember { mutableStateOf(false) }

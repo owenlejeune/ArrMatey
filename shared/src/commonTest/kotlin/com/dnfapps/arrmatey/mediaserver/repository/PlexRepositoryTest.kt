@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -427,5 +428,185 @@ class PlexRepositoryTest {
         assertEquals(2010, movie.year)
         assertEquals("Warner Bros. Pictures", movie.studio)
         assertEquals("2h 28m", movie.formattedRuntime)
+    }
+
+    @Test
+    fun getLibrariesCachesResultAndDoesNotRefetchUnlessForced() = runTest {
+        var networkRequestCount = 0
+        val mockEngine = MockEngine { request ->
+            networkRequestCount++
+            respond(
+                content = """
+                    {
+                      "MediaContainer": {
+                        "size": 1,
+                        "Directory": [
+                          { "key": "1", "title": "Movies", "type": "movie" }
+                        ]
+                      }
+                    }
+                """.trimIndent(),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+            )
+        }
+
+        val repository = PlexRepository(createClient(mockEngine))
+        assertFalse(repository.hasCachedLibraries())
+
+        // First call hits network
+        val result1 = repository.getLibraries()
+        assertTrue(result1 is NetworkResult.Success)
+        assertEquals(1, networkRequestCount)
+        assertTrue(repository.hasCachedLibraries())
+
+        // Second call without forceRefresh returns cached data without network request
+        val result2 = repository.getLibraries()
+        assertTrue(result2 is NetworkResult.Success)
+        assertEquals(1, networkRequestCount)
+
+        // Call with forceRefresh = true hits network again
+        val result3 = repository.getLibraries(forceRefresh = true)
+        assertTrue(result3 is NetworkResult.Success)
+        assertEquals(2, networkRequestCount)
+    }
+
+    @Test
+    fun getAllLibraryContentsCachesResultAndDoesNotRefetchUnlessForced() = runTest {
+        var networkRequestCount = 0
+        val mockEngine = MockEngine { request ->
+            networkRequestCount++
+            respond(
+                content = """
+                    {
+                      "MediaContainer": {
+                        "size": 1,
+                        "totalSize": 1,
+                        "Metadata": [
+                          {
+                            "ratingKey": "101",
+                            "title": "Inception",
+                            "type": "movie",
+                            "year": 2010,
+                            "viewCount": 0
+                          }
+                        ]
+                      }
+                    }
+                """.trimIndent(),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "application/json"),
+            )
+        }
+
+        val repository = PlexRepository(createClient(mockEngine))
+        assertFalse(repository.hasCachedContents("1"))
+
+        // First call hits network
+        val result1 = repository.getAllLibraryContents("1")
+        assertTrue(result1 is NetworkResult.Success)
+        assertEquals(1, networkRequestCount)
+        assertTrue(repository.hasCachedContents("1"))
+
+        // Second call returns cached data without network request
+        val result2 = repository.getAllLibraryContents("1")
+        assertTrue(result2 is NetworkResult.Success)
+        assertEquals(1, networkRequestCount)
+
+        // Force refresh hits network again
+        val result3 = repository.getAllLibraryContents("1", forceRefresh = true)
+        assertTrue(result3 is NetworkResult.Success)
+        assertEquals(2, networkRequestCount)
+    }
+
+    @Test
+    fun markWatchedUpdatesCachedItemPlayedStatus() = runTest {
+        val mockEngine = MockEngine { request ->
+            when (request.url.encodedPath) {
+                "/library/sections/1/all" -> respond(
+                    content = """
+                        {
+                          "MediaContainer": {
+                            "size": 1,
+                            "totalSize": 1,
+                            "Metadata": [
+                              {
+                                "ratingKey": "101",
+                                "title": "Inception",
+                                "type": "movie",
+                                "year": 2010,
+                                "viewCount": 0
+                              }
+                            ]
+                          }
+                        }
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+                "/:/scrobble" -> respond("", HttpStatusCode.OK)
+                else -> respond("{}", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+            }
+        }
+
+        val repository = PlexRepository(createClient(mockEngine))
+        val loadResult = repository.getAllLibraryContents("1")
+        assertTrue(loadResult is NetworkResult.Success)
+        assertFalse(loadResult.data.first().played)
+
+        // Mark watched
+        val markResult = repository.markWatched("101", true)
+        assertTrue(markResult is NetworkResult.Success)
+
+        // Cached item should now be played = true
+        val cachedResult = repository.getAllLibraryContents("1")
+        assertTrue(cachedResult is NetworkResult.Success)
+        assertTrue(cachedResult.data.first().played)
+    }
+
+    @Test
+    fun clearCacheInvalidatesBothLibrariesAndContents() = runTest {
+        val mockEngine = MockEngine { request ->
+            when (request.url.encodedPath) {
+                "/library/sections" -> respond(
+                    content = """
+                        {
+                          "MediaContainer": {
+                            "size": 1,
+                            "Directory": [{ "key": "1", "title": "Movies", "type": "movie" }]
+                          }
+                        }
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+                "/library/sections/1/all" -> respond(
+                    content = """
+                        {
+                          "MediaContainer": {
+                            "size": 1,
+                            "totalSize": 1,
+                            "Metadata": [{ "ratingKey": "101", "title": "Inception", "type": "movie" }]
+                          }
+                        }
+                    """.trimIndent(),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+                else -> respond("{}", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+            }
+        }
+
+        val repository = PlexRepository(createClient(mockEngine))
+        repository.getLibraries()
+        repository.getAllLibraryContents("1")
+        assertTrue(repository.hasCachedLibraries())
+        assertTrue(repository.hasCachedContents("1"))
+        assertTrue(repository.hasAllCachedContents(listOf("1")))
+
+        repository.clearCache()
+        assertFalse(repository.hasCachedLibraries())
+        assertFalse(repository.hasCachedContents("1"))
+        assertFalse(repository.hasAllCachedContents(listOf("1")))
     }
 }

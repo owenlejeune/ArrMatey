@@ -39,6 +39,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 
 private class FakeLibraryMediaServerDao(
@@ -267,5 +268,22 @@ class MediaServerLibraryViewModelTest {
         assertEquals(ViewType.List, vm.viewType.value)
         vm.toggleViewType()
         assertEquals(ViewType.Grid, vm.viewType.value)
+    }
+
+    @Test
+    fun switchingServerRestoresLibraryAndDoesNotShowLoadingWhenCached() = runBlocking {
+        val (vm, integration) = createSetup()
+        vm.selectServer(integration)
+        awaitLoaded(vm)
+
+        assertEquals("Movies", vm.selectedLibrary.value?.title)
+        assertFalse(vm.isLoading.value)
+        assertEquals(2, vm.filteredItems.value.size)
+
+        // Re-selecting the server should use cached data without setting isLoading = true
+        vm.selectServer(integration)
+        assertFalse(vm.isLoading.value)
+        assertEquals("Movies", vm.selectedLibrary.value?.title)
+        assertEquals(2, vm.filteredItems.value.size)
     }
 }

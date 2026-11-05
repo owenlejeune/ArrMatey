@@ -13,18 +13,24 @@ import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeGet
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import kotlinx.coroutines.sync.withLock
 
 class PlexRepository(
     private val client: PlexClient,
     private val onUrlUpdated: (suspend (String) -> Unit)? = null,
-) : MediaServerRepository {
+) : BaseMediaServerRepository() {
     override val serverType: MediaServerType = MediaServerType.Plex
     override val integration: MediaServerIntegration = client.integration
 
     private val baseUrl: String
         get() = client.baseUrl
 
-    override suspend fun getLibraries(): NetworkResult<List<UnifiedMediaLibrary>> {
+    override suspend fun getLibraries(forceRefresh: Boolean): NetworkResult<List<UnifiedMediaLibrary>> {
+        if (!forceRefresh) {
+            cacheMutex.withLock {
+                cachedLibraries?.let { return NetworkResult.Success(it) }
+            }
+        }
         var res = client.getSections()
         if (res is NetworkResult.Error && isRecoverableNetworkError(res)) {
             val healed = autoHealFromPlexTv()
@@ -41,6 +47,9 @@ class PlexRepository(
                         type = MediaType.fromString(dir.type),
                         serverType = MediaServerType.Plex,
                     )
+                }
+                cacheMutex.withLock {
+                    cachedLibraries = libs
                 }
                 NetworkResult.Success(libs)
             }
@@ -80,7 +89,13 @@ class PlexRepository(
     override suspend fun getAllLibraryContents(
         libraryId: String,
         sort: String?,
+        forceRefresh: Boolean,
     ): NetworkResult<List<UnifiedMediaItem>> {
+        if (!forceRefresh && sort == null) {
+            cacheMutex.withLock {
+                cachedContents[libraryId]?.let { return NetworkResult.Success(it) }
+            }
+        }
         var res = client.getSectionMedia(sectionId = libraryId, start = null, size = null, sort = sort)
         if (res is NetworkResult.Error && isRecoverableNetworkError(res)) {
             val healed = autoHealFromPlexTv()
@@ -88,7 +103,7 @@ class PlexRepository(
                 res = client.getSectionMedia(sectionId = libraryId, start = null, size = null, sort = sort)
             }
         }
-        return when (res) {
+        val result = when (res) {
             is NetworkResult.Success -> {
                 val container = res.data.mediaContainer
                 val initialMetadata = container.metadata.orEmpty().filter { !it.ratingKey.isNullOrBlank() }
@@ -120,6 +135,12 @@ class PlexRepository(
             is NetworkResult.Error -> res
             is NetworkResult.Loading -> res
         }
+        if (result is NetworkResult.Success && sort == null) {
+            cacheMutex.withLock {
+                cachedContents[libraryId] = result.data
+            }
+        }
+        return result
     }
 
     private fun isRecoverableNetworkError(error: NetworkResult.Error): Boolean {
@@ -177,7 +198,11 @@ class PlexRepository(
         is NetworkResult.Success -> {
             val first = res.data.mediaContainer.metadata.orEmpty().firstOrNull { !it.ratingKey.isNullOrBlank() }
             if (first != null) {
-                NetworkResult.Success(first.toUnifiedMediaItem())
+                val item = first.toUnifiedMediaItem()
+                cacheMutex.withLock {
+                    updateItemInCache(item)
+                }
+                NetworkResult.Success(item)
             } else {
                 NetworkResult.Error(message = "Item not found")
             }
@@ -221,7 +246,13 @@ class PlexRepository(
         is NetworkResult.Loading -> res
     }
 
-    override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(itemId, watched)
+    override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(itemId, watched).also { result ->
+        if (result is NetworkResult.Success) {
+            cacheMutex.withLock {
+                updateWatchedInCache(itemId, watched)
+            }
+        }
+    }
 
     override suspend fun refreshItem(itemId: String): NetworkResult<Unit> = client.refreshItem(itemId)
 

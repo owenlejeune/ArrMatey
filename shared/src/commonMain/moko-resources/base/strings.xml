@@ -1377,4 +1377,15 @@
     <string name="no_media_servers_configured">No media servers configured</string>
     <string name="no_media_servers_description">Connect Plex, Jellyfin, or Emby under Integrations to browse your personal media library.</string>
     <string name="all_libraries">All Libraries</string>
+
+    <!-- Media Server Configuration -->
+    <string name="plex_sign_in_link">Plex Sign-in Link</string>
+    <string name="available_endpoints">Available Endpoints:</string>
+    <string name="plex_url_placeholder">http://192.168.1.50:32400</string>
+    <string name="jellyfin_emby_url_placeholder">http://192.168.1.50:8096</string>
+    <string name="wifi_network_placeholder">Home-WiFi, Home-5G</string>
+    <string name="docker_bridge_unroutable">Docker Bridge (Unroutable)</string>
+    <string name="remote">Remote</string>
+    <string name="direct_http">Direct HTTP</string>
+    <string name="secure_https">Secure HTTPS</string>
 </resources>

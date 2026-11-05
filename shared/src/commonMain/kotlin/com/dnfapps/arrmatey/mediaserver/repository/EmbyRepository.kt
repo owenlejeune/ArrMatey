@@ -8,10 +8,11 @@ import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaLibrary
 import com.dnfapps.networking.NetworkResult
+import kotlinx.coroutines.sync.withLock
 
 class EmbyRepository(
     private val client: EmbyClient,
-) : MediaServerRepository {
+) : BaseMediaServerRepository() {
     override val serverType: MediaServerType = MediaServerType.Emby
     override val integration: MediaServerIntegration = client.integration
 
@@ -21,20 +22,30 @@ class EmbyRepository(
     private val userId: String
         get() = integration.userId.orEmpty()
 
-    override suspend fun getLibraries(): NetworkResult<List<UnifiedMediaLibrary>> = when (val res = client.getUserViews(userId)) {
-        is NetworkResult.Success -> {
-            val libs = res.data.items.map { item ->
-                UnifiedMediaLibrary(
-                    id = item.id,
-                    title = item.name,
-                    type = MediaType.fromString(item.collectionType ?: item.type),
-                    serverType = MediaServerType.Emby,
-                )
+    override suspend fun getLibraries(forceRefresh: Boolean): NetworkResult<List<UnifiedMediaLibrary>> {
+        if (!forceRefresh) {
+            cacheMutex.withLock {
+                cachedLibraries?.let { return NetworkResult.Success(it) }
             }
-            NetworkResult.Success(libs)
         }
-        is NetworkResult.Error -> res
-        is NetworkResult.Loading -> res
+        return when (val res = client.getUserViews(userId)) {
+            is NetworkResult.Success -> {
+                val libs = res.data.items.map { item ->
+                    UnifiedMediaLibrary(
+                        id = item.id,
+                        title = item.name,
+                        type = MediaType.fromString(item.collectionType ?: item.type),
+                        serverType = MediaServerType.Emby,
+                    )
+                }
+                cacheMutex.withLock {
+                    cachedLibraries = libs
+                }
+                NetworkResult.Success(libs)
+            }
+            is NetworkResult.Error -> res
+            is NetworkResult.Loading -> res
+        }
     }
 
     override suspend fun getLibraryContents(
@@ -67,47 +78,67 @@ class EmbyRepository(
     override suspend fun getAllLibraryContents(
         libraryId: String,
         sort: String?,
-    ): NetworkResult<List<UnifiedMediaItem>> = when (
-        val res = client.getItems(
-            userId = userId,
-            parentId = libraryId,
-            startIndex = null,
-            limit = null,
-            sortBy = sort ?: "SortName",
-        )
-    ) {
-        is NetworkResult.Success -> {
-            val initialItems = res.data.items
-            val totalCount = res.data.totalRecordCount
-            if (initialItems.size >= totalCount) {
-                NetworkResult.Success(initialItems.map { it.toUnifiedMediaItem(libraryId) })
-            } else {
-                val allItems = initialItems.toMutableList()
-                val batchSize = 500
-                while (allItems.size < totalCount) {
-                    val nextBatchRes = client.getItems(
-                        userId = userId,
-                        parentId = libraryId,
-                        startIndex = allItems.size,
-                        limit = batchSize,
-                        sortBy = sort ?: "SortName",
-                    )
-                    if (nextBatchRes is NetworkResult.Success) {
-                        if (nextBatchRes.data.items.isEmpty()) break
-                        allItems.addAll(nextBatchRes.data.items)
-                    } else {
-                        break
-                    }
-                }
-                NetworkResult.Success(allItems.map { it.toUnifiedMediaItem(libraryId) })
+        forceRefresh: Boolean,
+    ): NetworkResult<List<UnifiedMediaItem>> {
+        if (!forceRefresh && sort == null) {
+            cacheMutex.withLock {
+                cachedContents[libraryId]?.let { return NetworkResult.Success(it) }
             }
         }
-        is NetworkResult.Error -> res
-        is NetworkResult.Loading -> res
+        val result = when (
+            val res = client.getItems(
+                userId = userId,
+                parentId = libraryId,
+                startIndex = null,
+                limit = null,
+                sortBy = sort ?: "SortName",
+            )
+        ) {
+            is NetworkResult.Success -> {
+                val initialItems = res.data.items
+                val totalCount = res.data.totalRecordCount
+                if (initialItems.size >= totalCount) {
+                    NetworkResult.Success(initialItems.map { it.toUnifiedMediaItem(libraryId) })
+                } else {
+                    val allItems = initialItems.toMutableList()
+                    val batchSize = 500
+                    while (allItems.size < totalCount) {
+                        val nextBatchRes = client.getItems(
+                            userId = userId,
+                            parentId = libraryId,
+                            startIndex = allItems.size,
+                            limit = batchSize,
+                            sortBy = sort ?: "SortName",
+                        )
+                        if (nextBatchRes is NetworkResult.Success) {
+                            if (nextBatchRes.data.items.isEmpty()) break
+                            allItems.addAll(nextBatchRes.data.items)
+                        } else {
+                            break
+                        }
+                    }
+                    NetworkResult.Success(allItems.map { it.toUnifiedMediaItem(libraryId) })
+                }
+            }
+            is NetworkResult.Error -> res
+            is NetworkResult.Loading -> res
+        }
+        if (result is NetworkResult.Success && sort == null) {
+            cacheMutex.withLock {
+                cachedContents[libraryId] = result.data
+            }
+        }
+        return result
     }
 
     override suspend fun getItemDetail(itemId: String): NetworkResult<UnifiedMediaItem> = when (val res = client.getItemDetails(userId, itemId)) {
-        is NetworkResult.Success -> NetworkResult.Success(res.data.toUnifiedMediaItem())
+        is NetworkResult.Success -> {
+            val item = res.data.toUnifiedMediaItem()
+            cacheMutex.withLock {
+                updateItemInCache(item)
+            }
+            NetworkResult.Success(item)
+        }
         is NetworkResult.Error -> res
         is NetworkResult.Loading -> res
     }
@@ -139,7 +170,13 @@ class EmbyRepository(
         is NetworkResult.Loading -> res
     }
 
-    override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(userId, itemId, watched)
+    override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(userId, itemId, watched).also { result ->
+        if (result is NetworkResult.Success) {
+            cacheMutex.withLock {
+                updateWatchedInCache(itemId, watched)
+            }
+        }
+    }
 
     override suspend fun refreshItem(itemId: String): NetworkResult<Unit> = client.refreshItem(itemId)
 
