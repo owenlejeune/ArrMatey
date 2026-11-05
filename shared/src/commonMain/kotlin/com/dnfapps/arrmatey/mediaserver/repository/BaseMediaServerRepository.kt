@@ -13,8 +13,7 @@ abstract class BaseMediaServerRepository : MediaServerRepository {
 
     override fun hasCachedContents(libraryId: String): Boolean = cachedContents.containsKey(libraryId)
 
-    override fun hasAllCachedContents(libraryIds: List<String>): Boolean =
-        libraryIds.isNotEmpty() && libraryIds.all { cachedContents.containsKey(it) }
+    override fun hasAllCachedContents(libraryIds: List<String>): Boolean = libraryIds.isNotEmpty() && libraryIds.all { cachedContents.containsKey(it) }
 
     override fun clearCache() {
         cachedLibraries = null
@@ -37,4 +36,3 @@ abstract class BaseMediaServerRepository : MediaServerRepository {
         }
     }
 }
-

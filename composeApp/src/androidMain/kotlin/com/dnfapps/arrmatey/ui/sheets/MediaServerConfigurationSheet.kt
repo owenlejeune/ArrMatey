@@ -146,7 +146,7 @@ private fun MediaServerConfigurationContent(
                 Image(
                     painter = painterResource(state.serverType.icon),
                     contentDescription = null,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(28.dp),
                 )
                 Text(
                     text = mokoString(MR.strings.configure_server, mokoString(state.serverType.resource)),

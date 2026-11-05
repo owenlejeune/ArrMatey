@@ -13,7 +13,6 @@ import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.safeGet
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
-
 import kotlinx.coroutines.sync.withLock
 
 class PlexRepository(
@@ -247,14 +246,13 @@ class PlexRepository(
         is NetworkResult.Loading -> res
     }
 
-    override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> =
-        client.markWatched(itemId, watched).also { result ->
-            if (result is NetworkResult.Success) {
-                cacheMutex.withLock {
-                    updateWatchedInCache(itemId, watched)
-                }
+    override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(itemId, watched).also { result ->
+        if (result is NetworkResult.Success) {
+            cacheMutex.withLock {
+                updateWatchedInCache(itemId, watched)
             }
         }
+    }
 
     override suspend fun refreshItem(itemId: String): NetworkResult<Unit> = client.refreshItem(itemId)
 

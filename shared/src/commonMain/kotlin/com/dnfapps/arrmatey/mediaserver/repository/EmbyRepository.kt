@@ -8,7 +8,6 @@ import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaLibrary
 import com.dnfapps.networking.NetworkResult
-
 import kotlinx.coroutines.sync.withLock
 
 class EmbyRepository(
@@ -171,14 +170,13 @@ class EmbyRepository(
         is NetworkResult.Loading -> res
     }
 
-    override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> =
-        client.markWatched(userId, itemId, watched).also { result ->
-            if (result is NetworkResult.Success) {
-                cacheMutex.withLock {
-                    updateWatchedInCache(itemId, watched)
-                }
+    override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(userId, itemId, watched).also { result ->
+        if (result is NetworkResult.Success) {
+            cacheMutex.withLock {
+                updateWatchedInCache(itemId, watched)
             }
         }
+    }
 
     override suspend fun refreshItem(itemId: String): NetworkResult<Unit> = client.refreshItem(itemId)
 
