@@ -11,16 +11,15 @@ data class ArrImage(
     val remoteUrl: String? = null,
 ) {
     fun rebuildWithLocalUrls(instance: Instance): ArrImage {
+        val effectiveBase = instance.getEffectiveBaseUrl()
         val localUrl = url?.takeIf { it.startsWith("/") }
         val publicUrl = remoteUrl?.takeIf { it.startsWith("http", ignoreCase = true) }
         val apiUrl = localUrl?.let { mediaCoverApiUrl(instance, it) }
-        // Arrs only append ?lastWrite= / ?h= once the cover file exists on the server.
-        val coverDownloaded = localUrl?.contains('?') == true
         return when {
-            apiUrl != null && (publicUrl == null || coverDownloaded) -> copy(remoteUrl = apiUrl)
+            apiUrl != null -> copy(remoteUrl = apiUrl)
             publicUrl != null -> this
-            localUrl != null -> copy(remoteUrl = joinInstanceUrl(instance.url, localUrl))
-            remoteUrl?.startsWith("/") == true -> copy(remoteUrl = joinInstanceUrl(instance.url, remoteUrl))
+            localUrl != null -> copy(remoteUrl = joinInstanceUrl(effectiveBase, localUrl))
+            remoteUrl?.startsWith("/") == true -> copy(remoteUrl = joinInstanceUrl(effectiveBase, remoteUrl))
             else -> this
         }
     }
@@ -51,7 +50,8 @@ private fun mediaCoverApiUrl(
                 }
             else -> return null
         }
-    val path = "${instance.url.trimEnd('/')}/${instance.type.apiBase}/mediacover/$entity$id/$file"
+    val baseUrl = instance.getEffectiveBaseUrl().trimEnd('/')
+    val path = "$baseUrl/${instance.type.apiBase}/mediacover/$entity$id/$file"
     return if (query.isEmpty()) path else "$path?$query"
 }
 

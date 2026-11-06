@@ -54,6 +54,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -626,7 +627,11 @@ private fun HeadersEditor(
     onHeadersChanged: (List<InstanceHeader>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var headersList by remember { mutableStateOf(headers) }
+    var headersList by remember(headers) { mutableStateOf(headers) }
+
+    LaunchedEffect(headers) {
+        headersList = headers
+    }
 
     Column(
         modifier = modifier,

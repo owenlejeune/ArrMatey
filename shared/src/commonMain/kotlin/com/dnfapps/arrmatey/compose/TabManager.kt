@@ -100,19 +100,23 @@ class TabManager(
         val webpageItems = webpages.associate { "webpage_${it.id}" to TabItem.CustomWebpage(it.id, it.name, it.url, it.headers) }
         val allItems = standardItems + webpageItems
 
-        return prefs.orderedVisibleKeys.mapNotNull { key -> allItems[normalizeKey(key)] }
+        return prefs.orderedVisibleKeys.mapNotNull { key -> allItems[normalizeKey(key)] }.distinctBy { it.key }
     }
 
     private fun buildDrawerTabs(
         prefs: TabPreferences,
         webpages: List<CustomWebpage>,
     ): List<TabItem> {
+        val visibleKeys = prefs.orderedVisibleKeys.map { normalizeKey(it) }.toSet()
         val standardItems = TabItem.Standard.entries.associateBy { it.key }
         val webpageItems = webpages.associate { "webpage_${it.id}" to TabItem.CustomWebpage(it.id, it.name, it.url, it.headers) }
         val allItems = standardItems + webpageItems
 
         return buildList {
-            prefs.orderedHiddenKeys.mapNotNull { key -> allItems[normalizeKey(key)] }.forEach { add(it) }
+            prefs.orderedHiddenKeys
+                .mapNotNull { key -> allItems[normalizeKey(key)] }
+                .filter { it.key !in visibleKeys }
+                .forEach { add(it) }
 
             val tracked = (prefs.orderedVisibleKeys + prefs.orderedHiddenKeys + prefs.orderedRemovedKeys).map { normalizeKey(it) }.toSet()
 
@@ -124,17 +128,22 @@ class TabManager(
             webpages.filter { "webpage_${it.id}" !in tracked }.forEach {
                 add(TabItem.CustomWebpage(it.id, it.name, it.url, it.headers))
             }
-        }
+        }.distinctBy { it.key }
     }
 
     private fun buildHiddenTabs(
         prefs: TabPreferences,
         webpages: List<CustomWebpage>,
     ): List<TabItem> {
+        val visibleKeys = prefs.orderedVisibleKeys.map { normalizeKey(it) }.toSet()
+        val drawerKeys = prefs.orderedHiddenKeys.map { normalizeKey(it) }.toSet()
         val standardItems = TabItem.Standard.entries.associateBy { it.key }
         val webpageItems = webpages.associate { "webpage_${it.id}" to TabItem.CustomWebpage(it.id, it.name, it.url, it.headers) }
         val allItems = standardItems + webpageItems
 
-        return prefs.orderedRemovedKeys.mapNotNull { key -> allItems[normalizeKey(key)] }
+        return prefs.orderedRemovedKeys
+            .mapNotNull { key -> allItems[normalizeKey(key)] }
+            .filter { it.key !in visibleKeys && it.key !in drawerKeys }
+            .distinctBy { it.key }
     }
 }

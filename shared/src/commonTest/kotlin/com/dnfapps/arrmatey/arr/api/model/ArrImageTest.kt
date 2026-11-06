@@ -50,8 +50,11 @@ class ArrImageTest {
     }
 
     @Test
-    fun testCoverNotYetDownloadedFallsBackToPublicUrl() {
-        assertEquals(tmdbUrl, rebuild(instance(InstanceType.Sonarr, "https://host"), "/MediaCover/1/poster.jpg", tmdbUrl))
+    fun testMediaCoverUsesApiRouteEvenWithoutQueryString() {
+        assertEquals(
+            "https://host/api/v3/mediacover/1/poster.jpg",
+            rebuild(instance(InstanceType.Sonarr, "https://host"), "/MediaCover/1/poster.jpg", tmdbUrl),
+        )
     }
 
     @Test
