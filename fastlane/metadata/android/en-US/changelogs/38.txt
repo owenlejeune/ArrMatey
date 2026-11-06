@@ -1,0 +1,8 @@
+### Improvements
+* Media Server Library Caching: Cached libraries and media items prevent unnecessary reloads when switching tabs or servers.
+* Instant Watch Status: Toggling watched/unwatched status updates cached library items immediately.
+* Custom Headers Sync: Instance configuration now reliably updates headers when edited.
+
+### Bug Fixes
+* Image Loading: Normalized base URLs and trimmed trailing slashes to fix broken media cover images across remote and local connections.
+* Tab Customization: Fixed tab duplication and reordering animation glitches across visible, drawer, and hidden tabs.
