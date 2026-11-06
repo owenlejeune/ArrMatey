@@ -42,7 +42,11 @@ func arrImageRequest(for url: URL) -> URLRequest {
     let urlStr = url.absoluteString
     let instance = KoinBridge.shared.getInstanceManager().getAllRepositories()
         .map { $0.instance }
-        .first { urlStr.hasPrefix($0.url) || urlStr.hasPrefix($0.getEffectiveBaseUrl()) }
+        .first {
+            let raw = $0.url.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+            let effective = $0.getEffectiveBaseUrl().trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+            return urlStr.hasPrefix(raw) || urlStr.hasPrefix(effective)
+        }
 
     if let instance {
         if instance.type == .tracearr {

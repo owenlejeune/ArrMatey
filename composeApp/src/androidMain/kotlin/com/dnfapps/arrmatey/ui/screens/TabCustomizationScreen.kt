@@ -242,11 +242,9 @@ fun TabCustomizationContent(
 
             itemsIndexed(
                 items = visibleTabs,
-                key = { _, tab -> tab.key },
+                key = { _, tab -> "visible_${tab.key}" },
             ) { index, tab ->
-                ContainerCard(
-                    modifier = Modifier.animateItem(),
-                ) {
+                ContainerCard {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -308,11 +306,9 @@ fun TabCustomizationContent(
 
             itemsIndexed(
                 items = drawerTabs,
-                key = { _, tab -> tab.key },
+                key = { _, tab -> "drawer_${tab.key}" },
             ) { index, tab ->
-                ContainerCard(
-                    modifier = Modifier.animateItem(),
-                ) {
+                ContainerCard {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -384,11 +380,9 @@ fun TabCustomizationContent(
 
             itemsIndexed(
                 items = hiddenTabs,
-                key = { _, tab -> tab.key },
+                key = { _, tab -> "hidden_${tab.key}" },
             ) { _, tab ->
-                ContainerCard(
-                    modifier = Modifier.animateItem(),
-                ) {
+                ContainerCard {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,

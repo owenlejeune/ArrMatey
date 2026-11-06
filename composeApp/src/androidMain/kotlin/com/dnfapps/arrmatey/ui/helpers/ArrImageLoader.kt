@@ -23,8 +23,9 @@ class ArrImageLoader(
 
             val repository =
                 instanceManager.getAllRepositories().find { repository ->
-                    url.startsWith(repository.instance.url) ||
-                        url.startsWith(repository.instance.getEffectiveBaseUrl())
+                    val rawUrl = repository.instance.url.trimEnd('/')
+                    val effectiveUrl = repository.instance.getEffectiveBaseUrl().trimEnd('/')
+                    url.startsWith(rawUrl) || url.startsWith(effectiveUrl)
                 }
             val instance = repository?.instance
 
