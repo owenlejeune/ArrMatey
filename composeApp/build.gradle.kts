@@ -58,8 +58,8 @@ android {
             libs.versions.android.targetSdk
                 .get()
                 .toInt()
-        versionCode = 38
-        versionName = "1.0.1"
+        versionCode = 39
+        versionName = "1.0.2"
     }
     packaging {
         resources {
@@ -72,6 +72,9 @@ android {
             excludes += "**/META-INF/androidx.**"
             excludes += "**/META-INF/*.kotlin_module"
             excludes += "**/META-INF/proguard/**"
+        }
+        jniLibs {
+            keepDebugSymbols += "**/*.so"
         }
     }
     signingConfigs {
