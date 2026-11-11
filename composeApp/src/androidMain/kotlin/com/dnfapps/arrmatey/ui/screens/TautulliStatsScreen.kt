@@ -241,11 +241,14 @@ private fun HomeStatSectionCard(
                     }
 
                     val imageUrl = buildPmsImageUrl(instance, row.thumb) ?: row.userThumb
+                    val isMusicSection = section.statId == TautulliHomeStatId.TopMusic || section.statId == TautulliHomeStatId.PopularMusic
+                    val itemAspectRatio = row.mediaType?.aspectRatio?.ratio ?: if (isMusicSection) AspectRatio.Cover.ratio else AspectRatio.Poster.ratio
+
                     Box(
                         modifier =
                         Modifier
                             .width(42.dp)
-                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .aspectRatio(itemAspectRatio)
                             .clip(MaterialTheme.shapes.small)
                             .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                         contentAlignment = Alignment.Center,

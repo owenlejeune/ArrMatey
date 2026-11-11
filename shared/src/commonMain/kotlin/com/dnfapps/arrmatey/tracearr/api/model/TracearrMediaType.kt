@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.tracearr.api.model
 
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.utils.AspectRatio
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -39,4 +40,10 @@ enum class TracearrMediaType {
                 Show, Episode -> RequestType.Tv
                 else -> null
             }
+
+    val isAudio: Boolean
+        get() = this == Track
+
+    val aspectRatio: AspectRatio
+        get() = if (isAudio) AspectRatio.Cover else AspectRatio.Poster
 }

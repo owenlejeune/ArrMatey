@@ -51,6 +51,7 @@ import com.dnfapps.arrmatey.ui.theme.TracearrLightBlue
 import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.format
+import com.dnfapps.arrmatey.utils.formatDurationMs
 import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
@@ -112,7 +113,7 @@ fun TracearrHistoryCard(
                         modifier =
                         Modifier
                             .width(60.dp)
-                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .aspectRatio(item.mediaType?.aspectRatio?.ratio ?: AspectRatio.Poster.ratio)
                             .clip(MaterialTheme.shapes.small)
                             .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                         contentAlignment = Alignment.Center,
@@ -346,11 +347,4 @@ private fun StatusChip(
 private fun String?.isNullOrRelative(): Boolean {
     if (this.isNullOrEmpty()) return true
     return !this.startsWith("http://") && !this.startsWith("https://")
-}
-
-private fun formatDurationMs(ms: Long): String {
-    val totalSeconds = ms / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return if (minutes > 0) "${minutes}m ${seconds}s" else "${seconds}s"
 }

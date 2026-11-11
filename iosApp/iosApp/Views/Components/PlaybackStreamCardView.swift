@@ -82,7 +82,7 @@ struct PlaybackStreamCardView: View {
                                     .font(.system(size: 16))
                             )
                     }
-                    .frame(width: 80, height: 120)
+                    .frame(width: 80, height: session.mediaType == .track ? 80 : 120)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
                     VStack(alignment: .leading, spacing: 6) {

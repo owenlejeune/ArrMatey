@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.tautulli.api.model
 
+import com.dnfapps.arrmatey.utils.AspectRatio
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -22,6 +23,12 @@ enum class TautulliMediaType(val value: String) {
     Live("live"),
     Unknown("unknown"),
     ;
+
+    val isAudio: Boolean
+        get() = this == Artist || this == Album || this == Track
+
+    val aspectRatio: AspectRatio
+        get() = if (isAudio) AspectRatio.Cover else AspectRatio.Poster
 
     companion object {
         fun fromString(value: String?): TautulliMediaType = when (value?.lowercase()?.trim()) {

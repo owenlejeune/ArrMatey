@@ -33,7 +33,7 @@ struct PlaybackHistoryCardView: View {
                             Color(UIColor.secondarySystemBackground)
                         }
                     }
-                    .frame(width: 60, height: 90)
+                    .frame(width: 60, height: item.mediaType == .track ? 60 : 90)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
                     VStack(alignment: .leading, spacing: 4) {
@@ -98,7 +98,7 @@ struct PlaybackHistoryCardView: View {
                                 .tint(Color.accentColor)
 
                             if let dur = item.durationSeconds?.int64Value {
-                                Text(formatDurationSeconds(dur))
+                                Text(DurationUtilsKt.formatDurationSeconds(totalSeconds: dur))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -135,20 +135,6 @@ struct PlaybackHistoryCardView: View {
         }
         .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(12)
-    }
-
-    private func formatDurationSeconds(_ seconds: Int64) -> String {
-        if seconds <= 0 { return "0:00" }
-        let s = seconds % 60
-        let m = (seconds / 60) % 60
-        let h = seconds / 3600
-        let sStr = String(format: "%02d", s)
-        if h > 0 {
-            let mStr = String(format: "%02d", m)
-            return "\(h):\(mStr):\(sStr)"
-        } else {
-            return "\(m):\(sStr)"
-        }
     }
 
     private func formatDate(_ epochSeconds: Int64) -> String {

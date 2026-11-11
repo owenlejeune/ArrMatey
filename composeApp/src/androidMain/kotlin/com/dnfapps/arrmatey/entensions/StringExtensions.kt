@@ -13,3 +13,5 @@ inline fun <R> String.unlessEmpty(block: (String) -> R): R? {
 }
 
 fun String.takeUnlessEmpty(): String? = this.takeUnless { it.isEmpty() }
+
+fun String?.isNullOrRelative(): Boolean = this.isNullOrEmpty() || !this.startsWith("http://") && !this.startsWith("https://")
