@@ -63,6 +63,7 @@ class JellyfinRepository(
                 parentId = libraryId,
                 startIndex = page * pageSize,
                 limit = pageSize,
+                includeItemTypes = "Movie,Series",
                 sortBy = sort ?: "SortName",
             )
         ) {
@@ -91,6 +92,7 @@ class JellyfinRepository(
                 parentId = libraryId,
                 startIndex = null,
                 limit = null,
+                includeItemTypes = "Movie,Series",
                 sortBy = sort ?: "SortName",
             )
         ) {
@@ -108,6 +110,7 @@ class JellyfinRepository(
                             parentId = libraryId,
                             startIndex = allItems.size,
                             limit = batchSize,
+                            includeItemTypes = "Movie,Series",
                             sortBy = sort ?: "SortName",
                         )
                         if (nextBatchRes is NetworkResult.Success) {

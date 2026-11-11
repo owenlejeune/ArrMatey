@@ -78,6 +78,7 @@ class JellyfinRepositoryTest {
     fun getLibraryContentsExtractsProviderIdsAndPlaybackState() = runTest {
         val mockEngine = MockEngine { request ->
             assertEquals("/Users/user-id-abc/Items", request.url.encodedPath)
+            assertEquals("Movie,Series", request.url.parameters["IncludeItemTypes"])
             respond(
                 content = """
                     {
