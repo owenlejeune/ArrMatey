@@ -38,6 +38,8 @@ class ImportDataUseCase(
     }
 
     private fun sanitizeLegacyBackupJson(jsonString: String): String = jsonString
+        .replace("\"TracearrActiveStreams\"", "\"ActiveStreams\"")
+        .replace("\"TracearrOverview\"", "\"PlaybackOverview\"")
         .replace("\"Booksehlf\"", "\"Bookshelf\"")
         .replace("\"Booksehelf\"", "\"Bookshelf\"")
         .replace("\"booksehlf\"", "\"bookshelf\"")

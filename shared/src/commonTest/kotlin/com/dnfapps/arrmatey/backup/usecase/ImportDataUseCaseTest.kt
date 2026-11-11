@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.backup.TransportEncryptor
 import com.dnfapps.arrmatey.backup.model.BackupExport
 import com.dnfapps.arrmatey.backup.model.CustomWebpageExport
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
+import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.database.dao.CustomWebpageDao
 import com.dnfapps.arrmatey.database.dao.InstanceDao
@@ -581,5 +582,44 @@ class ImportDataUseCaseTest {
         assertEquals(MediaServerType.Plex, servers[0].serverType)
         assertEquals("My Plex", servers[0].label)
         assertEquals("plex-token-123", servers[0].token.value)
+    }
+
+    @Test
+    fun testDecryptBackupWithLegacyDashboardCardNames() {
+        val legacyJsonBackup =
+            """
+            {
+                "instances": [],
+                "downloadClients": [],
+                "globalPreferences": {
+                    "dashboardCardsOrder": [
+                        "ArrOverview",
+                        "TracearrOverview",
+                        "TracearrActiveStreams"
+                    ]
+                }
+            }
+            """.trimIndent()
+
+        val importDataUseCase =
+            ImportDataUseCase(
+                instanceDao = dummyInstanceDao,
+                downloadClientDao = dummyDownloadClientDao,
+                customWebpageDao = dummyCustomWebpageDao,
+                instancePreferenceStoreRepository = InstancePreferenceStoreRepository(dataStoreFactory),
+                preferencesStore = PreferencesStore(dataStoreFactory),
+                transportEncryptor = fakeEncryptor,
+                json = json,
+            )
+
+        val result = importDataUseCase.decryptBackup(legacyJsonBackup, "password")
+
+        assertNotNull(result)
+        val cards = result.globalPreferences?.dashboardCardsOrder
+        assertNotNull(cards)
+        assertEquals(3, cards.size)
+        assertEquals(DashboardCards.ArrOverview, cards[0])
+        assertEquals(DashboardCards.PlaybackOverview, cards[1])
+        assertEquals(DashboardCards.ActiveStreams, cards[2])
     }
 }

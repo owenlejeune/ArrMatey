@@ -32,7 +32,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
 class DashboardManager(
     private val preferencesStore: PreferencesStore,
@@ -119,7 +121,12 @@ enum class DashboardCards(
     InstanceDashboard(strings.dashboard_instance_dashboards),
     BazarrOverview(strings.dashboard_bazarr_overview),
 
+    @OptIn(ExperimentalSerializationApi::class)
+    @JsonNames("TracearrOverview")
     PlaybackOverview(strings.dashboard_playback_overview),
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @JsonNames("TracearrActiveStreams")
     ActiveStreams(strings.dashboard_tracearr_active_streams),
 
     ContinueWatching(strings.continue_watching),
@@ -158,6 +165,12 @@ enum class DashboardCards(
         }
 
     companion object {
+        fun fromStoredName(name: String): DashboardCards? = when (name) {
+            "TracearrOverview", "PlaybackOverview" -> PlaybackOverview
+            "TracearrActiveStreams", "ActiveStreams" -> ActiveStreams
+            else -> runCatching { valueOf(name) }.getOrNull()
+        }
+
         val defaultEntries: List<DashboardCards>
             get() =
                 listOf(
