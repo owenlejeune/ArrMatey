@@ -150,7 +150,7 @@ struct PlaybackStreamDetailsSheet: View {
                     } placeholder: {
                         Color(UIColor.secondarySystemBackground)
                     }
-                    .frame(width: 75, height: 110)
+                    .frame(width: 75, height: session.mediaType == .track ? 75 : 110)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
 

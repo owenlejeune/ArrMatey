@@ -169,7 +169,7 @@ struct TracearrStreamDetailsSheet: View {
                 Color(UIColor.tertiarySystemBackground)
             }
             .aspectRatio(contentMode: .fill)
-            .frame(width: 70, height: 105)
+            .frame(width: 70, height: session.mediaType == .track ? 70 : 105)
             .clipShape(RoundedRectangle(cornerRadius: 8))
 
             VStack(alignment: .leading, spacing: 4) {

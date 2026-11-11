@@ -227,7 +227,7 @@ fun TracearrStreamDetailsSheet(
                         modifier =
                         Modifier
                             .width(70.dp)
-                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .aspectRatio(session.mediaType?.aspectRatio?.ratio ?: AspectRatio.Poster.ratio)
                             .clip(RoundedCornerShape(8.dp))
                             .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                         contentAlignment = Alignment.Center,

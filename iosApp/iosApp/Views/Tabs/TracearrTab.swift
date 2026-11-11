@@ -290,7 +290,7 @@ struct TracearrStreamCardView: View {
                                     .font(.system(size: 16))
                             )
                     }
-                    .frame(width: 80, height: 120)
+                    .frame(width: 80, height: session.mediaType == .track ? 80 : 120)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
                     // Content Column
@@ -778,7 +778,7 @@ struct TracearrHistoryCardView: View {
                         }
                         .aspectRatio(contentMode: .fill)
                     }
-                    .frame(width: 60, height: 90)
+                    .frame(width: 60, height: item.mediaType == .track ? 60 : 90)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
                     VStack(alignment: .leading, spacing: 4) {

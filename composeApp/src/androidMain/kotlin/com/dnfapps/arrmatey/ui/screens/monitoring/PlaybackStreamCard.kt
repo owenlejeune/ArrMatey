@@ -47,9 +47,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.monitoring.model.PlaybackMediaType
 import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamDecision
 import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
 import com.dnfapps.arrmatey.shared.*
@@ -60,7 +62,6 @@ import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
-import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -157,7 +158,7 @@ fun PlaybackStreamCard(
                         modifier =
                         Modifier
                             .width(80.dp)
-                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .aspectRatio(session.mediaType.aspectRatio.ratio)
                             .clip(MaterialTheme.shapes.small)
                             .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                         contentAlignment = Alignment.Center,
@@ -438,5 +439,78 @@ private fun formatTimeMs(ms: Long): String {
         "$hours:$minutesStr:$secondsStr"
     } else {
         "$minutes:$secondsStr"
+    }
+}
+
+@Preview
+@Composable
+private fun PlaybackStreamCardMediaTypesPreview() {
+    MaterialTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                PlaybackStreamCard(
+                    session = PlaybackStreamSession(
+                        sessionId = "1",
+                        instanceId = 1L,
+                        instanceLabel = "Plex",
+                        instanceType = InstanceType.Tautulli,
+                        mediaType = PlaybackMediaType.Movie,
+                        title = "Inception",
+                        displayTitle = "Inception",
+                        year = "2010",
+                        username = "rockpilp",
+                        userDisplayName = "rockpilp",
+                        player = "Plex Web",
+                        progressPercent = 0.65f,
+                        progressMs = 5772000L,
+                        totalDurationMs = 8880000L,
+                        state = "playing",
+                        videoResolution = "1080p",
+                    ),
+                )
+
+                PlaybackStreamCard(
+                    session = PlaybackStreamSession(
+                        sessionId = "2",
+                        instanceId = 1L,
+                        instanceLabel = "Plex",
+                        instanceType = InstanceType.Tautulli,
+                        mediaType = PlaybackMediaType.Episode,
+                        title = "The Pothole",
+                        displayTitle = "Seinfeld",
+                        subtitle = "S08 E16 · The Pothole",
+                        username = "rockpilp",
+                        userDisplayName = "rockpilp",
+                        player = "Apple TV",
+                        progressPercent = 0.40f,
+                        progressMs = 539000L,
+                        totalDurationMs = 1348000L,
+                        state = "playing",
+                        videoResolution = "1080p",
+                    ),
+                )
+
+                PlaybackStreamCard(
+                    session = PlaybackStreamSession(
+                        sessionId = "3",
+                        instanceId = 1L,
+                        instanceLabel = "Plex",
+                        instanceType = InstanceType.Tautulli,
+                        mediaType = PlaybackMediaType.Track,
+                        title = "Smells Like Teen Spirit",
+                        displayTitle = "Nirvana",
+                        subtitle = "Nirvana · Nevermind · Smells Like Teen Spirit",
+                        username = "rockpilp",
+                        userDisplayName = "rockpilp",
+                        player = "Plexamp",
+                        progressPercent = 0.25f,
+                        progressMs = 75000L,
+                        totalDurationMs = 301000L,
+                        state = "playing",
+                        videoResolution = "FLAC",
+                    ),
+                )
+            }
+        }
     }
 }

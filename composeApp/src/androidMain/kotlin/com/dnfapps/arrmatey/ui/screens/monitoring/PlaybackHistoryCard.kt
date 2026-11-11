@@ -31,13 +31,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.dnfapps.arrmatey.entensions.isNullOrRelative
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.monitoring.model.PlaybackHistoryItem
+import com.dnfapps.arrmatey.monitoring.model.PlaybackMediaType
 import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamDecision
 import com.dnfapps.arrmatey.shared.*
-import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrServerType
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
@@ -46,8 +48,8 @@ import com.dnfapps.arrmatey.ui.theme.TracearrBlue
 import com.dnfapps.arrmatey.ui.theme.TracearrDarkBlue
 import com.dnfapps.arrmatey.ui.theme.TracearrLightBlue
 import com.dnfapps.arrmatey.ui.theme.getTracearrServerColor
-import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.format
+import com.dnfapps.arrmatey.utils.formatDurationSeconds
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.Instant
 
@@ -108,7 +110,7 @@ fun PlaybackHistoryCard(
                         modifier =
                         Modifier
                             .width(60.dp)
-                            .aspectRatio(AspectRatio.Poster.ratio)
+                            .aspectRatio(item.mediaType.aspectRatio.ratio)
                             .clip(MaterialTheme.shapes.small)
                             .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                         contentAlignment = Alignment.Center,
@@ -323,13 +325,72 @@ private fun StatusChip(
     }
 }
 
-private fun String?.isNullOrRelative(): Boolean {
-    if (this.isNullOrEmpty()) return true
-    return !this.startsWith("http://") && !this.startsWith("https://")
-}
+@Preview
+@Composable
+private fun PlaybackHistoryCardMediaTypesPreview() {
+    MaterialTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                PlaybackHistoryCard(
+                    item = PlaybackHistoryItem(
+                        id = "1",
+                        instanceId = 1L,
+                        instanceType = InstanceType.Tracearr,
+                        instanceLabel = "Tracearr",
+                        dateEpochSeconds = 0L,
+                        username = "testuser",
+                        userDisplayName = "testuser",
+                        title = "Inception",
+                        displayTitle = "Inception",
+                        mediaType = PlaybackMediaType.Movie,
+                        subtitle = "2010",
+                        durationSeconds = 8880L,
+                        percentComplete = 100,
+                        streamDecision = PlaybackStreamDecision.DirectPlay,
+                        resolution = "1080p",
+                    ),
+                )
 
-private fun formatDurationSeconds(totalSeconds: Long): String {
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return if (minutes > 0) "${minutes}m ${seconds}s" else "${seconds}s"
+                PlaybackHistoryCard(
+                    item = PlaybackHistoryItem(
+                        id = "2",
+                        instanceId = 1L,
+                        instanceType = InstanceType.Tautulli,
+                        instanceLabel = "Tautulli",
+                        dateEpochSeconds = 0L,
+                        username = "testuser",
+                        userDisplayName = "testuser",
+                        title = "The Pothole",
+                        displayTitle = "Seinfeld",
+                        mediaType = PlaybackMediaType.Episode,
+                        subtitle = "S08 E16 · The Pothole",
+                        durationSeconds = 1348L,
+                        percentComplete = 85,
+                        streamDecision = PlaybackStreamDecision.DirectPlay,
+                        resolution = "1080p",
+                    ),
+                )
+
+                PlaybackHistoryCard(
+                    item = PlaybackHistoryItem(
+                        id = "3",
+                        instanceId = 1L,
+                        instanceType = InstanceType.Tautulli,
+                        instanceLabel = "Tautulli",
+                        dateEpochSeconds = 0L,
+                        username = "testuser",
+                        userDisplayName = "testuser",
+                        title = "Smells Like Teen Spirit",
+                        displayTitle = "Nirvana",
+                        mediaType = PlaybackMediaType.Track,
+                        subtitle = "Nirvana · Nevermind · Smells Like Teen Spirit",
+                        durationSeconds = 301L,
+                        percentComplete = 45,
+                        streamDecision = PlaybackStreamDecision.DirectPlay,
+                        resolution = "FLAC",
+                    ),
+                )
+            }
+        }
+    }
 }

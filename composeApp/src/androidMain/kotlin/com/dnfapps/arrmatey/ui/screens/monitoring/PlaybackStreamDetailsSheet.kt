@@ -50,7 +50,6 @@ import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
-import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
 import java.util.Locale
 
@@ -117,7 +116,7 @@ fun PlaybackStreamDetailsSheet(
                     modifier =
                     Modifier
                         .width(72.dp)
-                        .aspectRatio(AspectRatio.Poster.ratio)
+                        .aspectRatio(session.mediaType.aspectRatio.ratio)
                         .clip(MaterialTheme.shapes.medium)
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                     contentAlignment = Alignment.Center,
