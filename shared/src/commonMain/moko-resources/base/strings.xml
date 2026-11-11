@@ -1229,6 +1229,8 @@
     <string name="saving_will_add_ebook_support">Saving will add an e-book root folder and configure e-books for this author.</string>
     <string name="start_week_on_monday">Start week on Monday</string>
     <string name="start_week_on_monday_desc">Use Monday as the first day of the week in the calendar month view</string>
+    <string name="calendar_focus_yesterday">Focus yesterday in calendar</string>
+    <string name="calendar_focus_yesterday_desc">Set the default focus date in the calendar list view to yesterday instead of today</string>
 
     <!-- Kapowarr -->
     <string name="type_volume">Volume</string>

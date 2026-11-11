@@ -34,11 +34,13 @@ class CalendarViewModel(
             getCalendarUseCase(),
             preferencesStore.observeCalendarFilterState(),
             preferencesStore.startOfWeekMonday,
-        ) { calendar, filter, startOfWeekMonday ->
+            preferencesStore.calendarFocusYesterday,
+        ) { calendar, filter, startOfWeekMonday, focusYesterday ->
             calendar.copy(
                 filterState = filter,
                 items = filterItems(calendar.items, filter),
                 startOfWeekMonday = startOfWeekMonday,
+                focusYesterday = focusYesterday,
             )
         }.stateIn(
             scope = viewModelScope,

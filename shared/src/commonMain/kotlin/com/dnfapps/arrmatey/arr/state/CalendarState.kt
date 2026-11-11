@@ -5,7 +5,9 @@ import com.dnfapps.arrmatey.extensions.localToday
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.minus
 import kotlin.time.Clock
 
 data class CalendarState(
@@ -18,8 +20,12 @@ data class CalendarState(
     val error: String? = null,
     val today: LocalDate = Clock.localToday(),
     val startOfWeekMonday: Boolean = false,
+    val focusYesterday: Boolean = false,
 ) {
     constructor() : this(CalendarFilterState())
+
+    val focusDate: LocalDate
+        get() = if (focusYesterday) today.minus(1, DateTimeUnit.DAY) else today
 
     fun weekdayHeaders(): List<StringResource> = if (startOfWeekMonday) {
         listOf(

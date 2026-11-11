@@ -14,28 +14,28 @@ struct CalendarListView: View {
     var useFullColorCards: Bool = false
     let onItemClick: (CalendarItem, Int64?) -> Void
     let onLoadMore: () -> Void
-    
+
     @State private var scrollProxy: ScrollViewProxy?
     @State private var showScrollToToday = false
     @State private var hasScrolledInitially = false
     @State private var visibleDates = Set<String>()
-    
-    private var todayIndex: Int? {
-        state.dates.firstIndex(where: { $0.isOnOrAfter(state.today) })
+
+    private var focusIndex: Int? {
+        state.dates.firstIndex(where: { $0.isOnOrAfter(state.focusDate) })
     }
-    
-    private var todayKey: String {
-        dateKey(state.today)
+
+    private var focusKey: String {
+        dateKey(state.focusDate)
     }
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             content
-            
+
             if showScrollToToday {
                 ScrollToTodayButton {
                     withAnimation {
-                        scrollToToday()
+                        scrollToFocus()
                     }
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -47,13 +47,13 @@ struct CalendarListView: View {
         .onChange(of: state.dates) { _, newDates in
             if !hasScrolledInitially && !newDates.isEmpty {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    scrollToToday()
+                    scrollToFocus()
                     hasScrolledInitially = true
                 }
             }
         }
     }
-    
+
     @ViewBuilder
     private var content: some View {
         ScrollViewReader { proxy in
@@ -64,14 +64,14 @@ struct CalendarListView: View {
                 scrollProxy = proxy
                 if !state.dates.isEmpty && !hasScrolledInitially {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        scrollToToday()
+                        scrollToFocus()
                         hasScrolledInitially = true
                     }
                 }
             }
         }
     }
-    
+
     @ViewBuilder
     private var calendarContent: some View {
         LazyVStack(spacing: 16) {
@@ -86,12 +86,12 @@ struct CalendarListView: View {
         }
         .padding()
     }
-    
+
     @ViewBuilder
     private func daySectionView(for date: LocalDate, at index: Int) -> some View {
         let isToday = date == state.today
         let key = dateKey(date)
-        
+
         CalendarDaySection(
             date: date,
             items: state.items[date] ?? [],
@@ -111,19 +111,19 @@ struct CalendarListView: View {
             visibleDates.remove(key)
         }
     }
-    
-    private func scrollToToday() {
-        guard let todayIndex = todayIndex, !state.dates.isEmpty else { return }
-        scrollProxy?.scrollTo(state.dates[todayIndex], anchor: .center)
+
+    private func scrollToFocus() {
+        guard let focusIndex = focusIndex, !state.dates.isEmpty else { return }
+        scrollProxy?.scrollTo(state.dates[focusIndex], anchor: .center)
     }
-    
+
     private func dateKey(_ date: LocalDate) -> String {
         "\(date.year)-\(date.month.number())-\(date.day)"
     }
-    
+
     private func updateScrollToTodayVisibility(visibleDates: Set<String>) {
         withAnimation {
-            showScrollToToday = !visibleDates.contains(todayKey)
+            showScrollToToday = !visibleDates.contains(focusKey)
         }
     }
 }

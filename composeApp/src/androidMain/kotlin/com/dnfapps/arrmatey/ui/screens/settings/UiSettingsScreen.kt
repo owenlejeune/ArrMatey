@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Splitscreen
+import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.DropdownMenu
@@ -84,6 +85,7 @@ fun UiSettingsScreen(
     val useColoredActivityCards by viewModel.useColoredActivityCards.collectAsStateWithLifecycle()
     val useColoredCalendarCards by viewModel.useColoredCalendarCards.collectAsStateWithLifecycle()
     val startOfWeekMonday by viewModel.startOfWeekMonday.collectAsStateWithLifecycle()
+    val calendarFocusYesterday by viewModel.calendarFocusYesterday.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
     val overlayTabBackOpensDrawer by viewModel.overlayTabBackOpensDrawer.collectAsStateWithLifecycle()
     val dualPanelSupport by viewModel.dualPanelSupport.collectAsStateWithLifecycle()
@@ -287,6 +289,18 @@ fun UiSettingsScreen(
                             )
                         },
                         onClick = { viewModel.toggleStartOfWeekMonday() },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Today),
+                        title = mokoString(MR.strings.calendar_focus_yesterday),
+                        subtitle = mokoString(MR.strings.calendar_focus_yesterday_desc),
+                        trailingContent = {
+                            Switch(
+                                checked = calendarFocusYesterday,
+                                onCheckedChange = { viewModel.toggleCalendarFocusYesterday() },
+                            )
+                        },
+                        onClick = { viewModel.toggleCalendarFocusYesterday() },
                     ),
                     SettingItem(
                         icon = IconSource.Vector(Icons.Default.Image),

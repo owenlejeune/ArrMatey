@@ -119,6 +119,14 @@ class MoreScreenViewModel(
                 initialValue = false,
             )
 
+    val calendarFocusYesterday =
+        preferencesStore.calendarFocusYesterday
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
     val appTheme =
         preferencesStore.appTheme
             .stateIn(
@@ -394,6 +402,10 @@ class MoreScreenViewModel(
 
     fun toggleStartOfWeekMonday() {
         preferencesStore.toggleStartOfWeekMonday()
+    }
+
+    fun toggleCalendarFocusYesterday() {
+        preferencesStore.toggleCalendarFocusYesterday()
     }
 
     fun setAppTheme(theme: AppTheme) {
