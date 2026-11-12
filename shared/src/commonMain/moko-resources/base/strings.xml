@@ -1390,4 +1390,6 @@
     <string name="remote">Remote</string>
     <string name="direct_http">Direct HTTP</string>
     <string name="secure_https">Secure HTTPS</string>
+    <string name="swipe_sensitivity">Swipe Sensitivity</string>
+    <string name="swipe_sensitivity_description">Adjust threshold required for swipe gestures (%1$d%%)</string>
 </resources>

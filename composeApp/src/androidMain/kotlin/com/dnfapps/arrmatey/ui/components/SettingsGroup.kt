@@ -1,22 +1,29 @@
 package com.dnfapps.arrmatey.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -94,74 +101,135 @@ fun SettingsRow(
     val subtitleColor = item.contentColor?.copy(alpha = 0.8f) ?: MaterialTheme.colorScheme.onSurfaceVariant
     val iconTint = item.contentColor ?: MaterialTheme.colorScheme.primary
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = shape,
-        color = item.backgroundColor ?: MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = titleColor,
-        enabled = item.enabled,
-        onClick = item.onClick,
-    ) {
-        Column {
-            Row(
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier.size(40.dp),
-                    contentAlignment = Alignment.Center,
+    val rowContent = @Composable {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = shape,
+            color = item.backgroundColor ?: MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = titleColor,
+            enabled = item.enabled,
+            onClick = item.onClick,
+        ) {
+            Column {
+                Row(
+                    modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    when (val source = item.icon) {
-                        is IconSource.Vector ->
-                            Icon(
-                                imageVector = source.imageVector,
-                                contentDescription = null,
-                                modifier = Modifier.size(36.dp).rotate(source.rotation),
-                                tint = iconTint.copy(alpha = contentAlpha),
-                            )
-                        is IconSource.Resource ->
-                            Image(
-                                painter = painterResource(source.resource),
-                                contentDescription = null,
-                                alpha = contentAlpha,
-                            )
-                        is IconSource.Radio ->
-                            RadioButton(
-                                selected = source.selected,
-                                onClick = item.onClick,
-                                enabled = item.enabled,
-                            )
-                    }
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = item.title,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = titleColor.copy(alpha = contentAlpha),
-                        )
-                        item.titleExtraContent?.let {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            it()
+                    Box(
+                        modifier = Modifier.size(40.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        when (val source = item.icon) {
+                            is IconSource.Vector ->
+                                Icon(
+                                    imageVector = source.imageVector,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(36.dp).rotate(source.rotation),
+                                    tint = iconTint.copy(alpha = contentAlpha),
+                                )
+                            is IconSource.Resource ->
+                                Image(
+                                    painter = painterResource(source.resource),
+                                    contentDescription = null,
+                                    alpha = contentAlpha,
+                                )
+                            is IconSource.Radio ->
+                                RadioButton(
+                                    selected = source.selected,
+                                    onClick = item.onClick,
+                                    enabled = item.enabled,
+                                )
                         }
                     }
-                    item.subtitle?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = subtitleColor.copy(alpha = contentAlpha),
-                        )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = item.title,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = titleColor.copy(alpha = contentAlpha),
+                            )
+                            item.titleExtraContent?.let {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                it()
+                            }
+                        }
+                        item.subtitle?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = subtitleColor.copy(alpha = contentAlpha),
+                            )
+                        }
+                    }
+                    item.trailingContent?.let {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        it()
                     }
                 }
-                item.trailingContent?.let {
-                    Spacer(modifier = Modifier.width(16.dp))
-                    it()
+                item.bottomContent?.let {
+                    Box(
+                        modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                    ) {
+                        it()
+                    }
                 }
             }
         }
+    }
+
+    if (item.isSwipeable) {
+        SwipeToDismissCard(
+            swipeSensitivity = item.swipeSensitivity,
+            enableStartToEnd = true,
+            enableEndToStart = true,
+            onSwipeStartToEnd = { item.onSwipeTriggered?.invoke() },
+            onSwipeEndToStart = { item.onSwipeTriggered?.invoke() },
+            shape = shape,
+            backgroundContent = { direction, isThresholdCrossed ->
+                val bgContainerColor = if (isThresholdCrossed) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHighest
+                }
+                val bgContentColor = if (isThresholdCrossed) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(bgContainerColor)
+                        .padding(horizontal = 20.dp),
+                    contentAlignment = if (direction == SwipeDirection.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd,
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = if (isThresholdCrossed) Icons.Default.CheckCircle else Icons.Default.TouchApp,
+                            contentDescription = null,
+                            tint = bgContentColor,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (isThresholdCrossed) "✓ Threshold Reached!" else "Swipe to test threshold",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = bgContentColor,
+                        )
+                    }
+                }
+            },
+        ) {
+            rowContent()
+        }
+    } else {
+        rowContent()
     }
 }

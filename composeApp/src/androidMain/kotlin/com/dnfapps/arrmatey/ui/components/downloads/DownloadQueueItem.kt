@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -30,17 +29,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +46,8 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.entensions.ARROW_DOWN
 import com.dnfapps.arrmatey.entensions.ARROW_UP
 import com.dnfapps.arrmatey.ui.components.ContainerCard
+import com.dnfapps.arrmatey.ui.components.SwipeDirection
+import com.dnfapps.arrmatey.ui.components.SwipeToDismissCard
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
@@ -73,75 +68,44 @@ fun TorrentActionsCard(
     onDelete: () -> Unit,
     onLongClick: () -> Unit,
     onClick: () -> Unit,
+    swipeSensitivity: Float = 0.60f,
 ) {
-    val state = rememberSwipeToDismissBoxState()
-
-    LaunchedEffect(state.currentValue) {
-        if (!isInSelectionMode) {
-            when (state.currentValue) {
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    if (item.status.isPaused) onResume() else onPause()
-                }
-
-                SwipeToDismissBoxValue.EndToStart -> {
-                    onDelete()
-                }
-
-                else -> {}
+    SwipeToDismissCard(
+        swipeSensitivity = swipeSensitivity,
+        enableStartToEnd = !isInSelectionMode,
+        enableEndToStart = !isInSelectionMode,
+        onSwipeStartToEnd = {
+            if (item.status.isPaused) onResume() else onPause()
+        },
+        onSwipeEndToStart = {
+            onDelete()
+        },
+        shape = MaterialTheme.shapes.large,
+        backgroundContent = { direction, _ ->
+            val color = when (direction) {
+                SwipeDirection.StartToEnd -> MaterialTheme.colorScheme.primary
+                SwipeDirection.EndToStart -> MaterialTheme.colorScheme.error
             }
-        }
-        state.snapTo(SwipeToDismissBoxValue.Settled)
-    }
+            val icon = when (direction) {
+                SwipeDirection.StartToEnd -> if (item.status.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause
+                SwipeDirection.EndToStart -> Icons.Default.Delete
+            }
 
-    SwipeToDismissBox(
-        state = state,
-        enableDismissFromStartToEnd = !isInSelectionMode,
-        enableDismissFromEndToStart = !isInSelectionMode,
-        backgroundContent = {
-            val color =
-                when (state.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
-                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
-                    else -> Color.Unspecified
-                }
-            val icon =
-                when (state.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd ->
-                        if (item.status.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause
-
-                    else -> Icons.Default.Delete
-                }
-            val alignment =
-                when (state.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                    else -> Alignment.CenterEnd
-                }
-
-            when (state.dismissDirection) {
-                SwipeToDismissBoxValue.StartToEnd,
-                SwipeToDismissBoxValue.EndToStart,
-                -> {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .drawBehind {
-                                drawRoundRect(
-                                    color = color,
-                                    cornerRadius = CornerRadius(10.dp.toPx()),
-                                )
-                            }.wrapContentSize(alignment)
-                            .padding(12.dp),
-                    )
-                }
-
-                else -> {}
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color)
+                    .padding(horizontal = 20.dp),
+                contentAlignment = if (direction == SwipeDirection.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp),
+                )
             }
         },
-        onDismiss = {},
     ) {
         DownloadQueueItem(
             item = item,

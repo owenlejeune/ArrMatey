@@ -1,25 +1,21 @@
 package com.dnfapps.arrmatey.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.MediaFile
 import com.dnfapps.arrmatey.compose.utils.breakable
@@ -37,42 +33,35 @@ fun FileCard(
     file: MediaFile,
     modifier: Modifier = Modifier,
     onDelete: (() -> Unit)? = null,
+    swipeSensitivity: Float = 0.60f,
 ) {
-    val state = rememberSwipeToDismissBoxState()
-    val deleteSwipeBackground = MaterialTheme.colorScheme.error
-
-    LaunchedEffect(state.currentValue) {
-        if (state.currentValue == SwipeToDismissBoxValue.EndToStart) {
-            onDelete?.invoke()
-        }
-        state.snapTo(SwipeToDismissBoxValue.Settled)
-    }
-
-    SwipeToDismissBox(
+    SwipeToDismissCard(
         modifier = modifier,
-        state = state,
-        enableDismissFromStartToEnd = false,
-        enableDismissFromEndToStart = onDelete != null,
-        backgroundContent = {
-            if (state.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onError,
-                    modifier =
-                    Modifier
+        swipeSensitivity = swipeSensitivity,
+        enableStartToEnd = false,
+        enableEndToStart = onDelete != null,
+        onSwipeEndToStart = {
+            onDelete?.invoke()
+        },
+        shape = MaterialTheme.shapes.large,
+        backgroundContent = { direction, _ ->
+            if (direction == SwipeDirection.EndToStart) {
+                Box(
+                    modifier = Modifier
                         .fillMaxSize()
-                        .drawBehind {
-                            drawRoundRect(
-                                color = deleteSwipeBackground,
-                                cornerRadius = CornerRadius(16.dp.toPx()),
-                            )
-                        }.wrapContentSize(Alignment.CenterEnd)
-                        .padding(12.dp),
-                )
+                        .background(MaterialTheme.colorScheme.error)
+                        .padding(horizontal = 20.dp),
+                    contentAlignment = Alignment.CenterEnd,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onError,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
         },
-        onDismiss = {},
     ) {
         ContainerCard(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),

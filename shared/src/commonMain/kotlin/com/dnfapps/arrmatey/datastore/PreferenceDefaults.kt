@@ -22,6 +22,7 @@ object PreferenceDefaults {
     const val START_OF_WEEK_MONDAY: Boolean = false
     const val SEARCH_SHOW_BANNERS: Boolean = true
     const val DUAL_PANEL_SUPPORT: Boolean = true
+    const val SWIPE_SENSITIVITY: Float = 0.60f
 
     // Info Cards
     const val SHOW_INFO_CARD: Boolean = true
