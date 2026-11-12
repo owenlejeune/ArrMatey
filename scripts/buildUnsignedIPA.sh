@@ -2,7 +2,7 @@
 
 set -e
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 BUILD_DIR="build"
@@ -34,10 +34,10 @@ echo "Packaging .app into Payload..."
 mkdir -p "$BUILD_DIR/Payload"
 cp -r "$ARCHIVE_PATH/Products/Applications/ArrMatey.app" "$BUILD_DIR/Payload/"
 
-# 4. Create IPA archive
+# 4. Create IPA archive with maximum compression
 echo "Creating ArrMatey.ipa..."
 cd "$BUILD_DIR"
-zip -r "ArrMatey.ipa" Payload > /dev/null
+zip -9 -r "ArrMatey.ipa" Payload > /dev/null
 rm -rf Payload
 
 cd "$PROJECT_ROOT"
