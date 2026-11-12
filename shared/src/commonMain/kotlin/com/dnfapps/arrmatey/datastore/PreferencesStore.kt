@@ -69,6 +69,7 @@ interface PreferencesStore {
 
     val queueRemovalPreferences: Flow<QueueRemovalPreferences>
     val downloadDeleteFiles: Flow<Boolean>
+    val swipeSensitivity: Flow<Float>
 
     fun observeCalendarFilterState(): Flow<CalendarFilterState>
 
@@ -180,6 +181,8 @@ interface PreferencesStore {
     fun saveQueueRemovalPreferences(preferences: QueueRemovalPreferences)
 
     fun setDownloadDeleteFiles(value: Boolean)
+
+    fun setSwipeSensitivity(value: Float)
 
     companion object {
         operator fun invoke(
@@ -862,6 +865,19 @@ class DefaultPreferencesStore(
         scope.launch {
             dataStore.edit {
                 it[PreferenceKeys.DOWNLOAD_DELETE_FILES] = value
+            }
+        }
+    }
+
+    override val swipeSensitivity: Flow<Float> =
+        dataStore.data.map {
+            it[PreferenceKeys.SWIPE_SENSITIVITY] ?: PreferenceDefaults.SWIPE_SENSITIVITY
+        }
+
+    override fun setSwipeSensitivity(value: Float) {
+        scope.launch {
+            dataStore.edit {
+                it[PreferenceKeys.SWIPE_SENSITIVITY] = value
             }
         }
     }

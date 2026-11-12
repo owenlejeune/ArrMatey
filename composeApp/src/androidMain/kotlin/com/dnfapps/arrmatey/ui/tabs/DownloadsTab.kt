@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientCommandState
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientsViewModel
@@ -76,6 +77,7 @@ fun DownloadsTab(
     viewModel: DownloadQueueViewModel = koinViewModel(),
     clientsViewModel: DownloadClientsViewModel = koinViewModel(),
     navigationManager: NavigationManager = koinInject(),
+    preferencesStore: PreferencesStore = koinInject(),
 ) {
     val queueState by viewModel.downloadQueueState.collectAsStateWithLifecycle()
     val filterState by viewModel.filterState.collectAsStateWithLifecycle()
@@ -84,6 +86,7 @@ fun DownloadsTab(
     val hasLoaded by viewModel.hasLoaded.collectAsStateWithLifecycle()
     val sortState by viewModel.sortState.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    val swipeSensitivity by preferencesStore.swipeSensitivity.collectAsStateWithLifecycle(initialValue = 0.60f)
 
     val downloadClientState by clientsViewModel.downloadClientsState.collectAsStateWithLifecycle()
 
@@ -292,6 +295,7 @@ fun DownloadsTab(
                                                 viewModel.toggleItemSelection(item.id)
                                             }
                                         },
+                                        swipeSensitivity = swipeSensitivity,
                                     )
                                 }
                             }

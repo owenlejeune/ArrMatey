@@ -14,6 +14,10 @@ data class SettingItem(
     val enabled: Boolean = true,
     val titleExtraContent: @Composable (() -> Unit)? = null,
     val trailingContent: @Composable (() -> Unit)? = null,
+    val bottomContent: @Composable (() -> Unit)? = null,
+    val isSwipeable: Boolean = false,
+    val swipeSensitivity: Float = 0.60f,
+    val onSwipeTriggered: (() -> Unit)? = null,
     val onClick: () -> Unit,
 )
 

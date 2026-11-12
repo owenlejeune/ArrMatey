@@ -17,7 +17,7 @@ struct DownloadsTab: View {
     @State private var showDeleteConfirm: Bool = false
     @State private var searchQuery: String = ""
     @State private var toastMessage: String? = nil
-    
+
     private var searchPrompt: String {
         let count = viewModel.downloadQueueState.queueItems.count
         return MR.plurals().search_downloads.localized(count)
@@ -114,12 +114,12 @@ struct DownloadsTab: View {
                     viewModel.exitSelectionMode()
                 }
             }
-            
+
             ToolbarItem(placement: .principal) {
                 Text(MR.plurals().selected_count.localized(viewModel.selectionCount))
                     .font(.headline)
             }
-            
+
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
                     if viewModel.areAllItemsSelected() {
@@ -171,15 +171,15 @@ struct DownloadsTab: View {
             Button(action: { viewModel.pauseSelected() }) {
                 Label(MR.strings().pause.localized(), systemImage: "pause.fill")
             }
-            
+
             Spacer()
-            
+
             Button(action: { viewModel.resumeSelected() }) {
                 Label(MR.strings().resume.localized(), systemImage: "play.fill")
             }
-            
+
             Spacer()
-            
+
             Button(role: .destructive, action: {
                 showDeleteConfirm = true
             }) {
@@ -209,7 +209,7 @@ struct DownloadsTab: View {
             )
             .padding(.top, 8)
             .padding(.bottom, 4)
-            
+
             if viewModel.downloadQueueState.queueItems.isEmpty {
                 emptyView
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -225,7 +225,7 @@ struct DownloadsTab: View {
                                         viewModel.toggleItemSelection(item.id)
                                     }
                             }
-                            
+
                             DownloadQueueItemView(
                                 item: item,
                                 showClientInfo: clientsViewModel.downloadClientsState.downloadClients.count > 1
@@ -257,7 +257,7 @@ struct DownloadsTab: View {
                                 .tint(.blue)
                             }
                         }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             if !viewModel.isInSelectionMode {
                                 Button(role: .destructive) {
                                     deleteTarget = item
@@ -316,7 +316,7 @@ extension Array where Element: Hashable {
 
 struct NoDownloadClientsView: View {
     @EnvironmentObject private var navigation: NavigationManager
-    
+
     var body: some View {
         ContentUnavailableView {
             Label(
@@ -340,7 +340,7 @@ struct ClientFilterRow: View {
     let transferInfos: [DownloadTransferInfo]
     let selectedIds: [Int64]
     let onToggle: (Int64) -> Void
-    
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
@@ -367,7 +367,7 @@ struct ClientFilterChip: View {
     let info: DownloadTransferInfo?
     let isSelected: Bool
     let onClick: () -> Void
-    
+
     var body: some View {
         Button(action: onClick) {
             HStack(spacing: 6) {
@@ -375,7 +375,7 @@ struct ClientFilterChip: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 16, height: 16)
-                
+
                 VStack(alignment: .leading, spacing: 2) {
                     if client.type.supportsUpload {
                         Text("↓ \((info?.downloadSpeed ?? 0).bytesAsFileSizeString())/s ↑ \((info?.uploadSpeed ?? 0).bytesAsFileSizeString())/s")
@@ -384,7 +384,7 @@ struct ClientFilterChip: View {
                         Text("↓ \((info?.downloadSpeed ?? 0).bytesAsFileSizeString())/s")
                             .font(.subheadline)
                     }
-                    
+
                     if client.type.supportsExternalIp && client.showExternalIpAddress, let externalIp = info?.externalIp, !externalIp.isEmpty {
                         Text(externalIp)
                             .font(.caption)

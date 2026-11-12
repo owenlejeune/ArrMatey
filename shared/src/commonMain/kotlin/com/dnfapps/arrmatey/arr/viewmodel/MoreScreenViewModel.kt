@@ -167,6 +167,14 @@ class MoreScreenViewModel(
                 initialValue = true,
             )
 
+    val swipeSensitivity =
+        preferencesStore.swipeSensitivity
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 0.60f,
+            )
+
     val smartAddSeerrAction =
         preferencesStore.smartAddSeerrAction
             .stateIn(
@@ -426,6 +434,10 @@ class MoreScreenViewModel(
 
     fun toggleDualPanelSupport() {
         preferencesStore.toggleDualPanelSupport()
+    }
+
+    fun setSwipeSensitivity(value: Float) {
+        preferencesStore.setSwipeSensitivity(value)
     }
 
     fun setSmartAddSeerrAction(action: SmartAddSeerrAction) {
