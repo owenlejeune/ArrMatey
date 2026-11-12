@@ -29,6 +29,7 @@ data class GlobalPreferencesExport(
     val useColoredActivityCards: Boolean? = null,
     val useColoredCalendarCards: Boolean? = null,
     val startOfWeekMonday: Boolean? = null,
+    val calendarFocusYesterday: Boolean? = null,
     // Info Cards
     val showInfoCards: Map<InstanceType, Boolean>? = null,
     // Discover & Integrations
@@ -60,6 +61,7 @@ data class GlobalPreferencesExport(
                 useColoredActivityCards != null ||
                 useColoredCalendarCards != null ||
                 startOfWeekMonday != null ||
+                calendarFocusYesterday != null ||
                 showInfoCards != null ||
                 calendarFilterState != null ||
                 downloadQueueSortState != null ||

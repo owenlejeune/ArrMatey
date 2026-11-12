@@ -133,6 +133,18 @@ struct UiSettingsView: View {
                     }
                 }
 
+                Toggle(isOn: Binding(
+                    get: { viewModel.calendarFocusYesterday },
+                    set: { _ in viewModel.toggleCalendarFocusYesterday() }
+                )) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(MR.strings().calendar_focus_yesterday.localized())
+                        Text(MR.strings().calendar_focus_yesterday_desc.localized())
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
                 Button {
                     showSearchResultCustomizationSheet = true
                 } label: {

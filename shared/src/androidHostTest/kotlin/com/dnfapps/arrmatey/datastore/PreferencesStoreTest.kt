@@ -203,4 +203,24 @@ class PreferencesStoreTest {
         }
         assertEquals(true, preferencesStore.hideFloatingNavigationBarLabels.first())
     }
+
+    @Test
+    fun testCalendarFocusYesterday() = runTest {
+        val file = tmpFolder.newFile("test_calendar_focus_yesterday.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create { file }
+
+        every { dataStoreFactory.provideDataStore() } returns dataStore
+        every { dataStoreFactory.defaultAppColor } returns AppColor.ArrMatey
+
+        val preferencesStore = PreferencesStore(dataStoreFactory)
+
+        // Default is false
+        assertEquals(false, preferencesStore.calendarFocusYesterday.first())
+
+        // Set to true via dataStore
+        dataStore.edit { prefs ->
+            prefs[PreferenceKeys.CALENDAR_FOCUS_YESTERDAY] = true
+        }
+        assertEquals(true, preferencesStore.calendarFocusYesterday.first())
+    }
 }

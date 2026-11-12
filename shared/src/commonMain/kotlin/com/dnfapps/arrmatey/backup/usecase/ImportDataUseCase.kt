@@ -224,6 +224,7 @@ class ImportDataUseCase(
                 global.useColoredActivityCards?.let { preferencesStore.setUseColoredActivityCards(it) }
                 global.useColoredCalendarCards?.let { preferencesStore.setUseColoredCalendarCards(it) }
                 global.startOfWeekMonday?.let { preferencesStore.setStartOfWeekMonday(it) }
+                global.calendarFocusYesterday?.let { preferencesStore.setCalendarFocusYesterday(it) }
                 global.showInfoCards?.forEach { (type, visible) ->
                     preferencesStore.setInfoCardVisibility(type, visible)
                 }

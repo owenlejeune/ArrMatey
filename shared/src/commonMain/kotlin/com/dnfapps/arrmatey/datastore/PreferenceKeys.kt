@@ -66,6 +66,7 @@ internal object PreferenceKeys {
     val USE_COLORED_ACTIVITY_CARDS = booleanPreferencesKey("useColoredActivityCards")
     val USE_COLORED_CALENDAR_CARDS = booleanPreferencesKey("useColoredCalendarCards")
     val START_OF_WEEK_MONDAY = booleanPreferencesKey("startOfWeekMonday")
+    val CALENDAR_FOCUS_YESTERDAY = booleanPreferencesKey("calendarFocusYesterday")
 
     fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> SONARR_INFO_CARD

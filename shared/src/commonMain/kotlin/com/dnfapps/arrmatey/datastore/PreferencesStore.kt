@@ -65,6 +65,7 @@ interface PreferencesStore {
     val useColoredActivityCards: Flow<Boolean>
     val useColoredCalendarCards: Flow<Boolean>
     val startOfWeekMonday: Flow<Boolean>
+    val calendarFocusYesterday: Flow<Boolean>
 
     val queueRemovalPreferences: Flow<QueueRemovalPreferences>
     val downloadDeleteFiles: Flow<Boolean>
@@ -171,6 +172,10 @@ interface PreferencesStore {
     fun toggleStartOfWeekMonday()
 
     fun setStartOfWeekMonday(value: Boolean)
+
+    fun toggleCalendarFocusYesterday()
+
+    fun setCalendarFocusYesterday(value: Boolean)
 
     fun saveQueueRemovalPreferences(preferences: QueueRemovalPreferences)
 
@@ -803,6 +808,28 @@ class DefaultPreferencesStore(
         scope.launch {
             dataStore.edit {
                 it[PreferenceKeys.START_OF_WEEK_MONDAY] = value
+            }
+        }
+    }
+
+    override val calendarFocusYesterday: Flow<Boolean> =
+        dataStore.data.map {
+            it[PreferenceKeys.CALENDAR_FOCUS_YESTERDAY] ?: PreferenceDefaults.CALENDAR_FOCUS_YESTERDAY
+        }
+
+    override fun toggleCalendarFocusYesterday() {
+        scope.launch {
+            dataStore.edit {
+                val current = it[PreferenceKeys.CALENDAR_FOCUS_YESTERDAY] ?: PreferenceDefaults.CALENDAR_FOCUS_YESTERDAY
+                it[PreferenceKeys.CALENDAR_FOCUS_YESTERDAY] = !current
+            }
+        }
+    }
+
+    override fun setCalendarFocusYesterday(value: Boolean) {
+        scope.launch {
+            dataStore.edit {
+                it[PreferenceKeys.CALENDAR_FOCUS_YESTERDAY] = value
             }
         }
     }

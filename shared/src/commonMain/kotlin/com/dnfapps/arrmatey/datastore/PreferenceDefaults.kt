@@ -35,6 +35,7 @@ object PreferenceDefaults {
     const val CALENDAR_MONITOR_ONLY: Boolean = false
     const val CALENDAR_PREMIERS_ONLY: Boolean = false
     const val CALENDAR_FINALES_ONLY: Boolean = false
+    const val CALENDAR_FOCUS_YESTERDAY: Boolean = false
 
     // Download Client
     val DOWNLOAD_CLIENT_SORT_BY: SortBy = SortBy.Title
