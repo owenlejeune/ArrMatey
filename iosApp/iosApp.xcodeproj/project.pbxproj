@@ -26,7 +26,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		1FA9039C5C604A1021753C40 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		1FA9039C5C604A1021753C40 /* Exceptions for "iosApp" folder in "iosApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -39,30 +39,18 @@
 		3F3BB1E6F7F76B8495D4C326 /* iosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				1FA9039C5C604A1021753C40 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
+				1FA9039C5C604A1021753C40 /* Exceptions for "iosApp" folder in "iosApp" target */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
 		};
 		44618216303DCD2A00FD074C /* iosAppTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
 			path = iosAppTests;
 			sourceTree = "<group>";
 		};
 		9487242E3AD8F152D191234C /* Configuration */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
 			path = Configuration;
 			sourceTree = "<group>";
 		};
@@ -355,6 +343,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = 6E72XH5S4A;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -424,6 +413,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = 6E72XH5S4A;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
