@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
@@ -17,7 +18,6 @@ import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarViewWeek
 import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MiscellaneousServices
@@ -40,7 +40,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import com.dnfapps.arrmatey.datastore.PreferenceDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -50,7 +49,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.delay
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
@@ -58,6 +56,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
+import com.dnfapps.arrmatey.datastore.PreferenceDefaults
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.AppColor
 import com.dnfapps.arrmatey.model.AppTheme
@@ -75,6 +74,7 @@ import com.dnfapps.arrmatey.ui.sheets.DiscoverSectionCustomizationSheet
 import com.dnfapps.arrmatey.ui.sheets.SearchResultCardCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
+import kotlinx.coroutines.delay
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
 

@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import com.dnfapps.arrmatey.ui.components.SwipeDirection
-import com.dnfapps.arrmatey.ui.components.SwipeToDismissCard
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Pause
@@ -31,19 +29,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
-import kotlinx.coroutines.flow.filter
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +46,8 @@ import com.dnfapps.arrmatey.downloadclient.model.DownloadItemStatus
 import com.dnfapps.arrmatey.entensions.ARROW_DOWN
 import com.dnfapps.arrmatey.entensions.ARROW_UP
 import com.dnfapps.arrmatey.ui.components.ContainerCard
+import com.dnfapps.arrmatey.ui.components.SwipeDirection
+import com.dnfapps.arrmatey.ui.components.SwipeToDismissCard
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
