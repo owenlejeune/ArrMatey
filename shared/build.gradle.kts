@@ -65,6 +65,7 @@ kotlin {
             isStatic = true
             export(libs.moko.resources)
             linkerOpts("-linker-option", "-ObjC")
+            freeCompilerArgs += "-Xg0"
         }
     }
 
