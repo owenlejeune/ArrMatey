@@ -32,7 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
@@ -112,7 +112,7 @@ fun AlbumsArea(
                         Icon(
                             imageVector = Icons.Default.ExpandCircleDown,
                             contentDescription = null,
-                            modifier = Modifier.rotate(iconRotation),
+                            modifier = Modifier.graphicsLayer { rotationZ = iconRotation },
                         )
                         Icon(
                             imageVector = Icons.Default.Edit,
