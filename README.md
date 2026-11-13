@@ -6,23 +6,18 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://www.android.com)
-[![iOS](https://img.shields.io/badge/Platform-iOS-purple.svg)](https://www.apple.com/ios)
 [![Kotlin](https://img.shields.io/badge/Language-Kotlin-purple.svg)](https://kotlinlang.org)
+[![iOS](https://img.shields.io/badge/Platform-iOS-purple.svg)](https://www.apple.com/ios)
 [![Swift](https://img.shields.io/badge/Language-Swift-orange.svg)](https://swift.org)
 
-<a href="https://www.buymeacoffee.com/owenlejeune" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+<a href="https://github.com?qj_open=1"><img src="https://api.quietjar.com/api/widget/image/eyJzaXRlIjoicWpfNDIyZTQ3ZmRkYzMxNjZhMTk4NDU2NWMwIiwiY3VycmVuY3kiOiJjYWQiLCJsYWJlbHMiOnsiaGVhZGxpbmUiOiJPZmZpY2lhbCBpT1MgUmVsZWFzZSIsImJvZHkiOiIiLCJhY3Rpb24iOiJTdXBwb3J0IiwiaWNvbiI6InBpZ2d5In0sInN0eWxlIjp7ImNvbG9yIjoiIzU4QkY3NSIsImZvbnQiOiJyb3VuZGVkIn0sImNsb3NlIjp7ImVuYWJsZWQiOnRydWUsImFmdGVyIjoic2Vzc2lvbiIsImRheXMiOjd9LCJkb25hdGlvbiI6eyJoaWRlRGF5cyI6MzB9LCJwb3NpdGlvbiI6eyJjb3JuZXIiOiJ0b3AtY2VudGVyIn0sImdvYWwiOiJxZ183MDY4OWM5MWY5Nzk2YjE3IiwiZ29hbFJlYWNoZWQiOiJoaWRlIn0.png" alt="Official iOS Release" height="120" /></a>
+<a href="https://www.buymeacoffee.com/owenlejeune" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="60" width="255"></a>
 
 ## Downloads
 
-<a href="https://f-droid.org/packages/com.dnfapps.arrmatey/" target="_blank">
-<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" align="center" height="80">
-</a>
-<a href="https://github.com/owenlejeune/ArrMatey/releases" target="_blank">
-<img src="https://github.com/machiav3lli/oandbackupx/blob/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png" alt="Get it on Github" align="center" height="80">
-</a>
-<a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/owenlejeune/ArrMatey/">
-<img src="https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" align="center" height="54"/>
-</a>
+<a href="https://f-droid.org/packages/com.dnfapps.arrmatey/" target="_blank"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" align="center" height="80"></a>
+<a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/owenlejeune/ArrMatey/"><img src="https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" align="center" height="80"/></a>
+<a href="https://github.com/owenlejeune/ArrMatey/releases" target="_blank"><img src="https://github.com/machiav3lli/oandbackupx/blob/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png" alt="Get it on Github" align="center" height="80"></a>
 
 ## Features
 
