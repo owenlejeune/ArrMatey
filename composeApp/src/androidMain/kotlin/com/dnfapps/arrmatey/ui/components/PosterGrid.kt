@@ -78,7 +78,11 @@ fun PosterGrid(
         verticalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
         userScrollEnabled = userScrollEnabled,
     ) {
-        items(items) { item ->
+        items(
+            items = items,
+            key = { item -> item.guid },
+            contentType = { "poster_grid_item" },
+        ) { item ->
             val isActive = itemIsActive(item)
             PosterItem(
                 aspectRatio = aspectRatio,

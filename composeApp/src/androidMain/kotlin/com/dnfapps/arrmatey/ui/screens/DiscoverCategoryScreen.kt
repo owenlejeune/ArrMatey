@@ -136,7 +136,11 @@ fun DiscoverCategoryScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize(),
                     ) {
-                        items(items) { item ->
+                        items(
+                            items = items,
+                            key = { item -> "${item.mediaType}_${item.id}" },
+                            contentType = { "discover_category_grid_item" },
+                        ) { item ->
                             PosterItem(
                                 item = item,
                                 onItemClick = { clickedItem ->
@@ -198,7 +202,11 @@ fun DiscoverCategoryScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize(),
                     ) {
-                        items(items) { item ->
+                        items(
+                            items = items,
+                            key = { item -> "${item.mediaType}_${item.id}" },
+                            contentType = { "discover_category_list_item" },
+                        ) { item ->
                             val searchResult = item.mediaServerItem?.let { serverItem ->
                                 SearchResult.MediaServerResult(
                                     item = serverItem,

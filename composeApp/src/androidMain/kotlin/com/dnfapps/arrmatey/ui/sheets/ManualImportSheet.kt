@@ -222,7 +222,11 @@ fun ManualImportSheetContent(
                     .heightIn(max = 450.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                items(files, key = { it.stableId }) { file ->
+                items(
+                    items = files,
+                    key = { it.stableId },
+                    contentType = { "manual_import_file" },
+                ) { file ->
                     val isSelected = selectedIds.contains(file.stableId)
                     ManualImportFileRow(
                         file = file,

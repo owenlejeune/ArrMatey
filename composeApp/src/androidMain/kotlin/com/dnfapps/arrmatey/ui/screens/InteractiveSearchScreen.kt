@@ -187,7 +187,11 @@ fun InteractiveSearchScreen(
                             bottom = 12.dp + LocalFloatingBarBottomPadding.current,
                         ),
                     ) {
-                        items(state.items) { item ->
+                        items(
+                            items = state.items,
+                            key = { item -> item.guid },
+                            contentType = { "release_item" },
+                        ) { item ->
                             val shouldAnimate =
                                 (downloadState as? DownloadState.Loading)?.guid == item.guid
                             ReleaseItem(

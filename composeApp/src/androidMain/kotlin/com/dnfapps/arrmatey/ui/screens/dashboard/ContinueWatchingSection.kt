@@ -119,7 +119,11 @@ fun ContinueWatchingSection(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     userScrollEnabled = enabled && !isEditing,
                 ) {
-                    items(items, key = { "${it.serverType}_${it.id}" }) { item ->
+                    items(
+                        items = items,
+                        key = { "${it.serverType}_${it.id}" },
+                        contentType = { "continue_watching_item" },
+                    ) { item ->
                         ContinueWatchingCard(
                             item = item,
                             onClick = { if (enabled && !isEditing) onItemClick(item) },

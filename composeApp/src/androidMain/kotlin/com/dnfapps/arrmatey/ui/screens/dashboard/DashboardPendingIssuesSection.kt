@@ -123,7 +123,11 @@ fun DashboardPendingIssuesSection(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    items(IssueState.entries) { filterState ->
+                    items(
+                        items = IssueState.entries,
+                        key = { it.name },
+                        contentType = { "issue_state_chip" },
+                    ) { filterState ->
                         FilterChip(
                             selected = selectedFilter == filterState,
                             onClick = { selectedFilter = filterState },
@@ -148,7 +152,11 @@ fun DashboardPendingIssuesSection(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp),
                     ) {
-                        items(filteredIssues, key = { it.issue.id }) { item ->
+                        items(
+                            items = filteredIssues,
+                            key = { it.issue.id },
+                            contentType = { "compact_issue_card" },
+                        ) { item ->
                             CompactIssueCard(
                                 issuePackage = item,
                                 onClick = { if (enabled) onIssueClick(item) },

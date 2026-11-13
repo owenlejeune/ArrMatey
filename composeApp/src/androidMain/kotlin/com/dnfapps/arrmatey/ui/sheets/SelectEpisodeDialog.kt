@@ -176,7 +176,11 @@ fun SelectEpisodeDialog(
                             contentPadding = PaddingValues(horizontal = 2.dp),
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            items(availableSeasons) { seasonNum ->
+                            items(
+                                items = availableSeasons,
+                                key = { it },
+                                contentType = { "season_chip" },
+                            ) { seasonNum ->
                                 val label = if (seasonNum == 0) {
                                     mokoString(MR.strings.specials)
                                 } else {
@@ -197,7 +201,11 @@ fun SelectEpisodeDialog(
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        items(seasonEpisodes, key = { it.id }) { ep ->
+                        items(
+                            items = seasonEpisodes,
+                            key = { it.id },
+                            contentType = { "episode_row" },
+                        ) { ep ->
                             val isSelected = selectedEpisodeIds.contains(ep.id)
                             Surface(
                                 modifier = Modifier

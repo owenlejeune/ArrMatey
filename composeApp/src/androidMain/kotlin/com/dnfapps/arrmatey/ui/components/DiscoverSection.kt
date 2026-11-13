@@ -114,7 +114,11 @@ fun DiscoverSection(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                items(items) { item ->
+                items(
+                    items = items,
+                    key = { item -> "${item.mediaType}_${item.id}" },
+                    contentType = { "discover_item" },
+                ) { item ->
                     PosterItem(
                         item = item,
                         modifier = Modifier.width(120.dp),

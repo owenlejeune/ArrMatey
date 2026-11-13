@@ -123,6 +123,7 @@ fun <T : ArrMedia> MediaList(
         items(
             items = items,
             key = { item -> item.guid },
+            contentType = { "media_item" },
         ) { item ->
             val isActive = itemIsActive(item)
             MediaItem(
@@ -180,7 +181,11 @@ fun SearchResultList(
             end = 18.dp,
         ),
     ) {
-        items(items, key = { it.id }) { item ->
+        items(
+            items = items,
+            key = { it.id },
+            contentType = { "search_result" },
+        ) { item ->
             SearchResultItem(
                 item = item,
                 onItemClick = onItemClick,

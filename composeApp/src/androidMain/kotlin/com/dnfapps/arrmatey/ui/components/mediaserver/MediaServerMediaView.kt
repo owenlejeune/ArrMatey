@@ -134,7 +134,11 @@ fun MediaServerMediaView(
                     verticalArrangement = Arrangement.spacedBy(preferences.gridSpacing.spacing),
                     modifier = contentModifier,
                 ) {
-                    items(items, key = { it.id }) { item ->
+                    items(
+                        items = items,
+                        key = { it.id },
+                        contentType = { "media_server_poster" },
+                    ) { item ->
                         MediaServerPosterGridItem(
                             item = item,
                             preferences = preferences,
@@ -157,7 +161,11 @@ fun MediaServerMediaView(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = contentModifier,
                 ) {
-                    items(items, key = { it.id }) { item ->
+                    items(
+                        items = items,
+                        key = { it.id },
+                        contentType = { "media_server_list_item" },
+                    ) { item ->
                         MediaServerListItem(
                             item = item,
                             preferences = preferences,
