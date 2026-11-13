@@ -92,7 +92,7 @@ class ProwlarrIndexersViewModel(
     ): ProwlarrIndexersState.Success {
         val comparator: Comparator<ProwlarrIndexer> =
             when (sortingState.sortBy) {
-                SortBy.Name -> compareBy { it.name?.lowercase() }
+                SortBy.Name -> compareBy(nullsLast(String.CASE_INSENSITIVE_ORDER)) { it.name }
                 SortBy.Added -> compareBy { it.added }
                 SortBy.Protocol -> compareBy { it.protocol }
                 SortBy.Priority -> compareBy { it.priority }

@@ -142,12 +142,12 @@ class MediaServerLibraryViewModel(
             // 3. Sorting
             val sort = prefs.sortBy
             val order = prefs.sortOrder
-            val comparator = when (sort) {
-                SortBy.Title -> compareBy<UnifiedMediaItem> { it.title.lowercase() }
-                SortBy.Year -> compareBy<UnifiedMediaItem> { it.year ?: 0 }
-                SortBy.Added -> compareBy<UnifiedMediaItem> { it.lastPlayedDate ?: 0L }
-                SortBy.Rating -> compareBy<UnifiedMediaItem> { it.rating ?: 0.0 }
-                else -> compareBy<UnifiedMediaItem> { it.title.lowercase() }
+            val comparator: Comparator<UnifiedMediaItem> = when (sort) {
+                SortBy.Title -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.title }
+                SortBy.Year -> compareBy { it.year ?: 0 }
+                SortBy.Added -> compareBy { it.lastPlayedDate ?: 0L }
+                SortBy.Rating -> compareBy { it.rating ?: 0.0 }
+                else -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.title }
             }
 
             if (order == SortOrder.Desc) {

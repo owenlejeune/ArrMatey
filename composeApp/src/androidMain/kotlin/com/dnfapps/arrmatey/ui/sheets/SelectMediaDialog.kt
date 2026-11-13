@@ -95,7 +95,7 @@ fun SelectMediaDialog(
         viewModel.getMediaForInstance(
             instanceId = instanceId,
             onSuccess = { list ->
-                mediaList = list.sortedBy { it.title?.lowercase() ?: "" }
+                mediaList = list.sortedWith(compareBy(nullsLast(String.CASE_INSENSITIVE_ORDER)) { it.title })
                 isLoading = false
             },
             onError = { err ->
