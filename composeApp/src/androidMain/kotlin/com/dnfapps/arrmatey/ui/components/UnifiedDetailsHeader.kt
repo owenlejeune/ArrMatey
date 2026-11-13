@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -88,8 +88,8 @@ fun UnifiedDetailsHeader(
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier =
-                Modifier.onGloballyPositioned {
-                    detailHeight = it.size.height
+                Modifier.onSizeChanged {
+                    detailHeight = it.height
                 },
             ) {
                 clearLogo?.let { clearLogo ->
