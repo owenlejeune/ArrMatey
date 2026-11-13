@@ -47,7 +47,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,9 +54,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.time.Duration.Companion.milliseconds
 
 class LibraryRepository(
     private val client: ArrClient,
@@ -226,7 +225,6 @@ class LibraryRepository(
         searchOnAdd: Boolean,
     ): ArrMedia? {
         _addItemStatus.value = OperationStatus.InProgress
-        delay(100.milliseconds)
 
         val result = withContext(Dispatchers.IO) { client.addItemToLibrary(item) }
         return processAddResult(result, searchOnAdd)
@@ -239,10 +237,8 @@ class LibraryRepository(
         result
             .onSuccess { addedItem ->
                 _addItemStatus.value = OperationStatus.Success(mokoStrings.getString(MR.strings.item_added_successfully))
-                addedItem.id?.let {
-                    val newMap = _mediaDetailsCache.value.toMutableMap()
-                    newMap[it] = addedItem
-                    _mediaDetailsCache.value = newMap
+                addedItem.id?.let { id ->
+                    _mediaDetailsCache.update { current -> current + (id to addedItem) }
                 }
 
                 val currentLibrary = (_library.value as? NetworkResult.Success)?.data
@@ -261,12 +257,9 @@ class LibraryRepository(
                     refreshLibrary()
                 }
 
-                delay(200.milliseconds)
                 _addItemStatus.value = OperationStatus.Idle
             }.onError { code, error, cause ->
                 _addItemStatus.value = OperationStatus.Error(code, error, cause)
-                delay(1500.milliseconds)
-                _addItemStatus.value = OperationStatus.Idle
             }
         return (result as? NetworkResult.Success)?.data
     }
