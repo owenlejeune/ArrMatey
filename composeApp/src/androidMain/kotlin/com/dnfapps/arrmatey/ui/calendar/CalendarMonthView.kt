@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,17 +69,8 @@ fun CalendarMonthView(
     var currentMonth by remember { mutableStateOf(today) }
     var selectedDate by remember { mutableStateOf(today) }
 
-    val isCurrentMonth by remember(currentMonth) {
-        derivedStateOf {
-            currentMonth.month == today.month && currentMonth.year == today.year
-        }
-    }
-
-    val isTodaySelected by remember(selectedDate, isCurrentMonth) {
-        derivedStateOf {
-            isCurrentMonth && selectedDate == today
-        }
-    }
+    val isCurrentMonth = currentMonth.month == today.month && currentMonth.year == today.year
+    val isTodaySelected = isCurrentMonth && selectedDate == today
 
     LaunchedEffect(currentMonth, state.dates) {
         if (selectedDate.month != currentMonth.month || selectedDate.year != currentMonth.year) {

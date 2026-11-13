@@ -57,20 +57,18 @@ fun CalendarListView(
     val preferencesStore: PreferencesStore = koinInject()
     val useColoredCards by preferencesStore.useColoredCalendarCards.collectAsStateWithLifecycle(false)
 
-    val endOfListReached by remember(state.dates) {
+    val endOfListReached by remember(listState) {
         derivedStateOf {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
             lastVisibleItem != null && lastVisibleItem.index >= state.dates.size - 1
         }
     }
 
-    val focusIndex by remember(state.dates, state.focusDate) {
-        derivedStateOf {
-            state.dates.indexOfFirst { it >= state.focusDate }.coerceAtLeast(0)
-        }
+    val focusIndex = remember(state.dates, state.focusDate) {
+        state.dates.indexOfFirst { it >= state.focusDate }.coerceAtLeast(0)
     }
 
-    val isFocusDateVisible by remember(focusIndex) {
+    val isFocusDateVisible by remember(listState, focusIndex) {
         derivedStateOf {
             listState.layoutInfo.visibleItemsInfo.any { it.index == focusIndex }
         }

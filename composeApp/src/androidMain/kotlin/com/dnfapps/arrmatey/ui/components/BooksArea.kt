@@ -38,7 +38,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -453,12 +452,8 @@ private fun SeriesView(
                         books.firstOrNull { it.id == link.bookId }
                     }
                 }
-            val monitoredBooksCount by remember {
-                derivedStateOf { seriesBooks.count { it.monitored } }
-            }
-            val wholeSeriesMonitored by remember {
-                derivedStateOf { monitoredBooksCount == bookSeries.links.size }
-            }
+            val monitoredBooksCount = remember(seriesBooks) { seriesBooks.count { it.monitored } }
+            val wholeSeriesMonitored = remember(monitoredBooksCount, bookSeries) { monitoredBooksCount == bookSeries.links.size }
 
             var expanded by rememberSaveable { mutableStateOf(true) }
             val iconRotation by animateFloatAsState(
