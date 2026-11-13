@@ -22,6 +22,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,6 +64,8 @@ fun PosterGrid(
     multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
 ) {
     val bottomPadding = LocalFloatingBarBottomPadding.current
+    val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
+    val selectedItems by multiSelectState.selectedItems.collectAsStateWithLifecycle()
 
     LazyVerticalGrid(
         state = lazyGridState,
@@ -84,6 +88,7 @@ fun PosterGrid(
             contentType = { "poster_grid_item" },
         ) { item ->
             val isActive = itemIsActive(item)
+            val isSelected = item.id?.let { selectedItems.contains(it) } ?: false
             PosterItem(
                 aspectRatio = aspectRatio,
                 radius = posterRadius,
@@ -91,6 +96,9 @@ fun PosterGrid(
                 item = item,
                 instanceType = instanceType,
                 onItemClick = onItemClick,
+                multiSelectState = multiSelectState,
+                isInSelectionMode = isInSelectionMode,
+                isSelected = isSelected,
                 additionalContent = {
                     if (showOverlay && item.id != null) {
                         PosterGridItemOverlay(
@@ -101,7 +109,6 @@ fun PosterGrid(
                     }
                 },
                 showFooter = showFullDetails,
-                multiSelectState = multiSelectState,
             )
         }
     }

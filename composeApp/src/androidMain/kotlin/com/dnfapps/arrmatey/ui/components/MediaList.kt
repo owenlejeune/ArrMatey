@@ -106,6 +106,9 @@ fun <T : ArrMedia> MediaList(
     tags: List<Tag> = emptyList(),
 ) {
     val bottomPadding = LocalFloatingBarBottomPadding.current
+    val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
+    val isSelectionModeAvailable by multiSelectState.isSelectionModeAvailable.collectAsStateWithLifecycle()
+    val selectedItems by multiSelectState.selectedItems.collectAsStateWithLifecycle()
 
     LazyColumn(
         state = lazyListState,
@@ -126,6 +129,7 @@ fun <T : ArrMedia> MediaList(
             contentType = { "media_item" },
         ) { item ->
             val isActive = itemIsActive(item)
+            val isSelected = selectedItems.contains(item.guid)
             MediaItem(
                 aspectRatio = aspectRatio,
                 item = item,
@@ -137,6 +141,9 @@ fun <T : ArrMedia> MediaList(
                 posterElevation = posterElevation,
                 posterRadius = posterRadius,
                 multiSelectState = multiSelectState,
+                isInSelectionMode = isInSelectionMode,
+                isSelectionModeAvailable = isSelectionModeAvailable,
+                isSelected = isSelected,
                 qualityProfiles = qualityProfiles,
                 tags = tags,
             )
@@ -272,6 +279,9 @@ fun <T : ArrMedia> MediaItem(
     posterElevation: PosterElevation = PosterElevation.Medium,
     posterRadius: PosterRadius = PosterRadius.Medium,
     multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
+    isInSelectionMode: Boolean? = null,
+    isSelectionModeAvailable: Boolean? = null,
+    isSelected: Boolean? = null,
     edgeColor: Color? = null,
     qualityProfiles: List<QualityProfile> = emptyList(),
     tags: List<Tag> = emptyList(),
@@ -279,9 +289,12 @@ fun <T : ArrMedia> MediaItem(
     mediaServerType: MediaServerType? = null,
     isSearch: Boolean = false,
 ) {
-    val isSelected = multiSelectState.isSelected(item.guid)
-    val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
-    val isSelectionModeAvailable by multiSelectState.isSelectionModeAvailable.collectAsStateWithLifecycle()
+    val selectionMode =
+        isInSelectionMode ?: multiSelectState.isInSelectionMode.collectAsStateWithLifecycle().value
+    val selectionModeAvailable =
+        isSelectionModeAvailable ?: multiSelectState.isSelectionModeAvailable.collectAsStateWithLifecycle().value
+    val selected =
+        isSelected ?: multiSelectState.isSelected(item.guid)
 
     val hasBanner =
         remember(showBannerBackground, bannerModel, item) {
@@ -294,14 +307,14 @@ fun <T : ArrMedia> MediaItem(
             .fillMaxWidth()
             .combinedClickable(
                 onClick = {
-                    if (isInSelectionMode) {
+                    if (selectionMode) {
                         multiSelectState.toggle(item.guid)
                     } else {
                         onItemClick(item)
                     }
                 },
                 onLongClick = {
-                    if (isSelectionModeAvailable) {
+                    if (selectionModeAvailable) {
                         multiSelectState.toggle(item.guid)
                     }
                 },
@@ -309,7 +322,7 @@ fun <T : ArrMedia> MediaItem(
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = posterElevation.elevation),
         border =
-        if (isSelected) {
+        if (selected) {
             BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
         } else {
             BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
