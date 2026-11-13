@@ -16,6 +16,9 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.asSuccess
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.joinAll
@@ -97,30 +100,34 @@ class GlobalSearchUseCase(
                     val result = repo.directLookup(query)
                     val data = if (result is NetworkResult.Success) result.data else emptyList()
                     val enrichedData = if (repo.instance.type == InstanceType.Chaptarr || repo.instance.type == InstanceType.Bookshelf) {
-                        data.map { media ->
-                            if (media is Author && media.images.isEmpty() && !media.foreignAuthorId.isNullOrBlank()) {
-                                val foreignId = media.foreignAuthorId
-                                val queries = listOf(
-                                    "author:$foreignId",
-                                    if (foreignId.startsWith("gr:")) "author:${foreignId.removePrefix("gr:")}" else "author:gr:$foreignId",
-                                    foreignId,
-                                ).distinct()
-                                var enriched: Author = media
-                                for (q in queries) {
-                                    val detailRes = repo.directLookup(q)
-                                    if (detailRes is NetworkResult.Success && detailRes.data.isNotEmpty()) {
-                                        val full = detailRes.data.filterIsInstance<Author>().firstOrNull { it.images.isNotEmpty() || !it.overview.isNullOrBlank() }
-                                            ?: detailRes.data.filterIsInstance<Author>().firstOrNull()
-                                        if (full != null) {
-                                            enriched = full
-                                            break
+                        coroutineScope {
+                            data.map { media ->
+                                async {
+                                    if (media is Author && media.images.isEmpty() && !media.foreignAuthorId.isNullOrBlank()) {
+                                        val foreignId = media.foreignAuthorId
+                                        val queries = listOf(
+                                            "author:$foreignId",
+                                            if (foreignId.startsWith("gr:")) "author:${foreignId.removePrefix("gr:")}" else "author:gr:$foreignId",
+                                            foreignId,
+                                        ).distinct()
+                                        var enriched: Author = media
+                                        for (q in queries) {
+                                            val detailRes = repo.directLookup(q)
+                                            if (detailRes is NetworkResult.Success && detailRes.data.isNotEmpty()) {
+                                                val full = detailRes.data.filterIsInstance<Author>().firstOrNull { it.images.isNotEmpty() || !it.overview.isNullOrBlank() }
+                                                    ?: detailRes.data.filterIsInstance<Author>().firstOrNull()
+                                                if (full != null) {
+                                                    enriched = full
+                                                    break
+                                                }
+                                            }
                                         }
+                                        enriched
+                                    } else {
+                                        media
                                     }
                                 }
-                                enriched
-                            } else {
-                                media
-                            }
+                            }.awaitAll()
                         }
                     } else {
                         data
