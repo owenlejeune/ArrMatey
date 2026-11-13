@@ -31,7 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -110,8 +110,8 @@ fun AlphabetFastScroller(
                         }
                     }
                 }
-                .onGloballyPositioned { coordinates ->
-                    railHeightPx = coordinates.size.height.toFloat()
+                .onSizeChanged { size ->
+                    railHeightPx = size.height.toFloat()
                 },
         ) {
             Column(

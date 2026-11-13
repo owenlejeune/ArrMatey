@@ -16,12 +16,17 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.asSuccess
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+
+private val NORMALIZE_REGEX = Regex("[^a-zA-Z0-9]")
 
 class GlobalSearchUseCase(
     private val instanceManager: InstanceManager,
@@ -33,7 +38,7 @@ class GlobalSearchUseCase(
             return@channelFlow
         }
 
-        val arrRepos = (if (instanceManager.getAllArrRepositories().isEmpty()) instanceManager.awaitAllArrRepositories() else instanceManager.getAllArrRepositories()).sortedBy { it.instance.id }
+        val arrRepos = (instanceManager.getAllArrRepositories().ifEmpty { instanceManager.awaitAllArrRepositories() }).sortedBy { it.instance.id }
         val seerrRepos = instanceManager.getAllSeerrRepositories().sortedBy { it.instance.id }
         val mediaServerRepos = mediaServerManager?.activeRepositories?.value ?: emptyList()
 
@@ -94,59 +99,70 @@ class GlobalSearchUseCase(
         arrRepos.forEach { repo ->
             val job =
                 launch {
-                    val result = repo.directLookup(query)
-                    val data = if (result is NetworkResult.Success) result.data else emptyList()
-                    val enrichedData = if (repo.instance.type == InstanceType.Chaptarr || repo.instance.type == InstanceType.Bookshelf) {
-                        data.map { media ->
-                            if (media is Author && media.images.isEmpty() && !media.foreignAuthorId.isNullOrBlank()) {
-                                val foreignId = media.foreignAuthorId
-                                val queries = listOf(
-                                    "author:$foreignId",
-                                    if (foreignId.startsWith("gr:")) "author:${foreignId.removePrefix("gr:")}" else "author:gr:$foreignId",
-                                    foreignId,
-                                ).distinct()
-                                var enriched: Author = media
-                                for (q in queries) {
-                                    val detailRes = repo.directLookup(q)
-                                    if (detailRes is NetworkResult.Success && detailRes.data.isNotEmpty()) {
-                                        val full = detailRes.data.filterIsInstance<Author>().firstOrNull { it.images.isNotEmpty() || !it.overview.isNullOrBlank() }
-                                            ?: detailRes.data.filterIsInstance<Author>().firstOrNull()
-                                        if (full != null) {
-                                            enriched = full
-                                            break
+                    try {
+                        val result = repo.directLookup(query)
+                        val data = if (result is NetworkResult.Success) result.data else emptyList()
+                        val enrichedData = if (repo.instance.type == InstanceType.Chaptarr || repo.instance.type == InstanceType.Bookshelf) {
+                            coroutineScope {
+                                data.map { media ->
+                                    async {
+                                        try {
+                                            if (media is Author && media.images.isEmpty() && !media.foreignAuthorId.isNullOrBlank()) {
+                                                val foreignId = media.foreignAuthorId
+                                                val queries = listOf(
+                                                    "author:$foreignId",
+                                                    if (foreignId.startsWith("gr:")) "author:${foreignId.removePrefix("gr:")}" else "author:gr:$foreignId",
+                                                    foreignId,
+                                                ).distinct()
+                                                var enriched: Author = media
+                                                for (q in queries) {
+                                                    val detailRes = repo.directLookup(q)
+                                                    if (detailRes is NetworkResult.Success && detailRes.data.isNotEmpty()) {
+                                                        val full = detailRes.data.filterIsInstance<Author>().firstOrNull { it.images.isNotEmpty() || !it.overview.isNullOrBlank() }
+                                                            ?: detailRes.data.filterIsInstance<Author>().firstOrNull()
+                                                        if (full != null) {
+                                                            enriched = full
+                                                            break
+                                                        }
+                                                    }
+                                                }
+                                                enriched
+                                            } else {
+                                                media
+                                            }
+                                        } catch (_: Exception) {
+                                            media
                                         }
                                     }
-                                }
-                                enriched
-                            } else {
-                                media
+                                }.awaitAll()
                             }
+                        } else {
+                            data
                         }
-                    } else {
-                        data
-                    }
-                    val mapped =
-                        enrichedData.mapIndexed { index, media ->
-                            SearchResult.ArrMediaResult(
-                                media = media,
-                                instanceId = repo.instance.id,
-                                originalRank = index,
-                                instanceTypeOverride = repo.instance.type,
-                            )
-                        }
-                    if (mapped.isNotEmpty()) {
-                        val woven =
-                            mutex.withLock {
-                                accumulatedResults.addAll(mapped)
-                                processAndWeave(
-                                    query = query,
-                                    allResults = accumulatedResults,
-                                    libraryByTmdbId = libraryByTmdbId,
-                                    libraryByTvdbId = libraryByTvdbId,
-                                    libraryByCleanTitle = libraryByCleanTitle,
+                        val mapped =
+                            enrichedData.mapIndexed { index, media ->
+                                SearchResult.ArrMediaResult(
+                                    media = media,
+                                    instanceId = repo.instance.id,
+                                    originalRank = index,
+                                    instanceTypeOverride = repo.instance.type,
                                 )
                             }
-                        send(woven)
+                        if (mapped.isNotEmpty()) {
+                            val woven =
+                                mutex.withLock {
+                                    accumulatedResults.addAll(mapped)
+                                    processAndWeave(
+                                        query = query,
+                                        allResults = accumulatedResults,
+                                        libraryByTmdbId = libraryByTmdbId,
+                                        libraryByTvdbId = libraryByTvdbId,
+                                        libraryByCleanTitle = libraryByCleanTitle,
+                                    )
+                                }
+                            send(woven)
+                        }
+                    } catch (_: Exception) {
                     }
                 }
             searchJobs.add(job)
@@ -155,31 +171,34 @@ class GlobalSearchUseCase(
         seerrRepos.forEach { repo ->
             val job =
                 launch {
-                    val result = repo.client.search(query, page = 1)
-                    val data = if (result is NetworkResult.Success) result.data.results else emptyList()
-                    val mapped =
-                        data.mapIndexedNotNull { index, res ->
-                            if (res.mediaType == RequestType.Person) {
-                                SearchResult.SeerrPersonResult(res, originalRank = index)
-                            } else if (includeSeerrMedia) {
-                                SearchResult.SeerrMediaResult(res, originalRank = index)
-                            } else {
-                                null
+                    try {
+                        val result = repo.client.search(query, page = 1)
+                        val data = if (result is NetworkResult.Success) result.data.results else emptyList()
+                        val mapped =
+                            data.mapIndexedNotNull { index, res ->
+                                if (res.mediaType == RequestType.Person) {
+                                    SearchResult.SeerrPersonResult(res, originalRank = index)
+                                } else if (includeSeerrMedia) {
+                                    SearchResult.SeerrMediaResult(res, originalRank = index)
+                                } else {
+                                    null
+                                }
                             }
+                        if (mapped.isNotEmpty()) {
+                            val woven =
+                                mutex.withLock {
+                                    accumulatedResults.addAll(mapped)
+                                    processAndWeave(
+                                        query = query,
+                                        allResults = accumulatedResults,
+                                        libraryByTmdbId = libraryByTmdbId,
+                                        libraryByTvdbId = libraryByTvdbId,
+                                        libraryByCleanTitle = libraryByCleanTitle,
+                                    )
+                                }
+                            send(woven)
                         }
-                    if (mapped.isNotEmpty()) {
-                        val woven =
-                            mutex.withLock {
-                                accumulatedResults.addAll(mapped)
-                                processAndWeave(
-                                    query = query,
-                                    allResults = accumulatedResults,
-                                    libraryByTmdbId = libraryByTmdbId,
-                                    libraryByTvdbId = libraryByTvdbId,
-                                    libraryByCleanTitle = libraryByCleanTitle,
-                                )
-                            }
-                        send(woven)
+                    } catch (_: Exception) {
                     }
                 }
             searchJobs.add(job)
@@ -188,30 +207,33 @@ class GlobalSearchUseCase(
         mediaServerRepos.forEach { repo ->
             val job =
                 launch {
-                    val result = repo.search(query, limit = 20)
-                    val data = if (result is NetworkResult.Success) result.data else emptyList()
-                    val mapped =
-                        data.mapIndexed { index, item ->
-                            SearchResult.MediaServerResult(
-                                item = item,
-                                serverType = repo.serverType,
-                                serverLabel = repo.integration.label,
-                                originalRank = index,
-                            )
-                        }
-                    if (mapped.isNotEmpty()) {
-                        val woven =
-                            mutex.withLock {
-                                accumulatedResults.addAll(mapped)
-                                processAndWeave(
-                                    query = query,
-                                    allResults = accumulatedResults,
-                                    libraryByTmdbId = libraryByTmdbId,
-                                    libraryByTvdbId = libraryByTvdbId,
-                                    libraryByCleanTitle = libraryByCleanTitle,
+                    try {
+                        val result = repo.search(query, limit = 20)
+                        val data = if (result is NetworkResult.Success) result.data else emptyList()
+                        val mapped =
+                            data.mapIndexed { index, item ->
+                                SearchResult.MediaServerResult(
+                                    item = item,
+                                    serverType = repo.serverType,
+                                    serverLabel = repo.integration.label,
+                                    originalRank = index,
                                 )
                             }
-                        send(woven)
+                        if (mapped.isNotEmpty()) {
+                            val woven =
+                                mutex.withLock {
+                                    accumulatedResults.addAll(mapped)
+                                    processAndWeave(
+                                        query = query,
+                                        allResults = accumulatedResults,
+                                        libraryByTmdbId = libraryByTmdbId,
+                                        libraryByTvdbId = libraryByTvdbId,
+                                        libraryByCleanTitle = libraryByCleanTitle,
+                                    )
+                                }
+                            send(woven)
+                        }
+                    } catch (_: Exception) {
                     }
                 }
             searchJobs.add(job)
@@ -232,20 +254,34 @@ class GlobalSearchUseCase(
         libraryByCleanTitle: Map<String, List<SearchResult.ArrMediaResult>>,
     ): List<SearchResult> {
         val clusters = mutableListOf<MutableList<SearchResult>>()
-        allResults.forEach { result ->
-            val matchingClusters = clusters.filter { cluster ->
-                cluster.any { areMatching(it, result) }
-            }
-            if (matchingClusters.isEmpty()) {
-                clusters.add(mutableListOf(result))
-            } else {
-                val first = matchingClusters.first()
-                first.add(result)
-                for (i in 1 until matchingClusters.size) {
-                    val other = matchingClusters[i]
-                    first.addAll(other)
-                    clusters.remove(other)
+        for (i in allResults.indices) {
+            val result = allResults[i]
+            var matchedCluster: MutableList<SearchResult>? = null
+            var c = 0
+            while (c < clusters.size) {
+                val cluster = clusters[c]
+                var matches = false
+                for (j in cluster.indices) {
+                    if (areMatching(cluster[j], result)) {
+                        matches = true
+                        break
+                    }
                 }
+                if (matches) {
+                    if (matchedCluster == null) {
+                        matchedCluster = cluster
+                        cluster.add(result)
+                        c++
+                    } else {
+                        matchedCluster.addAll(cluster)
+                        clusters.removeAt(c)
+                    }
+                } else {
+                    c++
+                }
+            }
+            if (matchedCluster == null) {
+                clusters.add(mutableListOf(result))
             }
         }
 
@@ -301,7 +337,7 @@ class GlobalSearchUseCase(
         // 6. Title + Kind + Year match (for Movie and Series)
         val aKind = a.mediaKind()
         val bKind = b.mediaKind()
-        if (aKind in setOf(MediaKind.MOVIE, MediaKind.SERIES) && aKind == bKind) {
+        if ((aKind == MediaKind.MOVIE || aKind == MediaKind.SERIES) && aKind == bKind) {
             val aClean = normalizeTitle(a.cleanTitle.ifBlank { a.title })
             val bClean = normalizeTitle(b.cleanTitle.ifBlank { b.title })
             if (aClean.isNotBlank() && bClean.isNotBlank()) {
@@ -397,7 +433,7 @@ class GlobalSearchUseCase(
         is SearchResult.SeerrPersonResult -> MediaKind.PERSON
     }
 
-    private fun normalizeTitle(title: String): String = title.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
+    private fun normalizeTitle(title: String): String = title.replace(NORMALIZE_REGEX, "").lowercase()
 
     private fun selectBestItem(items: List<SearchResult>): SearchResult {
         val inLibraryArr = items.filterIsInstance<SearchResult.ArrMediaResult>().firstOrNull { it.media.id != null && it.media.id != 0L }

@@ -81,10 +81,13 @@ fun PosterItem(
     posterModel: Any? = null,
     additionalContent: @Composable BoxScope.() -> Unit = {},
     multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
+    isInSelectionMode: Boolean? = null,
+    isSelected: Boolean? = null,
 ) {
-    val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
-    val selectedItems by multiSelectState.selectedItems.collectAsStateWithLifecycle()
-    val isSelected = item.id?.let { selectedItems.contains(it) } ?: false
+    val selectionMode =
+        isInSelectionMode ?: multiSelectState.isInSelectionMode.collectAsStateWithLifecycle().value
+    val selected =
+        isSelected ?: (item.id?.let { multiSelectState.isSelected(it) } ?: false)
 
     var imageLoadError by remember { mutableStateOf(value = false) }
 
@@ -104,28 +107,28 @@ fun PosterItem(
     BasePosterItem(
         model = model,
         modifier = modifier,
-        isSelected = isSelected,
+        isSelected = selected,
         enabled = enabled,
         elevation = elevation,
         radius = radius,
         posterHeight = posterHeight,
         aspectRatio = aspectRatio,
         onClick = {
-            if (isInSelectionMode) {
+            if (selectionMode) {
                 item.id?.let { multiSelectState.toggle(it) }
             } else {
                 onItemClick?.invoke(item)
             }
         },
         onLongClick = {
-            if (!isInSelectionMode) {
+            if (!selectionMode) {
                 multiSelectState.enterSelectionMode()
                 item.id?.let { multiSelectState.toggle(it) }
             }
         },
         additionalContent = {
             additionalContent()
-            if (isInSelectionMode) {
+            if (selectionMode) {
                 Box(
                     modifier =
                     Modifier
@@ -133,7 +136,7 @@ fun PosterItem(
                         .padding(8.dp),
                     contentAlignment = Alignment.TopEnd,
                 ) {
-                    CircularCheckbox(checked = isSelected)
+                    CircularCheckbox(checked = selected)
                 }
             }
         },

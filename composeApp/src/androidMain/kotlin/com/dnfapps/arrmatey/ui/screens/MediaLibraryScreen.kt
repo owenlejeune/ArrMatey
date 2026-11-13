@@ -218,7 +218,11 @@ fun MediaLibraryScreen(
                             label = { Text(mokoString(MR.strings.all)) },
                         )
                     }
-                    items(libraries, key = { it.id }) { lib ->
+                    items(
+                        items = libraries,
+                        key = { it.id },
+                        contentType = { "media_library_chip" },
+                    ) { lib ->
                         FilterChip(
                             selected = selectedLibrary?.id == lib.id,
                             onClick = { viewModel.selectLibrary(lib) },

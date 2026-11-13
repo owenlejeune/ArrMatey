@@ -12,7 +12,10 @@ class DynamicLogger(
     private val preferencesStore: PreferencesStore,
     private val logger: AppLogger,
 ) : Logger {
-    private var currentLogLevel = LogLevel.HEADERS
+    var currentLogLevel = LogLevel.HEADERS
+        private set
+
+    val level: LogLevel get() = currentLogLevel
 
     init {
         CoroutineScope(Dispatchers.Default).launch {
@@ -33,44 +36,8 @@ class DynamicLogger(
             return
         }
 
-        if (currentLogLevel == LogLevel.ALL) {
+        if (sanitizedMessage.isNotBlank()) {
             logger.info { sanitizedMessage }
-            return
-        }
-
-        val lines = sanitizedMessage.split("\n")
-        val filteredOutput = StringBuilder()
-
-        lines.forEach { line ->
-            val shouldInclude =
-                when (currentLogLevel) {
-                    LogLevel.INFO -> {
-                        line.startsWith("REQUEST:") ||
-                            line.startsWith("RESPONSE:") ||
-                            line.startsWith("METHOD:")
-                    }
-                    LogLevel.HEADERS -> {
-                        // Include everything except the body sections
-                        !isBodyLine(line)
-                    }
-                    LogLevel.BODY -> {
-                        // Include Request/Response lines and the JSON body, skip headers
-                        line.startsWith("REQUEST:") ||
-                            line.startsWith("RESPONSE:") ||
-                            line.startsWith("METHOD:") ||
-                            isBodyLine(line)
-                    }
-                    else -> false
-                }
-
-            if (shouldInclude) {
-                filteredOutput.append(line).append("\n")
-            }
-        }
-
-        val result = filteredOutput.toString().trim()
-        if (result.isNotEmpty()) {
-            logger.info { result }
         }
     }
 }

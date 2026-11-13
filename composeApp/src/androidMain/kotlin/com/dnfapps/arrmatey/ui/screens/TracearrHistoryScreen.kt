@@ -27,8 +27,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -122,19 +123,19 @@ fun TracearrHistoryScreen(
                 is TracearrHistoryState.Success -> {
                     val listState = rememberLazyListState()
 
-                    LaunchedEffect(listState) {
-                        snapshotFlow {
-                            listState.layoutInfo.visibleItemsInfo
-                                .lastOrNull()
-                                ?.index
-                        }.collect { lastVisibleIndex ->
-                            if (lastVisibleIndex != null &&
+                    val shouldLoadMore by remember(listState, currentState.items.size, currentState.hasMore, currentState.isLoadingMore) {
+                        derivedStateOf {
+                            val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                            lastVisibleIndex != null &&
                                 lastVisibleIndex >= currentState.items.size - 3 &&
                                 currentState.hasMore &&
                                 !currentState.isLoadingMore
-                            ) {
-                                viewModel.loadMore()
-                            }
+                        }
+                    }
+
+                    LaunchedEffect(shouldLoadMore) {
+                        if (shouldLoadMore) {
+                            viewModel.loadMore()
                         }
                     }
 

@@ -245,7 +245,11 @@ private fun LazyGridScope.seerrCreditsGrid(
         )
     }
 
-    items(items) { item ->
+    items(
+        items = items,
+        key = { item -> "${item.mediaType}_${item.id}" },
+        contentType = { "person_credit_item" },
+    ) { item ->
         PosterItem(
             item = item,
             onItemClick = { onItemClick(item) },

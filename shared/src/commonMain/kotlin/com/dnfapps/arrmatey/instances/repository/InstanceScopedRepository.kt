@@ -4,7 +4,9 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
 
 sealed interface InstanceScopedRepository {
-    val instance: Instance
+    var instance: Instance
+
+    fun close()
 
     suspend fun testConnection(): NetworkResult<Unit>
 }

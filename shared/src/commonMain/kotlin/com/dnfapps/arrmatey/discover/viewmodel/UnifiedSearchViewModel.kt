@@ -4,9 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.discover.model.CLEAN_TITLE_REGEX
+import com.dnfapps.arrmatey.discover.model.DiscoverLibraryIndex
 import com.dnfapps.arrmatey.discover.model.SearchFilter
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
@@ -56,6 +57,7 @@ class UnifiedSearchViewModel(
     val searchState: StateFlow<List<SearchResult>> =
         combine(_searchState, librariesByInstance) { results, libraryMap ->
             val allLibraries = libraryMap.values.flatten()
+            val libraryIndex = DiscoverLibraryIndex(allLibraries)
             results.map { result ->
                 when (result) {
                     is SearchResult.ArrMediaResult -> {
@@ -70,20 +72,12 @@ class UnifiedSearchViewModel(
 
                     is SearchResult.SeerrMediaResult -> {
                         val tmdbId = result.result.id
-                        val cleanTitle = (result.result.title ?: result.result.name)?.replace(Regex("[^a-zA-Z0-9]"), "")?.lowercase()
+                        val cleanTitle = (result.result.title ?: result.result.name)?.replace(CLEAN_TITLE_REGEX, "")?.lowercase()
                         val match =
                             if (result.result.mediaType == RequestType.Movie) {
-                                allLibraries
-                                    .filterIsInstance<ArrMovie>()
-                                    .firstOrNull {
-                                        (it.tmdbId != 0L && it.tmdbId == tmdbId) ||
-                                            (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
-                                    }
+                                libraryIndex.findMovie(tmdbId = tmdbId, cleanTitle = cleanTitle)
                             } else if (result.result.mediaType == RequestType.Tv) {
-                                allLibraries.filterIsInstance<ArrSeries>().firstOrNull {
-                                    (it.tmdbId != null && it.tmdbId != 0L && it.tmdbId == tmdbId) ||
-                                        (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
-                                }
+                                libraryIndex.findSeries(tmdbId = tmdbId, cleanTitle = cleanTitle)
                             } else {
                                 null
                             }

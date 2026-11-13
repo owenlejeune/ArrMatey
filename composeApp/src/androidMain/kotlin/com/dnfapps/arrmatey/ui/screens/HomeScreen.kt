@@ -26,7 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
@@ -235,8 +235,8 @@ fun HomeScreen(
                             onSelectTab = { navigationManager.setSelectedTab(it) },
                             onLongPressTab = { showReorderSheet = true },
                             modifier =
-                            Modifier.align(Alignment.BottomCenter).onGloballyPositioned {
-                                floatingBarHeight = it.size.height
+                            Modifier.align(Alignment.BottomCenter).onSizeChanged {
+                                floatingBarHeight = it.height
                             },
                         )
                     }

@@ -123,7 +123,11 @@ fun ProwlarrIndexersContent(
                             modifier = Modifier.fillMaxSize(),
                         ) {
                             item { Spacer(modifier = Modifier.size(4.dp)) }
-                            items(items = state.items, key = { it.id }) { indexer ->
+                            items(
+                                items = state.items,
+                                key = { it.id },
+                                contentType = { "prowlarr_indexer" },
+                            ) { indexer ->
                                 val indexerStatus =
                                     indexersStatus.firstOrNull { it.indexerId == indexer.id }
                                 IndexerCard(

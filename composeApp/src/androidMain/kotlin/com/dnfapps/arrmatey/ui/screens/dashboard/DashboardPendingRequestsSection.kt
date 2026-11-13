@@ -120,7 +120,11 @@ fun DashboardPendingRequestsSection(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    items(RequestState.entries) { filterState ->
+                    items(
+                        items = RequestState.entries,
+                        key = { it.name },
+                        contentType = { "request_state_chip" },
+                    ) { filterState ->
                         FilterChip(
                             selected = selectedFilter == filterState,
                             onClick = { selectedFilter = filterState },
@@ -145,7 +149,11 @@ fun DashboardPendingRequestsSection(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp),
                     ) {
-                        items(filteredRequests, key = { it.request.id }) { item ->
+                        items(
+                            items = filteredRequests,
+                            key = { it.request.id },
+                            contentType = { "compact_request_card" },
+                        ) { item ->
                             CompactRequestCard(
                                 mediaPackage = item,
                                 onClick = { if (enabled) onRequestClick(item) },

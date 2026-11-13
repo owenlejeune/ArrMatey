@@ -22,11 +22,13 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.*
@@ -62,6 +64,8 @@ fun PosterGrid(
     multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false),
 ) {
     val bottomPadding = LocalFloatingBarBottomPadding.current
+    val isInSelectionMode by multiSelectState.isInSelectionMode.collectAsStateWithLifecycle()
+    val selectedItems by multiSelectState.selectedItems.collectAsStateWithLifecycle()
 
     LazyVerticalGrid(
         state = lazyGridState,
@@ -78,8 +82,13 @@ fun PosterGrid(
         verticalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
         userScrollEnabled = userScrollEnabled,
     ) {
-        items(items) { item ->
+        items(
+            items = items,
+            key = { item -> item.guid },
+            contentType = { "poster_grid_item" },
+        ) { item ->
             val isActive = itemIsActive(item)
+            val isSelected = item.id?.let { selectedItems.contains(it) } ?: false
             PosterItem(
                 aspectRatio = aspectRatio,
                 radius = posterRadius,
@@ -87,6 +96,9 @@ fun PosterGrid(
                 item = item,
                 instanceType = instanceType,
                 onItemClick = onItemClick,
+                multiSelectState = multiSelectState,
+                isInSelectionMode = isInSelectionMode,
+                isSelected = isSelected,
                 additionalContent = {
                     if (showOverlay && item.id != null) {
                         PosterGridItemOverlay(
@@ -97,7 +109,6 @@ fun PosterGrid(
                     }
                 },
                 showFooter = showFullDetails,
-                multiSelectState = multiSelectState,
             )
         }
     }

@@ -26,7 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
@@ -96,8 +96,8 @@ fun DetailsHeader(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     modifier =
-                    Modifier.onGloballyPositioned {
-                        detailHeight = it.size.height
+                    Modifier.onSizeChanged {
+                        detailHeight = it.height
                     },
                 ) {
                     val ratings = item.toRatingItems()
@@ -209,8 +209,8 @@ fun DetailsHeader(item: RequestMediaDetails) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier =
-                Modifier.onGloballyPositioned {
-                    detailHeight = it.size.height
+                Modifier.onSizeChanged {
+                    detailHeight = it.height
                 },
             ) {
                 Text(

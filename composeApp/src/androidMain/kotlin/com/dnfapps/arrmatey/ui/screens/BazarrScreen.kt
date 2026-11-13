@@ -341,7 +341,11 @@ private fun <T> WantedList(
         ),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(items, key = { key(it) }) { item ->
+        items(
+            items = items,
+            key = { key(it) },
+            contentType = { "bazarr_missing_item" },
+        ) { item ->
             ContainerCard(
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth(),
@@ -392,7 +396,11 @@ private fun ProvidersContent(
             ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(providers, key = { it.name }) { provider ->
+            items(
+                items = providers,
+                key = { it.name },
+                contentType = { "bazarr_provider" },
+            ) { provider ->
                 ProviderRow(provider)
             }
         }
@@ -451,7 +459,11 @@ private fun BazarrSeriesList(
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        items(series) { item ->
+        items(
+            items = series,
+            key = { it.serviceId },
+            contentType = { "bazarr_series" },
+        ) { item ->
             BazarrItem(
                 title = item.title,
                 year = item.year,
@@ -493,7 +505,11 @@ private fun BazarrMoviesList(
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        items(movies) { item ->
+        items(
+            items = movies,
+            key = { it.serviceId },
+            contentType = { "bazarr_movie" },
+        ) { item ->
             BazarrItem(
                 title = item.title,
                 year = item.year,

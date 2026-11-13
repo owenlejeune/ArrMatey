@@ -42,8 +42,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -136,21 +137,26 @@ fun TracearrUsersScreen(
                 is TracearrUsersState.Success -> {
                     val listState = rememberLazyListState()
 
-                    LaunchedEffect(listState) {
-                        snapshotFlow {
-                            listState.layoutInfo.visibleItemsInfo
-                                .lastOrNull()
-                                ?.index
-                        }.collect { lastVisibleIndex ->
+                    val shouldLoadMore by remember(
+                        listState,
+                        currentState.users.size,
+                        currentState.hasMore,
+                        currentState.isLoadingMore,
+                    ) {
+                        derivedStateOf {
+                            val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
                             val userCount = currentState.users.size
-                            if (lastVisibleIndex != null &&
+                            lastVisibleIndex != null &&
                                 userCount > 0 &&
                                 lastVisibleIndex >= userCount - 2 &&
                                 currentState.hasMore &&
                                 !currentState.isLoadingMore
-                            ) {
-                                viewModel.loadMore()
-                            }
+                        }
+                    }
+
+                    LaunchedEffect(shouldLoadMore) {
+                        if (shouldLoadMore) {
+                            viewModel.loadMore()
                         }
                     }
 

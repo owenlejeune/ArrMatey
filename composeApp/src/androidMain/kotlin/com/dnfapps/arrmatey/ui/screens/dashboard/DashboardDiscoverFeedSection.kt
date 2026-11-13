@@ -140,7 +140,11 @@ fun DashboardDiscoverFeedSection(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     userScrollEnabled = enabled,
                 ) {
-                    items(categories) { category ->
+                    items(
+                        items = categories,
+                        key = { it.name },
+                        contentType = { "discover_category_chip" },
+                    ) { category ->
                         val isSelected = activeCategory == category
                         FilterChip(
                             selected = isSelected,
@@ -232,6 +236,7 @@ fun DashboardDiscoverFeedSection(
                             items(
                                 items = itemsList,
                                 key = { item -> "${category.name}_${item.id}_${item.mediaType.name}" },
+                                contentType = { "discover_feed_poster" },
                             ) { item ->
                                 PosterItem(
                                     item = item,

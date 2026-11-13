@@ -112,7 +112,11 @@ fun MediaInstanceFilterRow(
         }
 
         // Per-filter chips
-        items(availableFilters, key = { it.id }) { filter ->
+        items(
+            items = availableFilters,
+            key = { it.id },
+            contentType = { "media_instance_filter_chip" },
+        ) { filter ->
             val isSelected = selectedFilter == filter
             val count = itemCounts[filter] ?: 0
             val typeAccentColor = filter.color

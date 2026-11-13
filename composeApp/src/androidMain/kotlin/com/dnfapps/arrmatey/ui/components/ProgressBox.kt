@@ -13,7 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -54,25 +54,29 @@ fun ProgressBox(
     Box(
         modifier =
         modifier
-            .drawBehind {
-                if (animate) {
-                    val gradientWidth = size.width * gradientProgress
-                    drawRect(
-                        brush =
-                        Brush.horizontalGradient(
-                            colors = gradientColors,
-                            startX = 0f,
-                            endX = gradientWidth,
-                        ),
-                        size = Size(gradientWidth, size.height),
-                    )
+            .drawWithCache {
+                val fullWidthBrush = Brush.horizontalGradient(
+                    colors = gradientColors,
+                    startX = 0f,
+                    endX = size.width,
+                )
+                onDrawBehind {
+                    if (animate) {
+                        val gradientWidth = size.width * gradientProgress
+                        if (gradientWidth > 0f) {
+                            drawRect(
+                                brush = fullWidthBrush,
+                                size = Size(gradientWidth, size.height),
+                            )
+                        }
 
-                    if (gradientWidth < size.width) {
-                        drawRect(
-                            color = backgroundColor,
-                            topLeft = Offset(gradientWidth, 0f),
-                            size = Size(size.width - gradientWidth, size.height),
-                        )
+                        if (gradientWidth < size.width) {
+                            drawRect(
+                                color = backgroundColor,
+                                topLeft = Offset(gradientWidth, 0f),
+                                size = Size(size.width - gradientWidth, size.height),
+                            )
+                        }
                     } else {
                         drawRect(color = backgroundColor)
                     }

@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:max-line-length")
-
 package com.dnfapps.arrmatey.arr.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -24,7 +22,10 @@ import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.discover.model.CLEAN_TITLE_REGEX
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
+import com.dnfapps.arrmatey.discover.model.DiscoverLibraryIndex
+import com.dnfapps.arrmatey.discover.model.DiscoverMediaServerIndex
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
@@ -41,6 +42,7 @@ import com.dnfapps.arrmatey.instances.repository.TracearrRepository
 import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerRepository
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamSession
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
@@ -550,7 +552,7 @@ class CombinedDashboardViewModel(
                     wolDeviceRepository.getAllWolDevices(),
                     _cardLoadingStates,
                     _continueWatching,
-                    mediaServerManager?.activeRepositories ?: MutableStateFlow(emptyList<com.dnfapps.arrmatey.mediaserver.repository.MediaServerRepository>()),
+                    mediaServerManager?.activeRepositories ?: MutableStateFlow(emptyList<MediaServerRepository>()),
                 ),
             ) { args ->
                 @Suppress("UNCHECKED_CAST")
@@ -623,12 +625,15 @@ class CombinedDashboardViewModel(
                 val continueWatching = (args[22] as? List<UnifiedMediaItem>) ?: emptyList()
 
                 @Suppress("UNCHECKED_CAST")
-                val activeMediaServers = (args[23] as? List<com.dnfapps.arrmatey.mediaserver.repository.MediaServerRepository>) ?: emptyList()
+                val activeMediaServers = (args[23] as? List<MediaServerRepository>) ?: emptyList()
 
                 val serverItems = mediaServerManager?.allMediaServerItems?.value ?: emptyList()
                 val arrLibs = instances.flatMap { it.library }
+                val libraryIndex = DiscoverLibraryIndex(arrLibs)
+                val serverIndex = DiscoverMediaServerIndex(serverItems)
+
                 val enrichItem: (DiscoverResult) -> DiscoverResult = { res ->
-                    enrichDiscoverResultWithLibrary(res, serverItems, arrLibs)
+                    enrichDiscoverResultWithLibrary(res, serverIndex, libraryIndex)
                 }
 
                 CombinedDashboardState.Success(
@@ -722,8 +727,8 @@ class CombinedDashboardViewModel(
 
     private fun enrichDiscoverResultWithLibrary(
         item: DiscoverResult,
-        serverItems: List<UnifiedMediaItem>,
-        arrLibraries: List<ArrMedia>,
+        serverIndex: DiscoverMediaServerIndex,
+        libraryIndex: DiscoverLibraryIndex,
     ): DiscoverResult {
         val expectedMediaType = when (item.mediaType) {
             RequestType.Movie -> MediaType.MOVIE
@@ -731,30 +736,30 @@ class CombinedDashboardViewModel(
             RequestType.Person -> MediaType.UNKNOWN
         }
         val year = (item.releaseDate ?: item.firstAirDate)?.take(4)?.toIntOrNull()
-        val mediaServerMatch = mediaServerManager?.findMatchingItem(
-            items = serverItems,
+        val mediaServerMatch = serverIndex.findMatch(
             tmdbId = item.id,
             tvdbId = item.mediaInfo?.tvdbId,
             title = item.title ?: item.name,
             year = year,
             mediaType = expectedMediaType,
         )
-        val cleanTitle = (item.title ?: item.name)?.replace(Regex("[^a-zA-Z0-9]"), "")?.lowercase()
+        val cleanTitle = (item.title ?: item.name)?.replace(CLEAN_TITLE_REGEX, "")?.lowercase()
         val arrMatch = when (item.mediaType) {
             RequestType.Movie -> {
-                arrLibraries.filterIsInstance<com.dnfapps.arrmatey.arr.api.model.ArrMovie>().firstOrNull {
-                    (it.tmdbId != 0L && it.tmdbId == item.id) ||
-                        (item.mediaInfo?.tmdbId != null && it.tmdbId == item.mediaInfo.tmdbId) ||
-                        (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
-                }
+                libraryIndex.findMovie(
+                    tmdbId = item.id,
+                    mediaInfoTmdbId = item.mediaInfo?.tmdbId,
+                    cleanTitle = cleanTitle,
+                )
             }
             RequestType.Tv -> {
-                arrLibraries.filterIsInstance<com.dnfapps.arrmatey.arr.api.model.ArrSeries>().firstOrNull {
-                    (it.tmdbId != null && it.tmdbId != 0L && it.tmdbId == item.id) ||
-                        (item.mediaInfo?.tvdbId != null && it.tvdbId == item.mediaInfo.tvdbId) ||
-                        (item.mediaInfo?.tmdbId != null && it.tmdbId == item.mediaInfo.tmdbId) ||
-                        (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
-                }
+                libraryIndex.findSeries(
+                    tmdbId = item.id,
+                    tvdbId = item.mediaInfo?.tvdbId,
+                    mediaInfoTmdbId = item.mediaInfo?.tmdbId,
+                    mediaInfoTvdbId = item.mediaInfo?.tvdbId,
+                    cleanTitle = cleanTitle,
+                )
             }
             RequestType.Person -> null
         }
@@ -967,7 +972,7 @@ class CombinedDashboardViewModel(
             } catch (e: Exception) {
                 logger.error(e) { "Error loading next page for discover category $category" }
             } finally {
-                _isDiscoverLoadingMore.value = _isDiscoverLoadingMore.value + (category to false)
+                _isDiscoverLoadingMore.value += (category to false)
             }
         }
     }
@@ -1439,7 +1444,7 @@ class CombinedDashboardViewModel(
                     _removeItemState.value = status
                     if (status is OperationStatus.Success) {
                         item.instanceId?.let { instanceId ->
-                            launch {
+                            this@launch.launch {
                                 instanceManager.getArrRepository(instanceId)?.refreshActivityTasks()
                             }
                         }

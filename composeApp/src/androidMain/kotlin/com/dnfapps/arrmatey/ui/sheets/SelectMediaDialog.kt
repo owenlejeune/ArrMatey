@@ -95,7 +95,7 @@ fun SelectMediaDialog(
         viewModel.getMediaForInstance(
             instanceId = instanceId,
             onSuccess = { list ->
-                mediaList = list.sortedBy { it.title?.lowercase() ?: "" }
+                mediaList = list.sortedWith(compareBy(nullsLast(String.CASE_INSENSITIVE_ORDER)) { it.title })
                 isLoading = false
             },
             onError = { err ->
@@ -209,7 +209,11 @@ fun SelectMediaDialog(
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        items(filteredList, key = { it.guid }) { media ->
+                        items(
+                            items = filteredList,
+                            key = { it.guid },
+                            contentType = { "select_media_row" },
+                        ) { media ->
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()

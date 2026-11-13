@@ -61,7 +61,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -757,7 +757,7 @@ private fun HeaderItem(
                     Icon(
                         imageVector = Icons.Default.ExpandCircleDown,
                         contentDescription = null,
-                        modifier = Modifier.rotate(iconRotation),
+                        modifier = Modifier.graphicsLayer { rotationZ = iconRotation },
                     )
                 }
 

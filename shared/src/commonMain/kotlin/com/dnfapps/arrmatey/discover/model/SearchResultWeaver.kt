@@ -35,7 +35,15 @@ object SearchResultWeaver {
         item: SearchResult,
         query: String,
     ): Double {
-        val cleanQuery = sanitize(query)
+        val currentYear = Clock.System.todayIn(TimeZone.currentSystemDefault()).year
+        return calculateScore(item, sanitize(query), currentYear)
+    }
+
+    fun calculateScore(
+        item: SearchResult,
+        cleanQuery: String,
+        currentYear: Int,
+    ): Double {
         val cleanTitle = sanitize(item.cleanTitle.ifBlank { item.title })
 
         var score = max(MIN_SCORE, BASE_RANK_SCORE - (item.originalRank * RANK_DECAY_FACTOR))
@@ -58,8 +66,8 @@ object SearchResultWeaver {
             score += IN_LIBRARY_BONUS
         }
 
-        val currentYear = Clock.System.todayIn(TimeZone.currentSystemDefault()).year
-        if (item.year != null && (item.year ?: DEFAULT_YEAR) >= (currentYear - RECENCY_YEAR_THRESHOLD)) {
+        val itemYear = item.year
+        if (itemYear != null && itemYear >= (currentYear - RECENCY_YEAR_THRESHOLD)) {
             score += RECENCY_BONUS
         }
 
@@ -69,15 +77,24 @@ object SearchResultWeaver {
     fun weave(
         query: String,
         results: List<SearchResult>,
-    ): List<SearchResult> = results
-        .distinctBy { it.id }
-        .sortedWith(
-            compareByDescending<SearchResult> { calculateScore(it, query) }
-                .thenByDescending { it.popularity }
-                .thenByDescending { it.voteCount }
-                .thenByDescending { it.voteAverage }
-                .thenByDescending { it.year ?: DEFAULT_YEAR }
-                .thenBy { it.title }
-                .thenBy { it.id },
-        )
+    ): List<SearchResult> {
+        if (results.isEmpty()) return emptyList()
+
+        val cleanQuery = sanitize(query)
+        val currentYear = Clock.System.todayIn(TimeZone.currentSystemDefault()).year
+
+        return results
+            .distinctBy { it.id }
+            .map { item -> item to calculateScore(item, cleanQuery, currentYear) }
+            .sortedWith(
+                compareByDescending<Pair<SearchResult, Double>> { it.second }
+                    .thenByDescending { it.first.popularity }
+                    .thenByDescending { it.first.voteCount }
+                    .thenByDescending { it.first.voteAverage }
+                    .thenByDescending { it.first.year ?: DEFAULT_YEAR }
+                    .thenBy { it.first.title }
+                    .thenBy { it.first.id },
+            )
+            .map { it.first }
+    }
 }

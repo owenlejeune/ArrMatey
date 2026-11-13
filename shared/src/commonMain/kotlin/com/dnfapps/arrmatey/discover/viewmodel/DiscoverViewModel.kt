@@ -4,14 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.discover.model.CLEAN_TITLE_REGEX
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
+import com.dnfapps.arrmatey.discover.model.DiscoverLibraryIndex
+import com.dnfapps.arrmatey.discover.model.DiscoverMediaServerIndex
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.extensions.mergeWithLibrary
@@ -121,6 +123,8 @@ class DiscoverViewModel(
         allLibraries,
         discoverSectionPreferences,
     ) { pagedData, mediaServerItems, arrLibraries, prefs ->
+        val libraryIndex = DiscoverLibraryIndex(arrLibraries)
+        val serverIndex = DiscoverMediaServerIndex(mediaServerItems)
         val enrichedItems = pagedData.items.map { item ->
             val expectedMediaType = when (item.mediaType) {
                 RequestType.Movie -> MediaType.MOVIE
@@ -128,8 +132,7 @@ class DiscoverViewModel(
                 RequestType.Person -> MediaType.UNKNOWN
             }
             val year = (item.releaseDate ?: item.firstAirDate)?.take(4)?.toIntOrNull()
-            val mediaServerMatch = mediaServerManager?.findMatchingItem(
-                items = mediaServerItems,
+            val mediaServerMatch = serverIndex.findMatch(
                 tmdbId = item.id,
                 tvdbId = item.mediaInfo?.tvdbId,
                 title = item.title ?: item.name,
@@ -137,22 +140,23 @@ class DiscoverViewModel(
                 mediaType = expectedMediaType,
             )
 
-            val cleanTitle = (item.title ?: item.name)?.replace(Regex("[^a-zA-Z0-9]"), "")?.lowercase()
+            val cleanTitle = (item.title ?: item.name)?.replace(CLEAN_TITLE_REGEX, "")?.lowercase()
             val arrMatch = when (item.mediaType) {
                 RequestType.Movie -> {
-                    arrLibraries.filterIsInstance<ArrMovie>().firstOrNull {
-                        (it.tmdbId != 0L && it.tmdbId == item.id) ||
-                            (item.mediaInfo?.tmdbId != null && it.tmdbId == item.mediaInfo.tmdbId) ||
-                            (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
-                    }
+                    libraryIndex.findMovie(
+                        tmdbId = item.id,
+                        mediaInfoTmdbId = item.mediaInfo?.tmdbId,
+                        cleanTitle = cleanTitle,
+                    )
                 }
                 RequestType.Tv -> {
-                    arrLibraries.filterIsInstance<ArrSeries>().firstOrNull {
-                        (it.tmdbId != null && it.tmdbId != 0L && it.tmdbId == item.id) ||
-                            (item.mediaInfo?.tvdbId != null && it.tvdbId == item.mediaInfo.tvdbId) ||
-                            (item.mediaInfo?.tmdbId != null && it.tmdbId == item.mediaInfo.tmdbId) ||
-                            (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
-                    }
+                    libraryIndex.findSeries(
+                        tmdbId = item.id,
+                        tvdbId = item.mediaInfo?.tvdbId,
+                        mediaInfoTmdbId = item.mediaInfo?.tmdbId,
+                        mediaInfoTvdbId = item.mediaInfo?.tvdbId,
+                        cleanTitle = cleanTitle,
+                    )
                 }
                 RequestType.Person -> null
             }
@@ -242,6 +246,7 @@ class DiscoverViewModel(
 
     val searchState: StateFlow<List<SearchResult>> =
         combine(_searchState, allLibraries) { results, libraries ->
+            val libraryIndex = DiscoverLibraryIndex(libraries)
             results.map { result ->
                 when (result) {
                     is SearchResult.ArrMediaResult -> {
@@ -251,20 +256,12 @@ class DiscoverViewModel(
 
                     is SearchResult.SeerrMediaResult -> {
                         val tmdbId = result.result.id
-                        val cleanTitle = (result.result.title ?: result.result.name)?.replace(Regex("[^a-zA-Z0-9]"), "")?.lowercase()
+                        val cleanTitle = (result.result.title ?: result.result.name)?.replace(CLEAN_TITLE_REGEX, "")?.lowercase()
                         val match =
                             if (result.result.mediaType == RequestType.Movie) {
-                                libraries
-                                    .filterIsInstance<ArrMovie>()
-                                    .firstOrNull {
-                                        (it.tmdbId != 0L && it.tmdbId == tmdbId) ||
-                                            (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
-                                    }
+                                libraryIndex.findMovie(tmdbId = tmdbId, cleanTitle = cleanTitle)
                             } else if (result.result.mediaType == RequestType.Tv) {
-                                libraries.filterIsInstance<ArrSeries>().firstOrNull {
-                                    (it.tmdbId != null && it.tmdbId != 0L && it.tmdbId == tmdbId) ||
-                                        (cleanTitle != null && it.cleanTitle?.equals(cleanTitle, ignoreCase = true) == true)
-                                }
+                                libraryIndex.findSeries(tmdbId = tmdbId, cleanTitle = cleanTitle)
                             } else {
                                 null
                             }
@@ -322,40 +319,45 @@ class DiscoverViewModel(
         viewModelScope.launch {
             seerrRepository.collectLatest { repo ->
                 if (repo != null) {
-                    launch {
-                        val controller = getTrendingUseCase.createPagingController(repo, viewModelScope)
+                    this@launch.launch {
+                        val controller =
+                            getTrendingUseCase.createPagingController(repo, viewModelScope)
                         trendingPagingController = controller
                         controller.loadInitialPage()
                         controller.state.collect {
                             _trendingState.value = it
                         }
                     }
-                    launch {
-                        val controller = getDiscoverMoviesUseCase.createPagingController(repo, viewModelScope)
+                    this@launch.launch {
+                        val controller =
+                            getDiscoverMoviesUseCase.createPagingController(repo, viewModelScope)
                         moviesPagingController = controller
                         controller.loadInitialPage()
                         controller.state.collect {
                             _moviesState.value = it
                         }
                     }
-                    launch {
-                        val controller = getDiscoverTvUseCase.createPagingController(repo, viewModelScope)
+                    this@launch.launch {
+                        val controller =
+                            getDiscoverTvUseCase.createPagingController(repo, viewModelScope)
                         tvPagingController = controller
                         controller.loadInitialPage()
                         controller.state.collect {
                             _tvState.value = it
                         }
                     }
-                    launch {
-                        val controller = getUpcomingMoviesUseCase.createPagingController(repo, viewModelScope)
+                    this@launch.launch {
+                        val controller =
+                            getUpcomingMoviesUseCase.createPagingController(repo, viewModelScope)
                         upcomingMoviesPagingController = controller
                         controller.loadInitialPage()
                         controller.state.collect {
                             _upcomingMoviesState.value = it
                         }
                     }
-                    launch {
-                        val controller = getUpcomingTvUseCase.createPagingController(repo, viewModelScope)
+                    this@launch.launch {
+                        val controller =
+                            getUpcomingTvUseCase.createPagingController(repo, viewModelScope)
                         upcomingTvPagingController = controller
                         controller.loadInitialPage()
                         controller.state.collect {

@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.arr.api.client
 
+import com.dnfapps.arrmatey.arr.api.client.logging.DynamicLogger
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
@@ -58,7 +59,7 @@ fun createInstanceClient(
 
     install(Logging) {
         logger = customLogger
-        level = LogLevel.ALL
+        level = (customLogger as? DynamicLogger)?.level ?: LogLevel.HEADERS
     }
 
     install(HttpCookies) {
@@ -136,7 +137,7 @@ open class HttpClientFactory(
 
         install(Logging) {
             this.logger = logger
-            level = LogLevel.ALL
+            level = (logger as? DynamicLogger)?.level ?: LogLevel.HEADERS
         }
 
         defaultRequest {
@@ -189,7 +190,7 @@ open class HttpClientFactory(
         }
         install(Logging) {
             this.logger = this@HttpClientFactory.logger
-            level = LogLevel.ALL
+            level = (this@HttpClientFactory.logger as? DynamicLogger)?.level ?: LogLevel.HEADERS
         }
         defaultRequest {
             integration.headers.forEach { header ->
