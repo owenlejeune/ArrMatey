@@ -15,12 +15,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 
 class DownloadQueueService(
     private val downloadClientManager: DownloadClientManager,
@@ -29,6 +31,7 @@ class DownloadQueueService(
 
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var pollingJob: Job? = null
+    private val pollMutex = Mutex()
 
     private var _isPolling = MutableStateFlow(false)
     val isPolling: StateFlow<Boolean> = _isPolling
@@ -87,45 +90,49 @@ class DownloadQueueService(
     }
 
     private suspend fun pollDownloadQueue() {
-        _isPolling.value = true
+        if (!pollMutex.tryLock()) return
+        try {
+            val apis = downloadClientManager.downloadClientApis.value
+            if (apis.isEmpty()) return
 
-        val apis = downloadClientManager.downloadClientApis.value
+            _isPolling.value = true
 
-        fetchAllDownloadData()
-            .onSuccess { bundle ->
-                _allTransfers.value = bundle
-                if (apis.isNotEmpty()) {
+            fetchAllDownloadData()
+                .onSuccess { bundle ->
+                    _allTransfers.value = bundle
+                    _hasLoaded.value = true
+                }.onError { _, _, _ ->
                     _hasLoaded.value = true
                 }
-            }.onError { _, _, _ ->
-                if (apis.isNotEmpty()) {
-                    _hasLoaded.value = true
-                }
-            }
-
-        _isPolling.value = false
+        } finally {
+            _isPolling.value = false
+            pollMutex.unlock()
+        }
     }
 
     suspend fun fetchAllDownloadData(): NetworkResult<DownloadQueueBundle> {
         val downloadClients = downloadClientManager.downloadClientApis.value
+        if (downloadClients.isEmpty()) {
+            return NetworkResult.Success(DownloadQueueBundle())
+        }
 
-        val deferredResults =
-            downloadClients.entries.flatMap { (id, api) ->
-                listOf(
-                    scope.async { id to api.getDownloads() },
-                    scope.async { id to api.getTransferInfo() },
-                )
+        val allResults =
+            coroutineScope {
+                val deferredResults =
+                    downloadClients.entries.flatMap { (id, api) ->
+                        listOf(
+                            async { id to api.getDownloads() },
+                            async { id to api.getTransferInfo() },
+                        )
+                    }
+                deferredResults.awaitAll()
             }
-
-        val allResults = deferredResults.awaitAll()
 
         val queueItems = mutableListOf<DownloadItem>()
         val transferInfos = mutableListOf<DownloadTransferInfo>()
         val clientErrors = mutableMapOf<Long, String>()
 
-        allResults.forEach { resultPair ->
-            val clientId = resultPair.first
-            val result = resultPair.second
+        allResults.forEach { (clientId, result) ->
             when (result) {
                 is NetworkResult.Success<*> -> {
                     val data = result.data
