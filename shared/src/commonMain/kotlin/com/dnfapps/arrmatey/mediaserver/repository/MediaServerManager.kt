@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.mediaserver.repository
 
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
 import com.dnfapps.arrmatey.database.EncryptedString
+import com.dnfapps.arrmatey.discover.model.CLEAN_TITLE_REGEX
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.mediaserver.client.EmbyClient
 import com.dnfapps.arrmatey.mediaserver.client.JellyfinClient
@@ -222,9 +223,9 @@ class MediaServerManager(
         }
 
         if (!title.isNullOrBlank()) {
-            val cleanTitle = title.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
+            val cleanTitle = title.replace(CLEAN_TITLE_REGEX, "").lowercase()
             return candidateItems.firstOrNull { item ->
-                val itemCleanTitle = item.title.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
+                val itemCleanTitle = item.title.replace(CLEAN_TITLE_REGEX, "").lowercase()
                 val titleMatches = itemCleanTitle == cleanTitle
                 val typeMatches = mediaType == null || item.type == mediaType
                 val yearMatches = year == null || item.year == null || item.year == year
