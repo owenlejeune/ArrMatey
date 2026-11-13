@@ -16,6 +16,7 @@ import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
@@ -39,6 +40,7 @@ class CalendarService(
     private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private var reloadJob: Job? = null
 
     private val _items = MutableStateFlow<Map<LocalDate, List<CalendarItem>>>(emptyMap())
     val items: StateFlow<Map<LocalDate, List<CalendarItem>>> = _items.asStateFlow()
@@ -67,19 +69,22 @@ class CalendarService(
     private fun observeRepositoriesAndReload() {
         scope.launch {
             instanceManager.instanceRepositories.collect { repoMap ->
+                reloadJob?.cancel()
                 val arrRepos = repoMap.values.filterIsInstance<ArrInstanceRepository>()
                 if (arrRepos.isNotEmpty()) {
-                    val now =
-                        Clock.System
-                            .now()
-                            .toLocalDateTime(TimeZone.currentSystemDefault())
-                            .date
-                    val start = _dates.value.firstOrNull() ?: now.minus(daysRange, DateTimeUnit.DAY)
-                    val end = _dates.value.lastOrNull() ?: now.plus(daysRange, DateTimeUnit.DAY)
+                    reloadJob = scope.launch {
+                        val now =
+                            Clock.System
+                                .now()
+                                .toLocalDateTime(TimeZone.currentSystemDefault())
+                                .date
+                        val start = _dates.value.firstOrNull() ?: now.minus(daysRange, DateTimeUnit.DAY)
+                        val end = _dates.value.lastOrNull() ?: now.plus(daysRange, DateTimeUnit.DAY)
 
-                    insertDates(start, end)
-                    fetchForRepositories(arrRepos, start, end)
-                    _hasLoaded.value = true
+                        insertDates(start, end)
+                        fetchForRepositories(arrRepos, start, end)
+                        _hasLoaded.value = true
+                    }
                 } else {
                     _items.value = emptyMap()
                     _hasLoaded.value = false
@@ -181,16 +186,20 @@ class CalendarService(
                 }
             }
 
+        val affectedDates = HashSet<LocalDate>()
+
         // State updates immediately as this repository succeeds
         _items.update { current ->
             val next = current.toMutableMap()
             itemsWithId.forEach { item ->
                 item.getCalendarDates().forEach { date ->
-                    upsertItem(next, item, date.toLocalDate())
+                    val localDate = date.toLocalDate()
+                    affectedDates.add(localDate)
+                    upsertItem(next, item, localDate)
                 }
             }
-            if (type == InstanceType.Sonarr) {
-                applyGrouping(next)
+            if (type == InstanceType.Sonarr && affectedDates.isNotEmpty()) {
+                applyGroupingForDates(next, affectedDates)
             }
             next
         }
@@ -199,10 +208,15 @@ class CalendarService(
         scope.launch {
             val fetchedIds = itemsWithId.map { it.calendarId.toInt() }.toSet()
 
-            val snapshot: List<CalendarItem> =
-                _items.value.values.flatten().filter {
-                    isItemOfInstanceType(it, type)
+            val snapshot: List<CalendarItem> = buildList {
+                _items.value.values.forEach { dayItems ->
+                    dayItems.forEach { item ->
+                        if (isItemOfInstanceType(item, type)) {
+                            add(item)
+                        }
+                    }
                 }
+            }
 
             notificationCleanupUseCase.cleanup(
                 instanceId = instance.id,
@@ -338,31 +352,54 @@ class CalendarService(
         }
     }
 
-    private fun applyGrouping(map: MutableMap<LocalDate, List<CalendarItem>>) {
-        map.keys.forEach { date ->
+    private fun applyGroupingForDates(
+        map: MutableMap<LocalDate, List<CalendarItem>>,
+        datesToGroup: Set<LocalDate>,
+    ) {
+        datesToGroup.forEach { date ->
             val items = map[date] ?: return@forEach
 
-            val allEpisodes =
-                items
-                    .flatMap { item ->
-                        when (item) {
-                            is Episode -> listOf(item)
-                            is EpisodeGroup -> listOf(item.first) + item.additional
-                            else -> emptyList()
-                        }
-                    }.groupBy { it.tvdbId ?: it.id }
-                    .map { (_, eps) ->
-                        val first = eps.first()
-                        val ids = eps.flatMap { it.instanceIds }.distinct()
-                        first.copy(instanceIds = ids)
+            var hasEpisodes = false
+            for (i in items.indices) {
+                val item = items[i]
+                if (item is Episode || item is EpisodeGroup) {
+                    hasEpisodes = true
+                    break
+                }
+            }
+            if (!hasEpisodes) return@forEach
+
+            val nonEpisodeItems = ArrayList<CalendarItem>(items.size)
+            val allEpisodes = ArrayList<Episode>()
+
+            items.forEach { item ->
+                when (item) {
+                    is Episode -> allEpisodes.add(item)
+                    is EpisodeGroup -> {
+                        allEpisodes.add(item.first)
+                        allEpisodes.addAll(item.additional)
                     }
+                    else -> nonEpisodeItems.add(item)
+                }
+            }
 
             if (allEpisodes.isEmpty()) return@forEach
 
-            val nonEpisodeItems = items.filter { it !is Episode && it !is EpisodeGroup }
+            val deduplicatedEpisodes =
+                allEpisodes
+                    .groupBy { it.tvdbId ?: it.id }
+                    .map { (_, eps) ->
+                        if (eps.size == 1) {
+                            eps.first()
+                        } else {
+                            val first = eps.first()
+                            val ids = eps.flatMap { it.instanceIds }.distinct()
+                            first.copy(instanceIds = ids)
+                        }
+                    }
 
             val grouped =
-                allEpisodes
+                deduplicatedEpisodes
                     .groupBy { it.series?.tvdbId ?: it.series?.id }
                     .map { (_, episodeList) ->
                         if (episodeList.size > 1) {
@@ -389,20 +426,31 @@ class CalendarService(
         start: LocalDate,
         end: LocalDate,
     ) {
-        val currentDates = _dates.value.toMutableSet()
-        var current = start
-
-        while (current <= end) {
-            currentDates.add(current)
-            current = current.plus(1, DateTimeUnit.DAY)
+        _dates.update { currentDates ->
+            if (currentDates.isEmpty()) {
+                val list = ArrayList<LocalDate>()
+                var current = start
+                while (current <= end) {
+                    list.add(current)
+                    current = current.plus(1, DateTimeUnit.DAY)
+                }
+                list
+            } else {
+                val set = currentDates.toHashSet()
+                var current = start
+                while (current <= end) {
+                    set.add(current)
+                    current = current.plus(1, DateTimeUnit.DAY)
+                }
+                set.sorted()
+            }
         }
-
-        _dates.value = currentDates.sorted()
     }
 
     private fun Instant.toLocalDate(): LocalDate = this.toLocalDateTime(TimeZone.currentSystemDefault()).date
 
     fun reset() {
+        reloadJob?.cancel()
         _items.value = emptyMap()
         _dates.value = emptyList()
         _error.value = null
