@@ -236,6 +236,20 @@ class GetUnifiedMediaDetailsUseCase(
                 targetInstanceId == null || task.instanceId == null || task.instanceId == targetInstanceId
             }
 
+        val tasksByEpisodeId = HashMap<Long, SonarrQueueItem>()
+        val tasksBySeriesSeason = HashMap<Pair<Long, Int>, SonarrQueueItem>()
+
+        sonarrTasks.forEach { task ->
+            task.calcEpisodeId?.let { epId ->
+                if (epId != 0L) tasksByEpisodeId[epId] = task
+            }
+            val seriesId = task.calcSeriesId
+            val seasonNum = task.seasonNumber
+            if (seriesId != null && seriesId != 0L && task.calcEpisodeId == null && seasonNum != null) {
+                tasksBySeriesSeason[seriesId to seasonNum] = task
+            }
+        }
+
         val bazarrEpisodeMap = bazarr.episodes.associateBy { it.sonarrEpisodeId }
         val bazarrSeasonEpMap = bazarr.episodes.associateBy { it.season to it.episode }
 
@@ -261,12 +275,8 @@ class GetUnifiedMediaDetailsUseCase(
 
                         val queueItem =
                             arrEp?.let { ep ->
-                                sonarrTasks.firstOrNull { it.calcEpisodeId == ep.id }
-                                    ?: sonarrTasks.firstOrNull {
-                                        it.calcSeriesId == ep.seriesId &&
-                                            it.seasonNumber == ep.seasonNumber &&
-                                            it.calcEpisodeId == null
-                                    }
+                                tasksByEpisodeId[ep.id]
+                                    ?: tasksBySeriesSeason[ep.seriesId to ep.seasonNumber]
                             }
 
                         EpisodeWrapper(
