@@ -31,8 +31,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -151,21 +152,26 @@ fun TracearrViolationsContent(
                 is TracearrViolationsState.Success -> {
                     val listState = rememberLazyListState()
 
-                    LaunchedEffect(listState) {
-                        snapshotFlow {
-                            listState.layoutInfo.visibleItemsInfo
-                                .lastOrNull()
-                                ?.index
-                        }.collect { lastVisibleIndex ->
+                    val shouldLoadMore by remember(
+                        listState,
+                        state.violations.size,
+                        state.hasMore,
+                        state.isLoadingMore,
+                    ) {
+                        derivedStateOf {
+                            val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
                             val violationCount = state.violations.size
-                            if (lastVisibleIndex != null &&
+                            lastVisibleIndex != null &&
                                 violationCount > 0 &&
                                 lastVisibleIndex >= violationCount - 2 &&
                                 state.hasMore &&
                                 !state.isLoadingMore
-                            ) {
-                                onLoadMore()
-                            }
+                        }
+                    }
+
+                    LaunchedEffect(shouldLoadMore) {
+                        if (shouldLoadMore) {
+                            onLoadMore()
                         }
                     }
 

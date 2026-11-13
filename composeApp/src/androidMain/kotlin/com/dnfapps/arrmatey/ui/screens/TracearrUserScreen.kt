@@ -41,8 +41,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -154,21 +155,26 @@ fun TracearrUserScreen(
                 is TracearrUserState.Success -> {
                     val listState = rememberLazyListState()
 
-                    LaunchedEffect(listState) {
-                        snapshotFlow {
-                            listState.layoutInfo.visibleItemsInfo
-                                .lastOrNull()
-                                ?.index
-                        }.collect { lastVisibleIndex ->
+                    val shouldLoadMoreHistory by remember(
+                        listState,
+                        currentState.history.size,
+                        currentState.hasMoreHistory,
+                        currentState.isLoadingMoreHistory,
+                    ) {
+                        derivedStateOf {
+                            val lastVisibleIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
                             val historyCount = currentState.history.size
-                            if (lastVisibleIndex != null &&
+                            lastVisibleIndex != null &&
                                 historyCount > 0 &&
                                 lastVisibleIndex >= historyCount - 2 &&
                                 currentState.hasMoreHistory &&
                                 !currentState.isLoadingMoreHistory
-                            ) {
-                                viewModel.loadMoreHistory()
-                            }
+                        }
+                    }
+
+                    LaunchedEffect(shouldLoadMoreHistory) {
+                        if (shouldLoadMoreHistory) {
+                            viewModel.loadMoreHistory()
                         }
                     }
 

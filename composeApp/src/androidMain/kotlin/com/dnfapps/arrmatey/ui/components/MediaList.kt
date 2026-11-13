@@ -37,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -160,13 +161,8 @@ fun SearchResultList(
     includeOverview: Boolean = true,
     showBanners: Boolean = true,
 ) {
-    var wasAtTop by remember { mutableStateOf(true) }
-
-    LaunchedEffect(lazyListState) {
-        snapshotFlow { !lazyListState.canScrollBackward }
-            .collect { atTop ->
-                wasAtTop = atTop
-            }
+    val wasAtTop by remember(lazyListState) {
+        derivedStateOf { !lazyListState.canScrollBackward }
     }
 
     LaunchedEffect(items) {
