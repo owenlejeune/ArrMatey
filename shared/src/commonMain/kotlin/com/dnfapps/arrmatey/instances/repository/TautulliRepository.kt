@@ -33,9 +33,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 class TautulliRepository(
-    override val instance: Instance,
-    httpClient: HttpClient,
+    override var instance: Instance,
+    private val httpClient: HttpClient,
 ) : PlaybackMonitoringRepository {
+    override fun close() {
+        httpClient.close()
+    }
+
     private val tautulliClient = TautulliClient(instance, httpClient)
 
     private val _activity = MutableStateFlow<TautulliActivity?>(null)

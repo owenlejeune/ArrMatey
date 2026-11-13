@@ -63,6 +63,23 @@ class InstanceManager(
         }
     }
 
+    private fun hasConnectionConfigChanged(
+        old: Instance,
+        new: Instance,
+    ): Boolean = old.type != new.type ||
+        old.url != new.url ||
+        old.apiKey != new.apiKey ||
+        old.noApiKeyRequired != new.noApiKeyRequired ||
+        old.enabled != new.enabled ||
+        old.slowInstance != new.slowInstance ||
+        old.customTimeout != new.customTimeout ||
+        old.headers != new.headers ||
+        old.localNetworkEnabled != new.localNetworkEnabled ||
+        old.localNetworkSsids != new.localNetworkSsids ||
+        old.localNetworkEndpoint != new.localNetworkEndpoint ||
+        old.seerrAuthType != new.seerrAuthType ||
+        old.sessionToken != new.sessionToken
+
     private fun updateRepositories(instances: List<Instance>) {
         val currentRepos = _instanceRepositories.value.toMutableMap()
         val instanceIds = instances.map { it.id }.toSet()
@@ -70,12 +87,13 @@ class InstanceManager(
         currentRepos.keys
             .filterNot { it in instanceIds }
             .forEach { instanceId ->
-                currentRepos.remove(instanceId)
+                val removed = currentRepos.remove(instanceId)
+                removed?.close()
             }
 
         instances.forEach { instance ->
             val existingRepo = currentRepos[instance.id]
-            if (existingRepo == null || existingRepo.instance != instance) {
+            if (existingRepo == null) {
                 try {
                     val httpClient = httpClientFactory.create(instance)
                     val newRepo = createScopedRepository(instance, httpClient, logger)
@@ -84,6 +102,18 @@ class InstanceManager(
                 } catch (e: Exception) {
                     logger.error(e) { "Failed to create repository for instance ${instance.id} (${instance.type}): ${instance.label}" }
                 }
+            } else if (hasConnectionConfigChanged(existingRepo.instance, instance)) {
+                try {
+                    existingRepo.close()
+                    val httpClient = httpClientFactory.create(instance)
+                    val newRepo = createScopedRepository(instance, httpClient, logger)
+                    currentRepos[instance.id] = newRepo
+                    refreshRepositoryStatus(newRepo)
+                } catch (e: Exception) {
+                    logger.error(e) { "Failed to update repository for instance ${instance.id} (${instance.type}): ${instance.label}" }
+                }
+            } else if (existingRepo.instance != instance) {
+                existingRepo.instance = instance
             }
         }
 

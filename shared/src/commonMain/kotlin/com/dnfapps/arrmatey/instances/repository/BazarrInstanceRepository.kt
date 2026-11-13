@@ -21,9 +21,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class BazarrInstanceRepository(
-    override val instance: Instance,
-    httpClient: HttpClient,
+    override var instance: Instance,
+    private val httpClient: HttpClient,
 ) : InstanceScopedRepository {
+    override fun close() {
+        httpClient.close()
+    }
+
     companion object {
         private const val PAGE_SIZE = 50
     }

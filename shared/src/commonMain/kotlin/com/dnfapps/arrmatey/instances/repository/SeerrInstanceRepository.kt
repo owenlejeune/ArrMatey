@@ -58,9 +58,13 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 
 class SeerrInstanceRepository(
-    override val instance: Instance,
-    httpClient: HttpClient,
+    override var instance: Instance,
+    private val httpClient: HttpClient,
 ) : InstanceScopedRepository {
+    override fun close() {
+        httpClient.close()
+    }
+
     val client: SeerrClient = SeerrClientImpl(instance, httpClient)
     private val mediaPackageService = MediaRequestPackageService(client)
     private val issuePackageService = MediaIssuePackageService(client)

@@ -40,9 +40,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 class TracearrRepository(
-    override val instance: Instance,
-    httpClient: HttpClient,
+    override var instance: Instance,
+    private val httpClient: HttpClient,
 ) : PlaybackMonitoringRepository {
+    override fun close() {
+        httpClient.close()
+    }
+
     private val tracearrClient = TracearrClient(instance, httpClient)
 
     private val _todayStats = MutableStateFlow<TracearrTodayStats?>(null)

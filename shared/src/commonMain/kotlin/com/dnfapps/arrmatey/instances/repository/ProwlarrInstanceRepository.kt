@@ -18,9 +18,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class ProwlarrInstanceRepository(
-    override val instance: Instance,
-    httpClient: HttpClient,
+    override var instance: Instance,
+    private val httpClient: HttpClient,
 ) : InstanceScopedRepository {
+    override fun close() {
+        httpClient.close()
+    }
+
     private val prowlarrClient = ProwlarrClient(instance, httpClient)
 
     private val _softwareStatus = MutableStateFlow<ArrSoftwareStatus?>(null)
