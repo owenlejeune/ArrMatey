@@ -129,9 +129,9 @@ class GetMediaDetailsUseCase(
         artist: ArrMedia,
     ): Flow<MediaDetailsUiState> = flow {
         coroutineScope {
-            launch { repository.getArtistAlbums(artistId) }
-            launch { repository.getArtistTracks(artistId) }
-            launch { repository.getArtistTrackFiles(artistId) }
+            launch { runCatching { repository.getArtistAlbums(artistId) } }
+            launch { runCatching { repository.getArtistTracks(artistId) } }
+            launch { runCatching { repository.getArtistTrackFiles(artistId) } }
         }
 
         combine(
@@ -161,9 +161,9 @@ class GetMediaDetailsUseCase(
         author: ArrMedia,
     ): Flow<MediaDetailsUiState> = flow {
         coroutineScope {
-            launch { repository.getAuthorBooks(authorId) }
-            launch { repository.getAuthorBookFiles(authorId) }
-            launch { repository.getAuthorSeries(authorId) }
+            launch { runCatching { repository.getAuthorBooks(authorId) } }
+            launch { runCatching { repository.getAuthorBookFiles(authorId) } }
+            launch { runCatching { repository.getAuthorSeries(authorId) } }
         }
 
         combine(

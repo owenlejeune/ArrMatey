@@ -33,6 +33,7 @@ import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
 import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
@@ -144,13 +145,13 @@ class GetUnifiedMediaDetailsUseCase(
                     getSeerrAndRatingsFlow(tmdbId, requestType, seerrRepository)
                 } else {
                     flowOf(SeerrDetailsState.Initial to null)
-                }
+                }.catch { emit(SeerrDetailsState.Initial to null) }
 
-            val activityTasksFlow = getActivityTasksUseCase()
+            val activityTasksFlow = getActivityTasksUseCase().catch { emit(emptyList()) }
             val bazarrFlow =
                 if (bazarrRepository != null && targetItem is ArrSeries && targetItem.id != null && targetItem.id > 0) {
                     flow {
-                        bazarrRepository.getEpisodes(targetItem.id)
+                        runCatching { bazarrRepository.getEpisodes(targetItem.id) }
                         emitAll(
                             bazarrRepository.episodes.map { epMap ->
                                 val eps = epMap[targetItem.id] ?: emptyList()
@@ -166,7 +167,7 @@ class GetUnifiedMediaDetailsUseCase(
                     }
                 } else {
                     flowOf(BazarrDetails())
-                }
+                }.catch { emit(BazarrDetails()) }
 
             combine(
                 seerrAndRatingsFlow,
@@ -222,13 +223,16 @@ class GetUnifiedMediaDetailsUseCase(
 
         val seerrTv = seerrSuccess?.item as? TvDetails
         val seerrSeasons = seerrTv?.seasons ?: emptyList()
-        val seerrEpisodes = seerrSeasons.flatMap { it.episodes }
 
-        val allSeasonNumbers = (arrSeasons.map { it.seasonNumber } + seerrSeasons.map { it.seasonNumber }).distinct().sortedDescending()
+        val allSeasonNumbers = buildSet {
+            arrSeasons.forEach { add(it.seasonNumber) }
+            seerrSeasons.forEach { add(it.seasonNumber) }
+        }.sortedDescending()
+
         val arrSeasonMap = arrSeasons.associateBy { it.seasonNumber }
         val seerrSeasonMap = seerrSeasons.associateBy { it.seasonNumber }
         val arrEpMap = arrEpisodes.groupBy { it.seasonNumber }
-        val seerrEpMap = seerrEpisodes.groupBy { it.seasonNumber }
+        val seerrEpMap = seerrSeasons.associateBy({ it.seasonNumber }, { it.episodes })
 
         val targetInstanceId = arrRepository?.instance?.id
         val sonarrTasks =
@@ -260,10 +264,10 @@ class GetUnifiedMediaDetailsUseCase(
                 val seasonArrEps = arrEpMap[seasonNumber] ?: emptyList()
                 val seasonSeerrEps = seerrEpMap[seasonNumber] ?: emptyList()
 
-                val allEpNumbers =
-                    (seasonArrEps.map { it.episodeNumber } + seasonSeerrEps.map { it.episodeNumber })
-                        .distinct()
-                        .sortedDescending()
+                val allEpNumbers = buildSet {
+                    seasonArrEps.forEach { add(it.episodeNumber) }
+                    seasonSeerrEps.forEach { add(it.episodeNumber) }
+                }.sortedDescending()
                 val seasonArrEpMap = seasonArrEps.associateBy { it.episodeNumber }
                 val seasonSeerrEpMap = seasonSeerrEps.associateBy { it.episodeNumber }
 

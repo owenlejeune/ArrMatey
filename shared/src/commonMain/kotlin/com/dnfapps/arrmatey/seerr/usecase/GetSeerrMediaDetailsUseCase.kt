@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.seerr.usecase
 
+import com.dnfapps.arrmatey.arr.state.HttpErrorType
 import com.dnfapps.arrmatey.arr.state.toHttpError
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
@@ -25,44 +26,50 @@ class GetSeerrMediaDetailsUseCase {
     ): Flow<SeerrDetailsState> = channelFlow {
         send(SeerrDetailsState.Loading)
 
-        repository
-            .observeMediaDetails(tmdbId, type)
-            .collect { detailsResult ->
-                when (detailsResult) {
-                    is NetworkResult.Loading -> send(SeerrDetailsState.Loading)
-                    is NetworkResult.Error -> {
-                        send(
-                            SeerrDetailsState.Error(
-                                detailsResult.errorType.toHttpError(),
-                                detailsResult.message,
-                            ),
-                        )
-                    }
-                    is NetworkResult.Success<*> -> {
-                        val mediaDetails = (detailsResult as NetworkResult.Success<RequestMediaDetails>).data
+        runCatching {
+            repository
+                .observeMediaDetails(tmdbId, type)
+                .collect { detailsResult ->
+                    when (detailsResult) {
+                        is NetworkResult.Loading -> send(SeerrDetailsState.Loading)
+                        is NetworkResult.Error -> {
+                            send(
+                                SeerrDetailsState.Error(
+                                    detailsResult.errorType.toHttpError(),
+                                    detailsResult.message,
+                                ),
+                            )
+                        }
+                        is NetworkResult.Success<*> -> {
+                            val mediaDetails = (detailsResult as NetworkResult.Success<RequestMediaDetails>).data
 
-                        if (type == RequestType.Tv && mediaDetails is TvDetails) {
-                            val seasonCount = mediaDetails.numberOfSeasons
-                            val seasonSemaphore = Semaphore(MAX_CONCURRENT_SEASON_REQUESTS)
-                            val seasons =
-                                (1..seasonCount)
-                                    .map { seasonNumber ->
-                                        async {
-                                            seasonSemaphore.withPermit {
-                                                repository.getSeasonDetails(tmdbId, seasonNumber)
+                            if (type == RequestType.Tv && mediaDetails is TvDetails) {
+                                val seasonCount = mediaDetails.numberOfSeasons
+                                val seasonSemaphore = Semaphore(MAX_CONCURRENT_SEASON_REQUESTS)
+                                val seasons =
+                                    (1..seasonCount)
+                                        .map { seasonNumber ->
+                                            async {
+                                                seasonSemaphore.withPermit {
+                                                    runCatching {
+                                                        repository.getSeasonDetails(tmdbId, seasonNumber)
+                                                    }.getOrNull() ?: NetworkResult.Error(message = "Season details failed")
+                                                }
                                             }
-                                        }
-                                    }.awaitAll()
-                                    .filterIsInstance<NetworkResult.Success<Season>>()
-                                    .map { it.data }
+                                        }.awaitAll()
+                                        .filterIsInstance<NetworkResult.Success<Season>>()
+                                        .map { it.data }
 
-                            val enrichedDetails = mediaDetails.copy(seasons = seasons)
-                            send(SeerrDetailsState.Success(enrichedDetails))
-                        } else {
-                            send(SeerrDetailsState.Success(mediaDetails))
+                                val enrichedDetails = mediaDetails.copy(seasons = seasons)
+                                send(SeerrDetailsState.Success(enrichedDetails))
+                            } else {
+                                send(SeerrDetailsState.Success(mediaDetails))
+                            }
                         }
                     }
                 }
-            }
+        }.onFailure { e ->
+            send(SeerrDetailsState.Error(HttpErrorType.Unexpected, e.message ?: "Failed to observe Seerr media details"))
+        }
     }
 }
