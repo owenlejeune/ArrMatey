@@ -1,0 +1,14 @@
+### New Features
+* Swipe Card Sensitivity: Customize swipe-to-dismiss threshold and gesture sensitivity for downloads and file lists in UI settings.
+* Schedule Default Focus: Added setting to default calendar and schedule views to focus 'Yesterday' instead of 'Today'.
+* Media Server Enhancements: Cached media server libraries to eliminate unnecessary tab reload delays and added a dropdown endpoint selector for Plex configurations.
+
+### Improvements
+* Performance & Scalability: Overhauled library and discover cross-referencing with indexed lookups, parallelized global search queries, and optimized Compose rendering passes.
+* Coroutine & Memory Optimizations: In-flight locks for download queue service, restricted calendar episode re-grouping to affected dates, and dynamic Ktor logging levels.
+* Playback Monitoring: Applied album cover aspect ratio formatting for audio stream cards in Tautulli and Tracearr.
+
+### Bug Fixes
+* Legacy Backup Restore: Resolved issue restoring legacy configuration backup files.
+* Media Server Library Views: Excluded individual episode items from Jellyfin and Emby media server library views.
+* Subpath URLs: Fixed network connection issues for services configured with subpath URLs.
