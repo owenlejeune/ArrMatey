@@ -21,8 +21,16 @@ class GenericClient(
         sessionToken: String = "",
     ): Boolean {
         try {
+            val cleanEndpoint = endpoint.trim().trimEnd('/')
+            val cleanApiBase = type.apiBase.trim().trim('/')
+            val testEndpoint = type.testEndpoint.trim()
+            val fullUrl = if (testEndpoint.startsWith("?")) {
+                "$cleanEndpoint/$cleanApiBase$testEndpoint"
+            } else {
+                "$cleanEndpoint/$cleanApiBase/${testEndpoint.trimStart('/')}"
+            }
             val response =
-                httpClient.safeGet<Any>("${endpoint.trimEnd('/')}/${type.apiBase}/${type.testEndpoint}") {
+                httpClient.safeGet<Any>(fullUrl) {
                     if (type == InstanceType.Seerr && sessionToken.isNotEmpty()) {
                         header("Cookie", "connect.sid=$sessionToken")
                     } else if (!noApiKeyRequired && apiKey.isNotEmpty()) {

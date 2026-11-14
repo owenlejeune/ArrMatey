@@ -141,7 +141,7 @@ class BazarrClientImpl(
 ) : KoinComponent,
     BazarrClient {
     private val baseUrl: String
-        get() = "${instance.getEffectiveBaseUrl()}/${instance.type.apiBase}"
+        get() = "${instance.getEffectiveBaseUrl().trimEnd('/')}/${instance.type.apiBase.trim('/')}"
 
     override suspend fun testConnection(): NetworkResult<Unit> = get(instance.type.testEndpoint)
 
@@ -325,7 +325,7 @@ class BazarrClientImpl(
         params: Map<String, Any> = emptyMap(),
         timeoutMillis: Long? = null,
         crossinline onProgress: (Float) -> Unit = {},
-    ): NetworkResult<T> = httpClient.safeGet<T>("$baseUrl/$endpoint", onProgress = onProgress) {
+    ): NetworkResult<T> = httpClient.safeGet<T>("$baseUrl/${endpoint.trimStart('/')}", onProgress = onProgress) {
         applyParams(params, timeoutMillis)
     }
 
@@ -333,14 +333,14 @@ class BazarrClientImpl(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
         timeoutMillis: Long? = null,
-    ): NetworkResult<T> = httpClient.safePost<T>("$baseUrl/$endpoint") { applyParams(params, timeoutMillis) }
+    ): NetworkResult<T> = httpClient.safePost<T>("$baseUrl/${endpoint.trimStart('/')}") { applyParams(params, timeoutMillis) }
 
     private suspend inline fun <reified T> patch(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
         body: Any? = null,
         timeoutMillis: Long? = null,
-    ): NetworkResult<T> = httpClient.safePatch("$baseUrl/$endpoint") {
+    ): NetworkResult<T> = httpClient.safePatch("$baseUrl/${endpoint.trimStart('/')}") {
         applyParams(params, timeoutMillis)
         body?.let {
             contentType(ContentType.Application.Json)
@@ -351,7 +351,7 @@ class BazarrClientImpl(
     private suspend inline fun <reified T> delete(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
-    ): NetworkResult<T> = httpClient.safeDelete<T>("$baseUrl/$endpoint") {
+    ): NetworkResult<T> = httpClient.safeDelete<T>("$baseUrl/${endpoint.trimStart('/')}") {
         url { params.forEach { (key, value) -> parameters.append(key, value.toString()) } }
     }
 }

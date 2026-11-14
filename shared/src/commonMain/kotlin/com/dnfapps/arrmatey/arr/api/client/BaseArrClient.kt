@@ -44,7 +44,7 @@ abstract class BaseArrClient(
     protected abstract val instance: Instance
 
     protected val baseUrl: String
-        get() = "${instance.getEffectiveBaseUrl()}/${instance.type.apiBase}"
+        get() = "${instance.getEffectiveBaseUrl().trimEnd('/')}/${instance.type.apiBase.trim('/')}"
 
     override suspend fun testConnection(): NetworkResult<Unit> = get(instance.type.testEndpoint)
 
@@ -255,7 +255,7 @@ abstract class BaseArrClient(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
     ): NetworkResult<T> = httpClient
-        .safeGet<T>("$baseUrl/$endpoint") {
+        .safeGet<T>("$baseUrl/${endpoint.trimStart('/')}") {
             appendInstanceApiKey()
             url {
                 params.forEach { (key, value) ->
@@ -268,7 +268,7 @@ abstract class BaseArrClient(
         endpoint: String,
         body: T,
     ): NetworkResult<R> = httpClient
-        .safePost<R>("$baseUrl/$endpoint") {
+        .safePost<R>("$baseUrl/${endpoint.trimStart('/')}") {
             appendInstanceApiKey()
             contentType(ContentType.Application.Json)
             setBody(body)
@@ -278,7 +278,7 @@ abstract class BaseArrClient(
         endpoint: String,
         body: T,
     ): NetworkResult<R> = httpClient
-        .safePut<R>("$baseUrl/$endpoint") {
+        .safePut<R>("$baseUrl/${endpoint.trimStart('/')}") {
             appendInstanceApiKey()
             contentType(ContentType.Application.Json)
             setBody(body)
@@ -288,7 +288,7 @@ abstract class BaseArrClient(
         endpoint: String,
         body: T,
         params: Map<String, Any> = emptyMap(),
-    ): NetworkResult<R> = httpClient.safeDelete("$baseUrl/$endpoint") {
+    ): NetworkResult<R> = httpClient.safeDelete("$baseUrl/${endpoint.trimStart('/')}") {
         appendInstanceApiKey()
         contentType(ContentType.Application.Json)
         url {
@@ -302,7 +302,7 @@ abstract class BaseArrClient(
     protected suspend inline fun <reified T> delete(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
-    ): NetworkResult<T> = httpClient.safeDelete("$baseUrl/$endpoint") {
+    ): NetworkResult<T> = httpClient.safeDelete("$baseUrl/${endpoint.trimStart('/')}") {
         appendInstanceApiKey()
         url {
             params.forEach { (key, value) ->

@@ -190,4 +190,19 @@ class ArrImageTest {
         assertEquals("https://host/sonarr/sonarr4k/x.jpg", joinInstanceUrl("https://host/sonarr", "/sonarr4k/x.jpg"))
         assertEquals("https://host:6767/images/series/1/poster.jpg", joinInstanceUrl("https://host:6767", "/images/series/1/poster.jpg"))
     }
+
+    @Test
+    fun testSubpathWithTrailingSlashAndNestedSubpaths() {
+        val radarr = instance(InstanceType.Radarr, "https://example.com/radarr/")
+        assertEquals(
+            "https://example.com/radarr/api/v3/mediacover/10/poster.jpg?lastWrite=1",
+            rebuild(radarr, "/radarr/MediaCover/10/poster.jpg?lastWrite=1"),
+        )
+
+        val nestedSonarr = instance(InstanceType.Sonarr, "https://example.com/services/sonarr")
+        assertEquals(
+            "https://example.com/services/sonarr/api/v3/mediacover/5/poster.jpg?lastWrite=1",
+            rebuild(nestedSonarr, "/services/sonarr/MediaCover/5/poster.jpg?lastWrite=1"),
+        )
+    }
 }
