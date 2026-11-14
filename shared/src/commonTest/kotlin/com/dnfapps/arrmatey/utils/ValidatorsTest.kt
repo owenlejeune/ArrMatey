@@ -11,6 +11,8 @@ class ValidatorsTest {
         assertTrue("https://google.com".isValidUrl())
         assertTrue("http://localhost:8080".isValidUrl())
         assertTrue("http://192.168.1.1:8989/sonarr".isValidUrl())
+        assertTrue("https://example.com/radarr/".isValidUrl())
+        assertTrue("https://example.com/services/sonarr".isValidUrl())
         assertTrue("http://user:pass@host.com".isValidUrl())
 
         assertFalse("google.com".isValidUrl())

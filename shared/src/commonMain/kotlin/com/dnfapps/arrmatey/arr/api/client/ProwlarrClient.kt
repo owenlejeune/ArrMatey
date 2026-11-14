@@ -15,7 +15,6 @@ import com.dnfapps.networking.safePost
 import com.dnfapps.networking.safePut
 import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
-import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import org.koin.core.component.KoinComponent
@@ -30,12 +29,12 @@ class ProwlarrClient(
             val apiBase =
                 instance.type.apiBase
                     .trim()
-                    .trimStart('/', ' ')
+                    .trim('/', ' ')
             return "$cleanUrl/$apiBase"
         }
 
     suspend fun testConnection(): NetworkResult<Unit> {
-        val url = "$baseUrl/${instance.type.testEndpoint}"
+        val url = "$baseUrl/${instance.type.testEndpoint.trimStart('/')}"
         return httpClient.safeGet(url)
     }
 

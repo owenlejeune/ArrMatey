@@ -50,7 +50,7 @@ class KapowarrClient(
                     val apiKeyQuery = if (instance.apiKey.value.isNotBlank()) "?api_key=${instance.apiKey.value}" else ""
                     val items = response.data.result.orEmpty().map { volume ->
                         val coverUrl = volume.id?.let { id ->
-                            "${instance.getEffectiveBaseUrl()}/api/volumes/$id/cover$apiKeyQuery"
+                            "${instance.getEffectiveBaseUrl().trimEnd('/')}/${instance.type.apiBase.trim('/')}/volumes/$id/cover$apiKeyQuery"
                         }
                         val images = if (coverUrl != null) {
                             listOf(ArrImage(coverType = CoverType.Poster, url = coverUrl, remoteUrl = coverUrl))
@@ -79,7 +79,7 @@ class KapowarrClient(
                     if (volume != null) {
                         val apiKeyQuery = if (instance.apiKey.value.isNotBlank()) "?api_key=${instance.apiKey.value}" else ""
                         val coverUrl = volume.id?.let { volId ->
-                            "${instance.getEffectiveBaseUrl()}/api/volumes/$volId/cover$apiKeyQuery"
+                            "${instance.getEffectiveBaseUrl().trimEnd('/')}/${instance.type.apiBase.trim('/')}/volumes/$volId/cover$apiKeyQuery"
                         }
                         val images = if (coverUrl != null) {
                             listOf(ArrImage(coverType = CoverType.Poster, url = coverUrl, remoteUrl = coverUrl))
@@ -122,7 +122,7 @@ class KapowarrClient(
                 if (updatedVol != null) {
                     val apiKeyQuery = if (instance.apiKey.value.isNotBlank()) "?api_key=${instance.apiKey.value}" else ""
                     val coverUrl = updatedVol.id?.let { volId ->
-                        "${instance.getEffectiveBaseUrl()}/api/volumes/$volId/cover$apiKeyQuery"
+                        "${instance.getEffectiveBaseUrl().trimEnd('/')}/${instance.type.apiBase.trim('/')}/volumes/$volId/cover$apiKeyQuery"
                     }
                     val images = if (coverUrl != null) {
                         listOf(ArrImage(coverType = CoverType.Poster, url = coverUrl, remoteUrl = coverUrl))

@@ -236,7 +236,7 @@ class DownloadClientSettingsViewModel(
         label =
         uiState.value.label.takeUnless { it.isEmpty() }
             ?: uiState.value.selectedType.displayName,
-        url = uiState.value.url,
+        url = uiState.value.url.trimEnd('/'),
         username = EncryptedString(uiState.value.username),
         password = EncryptedString(uiState.value.password),
         apiKey = EncryptedString(uiState.value.apiKey),
@@ -245,7 +245,7 @@ class DownloadClientSettingsViewModel(
         selected = downloadClient.value?.selected ?: false,
         localNetworkEnabled = uiState.value.localNetworkEnabled,
         localNetworkSsids = uiState.value.localNetworkSsids,
-        localNetworkEndpoint = uiState.value.localNetworkEndpoint,
+        localNetworkEndpoint = uiState.value.localNetworkEndpoint.takeIf { uiState.value.localNetworkEnabled && it.isNotBlank() }?.trimEnd('/'),
         showExternalIpAddress = uiState.value.showExternalIpAddress,
     )
 

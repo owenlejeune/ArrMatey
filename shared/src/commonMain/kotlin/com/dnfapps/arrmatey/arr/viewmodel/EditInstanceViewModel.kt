@@ -586,14 +586,14 @@ class EditInstanceViewModel(
             val updated =
                 originalInstance.copy(
                     label = s.instanceLabel,
-                    url = s.apiEndpoint,
+                    url = s.apiEndpoint.trimEnd('/'),
                     apiKey = EncryptedString(s.apiKey),
                     noApiKeyRequired = s.noApiKeyRequired,
                     slowInstance = s.isSlowInstance,
                     customTimeout = if (s.isSlowInstance) s.customTimeout else null,
                     headers = s.headers.filter { it.key.isNotEmpty() && it.value.isNotEmpty() },
                     localNetworkEnabled = s.localNetworkEnabled,
-                    localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() },
+                    localNetworkEndpoint = s.localNetworkUrl.takeIf { s.localNetworkEnabled && it.isNotBlank() }?.trimEnd('/'),
                     localNetworkSsids = s.localNetworkSsids.filter { it.isNotBlank() },
                     notificationsEnabled = s.notificationsEnabled,
                     seerrAuthType = s.seerrAuthType,

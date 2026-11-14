@@ -25,7 +25,7 @@ data class ArrImage(
     }
 }
 
-private val mediaCoverPath = Regex("""/MediaCover/(?:(Albums|Books)/)?(\d+)/([^/?]+)(?:\?(.*))?$""", RegexOption.IGNORE_CASE)
+private val mediaCoverPath = Regex("""(?:/[^/]+)*/MediaCover/(?:(Albums|Books)/)?(\d+)/([^/?]+)(?:\?(.*))?$""", RegexOption.IGNORE_CASE)
 
 // /MediaCover/ only accepts a UI login session; the API mediacover route accepts the API key header.
 private fun mediaCoverApiUrl(
@@ -51,7 +51,7 @@ private fun mediaCoverApiUrl(
             else -> return null
         }
     val baseUrl = instance.getEffectiveBaseUrl().trimEnd('/')
-    val path = "$baseUrl/${instance.type.apiBase}/mediacover/$entity$id/$file"
+    val path = "$baseUrl/${instance.type.apiBase.trim('/')}/mediacover/$entity$id/$file"
     return if (query.isEmpty()) path else "$path?$query"
 }
 

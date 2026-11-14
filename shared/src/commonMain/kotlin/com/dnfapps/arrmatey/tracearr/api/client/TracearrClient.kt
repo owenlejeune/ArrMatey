@@ -24,14 +24,17 @@ class TracearrClient(
     val instance: Instance,
     private val httpClient: HttpClient,
 ) {
+    private val base: String
+        get() = "${instance.getEffectiveBaseUrl().trimEnd('/')}/${instance.type.apiBase.trim('/')}"
+
     private val v2BaseUrl: String
-        get() = "${instance.getEffectiveBaseUrl()}/${instance.type.apiBase}/v2"
+        get() = "$base/v2"
 
     private val v1BaseUrl: String
-        get() = "${instance.getEffectiveBaseUrl()}/${instance.type.apiBase}/v1"
+        get() = "$base/v1"
 
     suspend fun testConnection(): NetworkResult<Unit> {
-        val url = "${instance.getEffectiveBaseUrl()}/${instance.type.testEndpoint}"
+        val url = "${instance.getEffectiveBaseUrl().trimEnd('/')}/${instance.type.testEndpoint.trimStart('/')}"
         return httpClient.safeGet(url)
     }
 
