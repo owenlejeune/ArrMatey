@@ -199,9 +199,7 @@ class PlexRepository(
             val first = res.data.mediaContainer.metadata.orEmpty().firstOrNull { !it.ratingKey.isNullOrBlank() }
             if (first != null) {
                 val item = first.toUnifiedMediaItem()
-                cacheMutex.withLock {
-                    updateItemInCache(item)
-                }
+                updateItemInCache(item)
                 NetworkResult.Success(item)
             } else {
                 NetworkResult.Error(message = "Item not found")
@@ -248,9 +246,7 @@ class PlexRepository(
 
     override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(itemId, watched).also { result ->
         if (result is NetworkResult.Success) {
-            cacheMutex.withLock {
-                updateWatchedInCache(itemId, watched)
-            }
+            updateWatchedInCache(itemId, watched)
         }
     }
 

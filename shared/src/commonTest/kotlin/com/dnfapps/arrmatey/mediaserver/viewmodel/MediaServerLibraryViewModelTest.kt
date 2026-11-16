@@ -29,7 +29,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -172,6 +171,11 @@ class MediaServerLibraryViewModelTest {
                     HttpStatusCode.OK,
                     headersOf(HttpHeaders.ContentType, "application/json"),
                 )
+                path.contains("/library/sections/2/all") -> respond(
+                    """{"MediaContainer":{"size":0,"Metadata":[]}}""",
+                    HttpStatusCode.OK,
+                    headersOf(HttpHeaders.ContentType, "application/json"),
+                )
                 path.contains("/library/sections") -> respond(
                     plexSectionsJson,
                     HttpStatusCode.OK,
@@ -186,7 +190,7 @@ class MediaServerLibraryViewModelTest {
             override fun log(message: String) {}
         }
         val clientFactory = TestLibraryHttpClientFactory(json, mockEngine, logger)
-        val managerScope = CoroutineScope(Dispatchers.Default + Job())
+        val managerScope = CoroutineScope(testDispatcher + Job())
         activeManagerScope = managerScope
         val manager = MediaServerManager(dao, clientFactory, managerScope)
 

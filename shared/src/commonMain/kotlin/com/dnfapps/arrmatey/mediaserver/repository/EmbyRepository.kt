@@ -137,9 +137,7 @@ class EmbyRepository(
     override suspend fun getItemDetail(itemId: String): NetworkResult<UnifiedMediaItem> = when (val res = client.getItemDetails(userId, itemId)) {
         is NetworkResult.Success -> {
             val item = res.data.toUnifiedMediaItem()
-            cacheMutex.withLock {
-                updateItemInCache(item)
-            }
+            updateItemInCache(item)
             NetworkResult.Success(item)
         }
         is NetworkResult.Error -> res
@@ -175,9 +173,7 @@ class EmbyRepository(
 
     override suspend fun markWatched(itemId: String, watched: Boolean): NetworkResult<Unit> = client.markWatched(userId, itemId, watched).also { result ->
         if (result is NetworkResult.Success) {
-            cacheMutex.withLock {
-                updateWatchedInCache(itemId, watched)
-            }
+            updateWatchedInCache(itemId, watched)
         }
     }
 

@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -104,7 +105,7 @@ class MediaServerSettingsViewModelTest {
         }
         val json = Json { ignoreUnknownKeys = true }
         val httpFactory = TestHttpClientFactory(json, mockEngine, testLogger)
-        val managerScope = CoroutineScope(Dispatchers.Default + Job())
+        val managerScope = CoroutineScope(UnconfinedTestDispatcher() + Job())
         activeManagerScope = managerScope
         val manager = MediaServerManager(dao, httpFactory, managerScope)
         val plexAuthUseCase = PlexAuthUseCase(httpFactory)

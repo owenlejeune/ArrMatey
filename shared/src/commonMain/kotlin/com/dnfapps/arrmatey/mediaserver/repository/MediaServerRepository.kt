@@ -37,13 +37,13 @@ interface MediaServerRepository {
 
     suspend fun refreshItem(itemId: String): NetworkResult<Unit>
 
-    fun hasCachedLibraries(): Boolean = false
+    suspend fun hasCachedLibraries(): Boolean = false
 
-    fun hasCachedContents(libraryId: String): Boolean = false
+    suspend fun hasCachedContents(libraryId: String): Boolean = false
 
-    fun hasAllCachedContents(libraryIds: List<String>): Boolean = false
+    suspend fun hasAllCachedContents(libraryIds: List<String>): Boolean = false
 
-    fun clearCache() {}
+    suspend fun clearCache() {}
 
     fun buildImageUrl(imageKeyOrTag: String, itemId: String, maxWidth: Int = 400): String
 
