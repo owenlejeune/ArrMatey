@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
+import com.dnfapps.arrmatey.arr.api.model.hasDownloadedFiles
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.database.InstanceRepository
@@ -164,6 +165,7 @@ class DiscoverViewModel(
             item.copy(
                 mediaServerItem = mediaServerMatch,
                 inArrLibrary = arrMatch != null,
+                hasArrFiles = arrMatch?.hasDownloadedFiles == true,
             )
         }
 

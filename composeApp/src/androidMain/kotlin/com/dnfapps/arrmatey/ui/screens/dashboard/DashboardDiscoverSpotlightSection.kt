@@ -266,11 +266,16 @@ fun DashboardDiscoverSpotlightSection(
                                     val mediaServerItem = item.mediaServerItem
                                     if (mediaServerItem != null) {
                                         MediaServerBadgeOverlay(mediaServerItem.serverType)
-                                    } else if (item.inArrLibrary) {
+                                    } else if (item.isAvailableInLibrary) {
                                         InLibraryBadgeOverlay()
                                     } else {
-                                        item.mediaInfo?.let { info ->
-                                            StatusOverlay(SeerrMediaStatus.fromValue(info.status))
+                                        val status =
+                                            item.mediaInfo?.let { info ->
+                                                SeerrMediaStatus.fromValue(info.status)
+                                            } ?: if (item.inArrLibrary) SeerrMediaStatus.Processing else null
+
+                                        status?.let { s ->
+                                            StatusOverlay(s)
                                         }
                                     }
                                 }

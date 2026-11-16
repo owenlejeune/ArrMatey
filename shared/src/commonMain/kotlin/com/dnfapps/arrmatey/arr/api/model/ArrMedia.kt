@@ -117,6 +117,13 @@ sealed interface ArrMedia {
         get() = status == MediaStatus.Continuing
 }
 
+val ArrMedia.hasDownloadedFiles: Boolean
+    get() = when (this) {
+        is ArrMovie -> hasFile || movieFile != null
+        is ArrSeries -> episodeFileCount > 0
+        else -> isDownloaded
+    }
+
 fun ArrMedia.hasRootFolderChanged(newItem: ArrMedia): Boolean {
     if (this is Author && (this.isChaptarr || (newItem is Author && newItem.isChaptarr))) {
         val newAuthor = newItem as? Author ?: return false

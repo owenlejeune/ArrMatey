@@ -19,11 +19,11 @@ struct PosterItem<Content: View>: View {
     let onItemClick: ((ArrMedia) -> Void)?
     let enabled: Bool
     let additionalContent: () -> Content
-    
+
     let instanceType: InstanceType?
 
     @State private var loadError = false
-    
+
     init(
         item: ArrMedia,
         instanceType: InstanceType? = nil,
@@ -49,7 +49,7 @@ struct PosterItem<Content: View>: View {
         self.enabled = enabled
         self.additionalContent = additionalContent
     }
-    
+
     var body: some View {
         let placeholder: String = {
             if item is Arrtist || item is Author { return "person.fill" }
@@ -92,7 +92,7 @@ struct PosterItem<Content: View>: View {
                         .foregroundStyle(.primary)
                         .lineLimit(2, reservesSpace: true)
                         .multilineTextAlignment(.leading)
-                    
+
                     let subtitle: String? = {
                         if let author = item as? Author, let label = author.singleMediaTypeLabel(isChaptarrInstance: instanceType == .chaptarr) {
                             return label.localized()
@@ -118,7 +118,7 @@ struct PosterItem<Content: View>: View {
             }
         )
     }
-    
+
     @ViewBuilder
     private var posterImageView: some View {
         GeometryReader { geometry in
@@ -198,7 +198,7 @@ struct DiscoverPosterItem: View {
                         ZStack(alignment: .topLeading) {
                             RequestTypeChip(type: item.mediaType, solid: true)
                                 .padding(8)
-                            
+
                             HStack(spacing: 4) {
                                 Spacer()
                                 if let ms = item.mediaServerItem {
@@ -207,6 +207,8 @@ struct DiscoverPosterItem: View {
                                     InLibraryBadgeOverlay(iconSize: 14, innerPadding: 3, borderWidth: 1)
                                 } else if let status = item.mediaInfo?.status {
                                     StatusBadge(status: status)
+                                } else if item.inArrLibrary {
+                                    StatusBadge(status: 3)
                                 }
                             }
                             .padding(8)
@@ -220,7 +222,7 @@ struct DiscoverPosterItem: View {
                             .font(.system(size: 14, weight: .semibold))
                             .lineLimit(2, reservesSpace: true)
                             .multilineTextAlignment(.leading)
-                        
+
                         let subText: String = {
                             if item.mediaType == .person { return item.knownForDepartment ?? "" }
                             let date = item.releaseDate ?? item.firstAirDate
@@ -268,9 +270,9 @@ struct RequestPosterItem: View {
     let radius: Shared.PosterRadius
     let aspectRatio: AspectRatio
     let posterHeight: CGFloat?
-    
+
     @State private var loadError = false
-    
+
     init(
         item: RequestMediaDetails,
         aspectRatio: AspectRatio = .poster,
@@ -284,7 +286,7 @@ struct RequestPosterItem: View {
         self.aspectRatio = aspectRatio
         self.posterHeight = posterHeight
     }
-    
+
     var body: some View {
         if item.requestType == .person {
             CastMemberProfileView(
@@ -337,7 +339,7 @@ struct RequestPosterItem: View {
                     ZStack(alignment: .topLeading) {
                         RequestTypeChip(type: item.requestType, solid: true)
                             .padding(8)
-                        
+
                         if let status = item.mediaInfo?.status {
                             StatusBadge(status: status)
                                 .padding(8)
@@ -356,7 +358,7 @@ struct CastMemberProfileView: View {
     let name: String
     let credit: String
     let onClick: () -> Void
-    
+
     var body: some View {
         Button(action: onClick) {
             VStack(spacing: 4) {
@@ -380,11 +382,11 @@ struct CastMemberProfileView: View {
                                 .foregroundColor(.gray)
                         }
                 }
-                
+
                 Text(name)
                     .font(.caption)
                     .lineLimit(1)
-                
+
                 if !credit.isEmpty {
                     Text(credit)
                         .font(.caption2)
@@ -407,12 +409,12 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
     let enabled: Bool
     let footerVisible: Bool
     let placeholderIcon: String
-    
+
     let posterContent: () -> Poster
     let errorContent: () -> Error
     let additionalContent: () -> Additional
     let footerContent: () -> Footer
-    
+
     init(
         elevation: CGFloat = 4,
         radius: CGFloat = 12,
@@ -440,10 +442,10 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
         self.additionalContent = additionalContent
         self.footerContent = footerContent
     }
-    
+
     var body: some View {
         let width = posterHeight.map { $0 * CGFloat(aspectRatio.ratio) }
-        
+
         Button(action: { onClick?() }) {
             VStack(alignment: .leading, spacing: 0) {
                 ZStack {
@@ -459,7 +461,7 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
                 .aspectRatio(CGFloat(aspectRatio.ratio), contentMode: .fit)
                 .frame(height: posterHeight)
                 .clipped()
-                
+
                 if footerVisible {
                     VStack(alignment: .leading, spacing: 2) {
                         footerContent()
@@ -486,7 +488,7 @@ struct BasePosterItem<Poster: View, Error: View, Additional: View, Footer: View>
 
 struct StatusBadge: View {
     let status: Int32
-    
+
     var body: some View {
         let (icon, color): (String, Color) = {
             switch status {
@@ -496,7 +498,7 @@ struct StatusBadge: View {
             default: return ("", .clear)
             }
         }()
-        
+
         if !icon.isEmpty {
             Image(systemName: icon)
                 .symbolRenderingMode(.palette)
@@ -512,7 +514,7 @@ private struct PosterImageView: View {
     let resource: Shared.ImageResource?
     let geometry: GeometryProxy
     @Binding var loadError: Bool
-    
+
     var body: some View {
         if let resource = resource {
             Image(resource: resource)
@@ -550,9 +552,9 @@ struct GenericPosterItem<Content: View>: View {
     let posterHeight: CGFloat?
     let posterImage: Shared.ImageResource?
     let additionalContent: () -> Content
-    
+
     @State private var loadError = false
-    
+
     init(
         posterUrl: String?,
         aspectRatio: AspectRatio = .poster,
@@ -570,7 +572,7 @@ struct GenericPosterItem<Content: View>: View {
         self.posterImage = posterImage
         self.additionalContent = additionalContent
     }
-    
+
     var body: some View {
         BasePosterItem(
             elevation: CGFloat(truncating: elevation.elevation as NSNumber),
