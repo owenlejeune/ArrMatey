@@ -76,7 +76,7 @@ func arrImageRequest(for url: URL) -> URLRequest {
                 }
 
                 // Add auth params/headers
-                let apiKey = instance.apiKey.value
+                let apiKey = "\(instance.apiKey)"
                 if instance.type == .tracearr {
                     request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
                 } else if instance.type == .kapowarr || instance.type == .tautulli {
@@ -133,7 +133,7 @@ func arrImageRequest(for url: URL) -> URLRequest {
                     }
                 }
 
-                let token = integration.token.value
+                let token = "\(integration.token)"
                 if integration.serverType == .jellyfin || integration.serverType == .emby {
                     if !token.isEmpty {
                         request.setValue(token, forHTTPHeaderField: "X-Emby-Token")
