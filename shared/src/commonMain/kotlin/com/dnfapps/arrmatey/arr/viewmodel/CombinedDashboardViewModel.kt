@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.groupByTask
+import com.dnfapps.arrmatey.arr.api.model.hasDownloadedFiles
 import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.BazarrDashboardState
@@ -766,6 +767,7 @@ class CombinedDashboardViewModel(
         return item.copy(
             mediaServerItem = mediaServerMatch,
             inArrLibrary = arrMatch != null,
+            hasArrFiles = arrMatch?.hasDownloadedFiles == true,
         )
     }
 

@@ -44,9 +44,10 @@ data class DiscoverResult(
     val contentRating: String? = null,
     val mediaServerItem: UnifiedMediaItem? = null,
     val inArrLibrary: Boolean = false,
+    val hasArrFiles: Boolean = false,
 ) {
     val isAvailableInLibrary: Boolean
-        get() = mediaServerItem != null || inArrLibrary || mediaInfo?.status in listOf(4, 5)
+        get() = mediaServerItem != null || (inArrLibrary && hasArrFiles) || mediaInfo?.status in listOf(4, 5)
 
     val fullPosterPath: String?
         get() = (posterPath ?: profilePath)?.let { "https://image.tmdb.org/t/p/w500$it" }

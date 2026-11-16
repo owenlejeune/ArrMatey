@@ -267,16 +267,21 @@ fun PosterItem(
                             iconSize = badgeIconSize,
                             innerPadding = badgeInnerPadding,
                         )
-                    } else if (item.inArrLibrary) {
+                    } else if (item.isAvailableInLibrary) {
                         InLibraryBadgeOverlay(
                             modifier = Modifier.align(Alignment.TopEnd).padding(badgePadding),
                             iconSize = badgeIconSize,
                             innerPadding = badgeInnerPadding,
                         )
                     } else {
-                        item.mediaInfo?.let { info ->
+                        val status =
+                            item.mediaInfo?.let { info ->
+                                SeerrMediaStatus.fromValue(info.status)
+                            } ?: if (item.inArrLibrary) SeerrMediaStatus.Processing else null
+
+                        status?.let { s ->
                             StatusOverlay(
-                                status = SeerrMediaStatus.fromValue(info.status),
+                                status = s,
                                 modifier = Modifier.align(Alignment.TopEnd).padding(badgePadding),
                                 iconSize = badgeIconSize,
                                 innerPadding = badgeInnerPadding,

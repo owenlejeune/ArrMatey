@@ -120,11 +120,19 @@ class DiscoverLibraryCrossReferenceTest {
         )
         assertTrue(serverItem.isAvailableInLibrary)
 
-        // Present in Arr library
-        val arrItem = baseItem.copy(
+        // Present in Arr library without files -> not available
+        val arrItemNoFiles = baseItem.copy(
             inArrLibrary = true,
+            hasArrFiles = false,
         )
-        assertTrue(arrItem.isAvailableInLibrary)
+        assertFalse(arrItemNoFiles.isAvailableInLibrary)
+
+        // Present in Arr library with files -> available
+        val arrItemWithFiles = baseItem.copy(
+            inArrLibrary = true,
+            hasArrFiles = true,
+        )
+        assertTrue(arrItemWithFiles.isAvailableInLibrary)
 
         // Seerr status 4 (Partially Available) & 5 (Available)
         val status4Item = baseItem.copy(
