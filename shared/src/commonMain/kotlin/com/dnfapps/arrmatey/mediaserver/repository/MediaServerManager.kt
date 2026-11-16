@@ -103,6 +103,11 @@ class MediaServerManager(
 
     fun observeIntegrations(): Flow<List<MediaServerIntegration>> = dao.observeAll()
 
+    fun getAllIntegrations(): List<MediaServerIntegration> {
+        val cached = cachedIntegrations.values.toList()
+        return cached.ifEmpty { activeRepositories.value.map { it.integration } }
+    }
+
     fun observeIntegration(type: MediaServerType): Flow<MediaServerIntegration?> = dao.observeByType(type)
 
     suspend fun getIntegration(type: MediaServerType): MediaServerIntegration? = dao.getByType(type)
