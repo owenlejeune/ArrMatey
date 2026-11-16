@@ -8,7 +8,7 @@ data class ParsedRelease(
     val title: String,
     val year: Int?,
     val season: Int? = null,
-    val episode: Int? = null
+    val episode: Int? = null,
 )
 
 enum class ReleaseKind { Movie, Tv }
@@ -19,15 +19,14 @@ enum class ReleaseKind { Movie, Tv }
  * and for low-quality sources (CAM, TS, screeners and similar).
  */
 object ReleaseNameParser {
-
     private val lowQuality = Regex(
         """\b(CAM|HDCAM|CAMRIP|TS|HDTS|TELESYNC|TELECINE|TC|HC|HARDCODED|SCR|SCREENER|DVDSCR|WORKPRINT)\b""",
-        RegexOption.IGNORE_CASE
+        RegexOption.IGNORE_CASE,
     )
     private val year = Regex("""[ .(\[_]((?:19|20)\d\d)(?=[ .)\]_-]|$)""")
     private val tv = Regex(
         """[ .]S(\d{1,2})(?:E(\d{1,3}))?(?=[ .]|$)|[ .]Season[ .]?(\d{1,2})""",
-        RegexOption.IGNORE_CASE
+        RegexOption.IGNORE_CASE,
     )
     private val leadingTag = Regex("""^\[[^\]]*]\s*""")
     private val separators = Regex("""[._]+""")
@@ -67,6 +66,5 @@ object ReleaseNameParser {
         return ParsedRelease(title, match.groupValues[1].toInt())
     }
 
-    private fun clean(value: String): String =
-        spaces.replace(separators.replace(value, " "), " ").trim(' ', '-')
+    private fun clean(value: String): String = spaces.replace(separators.replace(value, " "), " ").trim(' ', '-')
 }

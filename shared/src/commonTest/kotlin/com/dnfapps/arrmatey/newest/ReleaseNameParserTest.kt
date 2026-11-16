@@ -6,12 +6,11 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ReleaseNameParserTest {
-
     @Test
     fun testMovieWithDots() {
         assertEquals(
             ParsedRelease("The Long Walk", 2025),
-            ReleaseNameParser.parse("The.Long.Walk.2025.1080p.WEB-DL.DDP5.1.H.264-GRP", ReleaseKind.Movie)
+            ReleaseNameParser.parse("The.Long.Walk.2025.1080p.WEB-DL.DDP5.1.H.264-GRP", ReleaseKind.Movie),
         )
     }
 
@@ -19,7 +18,7 @@ class ReleaseNameParserTest {
     fun testMovieWithSpacesAndParentheses() {
         assertEquals(
             ParsedRelease("Weapons", 2025),
-            ReleaseNameParser.parse("Weapons (2025) 2160p WEB-DL", ReleaseKind.Movie)
+            ReleaseNameParser.parse("Weapons (2025) 2160p WEB-DL", ReleaseKind.Movie),
         )
     }
 
@@ -27,7 +26,7 @@ class ReleaseNameParserTest {
     fun testMovieTitleContainingYearKeepsLastBoundary() {
         assertEquals(
             ParsedRelease("Blade Runner 2049", 2017),
-            ReleaseNameParser.parse("Blade.Runner.2049.2017.1080p.BluRay", ReleaseKind.Movie)
+            ReleaseNameParser.parse("Blade.Runner.2049.2017.1080p.BluRay", ReleaseKind.Movie),
         )
     }
 
@@ -35,7 +34,7 @@ class ReleaseNameParserTest {
     fun testMovieLeadingGroupTagIsRemoved() {
         assertEquals(
             ParsedRelease("Sinners", 2025),
-            ReleaseNameParser.parse("[GRP] Sinners 2025 1080p", ReleaseKind.Movie)
+            ReleaseNameParser.parse("[GRP] Sinners 2025 1080p", ReleaseKind.Movie),
         )
     }
 
@@ -61,7 +60,7 @@ class ReleaseNameParserTest {
     fun testTvSeasonAndEpisode() {
         assertEquals(
             ParsedRelease("The Bear", null, 4, 2),
-            ReleaseNameParser.parse("The.Bear.S04E02.1080p.WEB.h264-GRP", ReleaseKind.Tv)
+            ReleaseNameParser.parse("The.Bear.S04E02.1080p.WEB.h264-GRP", ReleaseKind.Tv),
         )
     }
 
@@ -69,7 +68,7 @@ class ReleaseNameParserTest {
     fun testTvSeasonPack() {
         assertEquals(
             ParsedRelease("Andor", null, 2, null),
-            ReleaseNameParser.parse("Andor.S02.2160p.DSNP.WEB-DL", ReleaseKind.Tv)
+            ReleaseNameParser.parse("Andor.S02.2160p.DSNP.WEB-DL", ReleaseKind.Tv),
         )
     }
 
@@ -77,7 +76,7 @@ class ReleaseNameParserTest {
     fun testTvSeasonWord() {
         assertEquals(
             ParsedRelease("Slow Horses", null, 5, null),
-            ReleaseNameParser.parse("Slow Horses Season 5 1080p", ReleaseKind.Tv)
+            ReleaseNameParser.parse("Slow Horses Season 5 1080p", ReleaseKind.Tv),
         )
     }
 
@@ -85,7 +84,7 @@ class ReleaseNameParserTest {
     fun testTvWithYear() {
         assertEquals(
             ParsedRelease("Doctor Who", 2005, 1, 1),
-            ReleaseNameParser.parse("Doctor.Who.2005.S01E01.720p", ReleaseKind.Tv)
+            ReleaseNameParser.parse("Doctor.Who.2005.S01E01.720p", ReleaseKind.Tv),
         )
     }
 
