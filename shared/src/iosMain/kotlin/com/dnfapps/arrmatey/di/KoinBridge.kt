@@ -43,6 +43,7 @@ import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadQueueViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerType
+import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.mediaserver.usecase.ResolveSonarrEpisodeUseCase
 import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerLibraryViewModel
 import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerSettingsViewModel
@@ -223,6 +224,8 @@ object KoinBridge : KoinComponent {
     fun getInstanceRepository(): InstanceRepository = getKoin().get()
 
     fun getInstanceManager(): InstanceManager = getKoin().get()
+
+    fun getMediaServerManager(): MediaServerManager = getKoin().get()
 
     fun getMediaServerSettingsViewModel(): MediaServerSettingsViewModel = getKoin().get()
 
