@@ -41,9 +41,7 @@ class ArrImageLoader(
         val headers: NetworkHeaders,
     )
 
-    private fun resolveImageRequest(originalUrl: String): ResolvedImageData? {
-        return resolveInstanceRequest(originalUrl) ?: resolveMediaServerRequest(originalUrl)
-    }
+    private fun resolveImageRequest(originalUrl: String): ResolvedImageData? = resolveInstanceRequest(originalUrl) ?: resolveMediaServerRequest(originalUrl)
 
     private fun resolveInstanceRequest(originalUrl: String): ResolvedImageData? {
         val (instance, matchedPrefix) = findMatch(
@@ -141,12 +139,10 @@ class ArrImageLoader(
         return remainingIndex == url.length || url[remainingIndex] == '/' || url[remainingIndex] == '?'
     }
 
-    private fun rewriteUrl(url: String, matchedPrefix: String, effectiveBase: String): String {
-        return if (matchedPrefix != effectiveBase) {
-            effectiveBase + url.substring(matchedPrefix.length)
-        } else {
-            url
-        }
+    private fun rewriteUrl(url: String, matchedPrefix: String, effectiveBase: String): String = if (matchedPrefix != effectiveBase) {
+        effectiveBase + url.substring(matchedPrefix.length)
+    } else {
+        url
     }
 
     private fun createHeadersBuilder(headers: List<InstanceHeader>): NetworkHeaders.Builder {
