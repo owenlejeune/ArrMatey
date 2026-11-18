@@ -834,13 +834,13 @@ class ActivityQueueViewModel(
     fun getQueueItemForEpisode(episode: Episode): SonarrQueueItem? {
         val tasks = activityTasks.value.filterIsInstance<SonarrQueueItem>()
 
-        val episodeMatch = tasks.firstOrNull { it.calcEpisodeId == episode.id }
+        val episodeMatch = tasks.firstOrNull { it.effectiveEpisodeIds.contains(episode.id) || it.calcEpisodeId == episode.id }
         if (episodeMatch != null) return episodeMatch
 
         return tasks.firstOrNull {
             it.calcSeriesId == episode.seriesId &&
-                it.seasonNumber == episode.seasonNumber &&
-                it.calcEpisodeId == null
+                (it.seasons.any { s -> s.seasonNumber == episode.seasonNumber } || it.primarySeasonNumber == episode.seasonNumber) &&
+                it.effectiveEpisodeIds.isEmpty()
         }
     }
 

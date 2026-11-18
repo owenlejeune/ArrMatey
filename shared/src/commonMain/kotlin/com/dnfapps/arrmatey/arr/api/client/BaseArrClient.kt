@@ -43,8 +43,11 @@ abstract class BaseArrClient(
     ArrClient {
     protected abstract val instance: Instance
 
+    protected open val apiBase: String
+        get() = instance.type.apiBase
+
     protected val baseUrl: String
-        get() = "${instance.getEffectiveBaseUrl().trimEnd('/')}/${instance.type.apiBase.trim('/')}"
+        get() = "${instance.getEffectiveBaseUrl().trimEnd('/')}/${apiBase.trim('/')}"
 
     override suspend fun testConnection(): NetworkResult<Unit> = get(instance.type.testEndpoint)
 
@@ -259,7 +262,13 @@ abstract class BaseArrClient(
             appendInstanceApiKey()
             url {
                 params.forEach { (key, value) ->
-                    parameters.append(key, value.toString())
+                    if (value is Iterable<*>) {
+                        value.forEach { item ->
+                            if (item != null) parameters.append(key, item.toString())
+                        }
+                    } else {
+                        parameters.append(key, value.toString())
+                    }
                 }
             }
         }.rebuild()
@@ -293,7 +302,13 @@ abstract class BaseArrClient(
         contentType(ContentType.Application.Json)
         url {
             params.forEach { (key, value) ->
-                parameters.append(key, value.toString())
+                if (value is Iterable<*>) {
+                    value.forEach { item ->
+                        if (item != null) parameters.append(key, item.toString())
+                    }
+                } else {
+                    parameters.append(key, value.toString())
+                }
             }
         }
         setBody(body)
@@ -306,7 +321,13 @@ abstract class BaseArrClient(
         appendInstanceApiKey()
         url {
             params.forEach { (key, value) ->
-                parameters.append(key, value.toString())
+                if (value is Iterable<*>) {
+                    value.forEach { item ->
+                        if (item != null) parameters.append(key, item.toString())
+                    }
+                } else {
+                    parameters.append(key, value.toString())
+                }
             }
         }
     }

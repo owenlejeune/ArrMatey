@@ -85,9 +85,14 @@ class EpisodeDetailsViewModel(
                 tasks.filterIsInstance<SonarrQueueItem>().filter { task ->
                     (targetInstanceId == null || task.instanceId == null || task.instanceId == targetInstanceId) &&
                         (
-                            task.calcEpisodeId == episode.id ||
-                                (task.calcSeriesId == seriesId && task.seasonNumber == episode.seasonNumber && task.calcEpisodeId == null)
-                            )
+                            task.effectiveEpisodeIds.contains(episode.id) ||
+                                task.calcEpisodeId == episode.id ||
+                                (
+                                    task.calcSeriesId == seriesId &&
+                                        (task.seasons.any { s -> s.seasonNumber == episode.seasonNumber } || task.primarySeasonNumber == episode.seasonNumber) &&
+                                        task.effectiveEpisodeIds.isEmpty()
+                                )
+                        )
                 }
             }.stateIn(
                 scope = viewModelScope,

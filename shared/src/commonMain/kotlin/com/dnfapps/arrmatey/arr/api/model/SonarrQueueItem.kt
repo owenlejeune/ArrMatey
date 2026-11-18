@@ -2,9 +2,19 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 import kotlin.time.Instant
 
+@Serializable
+data class QueueSeasonResource(
+    val seasonNumber: Int,
+    val monitored: Boolean = true,
+)
+
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class SonarrQueueItem(
     override val id: Int,
@@ -17,8 +27,8 @@ data class SonarrQueueItem(
     override val indexer: String? = null,
     override val protocol: ReleaseProtocol,
     override val size: Float,
-    override var sizeleft: Float,
-    override val timeleft: String? = null,
+    @JsonNames("sizeLeft") override var sizeleft: Float = 0f,
+    @JsonNames("timeLeft") override val timeleft: String? = null,
     override val languages: List<Language> = emptyList(),
     override val quality: QualityInfo,
     override val customFormats: List<CustomFormat> = emptyList(),
@@ -33,34 +43,66 @@ data class SonarrQueueItem(
     override val outputPath: String? = null,
     override val downloadClientHasPostImportCategory: Boolean = false,
     override var taskGroupCount: Int? = null,
+
+    // Series
     val seriesId: Long? = null,
     val series: ArrSeries? = null,
-    val episodeId: Long? = null,
-    val episode: Episode? = null,
+
+    // V5 Multi-episode / season pack fields
+    val episodeIds: List<Long> = emptyList(),
+    val episodes: List<Episode> = emptyList(),
+    val seasons: List<QueueSeasonResource> = emptyList(),
+    val episodesWithFilesCount: Int? = null,
+    val isFullSeason: Boolean = false,
+
+    // V3 Legacy single-episode fields (for backward compatibility & named constructor args)
+    @SerialName("episodeId") val episodeId: Long? = null,
+    @SerialName("episode") val episode: Episode? = null,
     val episodeHasFile: Boolean? = null,
-    val seasonNumber: Int? = null,
+    @SerialName("seasonNumber") val seasonNumber: Int? = null,
 ) : QueueItem {
     override val type: InstanceType
         get() = instanceType ?: InstanceType.Sonarr
+
+    val effectiveEpisodeIds: List<Long>
+        get() = episodeIds.ifEmpty { listOfNotNull(episodeId ?: episode?.id) }
+
+    val primaryEpisodeId: Long?
+        get() = effectiveEpisodeIds.firstOrNull()
+
+    val effectiveEpisodes: List<Episode>
+        get() = episodes.ifEmpty { listOfNotNull(episode) }
+
+    val primaryEpisode: Episode?
+        get() = effectiveEpisodes.firstOrNull()
+
+    val primarySeasonNumber: Int?
+        get() = seasons.firstOrNull()?.seasonNumber ?: seasonNumber
+
     val calcSeriesId: Long?
         get() = seriesId ?: series?.id
 
     val calcEpisodeId: Long?
-        get() = episodeId ?: episode?.id
+        get() = primaryEpisodeId
 
     override val taskGroup: String
-        get() = super.taskGroup + seasonNumber
+        get() = super.taskGroup + (primarySeasonNumber ?: "")
 
     override val titleLabel: String
         get() {
             series?.title?.let { seriesTitle ->
+                if (isFullSeason || seasons.isNotEmpty()) {
+                    primarySeasonNumber?.let { season ->
+                        return "$seriesTitle (Season $season)"
+                    }
+                }
                 taskGroupCount?.let { count ->
-                    if (count > 1 && seasonNumber != null) {
-                        val seasonText = "Season $seasonNumber"
+                    if (count > 1 && primarySeasonNumber != null) {
+                        val seasonText = "Season $primarySeasonNumber"
                         return "$seriesTitle ($seasonText)"
                     }
                 }
-                episode?.episodeLabel?.let { episodeLabel ->
+                primaryEpisode?.episodeLabel?.let { episodeLabel ->
                     return "$seriesTitle $episodeLabel"
                 }
             }
@@ -68,5 +110,5 @@ data class SonarrQueueItem(
         }
 
     override val mediaId: Long?
-        get() = seriesId ?: series?.id ?: episode?.seriesId
+        get() = seriesId ?: series?.id ?: primaryEpisode?.seriesId
 }

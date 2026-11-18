@@ -144,7 +144,7 @@ object QueueItemSerializer : JsonContentPolymorphicSerializer<QueueItem>(QueueIt
 
         return when {
             "movie" in jsonObject -> RadarrQueueItem.serializer()
-            "series" in jsonObject -> SonarrQueueItem.serializer()
+            "series" in jsonObject || "seriesId" in jsonObject || "seasons" in jsonObject || "episodes" in jsonObject -> SonarrQueueItem.serializer()
             "album" in jsonObject -> LidarrQueueItem.serializer()
             "author" in jsonObject || "book" in jsonObject -> ReadarrQueueItem.serializer()
             "volume_id" in jsonObject || "issue_id" in jsonObject || "download_service" in jsonObject -> KapowarrQueueItem.serializer()
