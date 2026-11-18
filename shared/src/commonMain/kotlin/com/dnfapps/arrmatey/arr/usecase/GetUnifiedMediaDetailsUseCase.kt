@@ -244,13 +244,17 @@ class GetUnifiedMediaDetailsUseCase(
         val tasksBySeriesSeason = HashMap<Pair<Long, Int>, SonarrQueueItem>()
 
         sonarrTasks.forEach { task ->
-            task.calcEpisodeId?.let { epId ->
+            task.effectiveEpisodeIds.forEach { epId ->
                 if (epId != 0L) tasksByEpisodeId[epId] = task
             }
             val seriesId = task.calcSeriesId
-            val seasonNum = task.seasonNumber
-            if (seriesId != null && seriesId != 0L && task.calcEpisodeId == null && seasonNum != null) {
-                tasksBySeriesSeason[seriesId to seasonNum] = task
+            if (seriesId != null && seriesId != 0L) {
+                task.seasons.forEach { seasonResource ->
+                    tasksBySeriesSeason[seriesId to seasonResource.seasonNumber] = task
+                }
+                task.primarySeasonNumber?.let { seasonNum ->
+                    tasksBySeriesSeason[seriesId to seasonNum] = task
+                }
             }
         }
 

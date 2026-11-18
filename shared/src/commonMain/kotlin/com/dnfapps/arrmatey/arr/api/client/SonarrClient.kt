@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.arr.api.model.Language
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
 import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
+import com.dnfapps.arrmatey.arr.api.model.QueuePage
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.SeriesEditorBody
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorOption
@@ -28,12 +29,73 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.Serializable
+
+enum class SonarrApiVersion(val apiBase: String) {
+    V3("api/v3"),
+    V5("api/v5"),
+    ;
+
+    companion object {
+        fun fromVersionString(version: String?): SonarrApiVersion = when {
+            version?.startsWith("5.") == true -> V5
+            version?.startsWith("3.") == true -> V3
+            version?.startsWith("4.") == true -> V3
+            else -> V5
+        }
+    }
+}
+
+@Serializable
+private data class SonarrQueueBulkPayload(
+    val ids: List<Int>,
+)
 
 class SonarrClient(
     override val instance: Instance,
     httpClient: HttpClient,
+    initialApiVersion: SonarrApiVersion = SonarrApiVersion.V5,
 ) : BaseArrClient(httpClient),
     ArrClient {
+
+    var apiVersion: SonarrApiVersion = initialApiVersion
+
+    override val apiBase: String
+        get() = apiVersion.apiBase
+
+    val isV5: Boolean
+        get() = apiVersion == SonarrApiVersion.V5
+
+    override suspend fun testConnection(): NetworkResult<Unit> {
+        val statusResult = getStatus()
+        if (statusResult is NetworkResult.Success) {
+            apiVersion = SonarrApiVersion.fromVersionString(statusResult.data.version)
+            return NetworkResult.Success(Unit)
+        }
+        val fallbackVersion = if (apiVersion == SonarrApiVersion.V5) SonarrApiVersion.V3 else SonarrApiVersion.V5
+        apiVersion = fallbackVersion
+        val fallbackResult = getStatus()
+        return if (fallbackResult is NetworkResult.Success) {
+            apiVersion = SonarrApiVersion.fromVersionString(fallbackResult.data.version)
+            NetworkResult.Success(Unit)
+        } else {
+            statusResult.map { }
+        }
+    }
+
+    private fun buildSubresourceParams(
+        v5Subresources: List<String>,
+        v3Params: Map<String, Any> = emptyMap(),
+        additionalParams: Map<String, Any> = emptyMap(),
+    ): Map<String, Any> = buildMap {
+        putAll(additionalParams)
+        if (isV5) {
+            put("includeSubresources", v5Subresources)
+        } else {
+            putAll(v3Params)
+        }
+    }
+
     override suspend fun getLibrary(): NetworkResult<List<ArrSeries>> = get<List<ArrSeries>>("series")
         .map { shows ->
             shows.map { series ->
@@ -88,6 +150,37 @@ class SonarrClient(
 
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrSeries> = post<ArrMedia, ArrSeries>("series", item)
 
+    override suspend fun fetchActivityTasks(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<QueuePage> = get<QueuePage>(
+        "queue",
+        buildSubresourceParams(
+            v5Subresources = listOf("Series", "Episodes"),
+            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+            additionalParams = mapOf("page" to page, "pageSize" to pageSize),
+        ),
+    ).map { it.setInstance(instance.id, instance.label, instance.type) }
+
+    override suspend fun deleteActivityTask(
+        id: Int,
+        removeFromClient: Boolean,
+        blocklist: Boolean,
+        skipRedownload: Boolean,
+    ): NetworkResult<Unit> = if (isV5) {
+        delete(
+            endpoint = "queue/bulk",
+            body = SonarrQueueBulkPayload(ids = listOf(id)),
+            params = mapOf(
+                "removeFromClient" to removeFromClient,
+                "blocklist" to blocklist,
+                "skipRedownload" to skipRedownload,
+            ),
+        )
+    } else {
+        super.deleteActivityTask(id, removeFromClient, blocklist, skipRedownload)
+    }
+
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<SeriesRelease>> {
         if (params !is ReleaseParams.Series) {
             return NetworkResult.Error(message = "Non-series params type: $params")
@@ -122,12 +215,10 @@ class SonarrClient(
         altId: Long?,
     ): NetworkResult<List<SonarrHistoryItem>> = get<SonarrHistoryResponse>(
         "history",
-        mapOf<String, Any>(
-            "page" to page,
-            "pageSize" to pageSize,
-            "episodeId" to id,
-            "includeSeries" to true,
-            "includeEpisode" to true,
+        buildSubresourceParams(
+            v5Subresources = listOf("Series", "Episode"),
+            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+            additionalParams = mapOf("page" to page, "pageSize" to pageSize, "episodeId" to id),
         ),
     ).map { response ->
         response.records.map {
@@ -144,10 +235,10 @@ class SonarrClient(
     // Paged /history ignores seriesId (it only accepts seriesIds), so use the per-series endpoint.
     suspend fun getSeriesHistory(seriesId: Long): NetworkResult<List<SonarrHistoryItem>> = get<List<SonarrHistoryItem>>(
         "history/series",
-        mapOf<String, Any>(
-            "seriesId" to seriesId,
-            "includeSeries" to true,
-            "includeEpisode" to true,
+        buildSubresourceParams(
+            v5Subresources = listOf("Series", "Episode"),
+            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+            additionalParams = mapOf("seriesId" to seriesId),
         ),
     ).map { list ->
         list.map {
@@ -166,11 +257,10 @@ class SonarrClient(
         pageSize: Int,
     ): NetworkResult<List<HistoryItem>> = get<SonarrHistoryResponse>(
         "history",
-        mapOf<String, Any>(
-            "page" to page,
-            "pageSize" to pageSize,
-            "includeSeries" to true,
-            "includeEpisode" to true,
+        buildSubresourceParams(
+            v5Subresources = listOf("Series", "Episode"),
+            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+            additionalParams = mapOf("page" to page, "pageSize" to pageSize),
         ),
     ).map { response ->
         response.records.map {
@@ -191,13 +281,18 @@ class SonarrClient(
         end: LocalDate,
     ): NetworkResult<List<Episode>> = get<List<Episode>>(
         "calendar",
-        mapOf(
-            "start" to start.toString(),
-            "end" to end.toString(),
-            "unmonitored" to true,
-            "includeSeries" to true,
-            "includeEpisodeFile" to true,
-            "includeEpisodeImages" to true,
+        buildSubresourceParams(
+            v5Subresources = listOf("Series", "EpisodeFile", "EpisodeImages"),
+            v3Params = mapOf(
+                "includeSeries" to true,
+                "includeEpisodeFile" to true,
+                "includeEpisodeImages" to true,
+            ),
+            additionalParams = mapOf(
+                "start" to start.toString(),
+                "end" to end.toString(),
+                "unmonitored" to true,
+            ),
         ),
     ).map { it.map { ep -> ep.copy(instanceId = instance.id) } }
 
@@ -242,11 +337,10 @@ class SonarrClient(
         pageSize: Int,
     ): NetworkResult<WantedPage> = get<SonarrWantedPage>(
         "wanted/missing",
-        mapOf(
-            "page" to page,
-            "pageSize" to pageSize,
-            "includeSeries" to true,
-            "includeEpisode" to true,
+        buildSubresourceParams(
+            v5Subresources = listOf("Series", "Episode"),
+            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+            additionalParams = mapOf("page" to page, "pageSize" to pageSize),
         ),
     ).map { pageRes ->
         WantedPage(
@@ -284,11 +378,10 @@ class SonarrClient(
         pageSize: Int,
     ): NetworkResult<WantedPage> = get<SonarrWantedPage>(
         "wanted/cutoff",
-        mapOf(
-            "page" to page,
-            "pageSize" to pageSize,
-            "includeSeries" to true,
-            "includeEpisode" to true,
+        buildSubresourceParams(
+            v5Subresources = listOf("Series", "Episode"),
+            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+            additionalParams = mapOf("page" to page, "pageSize" to pageSize),
         ),
     ).map { pageRes ->
         WantedPage(

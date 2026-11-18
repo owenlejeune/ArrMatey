@@ -48,6 +48,8 @@ data class Episode(
     val unverifiedSceneNumbering: Boolean,
     val endTime: String? = null,
     val grabDate: String? = null,
+    @Contextual val endTimeUtc: Instant? = null,
+    @Contextual val grabDateUtc: Instant? = null,
     override val images: List<ArrImage> = emptyList(),
     val series: ArrSeries? = null,
     override val instanceId: Long? = null,
