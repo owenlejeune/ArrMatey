@@ -91,8 +91,8 @@ class EpisodeDetailsViewModel(
                                     task.calcSeriesId == seriesId &&
                                         (task.seasons.any { s -> s.seasonNumber == episode.seasonNumber } || task.primarySeasonNumber == episode.seasonNumber) &&
                                         task.effectiveEpisodeIds.isEmpty()
-                                )
-                        )
+                                    )
+                            )
                 }
             }.stateIn(
                 scope = viewModelScope,

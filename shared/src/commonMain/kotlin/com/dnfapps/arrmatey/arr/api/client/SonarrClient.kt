@@ -167,20 +167,18 @@ class SonarrClient(
         removeFromClient: Boolean,
         blocklist: Boolean,
         skipRedownload: Boolean,
-    ): NetworkResult<Unit> {
-        return if (isV5) {
-            delete(
-                endpoint = "queue/bulk",
-                body = SonarrQueueBulkPayload(ids = listOf(id)),
-                params = mapOf(
-                    "removeFromClient" to removeFromClient,
-                    "blocklist" to blocklist,
-                    "skipRedownload" to skipRedownload,
-                ),
-            )
-        } else {
-            super.deleteActivityTask(id, removeFromClient, blocklist, skipRedownload)
-        }
+    ): NetworkResult<Unit> = if (isV5) {
+        delete(
+            endpoint = "queue/bulk",
+            body = SonarrQueueBulkPayload(ids = listOf(id)),
+            params = mapOf(
+                "removeFromClient" to removeFromClient,
+                "blocklist" to blocklist,
+                "skipRedownload" to skipRedownload,
+            ),
+        )
+    } else {
+        super.deleteActivityTask(id, removeFromClient, blocklist, skipRedownload)
     }
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<SeriesRelease>> {
