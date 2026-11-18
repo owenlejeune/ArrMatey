@@ -161,5 +161,8 @@ class BookDetailsViewModel(
 
     fun resetMonitorStatus() {
         _monitorStatus.value = OperationStatus.Idle
+        viewModelScope.launch {
+            currentRepository?.resetMonitorStatus()
+        }
     }
 }

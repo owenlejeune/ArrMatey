@@ -475,6 +475,25 @@ class ArrMediaViewModel(
         _editItemStatus.value = OperationStatus.Idle
     }
 
+    fun resetMonitorStatus() {
+        _monitorStatus.value = OperationStatus.Idle
+        viewModelScope.launch {
+            currentRepository?.resetMonitorStatus()
+        }
+    }
+
+    fun resetSearchStatus() {
+        viewModelScope.launch {
+            currentRepository?.resetSearchStatus()
+        }
+    }
+
+    fun resetHistoryStatus() {
+        viewModelScope.launch {
+            currentRepository?.resetHistoryStatus()
+        }
+    }
+
     fun toggleItemSelection(id: Long) {
         selectionState.toggle(id)
     }

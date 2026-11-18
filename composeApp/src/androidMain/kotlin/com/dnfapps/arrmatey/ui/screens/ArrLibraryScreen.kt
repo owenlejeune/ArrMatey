@@ -191,15 +191,39 @@ fun ArrLibraryScreen(
         arrMediaViewModel.resetErrorMessage()
     }
 
+    val monitorStatus by arrMediaViewModel.monitorStatus.collectAsStateWithLifecycle()
+
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
     LaunchedEffect(lastSearchResult) {
         when (lastSearchResult) {
             true -> {
                 Toast.makeText(context, searchQueuedMessage, Toast.LENGTH_SHORT).show()
+                arrMediaViewModel.resetSearchStatus()
             }
             false -> {
                 Toast.makeText(context, searchErrorMessage, Toast.LENGTH_SHORT).show()
+                arrMediaViewModel.resetSearchStatus()
+            }
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(monitorStatus) {
+        when (val status = monitorStatus) {
+            is OperationStatus.Success -> {
+                status.message?.let { message ->
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+                showMonitorOptionsSheet = false
+                arrMediaViewModel.resetMonitorStatus()
+                arrMediaViewModel.exitSelectionMode()
+            }
+            is OperationStatus.Error -> {
+                status.message?.let { message ->
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+                arrMediaViewModel.resetMonitorStatus()
             }
             else -> {}
         }
