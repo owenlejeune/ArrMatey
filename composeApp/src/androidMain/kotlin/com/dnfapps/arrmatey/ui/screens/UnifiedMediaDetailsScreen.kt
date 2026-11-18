@@ -270,8 +270,14 @@ fun UnifiedMediaDetailsScreen(
 
     LaunchedEffect(lastSearchResult) {
         when (lastSearchResult) {
-            true -> Toast.makeText(context, searchQueuedMessage, Toast.LENGTH_SHORT).show()
-            false -> Toast.makeText(context, searchErrorMessage, Toast.LENGTH_SHORT).show()
+            true -> {
+                Toast.makeText(context, searchQueuedMessage, Toast.LENGTH_SHORT).show()
+                viewModel.resetSearchStatus()
+            }
+            false -> {
+                Toast.makeText(context, searchErrorMessage, Toast.LENGTH_SHORT).show()
+                viewModel.resetSearchStatus()
+            }
             else -> {}
         }
     }

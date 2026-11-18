@@ -243,8 +243,24 @@ open class ArrInstanceRepository(
         libraryRepository.resetDownloadStatus()
     }
 
+    open fun resetAddItemStatus() {
+        libraryRepository.resetAddItemStatus()
+    }
+
     open fun resetEditItemStatus() {
         libraryRepository.setEditItemStatus(OperationStatus.Idle)
+    }
+
+    open fun resetMonitorStatus() {
+        libraryRepository.resetMonitorStatus()
+    }
+
+    open fun resetSearchStatus() {
+        libraryRepository.resetSearchStatus()
+    }
+
+    open fun resetHistoryStatus() {
+        libraryRepository.resetHistoryStatus()
     }
 
     open suspend fun deleteActivityTask(

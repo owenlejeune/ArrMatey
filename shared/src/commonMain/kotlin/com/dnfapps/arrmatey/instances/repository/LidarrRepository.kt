@@ -100,10 +100,8 @@ class LidarrRepository(
                     ),
                 )
                 updateAlbumInCache(resultAlbum.copy(images = album.images))
-                libraryRepository.setMonitorStatus(OperationStatus.Idle)
             }.onError { code, message, cause ->
                 libraryRepository.setMonitorStatus(OperationStatus.Error(code, message, cause))
-                libraryRepository.setMonitorStatus(OperationStatus.Idle)
             }
     }
 

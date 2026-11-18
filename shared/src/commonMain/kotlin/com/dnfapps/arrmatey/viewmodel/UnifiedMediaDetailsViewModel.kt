@@ -889,6 +889,27 @@ class UnifiedMediaDetailsViewModel(
 
     fun resetAddItemStatus() {
         arrActionsHandler.resetAddItemStatus()
+        viewModelScope.launch {
+            instanceHandler.getActiveArrRepository()?.resetAddItemStatus()
+        }
+    }
+
+    fun resetMonitorStatus() {
+        viewModelScope.launch {
+            instanceHandler.getActiveArrRepository()?.resetMonitorStatus()
+        }
+    }
+
+    fun resetSearchStatus() {
+        viewModelScope.launch {
+            instanceHandler.getActiveArrRepository()?.resetSearchStatus()
+        }
+    }
+
+    fun resetHistoryStatus() {
+        viewModelScope.launch {
+            instanceHandler.getActiveArrRepository()?.resetHistoryStatus()
+        }
     }
 
     fun deleteMedia(

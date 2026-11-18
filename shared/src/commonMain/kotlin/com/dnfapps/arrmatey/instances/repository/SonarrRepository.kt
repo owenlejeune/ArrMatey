@@ -70,8 +70,6 @@ class SonarrRepository(
                 libraryRepository.updateItemInLibraryCache(series)
             }.onError { code, message, cause ->
                 libraryRepository.setMonitorStatus(OperationStatus.Error(code, message, cause))
-            }.also {
-                libraryRepository.setMonitorStatus(OperationStatus.Idle)
             }
     }
 
@@ -96,8 +94,6 @@ class SonarrRepository(
                 )
             }.onError { code, message, cause ->
                 libraryRepository.setMonitorStatus(OperationStatus.Error(code, message, cause))
-            }.also {
-                libraryRepository.setMonitorStatus(OperationStatus.Idle)
             }
     }
 

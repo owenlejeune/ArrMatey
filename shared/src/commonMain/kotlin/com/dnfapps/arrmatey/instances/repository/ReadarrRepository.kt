@@ -105,8 +105,6 @@ class ReadarrRepository(
             }.map { responses ->
                 val response = responses.firstOrNull()
                 book.copy(monitored = response?.monitored ?: updatedMonitored)
-            }.also {
-                libraryRepository.setMonitorStatus(OperationStatus.Idle)
             }
     }
 

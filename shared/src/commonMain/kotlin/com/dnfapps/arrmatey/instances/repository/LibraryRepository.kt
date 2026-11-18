@@ -256,8 +256,6 @@ class LibraryRepository(
                 scope.launch {
                     refreshLibrary()
                 }
-
-                _addItemStatus.value = OperationStatus.Idle
             }.onError { code, error, cause ->
                 _addItemStatus.value = OperationStatus.Error(code, error, cause)
             }
@@ -319,8 +317,6 @@ class LibraryRepository(
             }.onError { code, error, cause ->
                 logger.error(cause) { "Search error: $error" }
                 _searchStatus.value = OperationStatus.Error(code, error, cause)
-            }.also {
-                _searchStatus.value = OperationStatus.Idle
             }
     }
 
@@ -354,8 +350,6 @@ class LibraryRepository(
                 _historyStatus.value = OperationStatus.Success()
             }.onError { code, message, cause ->
                 _historyStatus.value = OperationStatus.Error(code, message, cause)
-            }.also {
-                _historyStatus.value = OperationStatus.Idle
             }
     }
 
@@ -371,8 +365,6 @@ class LibraryRepository(
                 _historyStatus.value = OperationStatus.Success()
             }?.onError { code, message, cause ->
                 _historyStatus.value = OperationStatus.Error(code, message, cause)
-            }?.also {
-                _historyStatus.value = OperationStatus.Idle
             } ?: NetworkResult.Error(message = mokoStrings.getString(MR.strings.not_a_sonarr_instance))
     }
 
@@ -509,8 +501,6 @@ class LibraryRepository(
                 updateItemInLibraryCache(updateItem)
             }.onError { code, message, cause ->
                 _monitorStatus.value = OperationStatus.Error(code, message, cause)
-            }.also {
-                _monitorStatus.value = OperationStatus.Idle
             }
     }
 
@@ -564,8 +554,6 @@ class LibraryRepository(
                 _monitorStatus.value = OperationStatus.Success(mokoStrings.getString(MR.strings.monitoring_updated_successfully))
             }.onError { code, message, cause ->
                 _monitorStatus.value = OperationStatus.Error(code, message, cause)
-            }.also {
-                _monitorStatus.value = OperationStatus.Idle
             }
     }
 
@@ -663,6 +651,26 @@ class LibraryRepository(
 
     fun setMonitorStatus(status: OperationStatus) {
         _monitorStatus.value = status
+    }
+
+    fun resetMonitorStatus() {
+        _monitorStatus.value = OperationStatus.Idle
+    }
+
+    fun resetSearchStatus() {
+        _searchStatus.value = OperationStatus.Idle
+    }
+
+    fun resetHistoryStatus() {
+        _historyStatus.value = OperationStatus.Idle
+    }
+
+    fun setAddItemStatus(status: OperationStatus) {
+        _addItemStatus.value = status
+    }
+
+    fun resetAddItemStatus() {
+        _addItemStatus.value = OperationStatus.Idle
     }
 
     fun setEditItemStatus(status: OperationStatus) {

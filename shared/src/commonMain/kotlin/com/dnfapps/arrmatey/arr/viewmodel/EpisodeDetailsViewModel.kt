@@ -229,6 +229,9 @@ class EpisodeDetailsViewModel(
 
     fun resetMonitorStatus() {
         _monitorStatus.value = OperationStatus.Idle
+        viewModelScope.launch {
+            currentRepository?.resetMonitorStatus()
+        }
     }
 
     fun removeQueueItem(
