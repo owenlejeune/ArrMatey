@@ -52,6 +52,7 @@ ArrMatey is an all-in-one mobile companion for your home server media stack. Sup
 
 <b>Advanced Features</b>
 <ul>
+<li><b>QR Code Setup Sharing:</b> Easily transfer app configurations and service setups between devices by scanning a QR code</li>
 <li><b>Android App Shortcuts:</b> Jump to services or search directly from your home screen</li>
 <li><b>Wake-on-LAN:</b> Wake sleeping servers directly from within the app</li>
 <li><b>Custom Headers:</b> Add custom HTTP headers per instance</li>
