@@ -159,6 +159,8 @@ import com.dnfapps.arrmatey.monitoring.usecase.GetPlaybackStreamsUseCase
 import com.dnfapps.arrmatey.monitoring.usecase.TerminatePlaybackStreamUseCase
 import com.dnfapps.arrmatey.monitoring.viewmodel.MonitoringHistoryViewModel
 import com.dnfapps.arrmatey.monitoring.viewmodel.MonitoringViewModel
+import com.dnfapps.arrmatey.newest.GetNewestDownloadableUseCase
+import com.dnfapps.arrmatey.newest.NewestDownloadableViewModel
 import com.dnfapps.arrmatey.notifications.NotificationCleanupUseCase
 import com.dnfapps.arrmatey.notifications.ScheduleNotificationUseCase
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
@@ -374,6 +376,7 @@ val useCaseModule =
         factory { DeleteAlbumFilesUseCase() }
         factory { GetProwlarrIndexersUseCase(get()) }
         factory { PerformProwlarrSearchUseCase(get()) }
+        factory { GetNewestDownloadableUseCase() }
         factory { GrabProwlarrReleaseUseCase(get()) }
         factory { UpdateCalendarFilterPreferenceUseCase(get()) }
         factory { GetSeerrInstanceRepositoryUseCase(get()) }
@@ -627,6 +630,7 @@ val viewModelModule =
         }
         viewModelOf(::ProwlarrIndexersViewModel)
         viewModelOf(::ProwlarrSearchViewModel)
+        viewModelOf(::NewestDownloadableViewModel)
         viewModelOf(::DownloadQueueViewModel)
         viewModel { (clientId: Long?) ->
             DownloadClientSettingsViewModel(clientId, get(), get(), get(), get(), get(), get())
