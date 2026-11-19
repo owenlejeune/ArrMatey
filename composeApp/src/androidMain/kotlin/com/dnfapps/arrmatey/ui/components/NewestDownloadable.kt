@@ -24,6 +24,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -56,6 +57,7 @@ fun NewestDownloadableRow(
     icon: ImageVector,
     state: NewestDownloadableState,
     onItemClick: (NewestDownloadableItem) -> Unit,
+    onSeeMore: (() -> Unit)? = null,
 ) {
     val items = (state as? NewestDownloadableState.Success)?.items.orEmpty()
     if (items.isEmpty()) return
@@ -65,7 +67,7 @@ fun NewestDownloadableRow(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -78,7 +80,16 @@ fun NewestDownloadableRow(
             Text(
                 text = mokoString(title),
                 style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f),
             )
+            if (onSeeMore != null) {
+                TextButton(onClick = onSeeMore) {
+                    Text(
+                        text = mokoString(MR.strings.see_more),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            }
         }
 
         LazyRow(
@@ -106,8 +117,11 @@ fun NewestDownloadableRow(
 }
 
 @Composable
-private fun PlainReleaseCard(item: NewestDownloadableItem) {
-    Card(modifier = Modifier.width(160.dp).height(180.dp)) {
+fun PlainReleaseCard(
+    item: NewestDownloadableItem,
+    modifier: Modifier = Modifier.width(160.dp).height(180.dp),
+) {
+    Card(modifier = modifier) {
         Column(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -177,12 +191,15 @@ fun NewestDownloadableList(
     }
 }
 
+/** A list row: poster, title, "2026 • Movie • 2160p • 45 seeds", and optionally the overview. */
 @Composable
-private fun NewestDownloadableListItem(
+fun NewestDownloadableListItem(
     item: NewestDownloadableItem,
     onClick: () -> Unit,
+    showOverview: Boolean = false,
 ) {
     val poster = item.match?.fullPosterPath
+    val overview = item.match?.overview?.takeIf { showOverview && it.isNotBlank() }
     ListItem(
         modifier = if (item.match != null) Modifier.clickable(onClick = onClick) else Modifier,
         leadingContent = poster?.let {
@@ -200,13 +217,23 @@ private fun NewestDownloadableListItem(
             }
         },
         headlineContent = {
-            val year = item.displayYear?.let { " ($it)" }.orEmpty()
-            Text(text = item.displayTitle + year, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(text = item.displayTitle, maxLines = 2, overflow = TextOverflow.Ellipsis)
         },
         supportingContent = {
-            Text(text = newestDetails(item))
+            Column {
+                Text(text = newestListLine(item))
+                if (overview != null) {
+                    Text(text = overview, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                }
+            }
         },
     )
+}
+
+@Composable
+private fun newestListLine(item: NewestDownloadableItem): String {
+    val type = mokoString(if (item.release.kind == ReleaseKind.Movie) MR.strings.movie else MR.strings.series)
+    return listOfNotNull(item.displayYear?.toString(), type, newestDetails(item)).joinToString(" • ")
 }
 
 @Composable
@@ -215,5 +242,5 @@ private fun newestDetails(item: NewestDownloadableItem): String {
     val season = release.parsed.season?.takeIf { release.kind == ReleaseKind.Tv }?.let { "S" + it.toString().padStart(2, '0') }
     val seeders = release.seeders?.let { mokoString(MR.strings.seeders_count, it) }
     val age = release.ageHours.let { if (it < 24) "${it.toInt()}h" else "${(it / 24).toInt()}d" }
-    return listOfNotNull(season, release.qualities.joinToString("/").ifEmpty { null }, seeders, age).joinToString(" · ")
+    return listOfNotNull(season, release.qualities.joinToString("/").ifEmpty { null }, seeders, age).joinToString(" • ")
 }
