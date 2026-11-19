@@ -34,6 +34,10 @@ class BackupViewModelS: ObservableObject {
         viewModel.toggleCustomWebpageSelection(id: id)
     }
 
+    func toggleMediaServerSelection(id: Int64) {
+        viewModel.toggleMediaServerSelection(id: id)
+    }
+
     func setExportPassword(password: String) {
         viewModel.setExportPassword(password: password)
     }
@@ -88,6 +92,10 @@ class BackupViewModelS: ObservableObject {
 
     func toggleImportCustomWebpageSelection(index: Int32) {
         viewModel.toggleImportCustomWebpageSelection(index: index)
+    }
+
+    func toggleImportMediaServerSelection(index: Int32) {
+        viewModel.toggleImportMediaServerSelection(index: index)
     }
 
     func toggleImportInstancePreferences() {

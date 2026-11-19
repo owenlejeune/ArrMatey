@@ -230,7 +230,7 @@ struct ImportSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                if viewModel.importState.decryptedBackup == null {
+                if viewModel.importState.decryptedBackup == nil {
                     if !isQrImport {
                         Section(header: Text(MR.strings().password.localized()), footer: Text(MR.strings().import_password_prompt.localized())) {
                             SecureField(MR.strings().password.localized(), text: Binding(
@@ -456,7 +456,7 @@ struct ImportSheet: View {
                             .disabled(viewModel.importState.password.isEmpty)
                         }
                     } else {
-                        let hasInstancePreferences = viewModel.importState.decryptedBackup?.instances.contains(where: { $0.preferences != null }) == true
+                        let hasInstancePreferences = viewModel.importState.decryptedBackup?.instances.contains(where: { $0.preferences != nil }) == true
                         let hasPrefToImport =
                             (hasInstancePreferences && viewModel.importState.importInstancePreferences) ||
                             (viewModel.importState.decryptedBackup?.globalPreferences?.tabPreferences != nil && viewModel.importState.importTabPreferences) ||
