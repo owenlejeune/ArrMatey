@@ -11,6 +11,7 @@ import com.dnfapps.networking.safeDelete
 import com.dnfapps.networking.safeGet
 import com.dnfapps.networking.safePost
 import io.ktor.client.HttpClient
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.setBody
@@ -32,19 +33,31 @@ class JellyfinClient(
 
     private fun buildAuthHeader(tokenOverride: String? = null): String {
         val activeToken = tokenOverride ?: token
+        val effectiveDeviceId = clientIdentifier.ifBlank { "arrmatey-device-id" }
         val tokenPart = if (activeToken.isNotEmpty()) """, Token="$activeToken"""" else ""
-        return """MediaBrowser Client="ArrMatey", Device="ArrMatey", DeviceId="$clientIdentifier", Version="1.0.0"$tokenPart"""
+        return """MediaBrowser Client="ArrMatey", Device="Android", DeviceId="$effectiveDeviceId", Version="1.0.0"$tokenPart"""
+    }
+
+    private fun applyAuthHeaders(builder: HttpRequestBuilder, tokenOverride: String? = null) {
+        val authHeader = buildAuthHeader(tokenOverride)
+        builder.header("Authorization", authHeader)
+        builder.header("X-Emby-Authorization", authHeader)
+        val activeToken = tokenOverride ?: token
+        if (activeToken.isNotEmpty()) {
+            builder.header("X-MediaBrowser-Token", activeToken)
+            builder.header("X-Emby-Token", activeToken)
+        }
     }
 
     suspend fun authenticate(request: MediaBrowserAuthRequest): NetworkResult<MediaBrowserAuthResult> = httpClient.safePost("$baseUrl/Users/AuthenticateByName") {
-        header("Authorization", buildAuthHeader())
+        applyAuthHeaders(this)
         header("Accept", "application/json")
         contentType(ContentType.Application.Json)
         setBody(request)
     }
 
     suspend fun getUserViews(userId: String): NetworkResult<MediaBrowserItemsResult> = httpClient.safeGet("$baseUrl/Users/$userId/Views") {
-        header("Authorization", buildAuthHeader())
+        applyAuthHeaders(this)
         header("Accept", "application/json")
     }
 
@@ -58,7 +71,7 @@ class JellyfinClient(
         sortOrder: String = "Ascending",
         fields: String = "Overview,PrimaryImageAspectRatio,UserData,ProviderIds,MediaSources",
     ): NetworkResult<MediaBrowserItemsResult> = httpClient.safeGet("$baseUrl/Users/$userId/Items") {
-        header("Authorization", buildAuthHeader())
+        applyAuthHeaders(this)
         header("Accept", "application/json")
         parameter("ParentId", parentId)
         if (startIndex != null) parameter("StartIndex", startIndex)
@@ -71,19 +84,19 @@ class JellyfinClient(
     }
 
     suspend fun getItemDetails(userId: String, itemId: String): NetworkResult<MediaBrowserBaseItem> = httpClient.safeGet("$baseUrl/Users/$userId/Items/$itemId") {
-        header("Authorization", buildAuthHeader())
+        applyAuthHeaders(this)
         header("Accept", "application/json")
     }
 
     suspend fun getResumeItems(userId: String, limit: Int = 20): NetworkResult<MediaBrowserItemsResult> = httpClient.safeGet("$baseUrl/Users/$userId/Items/Resume") {
-        header("Authorization", buildAuthHeader())
+        applyAuthHeaders(this)
         header("Accept", "application/json")
         parameter("Limit", limit)
         parameter("Fields", "Overview,UserData,PrimaryImageAspectRatio,ProviderIds,SeriesName")
     }
 
     suspend fun search(userId: String, query: String, limit: Int = 30): NetworkResult<MediaBrowserItemsResult> = httpClient.safeGet("$baseUrl/Users/$userId/Items") {
-        header("Authorization", buildAuthHeader())
+        applyAuthHeaders(this)
         header("Accept", "application/json")
         parameter("SearchTerm", query)
         parameter("Limit", limit)
@@ -93,7 +106,7 @@ class JellyfinClient(
     }
 
     suspend fun getShowEpisodes(userId: String, showId: String): NetworkResult<MediaBrowserItemsResult> = httpClient.safeGet("$baseUrl/Shows/$showId/Episodes") {
-        header("Authorization", buildAuthHeader())
+        applyAuthHeaders(this)
         header("Accept", "application/json")
         parameter("UserId", userId)
         parameter("Fields", "Overview,UserData,PrimaryImageAspectRatio,ProviderIds")
@@ -101,23 +114,23 @@ class JellyfinClient(
 
     suspend fun markWatched(userId: String, itemId: String, watched: Boolean): NetworkResult<Unit> = if (watched) {
         httpClient.safePost("$baseUrl/Users/$userId/PlayedItems/$itemId") {
-            header("Authorization", buildAuthHeader())
+            applyAuthHeaders(this)
             header("Accept", "application/json")
         }
     } else {
         httpClient.safeDelete("$baseUrl/Users/$userId/PlayedItems/$itemId") {
-            header("Authorization", buildAuthHeader())
+            applyAuthHeaders(this)
             header("Accept", "application/json")
         }
     }
 
     suspend fun getSystemInfo(): NetworkResult<MediaBrowserSystemInfo> = httpClient.safeGet("$baseUrl/System/Info") {
-        header("Authorization", buildAuthHeader())
+        applyAuthHeaders(this)
         header("Accept", "application/json")
     }
 
     suspend fun refreshItem(itemId: String): NetworkResult<Unit> = httpClient.safePost("$baseUrl/Items/$itemId/Refresh") {
-        header("Authorization", buildAuthHeader())
+        applyAuthHeaders(this)
         header("Accept", "application/json")
         parameter("Recursive", true)
     }

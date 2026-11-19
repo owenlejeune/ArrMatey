@@ -46,10 +46,12 @@ import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.datastore.TabPreferences
+import com.dnfapps.arrmatey.mediaserver.viewmodel.MediaServerSettingsViewModel
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.settings.ImportDialog
 import com.dnfapps.arrmatey.ui.screens.settings.ScanQrCodeSheet
+import com.dnfapps.arrmatey.ui.sheets.MediaServerConfigurationSheet
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
@@ -65,6 +67,7 @@ fun OnboardingScreen(
     preferences: PreferencesStore = koinInject(),
     moreViewModel: MoreScreenViewModel = koinViewModel(),
     backupViewModel: BackupViewModel = koinViewModel(),
+    mediaServerViewModel: MediaServerSettingsViewModel = koinViewModel(),
     moko: MokoStrings = koinInject(),
 ) {
     val context = LocalContext.current
@@ -73,6 +76,9 @@ fun OnboardingScreen(
 
     val instances by moreViewModel.instances.collectAsStateWithLifecycle()
     val downloadClients by moreViewModel.downloadClients.collectAsStateWithLifecycle()
+    val configuredServersMap by mediaServerViewModel.configuredServers.collectAsStateWithLifecycle()
+    val mediaServers = remember(configuredServersMap) { configuredServersMap.values.toList() }
+    val mediaServerConfigState by mediaServerViewModel.configState.collectAsStateWithLifecycle()
     val appTheme by moreViewModel.appTheme.collectAsStateWithLifecycle()
     val appColor by moreViewModel.appColor.collectAsStateWithLifecycle()
     val useServiceNavLogos by moreViewModel.useServiceNavLogos.collectAsStateWithLifecycle()
@@ -81,6 +87,7 @@ fun OnboardingScreen(
 
     var showAddInstanceSheet by remember { mutableStateOf(false) }
     var showAddDownloadClientSheet by remember { mutableStateOf(false) }
+    var showSelectMediaServerSheet by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
     var showScanQrSheet by remember { mutableStateOf(false) }
     var pendingImportData by remember { mutableStateOf<String?>(null) }
@@ -226,8 +233,10 @@ fun OnboardingScreen(
                     InstancesSetupPage(
                         instances = instances,
                         downloadClients = downloadClients,
+                        mediaServers = mediaServers,
                         onAddInstance = { showAddInstanceSheet = true },
                         onAddDownloadClient = { showAddDownloadClientSheet = true },
+                        onAddMediaServer = { showSelectMediaServerSheet = true },
                     )
 
                 5 ->
@@ -252,6 +261,7 @@ fun OnboardingScreen(
                     ReadyPage(
                         instancesCount = instances.size,
                         downloadClientsCount = downloadClients.size,
+                        mediaServersCount = mediaServers.size,
                         onFinish = onComplete,
                     )
             }
@@ -267,6 +277,22 @@ fun OnboardingScreen(
     if (showAddDownloadClientSheet) {
         AddDownloadClientSheet(
             onDismiss = { showAddDownloadClientSheet = false },
+        )
+    }
+
+    if (showSelectMediaServerSheet) {
+        SelectMediaServerTypeSheet(
+            onDismiss = { showSelectMediaServerSheet = false },
+            onSelectType = { serverType ->
+                mediaServerViewModel.openConfiguration(serverType)
+            },
+        )
+    }
+
+    if (mediaServerConfigState?.serverType != null) {
+        MediaServerConfigurationSheet(
+            onDismiss = { mediaServerViewModel.closeConfiguration() },
+            viewModel = mediaServerViewModel,
         )
     }
 
