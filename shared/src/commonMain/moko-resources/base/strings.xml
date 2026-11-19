@@ -1408,4 +1408,9 @@
     <string name="secure_https">Secure HTTPS</string>
     <string name="swipe_sensitivity">Swipe Sensitivity</string>
     <string name="swipe_sensitivity_description">Adjust threshold required for swipe gestures (%1$d%%)</string>
+    <string name="prowlarr_tv">TV</string>
+    <string name="movies_from_prowlarr">Movies from Prowlarr</string>
+    <string name="tv_from_prowlarr">TV from Prowlarr</string>
+    <string name="newest_downloadable_empty">No new releases from your indexers</string>
+    <string name="seeders_count">%1$d seeders</string>
 </resources>
