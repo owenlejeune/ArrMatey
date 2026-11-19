@@ -14,6 +14,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
+import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -69,7 +70,21 @@ suspend inline fun <reified T> HttpClient.safeCall(crossinline block: suspend Ht
     } catch (e: ClientRequestException) {
         // 4xx
         val status = e.response.status
-        NetworkResult.Error(code = status.value, message = status.description, errorType = ErrorType.Http)
+        val responseText = try {
+            e.response.bodyAsText().trim()
+        } catch (_: Exception) {
+            ""
+        }
+        val errorMessage = if (responseText.isNotBlank() && responseText.length < 300) {
+            if (responseText.startsWith("{") || responseText.startsWith("[")) {
+                status.description
+            } else {
+                responseText
+            }
+        } else {
+            status.description
+        }
+        NetworkResult.Error(code = status.value, message = errorMessage, errorType = ErrorType.Http)
     } catch (e: ServerResponseException) {
         // 5xx
         val status = e.response.status

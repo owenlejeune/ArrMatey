@@ -11,6 +11,7 @@ import com.dnfapps.networking.safeDelete
 import com.dnfapps.networking.safeGet
 import com.dnfapps.networking.safePost
 import io.ktor.client.HttpClient
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.setBody
@@ -32,12 +33,23 @@ class EmbyClient(
 
     private fun buildAuthHeader(tokenOverride: String? = null): String {
         val activeToken = tokenOverride ?: token
+        val effectiveDeviceId = clientIdentifier.ifBlank { "arrmatey-device-id" }
         val tokenPart = if (activeToken.isNotEmpty()) """, Token="$activeToken"""" else ""
-        return """MediaBrowser Client="ArrMatey", Device="ArrMatey", DeviceId="$clientIdentifier", Version="1.0.0"$tokenPart"""
+        return """Emby Client="ArrMatey", Device="Android", DeviceId="$effectiveDeviceId", Version="1.0.0"$tokenPart"""
+    }
+
+    private fun applyAuthHeaders(builder: HttpRequestBuilder, tokenOverride: String? = null) {
+        val authHeader = buildAuthHeader(tokenOverride)
+        builder.header("Authorization", authHeader)
+        builder.header("X-Emby-Authorization", authHeader)
+        val activeToken = tokenOverride ?: token
+        if (activeToken.isNotEmpty()) {
+            builder.header("X-Emby-Token", activeToken)
+        }
     }
 
     suspend fun authenticate(request: MediaBrowserAuthRequest): NetworkResult<MediaBrowserAuthResult> = httpClient.safePost("$baseUrl/Users/AuthenticateByName") {
-        header("X-Emby-Authorization", buildAuthHeader())
+        applyAuthHeaders(this)
         header("Accept", "application/json")
         contentType(ContentType.Application.Json)
         setBody(request)

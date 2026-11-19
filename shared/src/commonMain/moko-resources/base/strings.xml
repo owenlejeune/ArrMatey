@@ -1024,6 +1024,7 @@
     <string name="restore_mode_qr">Scan QR Code</string>
     <string name="export_data">Export Data</string>
     <string name="import_data">Import Data</string>
+    <string name="add_media_server">Add Media Server</string>
     <string name="export_password_prompt">Enter a password to encrypt your backup. You will need this password to import the data on another device.</string>
     <string name="import_password_prompt">Enter the password used to encrypt the backup file.</string>
     <string name="include_preferences">Include service preferences</string>

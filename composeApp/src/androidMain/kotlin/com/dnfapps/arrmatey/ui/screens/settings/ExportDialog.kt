@@ -184,7 +184,11 @@ fun ExportDialog(
                     )
                 }
 
-                if (exportState.instances.isNotEmpty() || exportState.downloadClients.isNotEmpty() || exportState.customWebpages.isNotEmpty()) {
+                if (exportState.instances.isNotEmpty() ||
+                    exportState.downloadClients.isNotEmpty() ||
+                    exportState.customWebpages.isNotEmpty() ||
+                    exportState.mediaServers.isNotEmpty()
+                ) {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
                     Text(

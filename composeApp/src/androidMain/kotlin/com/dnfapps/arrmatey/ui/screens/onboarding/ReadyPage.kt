@@ -36,6 +36,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun ReadyPage(
     instancesCount: Int,
     downloadClientsCount: Int = 0,
+    mediaServersCount: Int = 0,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -53,6 +54,10 @@ fun ReadyPage(
             downloadClientsCount > 0 -> {
                 val clientsStr = mokoPlural(MR.plurals.clients_count, downloadClientsCount)
                 mokoString(MR.strings.onboarding_connected_format, clientsStr)
+            }
+            mediaServersCount > 0 -> {
+                val serversStr = mokoPlural(MR.plurals.servers_count, mediaServersCount)
+                mokoString(MR.strings.onboarding_connected_format, serversStr)
             }
             else -> mokoString(MR.strings.onboarding_ready_explore)
         }

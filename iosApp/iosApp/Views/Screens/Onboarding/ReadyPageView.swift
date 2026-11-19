@@ -11,11 +11,13 @@ import Shared
 struct ReadyPageView: View {
     let instancesCount: Int
     let downloadClientsCount: Int
+    let mediaServersCount: Int
     let onFinish: () -> Void
 
-    init(instancesCount: Int = 0, downloadClientsCount: Int = 0, onFinish: @escaping () -> Void) {
+    init(instancesCount: Int = 0, downloadClientsCount: Int = 0, mediaServersCount: Int = 0, onFinish: @escaping () -> Void) {
         self.instancesCount = instancesCount
         self.downloadClientsCount = downloadClientsCount
+        self.mediaServersCount = mediaServersCount
         self.onFinish = onFinish
     }
 
@@ -30,6 +32,9 @@ struct ReadyPageView: View {
         } else if downloadClientsCount > 0 {
             let clientsStr = MR.plurals().clients_count.localized(downloadClientsCount)
             return MR.strings().onboarding_connected_format.formatted(args: [clientsStr])
+        } else if mediaServersCount > 0 {
+            let serversStr = MR.plurals().servers_count.localized(mediaServersCount)
+            return MR.strings().onboarding_connected_format.formatted(args: [serversStr])
         }
         return nil
     }

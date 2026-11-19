@@ -11,25 +11,34 @@ import Shared
 struct InstancesPageView: View {
     let instances: [Instance]
     let downloadClients: [DownloadClient]
+    let mediaServers: [MediaServerIntegration]
     let onAddInstance: () -> Void
     let onAddDownloadClient: () -> Void
+    let onAddMediaServer: () -> Void
     let onDeleteInstance: (Instance) -> Void
     let onDeleteDownloadClient: (DownloadClient) -> Void
+    let onDeleteMediaServer: (MediaServerIntegration) -> Void
 
     init(
         instances: [Instance],
         downloadClients: [DownloadClient] = [],
+        mediaServers: [MediaServerIntegration] = [],
         onAddInstance: @escaping () -> Void,
         onAddDownloadClient: @escaping () -> Void = {},
+        onAddMediaServer: @escaping () -> Void = {},
         onDeleteInstance: @escaping (Instance) -> Void,
-        onDeleteDownloadClient: @escaping (DownloadClient) -> Void = { _ in }
+        onDeleteDownloadClient: @escaping (DownloadClient) -> Void = { _ in },
+        onDeleteMediaServer: @escaping (MediaServerIntegration) -> Void = { _ in }
     ) {
         self.instances = instances
         self.downloadClients = downloadClients
+        self.mediaServers = mediaServers
         self.onAddInstance = onAddInstance
         self.onAddDownloadClient = onAddDownloadClient
+        self.onAddMediaServer = onAddMediaServer
         self.onDeleteInstance = onDeleteInstance
         self.onDeleteDownloadClient = onDeleteDownloadClient
+        self.onDeleteMediaServer = onDeleteMediaServer
     }
 
     var body: some View {
@@ -50,7 +59,7 @@ struct InstancesPageView: View {
                             .padding(.horizontal, 20)
                     }
 
-                    if instances.isEmpty && downloadClients.isEmpty {
+                    if instances.isEmpty && downloadClients.isEmpty && mediaServers.isEmpty {
                         VStack(spacing: 12) {
                             Image(systemName: "server.rack")
                                 .font(.system(size: 40))
@@ -146,6 +155,45 @@ struct InstancesPageView: View {
                                 }
                             }
                         }
+
+                        if !mediaServers.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("\(MR.strings().media_servers.localized()) (\(mediaServers.count))")
+                                    .font(.caption.bold())
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 24)
+
+                                ForEach(mediaServers, id: \.id) { server in
+                                    HStack(spacing: 14) {
+                                        server.serverType.icon.toImage(renderingMode: .original)
+                                            .frame(width: 24, height: 24)
+
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(server.label.isEmpty ? server.serverType.name : server.label)
+                                                .font(.headline)
+
+                                            Text(server.url)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(1)
+                                        }
+
+                                        Spacer()
+
+                                        Button(action: { onDeleteMediaServer(server) }) {
+                                            Image(systemName: "trash")
+                                                .font(.subheadline)
+                                                .foregroundColor(.red)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    .padding(14)
+                                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                                    .cornerRadius(12)
+                                    .padding(.horizontal, 20)
+                                }
+                            }
+                        }
                     }
 
                     VStack(spacing: 10) {
@@ -167,6 +215,20 @@ struct InstancesPageView: View {
                             HStack {
                                 Image(systemName: "plus.circle.fill")
                                 Text(MR.strings().add_download_client.localized())
+                            }
+                            .font(.subheadline.bold())
+                            .foregroundColor(.themePrimary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Color.themePrimary.opacity(0.12))
+                            .cornerRadius(14)
+                        }
+                        .buttonStyle(.plain)
+
+                        Button(action: onAddMediaServer) {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                Text(MR.strings().add_media_server.localized())
                             }
                             .font(.subheadline.bold())
                             .foregroundColor(.themePrimary)

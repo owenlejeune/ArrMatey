@@ -256,12 +256,13 @@ class MediaServerManager(
         clientIdentifier: String,
         headers: List<InstanceHeader> = emptyList(),
     ): NetworkResult<MediaBrowserAuthResult> {
+        val effectiveClientId = clientIdentifier.ifBlank { "arrmatey-device-id" }
         val tempIntegration = MediaServerIntegration(
             serverType = serverType,
             label = serverType.name,
             url = baseUrl,
             token = EncryptedString(""),
-            clientIdentifier = clientIdentifier,
+            clientIdentifier = effectiveClientId,
             headers = headers,
         )
         val httpClient = httpClientFactory.createMediaServerClient(tempIntegration)

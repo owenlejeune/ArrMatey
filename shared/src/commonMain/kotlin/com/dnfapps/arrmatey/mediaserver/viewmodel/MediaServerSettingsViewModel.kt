@@ -469,8 +469,8 @@ class MediaServerSettingsViewModel(
 
     fun authenticateCredentials() {
         val state = _configState.value ?: return
-        if (state.url.isBlank() || state.username.isBlank() || state.password.isBlank()) {
-            _configState.update { it?.copy(errorMessage = "Server URL, username, and password are required") }
+        if (state.url.isBlank() || state.username.isBlank()) {
+            _configState.update { it?.copy(errorMessage = "Server URL and username are required") }
             return
         }
         _configState.update { it?.copy(isTesting = true, errorMessage = null, testSuccess = null) }
