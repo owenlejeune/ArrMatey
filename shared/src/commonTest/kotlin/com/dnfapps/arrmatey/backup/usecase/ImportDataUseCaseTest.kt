@@ -425,7 +425,6 @@ class ImportDataUseCaseTest {
             instancePreferenceStoreRepository = InstancePreferenceStoreRepository(dataStoreFactory),
             preferencesStore = PreferencesStore(dataStoreFactory),
             transportEncryptor = fakeEncryptor,
-            json = json,
         )
         val encrypted = exportUseCase(
             password = "password",
@@ -460,7 +459,7 @@ class ImportDataUseCaseTest {
             val instancePreferences = InstancePreferenceStoreRepository(dataStoreFactory)
             val preferences = PreferencesStore(dataStoreFactory)
             val importer = ImportDataUseCase(dummyInstanceDao, dummyDownloadClientDao, pageDao, instancePreferences, preferences, fakeEncryptor, json)
-            val exporter = ExportDataUseCase(dummyInstanceDao, dummyDownloadClientDao, pageDao, instancePreferences, preferences, fakeEncryptor, json)
+            val exporter = ExportDataUseCase(dummyInstanceDao, dummyDownloadClientDao, pageDao, instancePreferences, preferences, fakeEncryptor)
             val viewModel = BackupViewModel(exporter, importer, dummyInstanceDao, dummyDownloadClientDao, pageDao)
             advanceUntilIdle()
             val backup = """{"customWebpages":[{"name":"Audit","url":"https://example.com"}]}"""
@@ -541,7 +540,6 @@ class ImportDataUseCaseTest {
             instancePreferences,
             preferences,
             fakeEncryptor,
-            json,
             mediaServerDao,
         )
         val exportJson = exporter.invoke(
@@ -635,7 +633,6 @@ class ImportDataUseCaseTest {
             InstancePreferenceStoreRepository(dataStoreFactory),
             PreferencesStore(dataStoreFactory),
             fakeEncryptor,
-            json,
         )
         val encrypted = exportUseCase(
             password = "test",
