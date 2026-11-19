@@ -58,6 +58,10 @@ class BackupViewModelS: ObservableObject {
         viewModel.exportData(onExportReady: onExportReady)
     }
 
+    func exportQrData(onExportReady: @escaping (String) -> Void) {
+        viewModel.exportQrData(onExportReady: onExportReady)
+    }
+
     func setImportPassword(password: String) {
         viewModel.setImportPassword(password: password)
     }
@@ -70,6 +74,10 @@ class BackupViewModelS: ObservableObject {
         viewModel.prepareImport(encryptedData: encryptedData)
     }
 
+    func prepareImportFromQr(encryptedData: String) {
+        viewModel.prepareImportFromQr(encryptedData: encryptedData)
+    }
+
     func toggleImportInstanceSelection(index: Int32) {
         viewModel.toggleImportInstanceSelection(index: index)
     }
@@ -80,6 +88,10 @@ class BackupViewModelS: ObservableObject {
 
     func toggleImportCustomWebpageSelection(index: Int32) {
         viewModel.toggleImportCustomWebpageSelection(index: index)
+    }
+
+    func toggleImportInstancePreferences() {
+        viewModel.toggleImportInstancePreferences()
     }
 
     func toggleImportTabPreferences() {

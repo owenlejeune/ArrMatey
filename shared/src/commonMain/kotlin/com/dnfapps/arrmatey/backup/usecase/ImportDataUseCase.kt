@@ -17,6 +17,8 @@ import com.dnfapps.arrmatey.mediaserver.database.MediaServerIntegrationDao
 import com.dnfapps.arrmatey.mediaserver.model.MediaServerIntegration
 import com.dnfapps.arrmatey.webpage.model.CustomWebpage
 import kotlinx.serialization.json.Json
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
 
 class ImportDataUseCase(
     private val instanceDao: InstanceDao,
@@ -37,6 +39,24 @@ class ImportDataUseCase(
         return json.decodeFromString(sanitizedJson)
     }
 
+    fun decryptAndValidateQrBackup(
+        encryptedData: String,
+        password: String,
+    ): BackupExport {
+        val backup = decryptBackup(encryptedData, password)
+        return validateQrBackup(backup)
+    }
+
+    fun validateQrBackup(backup: BackupExport): BackupExport {
+        val creationTime = backup.creationDateTime
+            ?: throw IllegalArgumentException("QR code missing creation timestamp")
+        val age = Clock.System.now() - creationTime
+        if (age > 5.minutes || age < (-1).minutes) {
+            throw IllegalArgumentException("QR code has expired (older than 5 minutes)")
+        }
+        return backup
+    }
+
     private fun sanitizeLegacyBackupJson(jsonString: String): String = jsonString
         .replace("\"TracearrActiveStreams\"", "\"ActiveStreams\"")
         .replace("\"TracearrOverview\"", "\"PlaybackOverview\"")
@@ -51,8 +71,9 @@ class ImportDataUseCase(
         selectedDownloadClientIndices: Set<Int>,
         selectedCustomWebpageIndices: Set<Int> = emptySet(),
         selectedMediaServerIndices: Set<Int> = emptySet(),
-        importTabPreferences: Boolean,
-        importUiPreferences: Boolean,
+        importInstancePreferences: Boolean = true,
+        importTabPreferences: Boolean = true,
+        importUiPreferences: Boolean = true,
         importIntegrationsPreferences: Boolean = true,
     ) {
         backup.instances.forEachIndexed { index, export ->
@@ -100,7 +121,7 @@ class ImportDataUseCase(
                         instanceDao.insert(instance)
                     }
 
-                if (id > 0 && export.preferences != null) {
+                if (id > 0 && importInstancePreferences && export.preferences != null) {
                     val prefStore = instancePreferenceStoreRepository.getInstancePreferences(id)
                     prefStore.savePreferences(export.preferences)
                 }

@@ -10,6 +10,7 @@ import Shared
 
 struct SetupChoicePageView: View {
     let onRestoreBackup: () -> Void
+    let onScanQrCode: () -> Void
     let onManualSetup: () -> Void
     let onSkip: () -> Void
 
@@ -83,6 +84,42 @@ struct SetupChoicePageView: View {
                                         .foregroundColor(.primary)
 
                                     Text(MR.strings().onboarding_choice_backup_desc.localized())
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                        .multilineTextAlignment(.leading)
+                                }
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.subheadline.bold())
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(18)
+                            .background(Color(UIColor.secondarySystemGroupedBackground))
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.themePrimary.opacity(0.2), lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(.plain)
+
+                        Button(action: onScanQrCode) {
+                            HStack(spacing: 16) {
+                                Image(systemName: "qrcode.viewfinder")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(.themePrimary)
+                                    .frame(width: 52, height: 52)
+                                    .background(Color.themePrimary.opacity(0.12))
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
+
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(MR.strings().scan_qr_code.localized())
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+
+                                    Text(MR.strings().scan_qr_code_description.localized())
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                         .multilineTextAlignment(.leading)

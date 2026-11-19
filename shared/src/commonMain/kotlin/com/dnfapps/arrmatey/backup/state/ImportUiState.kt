@@ -9,6 +9,7 @@ data class ImportUiState(
     val selectedDownloadClientIndices: Set<Int> = emptySet(),
     val selectedCustomWebpageIndices: Set<Int> = emptySet(),
     val selectedMediaServerIndices: Set<Int> = emptySet(),
+    val importInstancePreferences: Boolean = true,
     val importTabPreferences: Boolean = true,
     val importUiPreferences: Boolean = true,
     val importIntegrationsPreferences: Boolean = true,

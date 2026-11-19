@@ -33,7 +33,10 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
 
 class ImportDataUseCaseTest {
     private val fakeEncryptor =
@@ -621,5 +624,79 @@ class ImportDataUseCaseTest {
         assertEquals(DashboardCards.ArrOverview, cards[0])
         assertEquals(DashboardCards.PlaybackOverview, cards[1])
         assertEquals(DashboardCards.ActiveStreams, cards[2])
+    }
+
+    @Test
+    fun testExportSetsCreationDateTime() = runTest {
+        val exportUseCase = ExportDataUseCase(
+            dummyInstanceDao,
+            dummyDownloadClientDao,
+            dummyCustomWebpageDao,
+            InstancePreferenceStoreRepository(dataStoreFactory),
+            PreferencesStore(dataStoreFactory),
+            fakeEncryptor,
+            json,
+        )
+        val encrypted = exportUseCase(
+            password = "test",
+            selectedInstanceIds = emptySet(),
+            selectedDownloadClientIds = emptySet(),
+            includeInstancePreferences = false,
+            includeTabPreferences = false,
+            includeUiPreferences = false,
+            includeIntegrationsPreferences = false,
+        )
+        val backup = json.decodeFromString<BackupExport>(encrypted)
+        assertNotNull(backup.creationDateTime)
+    }
+
+    @Test
+    fun testValidateQrBackupValid() {
+        val importUseCase = ImportDataUseCase(
+            dummyInstanceDao,
+            dummyDownloadClientDao,
+            dummyCustomWebpageDao,
+            InstancePreferenceStoreRepository(dataStoreFactory),
+            PreferencesStore(dataStoreFactory),
+            fakeEncryptor,
+            json,
+        )
+        val validBackup = BackupExport(creationDateTime = Clock.System.now())
+        val validated = importUseCase.validateQrBackup(validBackup)
+        assertEquals(validBackup, validated)
+    }
+
+    @Test
+    fun testValidateQrBackupMissingCreationDateTime() {
+        val importUseCase = ImportDataUseCase(
+            dummyInstanceDao,
+            dummyDownloadClientDao,
+            dummyCustomWebpageDao,
+            InstancePreferenceStoreRepository(dataStoreFactory),
+            PreferencesStore(dataStoreFactory),
+            fakeEncryptor,
+            json,
+        )
+        val invalidBackup = BackupExport(creationDateTime = null)
+        assertFailsWith<IllegalArgumentException> {
+            importUseCase.validateQrBackup(invalidBackup)
+        }
+    }
+
+    @Test
+    fun testValidateQrBackupExpired() {
+        val importUseCase = ImportDataUseCase(
+            dummyInstanceDao,
+            dummyDownloadClientDao,
+            dummyCustomWebpageDao,
+            InstancePreferenceStoreRepository(dataStoreFactory),
+            PreferencesStore(dataStoreFactory),
+            fakeEncryptor,
+            json,
+        )
+        val expiredBackup = BackupExport(creationDateTime = Clock.System.now() - 10.minutes)
+        assertFailsWith<IllegalArgumentException> {
+            importUseCase.validateQrBackup(expiredBackup)
+        }
     }
 }

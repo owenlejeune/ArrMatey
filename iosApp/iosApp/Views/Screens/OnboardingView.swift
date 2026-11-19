@@ -15,12 +15,14 @@ struct OnboardingView: View {
     @StateObject private var preferences = PreferencesViewModel()
     @StateObject private var backupViewModel = BackupViewModelS()
     @StateObject private var downloadClientsViewModel = DownloadClientsViewModelS()
-    
+
     @State private var instances: [Instance] = []
     @State private var currentPage: Int = 0
     @State private var showAddInstanceSheet: Bool = false
     @State private var showAddDownloadClientSheet: Bool = false
     @State private var showFileImporter: Bool = false
+    @State private var showScanQrSheet: Bool = false
+    @State private var isQrImport: Bool = false
     @State private var importData: String = ""
     @State private var showImportSuccess: Bool = false
 
@@ -44,7 +46,11 @@ struct OnboardingView: View {
 
                     SetupChoicePageView(
                         onRestoreBackup: {
+                            isQrImport = false
                             showFileImporter = true
+                        },
+                        onScanQrCode: {
+                            showScanQrSheet = true
                         },
                         onManualSetup: {
                             withAnimation {
@@ -126,6 +132,7 @@ struct OnboardingView: View {
                     defer { url.stopAccessingSecurityScopedResource() }
                     if let data = try? Data(contentsOf: url), let string = String(data: data, encoding: .utf8) {
                         backupViewModel.resetImportState()
+                        self.isQrImport = false
                         self.importData = string
                     }
                 }
@@ -133,11 +140,20 @@ struct OnboardingView: View {
                 print("Import failed: \(error.localizedDescription)")
             }
         }
+        .sheet(isPresented: $showScanQrSheet) {
+            ScanQrCodeSheet(isPresented: $showScanQrSheet) { code in
+                backupViewModel.resetImportState()
+                self.isQrImport = true
+                self.importData = code
+            }
+        }
         .sheet(isPresented: Binding(get: { !importData.isEmpty }, set: { if !$0 { importData = "" } }), onDismiss: {
             backupViewModel.resetImportState()
+            self.isQrImport = false
         }) {
-            ImportSheet(viewModel: backupViewModel, isPresented: Binding(get: { !importData.isEmpty }, set: { if !$0 { importData = "" } }), encryptedData: importData) {
+            ImportSheet(viewModel: backupViewModel, isPresented: Binding(get: { !importData.isEmpty }, set: { if !$0 { importData = "" } }), encryptedData: importData, isQrImport: isQrImport) {
                 self.importData = ""
+                self.isQrImport = false
                 self.showImportSuccess = true
             }
         }

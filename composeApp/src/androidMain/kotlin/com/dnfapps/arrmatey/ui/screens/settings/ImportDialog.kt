@@ -54,6 +54,8 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.LabelledCheckbox
+import com.dnfapps.arrmatey.ui.components.ServiceSelectionCard
+import com.dnfapps.arrmatey.ui.theme.associatedColor
 import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,17 +70,21 @@ fun ImportDialog(
     onToggleDownloadClientSelection: (Int) -> Unit,
     onToggleCustomWebpageSelection: (Int) -> Unit,
     onToggleImportMediaServerSelection: (Int) -> Unit = {},
+    onToggleImportInstancePreferences: () -> Unit = {},
     onToggleImportTabPreferences: () -> Unit,
     onToggleImportUiPreferences: () -> Unit,
     onToggleImportIntegrationsPreferences: () -> Unit,
+    isQrImport: Boolean = false,
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
     val passwordFocusRequester = remember { FocusRequester() }
 
     val backup = importState.decryptedBackup
 
-    LaunchedEffect(backup) {
-        if (backup == null) {
+    LaunchedEffect(isQrImport, backup) {
+        if (isQrImport && backup == null) {
+            onConfirmDecrypt()
+        } else if (backup == null) {
             passwordFocusRequester.requestFocus()
         }
     }
@@ -88,17 +94,16 @@ fun ImportDialog(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
-                .verticalScroll(rememberScrollState()),
+                .padding(bottom = 24.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             ) {
                 Surface(
                     shape = CircleShape,
@@ -122,7 +127,7 @@ fun ImportDialog(
                     Text(
                         text =
                         if (importState.decryptedBackup == null) {
-                            mokoString(MR.strings.import_password_prompt)
+                            if (isQrImport) "" else mokoString(MR.strings.import_password_prompt)
                         } else {
                             mokoString(MR.strings.select_items_to_import)
                         },
@@ -132,126 +137,68 @@ fun ImportDialog(
                 }
             }
 
-            val backup = importState.decryptedBackup
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                val backup = importState.decryptedBackup
 
-            if (backup == null) {
-                AMOutlinedTextField(
-                    value = importState.password,
-                    onValueChange = onPasswordChanged,
-                    label = mokoString(MR.strings.password),
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                            )
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().focusRequester(passwordFocusRequester),
-                    singleLine = true,
-                    isError = importState.error != null,
-                    errorMessage = importState.error,
-                )
-            } else {
-                val hasAnyPreferences =
-                    backup.globalPreferences?.let {
-                        it.tabPreferences != null || it.hasUiPreferences || it.hasIntegrationsPreferences
-                    } == true
-
-                if (hasAnyPreferences) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Tune,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp),
+                if (backup == null) {
+                    if (!isQrImport) {
+                        AMOutlinedTextField(
+                            value = importState.password,
+                            onValueChange = onPasswordChanged,
+                            label = mokoString(MR.strings.password),
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().focusRequester(passwordFocusRequester),
+                            singleLine = true,
+                            isError = importState.error != null,
+                            errorMessage = importState.error,
                         )
-                        Text(
-                            text = mokoString(MR.strings.onboarding_preferences_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-
-                    ContainerCard(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                        contentPadding = PaddingValues(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        if (backup.globalPreferences?.tabPreferences != null) {
-                            LabelledCheckbox(
-                                label = mokoString(MR.strings.navigation_bar_configuration),
-                                checked = importState.importTabPreferences,
-                                onCheckedChange = { onToggleImportTabPreferences() },
-                            )
-                        }
-
-                        if (backup.globalPreferences?.hasUiPreferences == true) {
-                            LabelledCheckbox(
-                                label = mokoString(MR.strings.user_interface),
-                                checked = importState.importUiPreferences,
-                                onCheckedChange = { onToggleImportUiPreferences() },
-                            )
-                        }
-
-                        if (backup.globalPreferences?.hasIntegrationsPreferences == true) {
-                            LabelledCheckbox(
-                                label = mokoString(MR.strings.integrations),
-                                checked = importState.importIntegrationsPreferences,
-                                onCheckedChange = { onToggleImportIntegrationsPreferences() },
+                    } else {
+                        val errorMsg = importState.error
+                        if (errorMsg != null) {
+                            Text(
+                                text = errorMsg,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error,
                             )
                         }
                     }
-                }
+                } else {
+                    val hasInstancePreferences = backup.instances.any { it.preferences != null }
+                    val hasAnyPreferences =
+                        hasInstancePreferences ||
+                            backup.globalPreferences?.let {
+                                it.tabPreferences != null || it.hasUiPreferences || it.hasIntegrationsPreferences
+                            } == true
 
-                if (backup.instances.isNotEmpty() ||
-                    backup.downloadClients.isNotEmpty() ||
-                    backup.customWebpages.isNotEmpty() ||
-                    backup.mediaServers.isNotEmpty()
-                ) {
                     if (hasAnyPreferences) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                    }
-
-                    Text(
-                        text = mokoString(MR.strings.select_items_to_import),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-
-                    if (backup.instances.isNotEmpty()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Dns,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                                Text(
-                                    text = mokoString(MR.strings.instances),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-
+                            Icon(
+                                imageVector = Icons.Default.Tune,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp),
+                            )
                             Text(
-                                text = "${importState.selectedInstanceIndices.size}/${backup.instances.size}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                text = mokoString(MR.strings.onboarding_preferences_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
 
@@ -260,150 +207,232 @@ fun ImportDialog(
                             contentPadding = PaddingValues(12.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            backup.instances.forEachIndexed { index, instance ->
+                            if (hasInstancePreferences) {
                                 LabelledCheckbox(
-                                    label = instance.label,
-                                    checked = importState.selectedInstanceIndices.contains(index),
-                                    onCheckedChange = { onToggleInstanceSelection(index) },
+                                    label = mokoString(MR.strings.include_preferences),
+                                    checked = importState.importInstancePreferences,
+                                    onCheckedChange = { onToggleImportInstancePreferences() },
+                                )
+                            }
+
+                            if (backup.globalPreferences?.tabPreferences != null) {
+                                LabelledCheckbox(
+                                    label = mokoString(MR.strings.navigation_bar_configuration),
+                                    checked = importState.importTabPreferences,
+                                    onCheckedChange = { onToggleImportTabPreferences() },
+                                )
+                            }
+
+                            if (backup.globalPreferences?.hasUiPreferences == true) {
+                                LabelledCheckbox(
+                                    label = mokoString(MR.strings.user_interface),
+                                    checked = importState.importUiPreferences,
+                                    onCheckedChange = { onToggleImportUiPreferences() },
+                                )
+                            }
+
+                            if (backup.globalPreferences?.hasIntegrationsPreferences == true) {
+                                LabelledCheckbox(
+                                    label = mokoString(MR.strings.integrations),
+                                    checked = importState.importIntegrationsPreferences,
+                                    onCheckedChange = { onToggleImportIntegrationsPreferences() },
                                 )
                             }
                         }
                     }
 
-                    if (backup.downloadClients.isNotEmpty()) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
+                    if (backup.instances.isNotEmpty() ||
+                        backup.downloadClients.isNotEmpty() ||
+                        backup.customWebpages.isNotEmpty() ||
+                        backup.mediaServers.isNotEmpty()
+                    ) {
+                        if (hasAnyPreferences) {
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        }
+
+                        Text(
+                            text = mokoString(MR.strings.select_items_to_import),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+
+                        if (backup.instances.isNotEmpty()) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Download,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp),
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Dns,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                    Text(
+                                        text = mokoString(MR.strings.instances),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+
                                 Text(
-                                    text = mokoString(MR.strings.download_clients),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary,
+                                    text = "${importState.selectedInstanceIndices.size}/${backup.instances.size}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
 
-                            Text(
-                                text = "${importState.selectedDownloadClientIndices.size}/${backup.downloadClients.size}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-
-                        ContainerCard(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                            contentPadding = PaddingValues(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            backup.downloadClients.forEachIndexed { index, client ->
-                                LabelledCheckbox(
-                                    label = client.label,
-                                    checked = importState.selectedDownloadClientIndices.contains(index),
-                                    onCheckedChange = { onToggleDownloadClientSelection(index) },
-                                )
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                backup.instances.forEachIndexed { index, instance ->
+                                    ServiceSelectionCard(
+                                        label = instance.label,
+                                        url = instance.url,
+                                        checked = importState.selectedInstanceIndices.contains(index),
+                                        onCheckedChange = { onToggleInstanceSelection(index) },
+                                        icon = instance.type.icon,
+                                        color = instance.type.associatedColor,
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    if (backup.customWebpages.isNotEmpty()) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
+                        if (backup.downloadClients.isNotEmpty()) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Language,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp),
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Download,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                    Text(
+                                        text = mokoString(MR.strings.download_clients),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+
                                 Text(
-                                    text = mokoString(MR.strings.custom_webpages),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary,
+                                    text = "${importState.selectedDownloadClientIndices.size}/${backup.downloadClients.size}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
 
-                            Text(
-                                text = "${importState.selectedCustomWebpageIndices.size}/${backup.customWebpages.size}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-
-                        ContainerCard(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                            contentPadding = PaddingValues(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            backup.customWebpages.forEachIndexed { index, webpage ->
-                                LabelledCheckbox(
-                                    label = webpage.name,
-                                    checked = importState.selectedCustomWebpageIndices.contains(index),
-                                    onCheckedChange = { onToggleCustomWebpageSelection(index) },
-                                )
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                backup.downloadClients.forEachIndexed { index, client ->
+                                    ServiceSelectionCard(
+                                        label = client.label,
+                                        url = client.url,
+                                        checked = importState.selectedDownloadClientIndices.contains(index),
+                                        onCheckedChange = { onToggleDownloadClientSelection(index) },
+                                        icon = client.type.icon,
+                                        color = client.type.associatedColor,
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    if (backup.mediaServers.isNotEmpty()) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
+                        if (backup.customWebpages.isNotEmpty()) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Tv,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp),
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Language,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                    Text(
+                                        text = mokoString(MR.strings.custom_webpages),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+
                                 Text(
-                                    text = mokoString(MR.strings.media_servers),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary,
+                                    text = "${importState.selectedCustomWebpageIndices.size}/${backup.customWebpages.size}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
 
-                            Text(
-                                text = "${importState.selectedMediaServerIndices.size}/${backup.mediaServers.size}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                backup.customWebpages.forEachIndexed { index, webpage ->
+                                    ServiceSelectionCard(
+                                        label = webpage.name,
+                                        url = webpage.url,
+                                        checked = importState.selectedCustomWebpageIndices.contains(index),
+                                        onCheckedChange = { onToggleCustomWebpageSelection(index) },
+                                        vectorIcon = Icons.Default.Language,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+                            }
                         }
 
-                        ContainerCard(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                            contentPadding = PaddingValues(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            backup.mediaServers.forEachIndexed { index, server ->
-                                LabelledCheckbox(
-                                    label = server.label.ifBlank { server.serverType.name },
-                                    checked = importState.selectedMediaServerIndices.contains(index),
-                                    onCheckedChange = { onToggleImportMediaServerSelection(index) },
+                        if (backup.mediaServers.isNotEmpty()) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Tv,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                    Text(
+                                        text = mokoString(MR.strings.media_servers),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+
+                                Text(
+                                    text = "${importState.selectedMediaServerIndices.size}/${backup.mediaServers.size}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
+                            }
+
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                backup.mediaServers.forEachIndexed { index, server ->
+                                    ServiceSelectionCard(
+                                        label = server.label.ifBlank { server.serverType.name },
+                                        url = server.url,
+                                        checked = importState.selectedMediaServerIndices.contains(index),
+                                        onCheckedChange = { onToggleImportMediaServerSelection(index) },
+                                        icon = server.serverType.icon,
+                                        color = server.serverType.brandColor,
+                                    )
+                                }
                             }
                         }
                     }
@@ -412,7 +441,7 @@ fun ImportDialog(
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             ) {
                 TextButton(
                     onClick = onDismiss,
@@ -422,22 +451,25 @@ fun ImportDialog(
                 }
 
                 if (importState.decryptedBackup == null) {
-                    Button(
-                        enabled = importState.password.isNotBlank(),
-                        onClick = onConfirmDecrypt,
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LockOpen,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(mokoString(MR.strings.ok))
+                    if (!isQrImport) {
+                        Button(
+                            enabled = importState.password.isNotBlank(),
+                            onClick = onConfirmDecrypt,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LockOpen,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(mokoString(MR.strings.ok))
+                        }
                     }
                 } else {
-                    val hasGlobalPrefToImport =
-                        (importState.decryptedBackup?.globalPreferences?.tabPreferences != null && importState.importTabPreferences) ||
+                    val hasPrefToImport =
+                        (importState.decryptedBackup?.instances?.any { it.preferences != null } == true && importState.importInstancePreferences) ||
+                            (importState.decryptedBackup?.globalPreferences?.tabPreferences != null && importState.importTabPreferences) ||
                             (importState.decryptedBackup?.globalPreferences?.hasUiPreferences == true && importState.importUiPreferences) ||
                             (
                                 importState.decryptedBackup?.globalPreferences?.hasIntegrationsPreferences == true &&
@@ -450,7 +482,7 @@ fun ImportDialog(
                             importState.selectedDownloadClientIndices.isNotEmpty() ||
                             importState.selectedCustomWebpageIndices.isNotEmpty() ||
                             importState.selectedMediaServerIndices.isNotEmpty() ||
-                            hasGlobalPrefToImport,
+                            hasPrefToImport,
                         onClick = onConfirmImport,
                         modifier = Modifier.weight(1f),
                     ) {
