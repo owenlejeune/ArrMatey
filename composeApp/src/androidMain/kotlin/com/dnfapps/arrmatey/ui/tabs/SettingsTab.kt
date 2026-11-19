@@ -2,9 +2,10 @@ package com.dnfapps.arrmatey.ui.tabs
 
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.SettingsScreen
 import com.dnfapps.arrmatey.navigation.SettingsTabNavigator
 import com.dnfapps.arrmatey.navigation.onInstanceTap
@@ -25,9 +26,8 @@ import com.dnfapps.arrmatey.navigation.toServices
 import com.dnfapps.arrmatey.navigation.toShortcutsPreferences
 import com.dnfapps.arrmatey.navigation.toTabPreferences
 import com.dnfapps.arrmatey.navigation.toUserInterface
-import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
-import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
-import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDisplay
+import com.dnfapps.arrmatey.ui.helpers.isExpandedWidth
 import com.dnfapps.arrmatey.ui.screens.AddEditCustomWebpageScreen
 import com.dnfapps.arrmatey.ui.screens.AddEditDownloadClientScreen
 import com.dnfapps.arrmatey.ui.screens.AddEditWolDeviceScreen
@@ -46,18 +46,20 @@ import com.dnfapps.arrmatey.ui.screens.settings.ServicesSettingsScreen
 import com.dnfapps.arrmatey.ui.screens.settings.UiSettingsScreen
 import org.koin.compose.koinInject
 
+@Suppress("UNCHECKED_CAST")
 @Composable
 fun SettingsTabNavHost(
     windowSizeClass: WindowSizeClass,
     navigationManager: NavigationManager = koinInject(),
     navigation: SettingsTabNavigator = navigationManager.settings,
 ) {
-    NavDisplay(
-        backStack = navigation.backStack,
-        onBack = { navigation.popBackStack() },
-        transitionSpec = { forwardSlideTransform() },
-        popTransitionSpec = { popSlideTransform() },
-        predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
+    val isExpanded = windowSizeClass.isExpandedWidth
+
+    TwoPaneMasterDetailNavDisplay(
+        navigation = navigation as Navigator<NavKey>,
+        isExpanded = isExpanded,
+        wideRailIsVisible = false,
+        isMasterScreen = { it is SettingsScreen.Landing },
         entryProvider =
         entryProvider {
             entry<SettingsScreen.Landing> {

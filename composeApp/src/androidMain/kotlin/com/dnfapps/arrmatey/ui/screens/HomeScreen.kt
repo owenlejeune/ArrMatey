@@ -13,8 +13,8 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -40,8 +40,12 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarActionState
 import com.dnfapps.arrmatey.ui.components.appbar.LocalFloatingBarActionState
 import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
+import com.dnfapps.arrmatey.ui.helpers.FoldablePosture
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarVisible
+import com.dnfapps.arrmatey.ui.helpers.LocalFoldablePosture
+import com.dnfapps.arrmatey.ui.helpers.globalKeyboardShortcuts
+import com.dnfapps.arrmatey.ui.helpers.isExpandedWidth
 import com.dnfapps.arrmatey.ui.screens.home.HomeBottomNavBar
 import com.dnfapps.arrmatey.ui.screens.home.HomeDrawerContent
 import com.dnfapps.arrmatey.ui.screens.home.HomeFloatingNavBar
@@ -131,7 +135,7 @@ fun HomeScreen(
         closeOverlayInstead = overlayTab != null && !overlayTabBackOpensDrawer,
     )
 
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+    val isExpanded = windowSizeClass.isExpandedWidth
     val floatingBarIsVisible = !isExpanded && useFloatingNavigationBar && overlayTab == null && visibleTabs.size > 1
     var floatingBarHeight by remember { mutableIntStateOf(0) }
     val floatingBarBottomPadding =
@@ -145,11 +149,21 @@ fun HomeScreen(
 
     var showReorderSheet by remember { mutableStateOf(false) }
 
+    val posture =
+        remember(windowSizeClass, isExpanded) {
+            if (windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact && isExpanded) {
+                FoldablePosture.Tabletop()
+            } else {
+                FoldablePosture.Normal
+            }
+        }
+
     CompositionLocalProvider(
         LocalNavigationManager provides navigationManager,
         LocalFloatingBarBottomPadding provides floatingBarBottomPadding,
         LocalFloatingBarActionState provides floatingBarActionState,
         LocalFloatingBarVisible provides floatingBarIsVisible,
+        LocalFoldablePosture provides posture,
     ) {
         val mainContent = @Composable {
             HomeMainContent(
@@ -166,6 +180,25 @@ fun HomeScreen(
         val drawerGesturesEnabled by navigationManager.drawerGesturesEnabled.collectAsStateWithLifecycle()
 
         ModalNavigationDrawer(
+            modifier =
+            Modifier.globalKeyboardShortcuts(
+                onOpenSettings = {
+                    scope.launch { navigationManager.openOverlay(TabItem.Settings) }
+                },
+                onEscape = {
+                    if (overlayTab != null) {
+                        navigationManager.closeOverlay()
+                        true
+                    } else {
+                        false
+                    }
+                },
+                onSelectTabByIndex = { index ->
+                    if (index in visibleTabs.indices) {
+                        navigationManager.setSelectedTab(visibleTabs[index])
+                    }
+                },
+            ),
             gesturesEnabled =
             drawerGesturesEnabled &&
                 isRootScreen &&

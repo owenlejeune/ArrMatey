@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.ui.tabs
 
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation3.runtime.entryProvider
@@ -27,6 +26,8 @@ import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDisplay
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.monitoringNavEntries
+import com.dnfapps.arrmatey.ui.helpers.isExpandedWidth
+import com.dnfapps.arrmatey.ui.helpers.isMultiPaneSupported
 import com.dnfapps.arrmatey.ui.screens.ArrInstanceDashboard
 import com.dnfapps.arrmatey.ui.screens.BazarrDetailsScreen
 import com.dnfapps.arrmatey.ui.screens.BazarrScreen
@@ -40,8 +41,8 @@ fun DashboardTab(
     navigationManager: NavigationManager = koinInject(),
     navigation: DashboardTabNavigator = navigationManager.dashboard,
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
-    val isLargeScreen = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+    val isExpanded = windowSizeClass.isExpandedWidth
+    val isLargeScreen = windowSizeClass.isMultiPaneSupported
     val coroutineScope = rememberCoroutineScope()
     val resolveEpisodeUseCase: ResolveSonarrEpisodeUseCase = koinInject()
     TwoPaneMasterDetailNavDisplay(

@@ -21,7 +21,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
@@ -56,10 +54,9 @@ import com.dnfapps.arrmatey.ui.calendar.CalendarListView
 import com.dnfapps.arrmatey.ui.calendar.CalendarMonthView
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDisplay
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
-import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
-import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
+import com.dnfapps.arrmatey.ui.helpers.isExpandedWidth
 import com.dnfapps.arrmatey.ui.menu.CalendarFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.CalendarCardCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
@@ -75,13 +72,13 @@ fun CalendarTab(
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<NavKey> = navigationManager.calendar,
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
-    NavDisplay(
-        backStack = navigation.backStack,
-        onBack = { navigation.popBackStack() },
-        transitionSpec = { forwardSlideTransform() },
-        popTransitionSpec = { popSlideTransform() },
-        predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
+    val isExpanded = windowSizeClass.isExpandedWidth
+
+    TwoPaneMasterDetailNavDisplay(
+        navigation = navigation,
+        isExpanded = isExpanded,
+        wideRailIsVisible = wideRailIsVisible,
+        isMasterScreen = { it is CalendarScreen.Home },
         entryProvider =
         entryProvider {
             entry<CalendarScreen.Home> {

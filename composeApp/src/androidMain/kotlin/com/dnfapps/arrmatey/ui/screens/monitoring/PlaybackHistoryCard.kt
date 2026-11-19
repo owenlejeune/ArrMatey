@@ -41,6 +41,7 @@ import com.dnfapps.arrmatey.monitoring.model.PlaybackMediaType
 import com.dnfapps.arrmatey.monitoring.model.PlaybackStreamDecision
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.tracearr.api.model.TracearrServerType
+import com.dnfapps.arrmatey.ui.helpers.FormFactorPreviews
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrRed
@@ -325,6 +326,7 @@ private fun StatusChip(
     }
 }
 
+@FormFactorPreviews
 @Preview
 @Composable
 private fun PlaybackHistoryCardMediaTypesPreview() {

@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.ui.tabs
 
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -13,6 +12,7 @@ import com.dnfapps.arrmatey.navigation.toMediaDetails
 import com.dnfapps.arrmatey.navigation.toSearch
 import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDisplay
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
+import com.dnfapps.arrmatey.ui.helpers.isExpandedWidth
 import com.dnfapps.arrmatey.ui.screens.ArrLibraryScreen
 import org.koin.compose.koinInject
 
@@ -25,7 +25,7 @@ fun ArrTab(
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<NavKey> = navigationManager.arr(type),
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+    val isExpanded = windowSizeClass.isExpandedWidth
 
     TwoPaneMasterDetailNavDisplay(
         navigation = navigation,

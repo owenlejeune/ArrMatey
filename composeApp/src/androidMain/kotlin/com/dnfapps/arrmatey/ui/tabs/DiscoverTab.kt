@@ -15,7 +15,6 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +45,7 @@ import com.dnfapps.arrmatey.ui.components.MediaInstanceFilterRow
 import com.dnfapps.arrmatey.ui.components.SearchResultList
 import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDisplay
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
+import com.dnfapps.arrmatey.ui.helpers.isExpandedWidth
 import com.dnfapps.arrmatey.ui.screens.DiscoverCategoryScreen
 import com.dnfapps.arrmatey.ui.screens.DiscoverHomeScreen
 import com.dnfapps.arrmatey.utils.mokoString
@@ -61,7 +61,7 @@ fun DiscoverTab(
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<NavKey> = navigationManager.discover,
 ) {
-    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+    val isExpanded = windowSizeClass.isExpandedWidth
     TwoPaneMasterDetailNavDisplay(
         navigation = navigation,
         isExpanded = isExpanded,

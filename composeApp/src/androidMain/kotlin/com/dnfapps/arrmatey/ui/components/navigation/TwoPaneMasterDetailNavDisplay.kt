@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.components.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.slideInHorizontally
@@ -15,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -23,6 +25,8 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.MediaScreen
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.ui.helpers.FoldablePosture
+import com.dnfapps.arrmatey.ui.helpers.LocalFoldablePosture
 import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import org.koin.compose.koinInject
 
@@ -44,6 +48,10 @@ fun TwoPaneMasterDetailNavDisplay(
     val detailBackStack = navigation.backStack.filterIndexed { index, _ -> index > baseIndex }
     val showDetails = isExpanded && dualPanelSupport && detailBackStack.isNotEmpty()
 
+    BackHandler(enabled = showDetails) {
+        navigation.popBackStack()
+    }
+
     val detailsWeight by animateFloatAsState(
         targetValue =
         if (showDetails) {
@@ -53,6 +61,9 @@ fun TwoPaneMasterDetailNavDisplay(
         },
         label = "DetailsWeight",
     )
+
+    val foldablePosture = LocalFoldablePosture.current
+    val dividerThickness = if (foldablePosture is FoldablePosture.Book) 16.dp else 1.dp
 
     Row(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
@@ -67,7 +78,10 @@ fun TwoPaneMasterDetailNavDisplay(
         }
 
         if (showDetails) {
-            VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            VerticalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant,
+                thickness = dividerThickness,
+            )
         }
 
         val lastValidDetailBackStack = remember { mutableStateOf<List<NavKey>>(emptyList()) }
