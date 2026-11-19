@@ -61,6 +61,7 @@ import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.newest.NewestDownloadableItem
 import com.dnfapps.arrmatey.newest.NewestDownloadableViewModel
+import com.dnfapps.arrmatey.newest.ReleaseKind
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
@@ -86,6 +87,7 @@ fun DiscoverHomeScreen(
     onSeeMore: (DiscoverCategory) -> Unit,
     onItemClick: (SearchResult) -> Unit,
     newestViewModel: NewestDownloadableViewModel = koinViewModel(),
+    onSeeMoreProwlarr: (ReleaseKind) -> Unit = {},
 ) {
     val isFloatingBarVisible = LocalFloatingBarVisible.current
 
@@ -330,12 +332,14 @@ fun DiscoverHomeScreen(
                             icon = Icons.Default.Movie,
                             state = newestMoviesState,
                             onItemClick = openNewest,
+                            onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Movie) },
                         )
                         NewestDownloadableRow(
                             title = MR.strings.tv_from_prowlarr,
                             icon = Icons.Default.Tv,
                             state = newestTvState,
                             onItemClick = openNewest,
+                            onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Tv) },
                         )
 
                         Spacer(modifier = Modifier.height(LocalFloatingBarBottomPadding.current))

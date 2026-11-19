@@ -40,6 +40,7 @@ import com.dnfapps.arrmatey.navigation.navigateToMediaServerItem
 import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toPersonDetails
+import com.dnfapps.arrmatey.newest.NewestDownloadableViewModel
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.MediaInstanceFilterRow
@@ -48,6 +49,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDispl
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.screens.DiscoverCategoryScreen
 import com.dnfapps.arrmatey.ui.screens.DiscoverHomeScreen
+import com.dnfapps.arrmatey.ui.screens.NewestDownloadableGridScreen
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -58,6 +60,7 @@ fun DiscoverTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
     viewModel: DiscoverViewModel = koinViewModel(),
+    newestViewModel: NewestDownloadableViewModel = koinViewModel(),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<NavKey> = navigationManager.discover,
 ) {
@@ -74,6 +77,10 @@ fun DiscoverTab(
                 val resolveEpisodeUseCase: ResolveSonarrEpisodeUseCase = koinInject()
                 DiscoverHomeScreen(
                     viewModel = viewModel,
+                    newestViewModel = newestViewModel,
+                    onSeeMoreProwlarr = { kind ->
+                        navigation.navigateTo(DiscoverScreen.Prowlarr(kind))
+                    },
                     wideRailIsVisible = wideRailIsVisible,
                     onSeeMore = { category ->
                         navigation.navigateTo(DiscoverScreen.Category(category))
@@ -118,6 +125,16 @@ fun DiscoverTab(
                                 navigation.toPersonDetails(result.result.id)
                             }
                         }
+                    },
+                )
+            }
+            entry<DiscoverScreen.Prowlarr> { entry ->
+                NewestDownloadableGridScreen(
+                    kind = entry.kind,
+                    viewModel = newestViewModel,
+                    onBack = { navigation.popBackStack() },
+                    onItemClick = { item ->
+                        item.match?.let { navigation.toDetails(tmdbId = it.id, requestType = it.mediaType) }
                     },
                 )
             }
