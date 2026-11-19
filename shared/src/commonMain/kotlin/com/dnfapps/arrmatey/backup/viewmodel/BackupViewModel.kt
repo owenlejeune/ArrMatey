@@ -133,6 +133,27 @@ class BackupViewModel(
         }
     }
 
+    fun exportQrData(onExportReady: (String) -> Unit) {
+        val state = _exportUiState.value
+        viewModelScope.launch {
+            _exportUiState.update { it.copy(isExporting = true) }
+            val encryptedData =
+                exportDataUseCase(
+                    password = "",
+                    selectedInstanceIds = state.selectedInstanceIds,
+                    selectedDownloadClientIds = state.selectedDownloadClientIds,
+                    selectedCustomWebpageIds = state.selectedCustomWebpageIds,
+                    selectedMediaServerIds = state.selectedMediaServerIds,
+                    includeInstancePreferences = state.includeInstancePreferences,
+                    includeTabPreferences = state.includeTabPreferences,
+                    includeUiPreferences = state.includeUiPreferences,
+                    includeIntegrationsPreferences = state.includeIntegrationsPreferences,
+                )
+            _exportUiState.update { it.copy(isExporting = false) }
+            onExportReady(encryptedData)
+        }
+    }
+
     // Import logic
     fun setImportPassword(password: String) {
         _importUiState.update { it.copy(password = password) }
@@ -171,6 +192,37 @@ class BackupViewModel(
         }
     }
 
+    fun prepareImportFromQr(encryptedData: String) {
+        _importUiState.update {
+            it.copy(
+                decryptedBackup = null,
+                selectedInstanceIndices = emptySet(),
+                selectedDownloadClientIndices = emptySet(),
+                selectedCustomWebpageIndices = emptySet(),
+                selectedMediaServerIndices = emptySet(),
+                error = null,
+            )
+        }
+        viewModelScope.launch {
+            try {
+                val backup = importDataUseCase.decryptAndValidateQrBackup(encryptedData, "")
+                _importUiState.update {
+                    it.copy(
+                        decryptedBackup = backup,
+                        selectedInstanceIndices = backup.instances.indices.toSet(),
+                        selectedDownloadClientIndices = backup.downloadClients.indices.toSet(),
+                        selectedCustomWebpageIndices = backup.customWebpages.indices.toSet(),
+                        selectedMediaServerIndices = backup.mediaServers.indices.toSet(),
+                        error = null,
+                    )
+                }
+            } catch (e: Exception) {
+                val message = e.message ?: "Invalid or corrupted QR code payload"
+                _importUiState.update { it.copy(error = message) }
+            }
+        }
+    }
+
     fun toggleImportInstanceSelection(index: Int) {
         _importUiState.update { state ->
             val newSelected = state.selectedInstanceIndices.toMutableSet()
@@ -203,6 +255,10 @@ class BackupViewModel(
         }
     }
 
+    fun toggleImportInstancePreferences() {
+        _importUiState.update { it.copy(importInstancePreferences = !it.importInstancePreferences) }
+    }
+
     fun toggleImportTabPreferences() {
         _importUiState.update { it.copy(importTabPreferences = !it.importTabPreferences) }
     }
@@ -227,6 +283,7 @@ class BackupViewModel(
                 selectedDownloadClientIndices = state.selectedDownloadClientIndices,
                 selectedCustomWebpageIndices = state.selectedCustomWebpageIndices,
                 selectedMediaServerIndices = state.selectedMediaServerIndices,
+                importInstancePreferences = state.importInstancePreferences,
                 importTabPreferences = state.importTabPreferences,
                 importUiPreferences = state.importUiPreferences,
                 importIntegrationsPreferences = state.importIntegrationsPreferences,

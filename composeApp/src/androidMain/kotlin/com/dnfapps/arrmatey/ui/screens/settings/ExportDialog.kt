@@ -51,6 +51,8 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.LabelledCheckbox
+import com.dnfapps.arrmatey.ui.components.ServiceSelectionCard
+import com.dnfapps.arrmatey.ui.theme.associatedColor
 import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,17 +78,16 @@ fun ExportDialog(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
-                .verticalScroll(rememberScrollState()),
+                .padding(bottom = 24.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             ) {
                 Surface(
                     shape = CircleShape,
@@ -115,265 +116,268 @@ fun ExportDialog(
                 }
             }
 
-            AMOutlinedTextField(
-                value = exportState.password,
-                onValueChange = onPasswordChanged,
-                label = mokoString(MR.strings.password),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                        )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                AMOutlinedTextField(
+                    value = exportState.password,
+                    onValueChange = onPasswordChanged,
+                    label = mokoString(MR.strings.password),
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Tune,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Text(
+                        text = mokoString(MR.strings.onboarding_preferences_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+
+                ContainerCard(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    LabelledCheckbox(
+                        label = mokoString(MR.strings.include_preferences),
+                        checked = exportState.includeInstancePreferences,
+                        onCheckedChange = { onToggleIncludeInstancePreferences() },
+                    )
+                    LabelledCheckbox(
+                        label = mokoString(MR.strings.navigation_bar_configuration),
+                        checked = exportState.includeTabPreferences,
+                        onCheckedChange = { onToggleIncludeTabPreferences() },
+                    )
+                    LabelledCheckbox(
+                        label = mokoString(MR.strings.user_interface),
+                        checked = exportState.includeUiPreferences,
+                        onCheckedChange = { onToggleIncludeUiPreferences() },
+                    )
+                    LabelledCheckbox(
+                        label = mokoString(MR.strings.integrations),
+                        checked = exportState.includeIntegrationsPreferences,
+                        onCheckedChange = { onToggleIncludeIntegrationsPreferences() },
+                    )
+                }
+
+                if (exportState.instances.isNotEmpty() || exportState.downloadClients.isNotEmpty() || exportState.customWebpages.isNotEmpty()) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+                    Text(
+                        text = mokoString(MR.strings.select_items_to_export),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    if (exportState.instances.isNotEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Dns,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Text(
+                                    text = mokoString(MR.strings.instances),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+
+                            Text(
+                                text = "${exportState.selectedInstanceIds.size}/${exportState.instances.size}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            exportState.instances.forEach { instance ->
+                                ServiceSelectionCard(
+                                    label = instance.label,
+                                    url = instance.url,
+                                    checked = exportState.selectedInstanceIds.contains(instance.id),
+                                    onCheckedChange = { onToggleInstanceSelection(instance.id) },
+                                    icon = instance.type.icon,
+                                    color = instance.type.associatedColor,
+                                )
+                            }
+                        }
                     }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-            )
+
+                    if (exportState.downloadClients.isNotEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Download,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Text(
+                                    text = mokoString(MR.strings.download_clients),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+
+                            Text(
+                                text = "${exportState.selectedDownloadClientIds.size}/${exportState.downloadClients.size}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            exportState.downloadClients.forEach { client ->
+                                ServiceSelectionCard(
+                                    label = client.label,
+                                    url = client.url,
+                                    checked = exportState.selectedDownloadClientIds.contains(client.id),
+                                    onCheckedChange = { onToggleDownloadClientSelection(client.id) },
+                                    icon = client.type.icon,
+                                    color = client.type.associatedColor,
+                                )
+                            }
+                        }
+                    }
+
+                    if (exportState.customWebpages.isNotEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Language,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Text(
+                                    text = mokoString(MR.strings.custom_webpages),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+
+                            Text(
+                                text = "${exportState.selectedCustomWebpageIds.size}/${exportState.customWebpages.size}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            exportState.customWebpages.forEach { webpage ->
+                                ServiceSelectionCard(
+                                    label = webpage.name,
+                                    url = webpage.url,
+                                    checked = exportState.selectedCustomWebpageIds.contains(webpage.id),
+                                    onCheckedChange = { onToggleCustomWebpageSelection(webpage.id) },
+                                    vectorIcon = Icons.Default.Language,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                    }
+
+                    if (exportState.mediaServers.isNotEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Tv,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Text(
+                                    text = mokoString(MR.strings.media_servers),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+
+                            Text(
+                                text = "${exportState.selectedMediaServerIds.size}/${exportState.mediaServers.size}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            exportState.mediaServers.forEach { server ->
+                                ServiceSelectionCard(
+                                    label = server.label.ifBlank { server.serverType.name },
+                                    url = server.url,
+                                    checked = exportState.selectedMediaServerIds.contains(server.id),
+                                    onCheckedChange = { onToggleMediaServerSelection(server.id) },
+                                    icon = server.serverType.icon,
+                                    color = server.serverType.brandColor,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
 
             Row(
-                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Tune,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp),
-                )
-                Text(
-                    text = mokoString(MR.strings.onboarding_preferences_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-
-            ContainerCard(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                LabelledCheckbox(
-                    label = mokoString(MR.strings.include_preferences),
-                    checked = exportState.includeInstancePreferences,
-                    onCheckedChange = { onToggleIncludeInstancePreferences() },
-                )
-                LabelledCheckbox(
-                    label = mokoString(MR.strings.navigation_bar_configuration),
-                    checked = exportState.includeTabPreferences,
-                    onCheckedChange = { onToggleIncludeTabPreferences() },
-                )
-                LabelledCheckbox(
-                    label = mokoString(MR.strings.user_interface),
-                    checked = exportState.includeUiPreferences,
-                    onCheckedChange = { onToggleIncludeUiPreferences() },
-                )
-                LabelledCheckbox(
-                    label = mokoString(MR.strings.integrations),
-                    checked = exportState.includeIntegrationsPreferences,
-                    onCheckedChange = { onToggleIncludeIntegrationsPreferences() },
-                )
-            }
-
-            if (exportState.instances.isNotEmpty() || exportState.downloadClients.isNotEmpty() || exportState.customWebpages.isNotEmpty()) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-
-                Text(
-                    text = mokoString(MR.strings.select_items_to_export),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                if (exportState.instances.isNotEmpty()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Dns,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Text(
-                                text = mokoString(MR.strings.instances),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-
-                        Text(
-                            text = "${exportState.selectedInstanceIds.size}/${exportState.instances.size}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
-                    ContainerCard(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                        contentPadding = PaddingValues(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        exportState.instances.forEach { instance ->
-                            LabelledCheckbox(
-                                label = instance.label,
-                                checked = exportState.selectedInstanceIds.contains(instance.id),
-                                onCheckedChange = { onToggleInstanceSelection(instance.id) },
-                            )
-                        }
-                    }
-                }
-
-                if (exportState.downloadClients.isNotEmpty()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Download,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Text(
-                                text = mokoString(MR.strings.download_clients),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-
-                        Text(
-                            text = "${exportState.selectedDownloadClientIds.size}/${exportState.downloadClients.size}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
-                    ContainerCard(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                        contentPadding = PaddingValues(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        exportState.downloadClients.forEach { client ->
-                            LabelledCheckbox(
-                                label = client.label,
-                                checked = exportState.selectedDownloadClientIds.contains(client.id),
-                                onCheckedChange = { onToggleDownloadClientSelection(client.id) },
-                            )
-                        }
-                    }
-                }
-
-                if (exportState.customWebpages.isNotEmpty()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Language,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Text(
-                                text = mokoString(MR.strings.custom_webpages),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-
-                        Text(
-                            text = "${exportState.selectedCustomWebpageIds.size}/${exportState.customWebpages.size}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
-                    ContainerCard(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                        contentPadding = PaddingValues(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        exportState.customWebpages.forEach { webpage ->
-                            LabelledCheckbox(
-                                label = webpage.name,
-                                checked = exportState.selectedCustomWebpageIds.contains(webpage.id),
-                                onCheckedChange = { onToggleCustomWebpageSelection(webpage.id) },
-                            )
-                        }
-                    }
-                }
-
-                if (exportState.mediaServers.isNotEmpty()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Tv,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Text(
-                                text = mokoString(MR.strings.media_servers),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-
-                        Text(
-                            text = "${exportState.selectedMediaServerIds.size}/${exportState.mediaServers.size}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
-                    ContainerCard(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                        contentPadding = PaddingValues(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        exportState.mediaServers.forEach { server ->
-                            LabelledCheckbox(
-                                label = server.label.ifBlank { server.serverType.name },
-                                checked = exportState.selectedMediaServerIds.contains(server.id),
-                                onCheckedChange = { onToggleMediaServerSelection(server.id) },
-                            )
-                        }
-                    }
-                }
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             ) {
                 TextButton(
                     onClick = onDismiss,

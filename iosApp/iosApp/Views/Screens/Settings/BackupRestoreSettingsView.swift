@@ -15,6 +15,9 @@ struct BackupRestoreSettingsView: View {
     @State private var showExportSheet: Bool = false
     @State private var showFileExporter: Bool = false
     @State private var showFileImporter: Bool = false
+    @State private var showGenerateQrSheet: Bool = false
+    @State private var showScanQrSheet: Bool = false
+    @State private var isQrImport: Bool = false
     @State private var exportData: String = ""
     @State private var importData: String = ""
     @State private var showExportSuccess: Bool = false
@@ -31,9 +34,22 @@ struct BackupRestoreSettingsView: View {
                 }
 
                 Button {
+                    isQrImport = false
                     showFileImporter = true
                 } label: {
                     Label(MR.strings().import_data.localized(), systemImage: "square.and.arrow.down")
+                }
+
+                Button {
+                    showGenerateQrSheet = true
+                } label: {
+                    Label(MR.strings().generate_qr_code.localized(), systemImage: "qrcode")
+                }
+
+                Button {
+                    showScanQrSheet = true
+                } label: {
+                    Label(MR.strings().scan_qr_code.localized(), systemImage: "qrcode.viewfinder")
                 }
             } header: {
                 Text(MR.strings().backup_restore.localized())
@@ -61,6 +77,16 @@ struct BackupRestoreSettingsView: View {
                 self.showFileExporter = true
             }
         }
+        .sheet(isPresented: $showGenerateQrSheet) {
+            GenerateQrCodeSheet(viewModel: backupViewModel, isPresented: $showGenerateQrSheet)
+        }
+        .sheet(isPresented: $showScanQrSheet) {
+            ScanQrCodeSheet(isPresented: $showScanQrSheet) { code in
+                backupViewModel.resetImportState()
+                self.isQrImport = true
+                self.importData = code
+            }
+        }
         .fileExporter(isPresented: $showFileExporter, document: BackupFile(data: exportData), contentType: .json, defaultFilename: backupViewModel.getBackupFilename()) { result in
             switch result {
             case .success:
@@ -77,9 +103,8 @@ struct BackupRestoreSettingsView: View {
                     defer { url.stopAccessingSecurityScopedResource() }
                     if let data = try? Data(contentsOf: url), let string = String(data: data, encoding: .utf8) {
                         backupViewModel.resetImportState()
+                        self.isQrImport = false
                         self.importData = string
-                        // Need a way to trigger ImportSheet from here.
-                        // In the original it was in SettingsScreen.
                     }
                 }
             case .failure(let error):
@@ -88,9 +113,11 @@ struct BackupRestoreSettingsView: View {
         }
         .sheet(isPresented: Binding(get: { !importData.isEmpty }, set: { if !$0 { importData = "" } }), onDismiss: {
             backupViewModel.resetImportState()
+            self.isQrImport = false
         }) {
-            ImportSheet(viewModel: backupViewModel, isPresented: Binding(get: { !importData.isEmpty }, set: { if !$0 { importData = "" } }), encryptedData: importData) {
+            ImportSheet(viewModel: backupViewModel, isPresented: Binding(get: { !importData.isEmpty }, set: { if !$0 { importData = "" } }), encryptedData: importData, isQrImport: isQrImport) {
                 self.importData = ""
+                self.isQrImport = false
                 self.showImportSuccess = true
             }
         }

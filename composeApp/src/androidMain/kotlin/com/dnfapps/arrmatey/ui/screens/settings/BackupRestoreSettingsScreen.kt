@@ -13,6 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,7 +58,10 @@ fun BackupRestoreSettingsScreen(
 
     var showExportDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
+    var showGenerateQrSheet by remember { mutableStateOf(false) }
+    var showScanQrSheet by remember { mutableStateOf(false) }
     var pendingImportData by remember { mutableStateOf<String?>(null) }
+    var isQrImport by remember { mutableStateOf(false) }
 
     val exportLauncher =
         rememberLauncherForActivityResult(
@@ -128,6 +133,18 @@ fun BackupRestoreSettingsScreen(
                         subtitle = mokoString(MR.strings.restore_description),
                         onClick = { importLauncher.launch(arrayOf("application/json")) },
                     ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.QrCode),
+                        title = mokoString(MR.strings.generate_qr_code),
+                        subtitle = mokoString(MR.strings.generate_qr_code_description),
+                        onClick = { showGenerateQrSheet = true },
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.QrCodeScanner),
+                        title = mokoString(MR.strings.scan_qr_code),
+                        subtitle = mokoString(MR.strings.scan_qr_code_description),
+                        onClick = { showScanQrSheet = true },
+                    ),
                 ),
             )
 
@@ -166,14 +183,49 @@ fun BackupRestoreSettingsScreen(
             )
         }
 
+        if (showGenerateQrSheet) {
+            val exportState by backupViewModel.exportUiState.collectAsStateWithLifecycle()
+
+            GenerateQrCodeSheet(
+                exportState = exportState,
+                onDismiss = { showGenerateQrSheet = false },
+                onGenerateExportData = { onReady ->
+                    backupViewModel.exportQrData(onReady)
+                },
+                onToggleIncludeInstancePreferences = { backupViewModel.toggleIncludePreferences() },
+                onToggleIncludeTabPreferences = { backupViewModel.toggleIncludeTabPreferences() },
+                onToggleIncludeUiPreferences = { backupViewModel.toggleIncludeUiPreferences() },
+                onToggleIncludeIntegrationsPreferences = { backupViewModel.toggleIncludeIntegrationsPreferences() },
+                onToggleInstanceSelection = { backupViewModel.toggleInstanceSelection(it) },
+                onToggleDownloadClientSelection = { backupViewModel.toggleDownloadClientSelection(it) },
+                onToggleCustomWebpageSelection = { backupViewModel.toggleCustomWebpageSelection(it) },
+                onToggleMediaServerSelection = { backupViewModel.toggleMediaServerSelection(it) },
+            )
+        }
+
+        if (showScanQrSheet) {
+            ScanQrCodeSheet(
+                onDismiss = { showScanQrSheet = false },
+                onQrScanned = { scannedString ->
+                    showScanQrSheet = false
+                    backupViewModel.resetImportState()
+                    pendingImportData = scannedString
+                    isQrImport = true
+                    showImportDialog = true
+                },
+            )
+        }
+
         if (showImportDialog) {
             val importState by backupViewModel.importUiState.collectAsStateWithLifecycle()
 
             ImportDialog(
                 importState = importState,
+                isQrImport = isQrImport,
                 onDismiss = {
                     showImportDialog = false
                     pendingImportData = null
+                    isQrImport = false
                     backupViewModel.resetImportState()
                 },
                 onPasswordChanged = { backupViewModel.setImportPassword(it) },
@@ -181,18 +233,24 @@ fun BackupRestoreSettingsScreen(
                 onToggleDownloadClientSelection = { backupViewModel.toggleImportDownloadClientSelection(it) },
                 onToggleCustomWebpageSelection = { backupViewModel.toggleImportCustomWebpageSelection(it) },
                 onToggleImportMediaServerSelection = { backupViewModel.toggleImportMediaServerSelection(it) },
+                onToggleImportInstancePreferences = { backupViewModel.toggleImportInstancePreferences() },
                 onToggleImportTabPreferences = { backupViewModel.toggleImportTabPreferences() },
                 onToggleImportUiPreferences = { backupViewModel.toggleImportUiPreferences() },
                 onToggleImportIntegrationsPreferences = { backupViewModel.toggleImportIntegrationsPreferences() },
                 onConfirmDecrypt = {
                     pendingImportData?.let { data ->
-                        backupViewModel.prepareImport(data)
+                        if (isQrImport) {
+                            backupViewModel.prepareImportFromQr(data)
+                        } else {
+                            backupViewModel.prepareImport(data)
+                        }
                     }
                 },
                 onConfirmImport = {
                     backupViewModel.executeImport {
                         showImportDialog = false
                         pendingImportData = null
+                        isQrImport = false
                         Toast.makeText(context, moko.getString(MR.strings.import_complete), Toast.LENGTH_SHORT).show()
                     }
                 },

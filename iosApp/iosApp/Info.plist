@@ -14,5 +14,7 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera permission is required to scan QR codes for backup and restore.</string>
 </dict>
 </plist>

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -40,6 +41,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun SetupChoicePage(
     onManualSetup: () -> Unit,
     onRestoreBackup: () -> Unit,
+    onScanQrCode: () -> Unit,
     onSkip: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -85,6 +87,17 @@ fun SetupChoicePage(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             iconColor = MaterialTheme.colorScheme.onSecondaryContainer,
             onClick = onRestoreBackup,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ConfigurationCard(
+            title = mokoString(MR.strings.scan_qr_code),
+            description = mokoString(MR.strings.scan_qr_code_description),
+            icon = Icons.Default.QrCodeScanner,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            iconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            onClick = onScanQrCode,
         )
 
         Spacer(modifier = Modifier.height(16.dp))

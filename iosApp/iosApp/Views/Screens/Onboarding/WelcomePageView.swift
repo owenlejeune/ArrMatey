@@ -23,6 +23,9 @@ struct WelcomePageView: View {
         for client in DownloadClientType.allCases {
             list.append(SupportedService(id: "client_\(client.displayName)", name: client.displayName, icon: client.icon))
         }
+        for mediaServer in MediaServerType.allCases {
+            list.append(SupportedService(id: "mediaserver_\(mediaServer.name)", name: mediaServer.name, icon: mediaServer.icon))
+        }
         return list
     }
 
