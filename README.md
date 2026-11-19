@@ -91,9 +91,10 @@
 - Dedicated Blocklist view to inspect and manage blocked releases across all configured instances
 
 ### Advanced Features
+- **QR Code Setup Sharing**: Easily transfer app configurations and service setups between devices by generating and scanning QR codes
 - **Floating Navigation Bar**: Modern floating navigation bar option for clean, fluid screen transitions
 - **Wake-on-LAN**: Wake sleeping servers directly from within the app
-- **Interactive Onboarding**: Guided setup wizard to configure your initial instances and app preferences
+- **Interactive Onboarding**: Guided setup wizard to configure your initial instances, media servers, and app preferences
 - **Android App Shortcuts & Monochrome Icon**: Jump to services directly from your home screen with Material You icon support
 - **Local Network Switching**: Automatically use local URLs when connected to home Wi-Fi
 - **Large Screen & Adaptive Layouts**: Responsive dual-panel layouts for tablets and large screens

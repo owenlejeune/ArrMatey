@@ -1002,6 +1002,7 @@
     <string name="v17_title">Media History, Fast Scroll &amp; Enhancements</string>
     <string name="v18_title">It's a big one!</string>
     <string name="v19_title">Performance &amp; Enhancements</string>
+    <string name="v20_title">QR Sharing &amp; Setup Enhancements</string>
 
     <!-- Backup & Restore -->
     <string name="backup_restore">Backup &amp; Restore</string>

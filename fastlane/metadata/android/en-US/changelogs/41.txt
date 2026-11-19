@@ -1,0 +1,11 @@
+### New Features
+* QR Code Setup Sharing: Easily share and transfer app configurations and service setups between devices by generating and scanning QR codes.
+* Onboarding Media Server Setup: Configure Jellyfin, Emby, and Plex media servers directly during the initial onboarding flow and include them in backup exports.
+* Sonarr API v5 Support: Added beta support for Sonarr API v5.
+
+### Improvements
+* Network & Reverse Proxy Image Loading: Enhanced image request interceptors support custom HTTP headers (e.g., Cloudflare Access) and dynamically rewrite local IP image URLs when switching networks.
+
+### Bug Fixes
+* Add Media Sheet: Fixed an issue where the add media bottom sheet would re-appear after adding content to your library.
+* Discover Availability Status: Fixed requested items present in Sonarr or Radarr without downloaded files incorrectly showing as available rather than processing.
