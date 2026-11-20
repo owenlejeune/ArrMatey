@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.networking.NetworkResult
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +31,7 @@ class NewestDownloadableViewModel(
     private val _hasSeerr = MutableStateFlow(false)
     val hasSeerr: StateFlow<Boolean> = _hasSeerr.asStateFlow()
 
+    private val jobs = mutableMapOf<ReleaseKind, Job>()
     private var prowlarr: ProwlarrInstanceRepository? = null
     private var seerr: SeerrInstanceRepository? = null
 
@@ -69,29 +71,41 @@ class NewestDownloadableViewModel(
     private fun load() {
         val prowlarrRepo = prowlarr
         if (prowlarrRepo == null) {
+            jobs.values.forEach { it.cancel() }
+            jobs.clear()
             _moviesState.value = NewestDownloadableState.Initial
             _tvState.value = NewestDownloadableState.Initial
             return
         }
         val seerrRepo = seerr
-        viewModelScope.launch { _moviesState.value = fetch(prowlarrRepo, seerrRepo, ReleaseKind.Movie, _moviesState.value) }
-        viewModelScope.launch { _tvState.value = fetch(prowlarrRepo, seerrRepo, ReleaseKind.Tv, _tvState.value) }
+        // Movies and TV are separate Prowlarr searches and run side by side.
+        // A new load replaces the one in flight instead of running a second slow search.
+        ReleaseKind.entries.forEach { kind ->
+            jobs[kind]?.cancel()
+            jobs[kind] = viewModelScope.launch { fetch(prowlarrRepo, seerrRepo, kind) }
+        }
     }
 
     private suspend fun fetch(
         prowlarrRepo: ProwlarrInstanceRepository,
         seerrRepo: SeerrInstanceRepository?,
         kind: ReleaseKind,
-        current: NewestDownloadableState,
-    ): NewestDownloadableState {
-        if (current !is NewestDownloadableState.Success) {
+    ) {
+        if (stateFor(kind) !is NewestDownloadableState.Success) {
             setState(kind, NewestDownloadableState.Loading)
         }
-        return when (val result = getNewestDownloadableUseCase(prowlarrRepo, seerrRepo, kind)) {
-            is NetworkResult.Success -> NewestDownloadableState.Success(result.data)
-            is NetworkResult.Error -> NewestDownloadableState.Error(result.message ?: "Failed to load newest releases")
-            is NetworkResult.Loading -> NewestDownloadableState.Loading
+        getNewestDownloadableUseCase(prowlarrRepo, seerrRepo, kind).collect { result ->
+            when (result) {
+                is NetworkResult.Success -> setState(kind, NewestDownloadableState.Success(result.data))
+                is NetworkResult.Error -> setState(kind, NewestDownloadableState.Error(result.message ?: "Failed to load newest releases"))
+                is NetworkResult.Loading -> Unit
+            }
         }
+    }
+
+    private fun stateFor(kind: ReleaseKind): NewestDownloadableState = when (kind) {
+        ReleaseKind.Movie -> _moviesState.value
+        ReleaseKind.Tv -> _tvState.value
     }
 
     private fun setState(kind: ReleaseKind, state: NewestDownloadableState) {
