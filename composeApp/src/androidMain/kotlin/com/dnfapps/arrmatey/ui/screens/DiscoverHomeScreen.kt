@@ -116,6 +116,10 @@ fun DiscoverHomeScreen(
     val focusRequester = remember { FocusRequester() }
     val scope = rememberCoroutineScope()
 
+    LaunchedEffect(hasProwlarr) {
+        if (hasProwlarr) newestViewModel.ensureLoaded()
+    }
+
     LaunchedEffect(textFieldState.text) {
         viewModel.updateSearchQuery(textFieldState.text.toString())
     }
@@ -327,20 +331,22 @@ fun DiscoverHomeScreen(
                         val openNewest: (NewestDownloadableItem) -> Unit = { item ->
                             item.match?.let { onItemClick(SearchResult.SeerrMediaResult(it)) }
                         }
-                        NewestDownloadableRow(
-                            title = MR.strings.movies_from_prowlarr,
-                            icon = Icons.Default.Movie,
-                            state = newestMoviesState,
-                            onItemClick = openNewest,
-                            onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Movie) },
-                        )
-                        NewestDownloadableRow(
-                            title = MR.strings.tv_from_prowlarr,
-                            icon = Icons.Default.Tv,
-                            state = newestTvState,
-                            onItemClick = openNewest,
-                            onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Tv) },
-                        )
+                        if (hasProwlarr) {
+                            NewestDownloadableRow(
+                                title = MR.strings.movies_from_prowlarr,
+                                icon = Icons.Default.Movie,
+                                state = newestMoviesState,
+                                onItemClick = openNewest,
+                                onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Movie) },
+                            )
+                            NewestDownloadableRow(
+                                title = MR.strings.tv_from_prowlarr,
+                                icon = Icons.Default.Tv,
+                                state = newestTvState,
+                                onItemClick = openNewest,
+                                onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Tv) },
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(LocalFloatingBarBottomPadding.current))
                     }

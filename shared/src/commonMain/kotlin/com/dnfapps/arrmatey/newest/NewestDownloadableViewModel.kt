@@ -50,6 +50,18 @@ class NewestDownloadableViewModel(
         }
     }
 
+    /**
+     * Loads the lists if nothing has loaded yet, or the last load failed.
+     * Screens call this when they open, so a screen created before the
+     * instances were known still fetches on its own.
+     */
+    fun ensureLoaded() {
+        val idle = { state: NewestDownloadableState ->
+            state is NewestDownloadableState.Initial || state is NewestDownloadableState.Error
+        }
+        if (prowlarr != null && (idle(_moviesState.value) || idle(_tvState.value))) load()
+    }
+
     fun refresh() {
         viewModelScope.launch { load() }
     }

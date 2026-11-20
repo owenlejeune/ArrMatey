@@ -51,6 +51,7 @@ import dev.icerock.moko.resources.StringResource
  * A Discover row of the newest releases from Prowlarr. Titles Seerr matched show as
  * posters; the rest show as plain cards with their year, quality and seeders.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NewestDownloadableRow(
     title: StringResource,
@@ -60,7 +61,6 @@ fun NewestDownloadableRow(
     onSeeMore: (() -> Unit)? = null,
 ) {
     val items = (state as? NewestDownloadableState.Success)?.items.orEmpty()
-    if (items.isEmpty()) return
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -92,25 +92,59 @@ fun NewestDownloadableRow(
             }
         }
 
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(
-                items = items,
-                key = { it.key },
-                contentType = { if (it.match != null) "poster" else "plain" },
-            ) { item ->
-                val match = item.match
-                if (match != null) {
-                    PosterItem(
-                        item = match,
-                        modifier = Modifier.width(120.dp),
-                        onItemClick = { onItemClick(item) },
-                    )
-                } else {
-                    PlainReleaseCard(item = item)
+        when {
+            state is NewestDownloadableState.Error -> {
+                Text(
+                    text = state.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
+            state !is NewestDownloadableState.Success -> {
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(180.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    LoadingIndicator()
                 }
+            }
+            items.isEmpty() -> {
+                Text(
+                    text = mokoString(MR.strings.newest_downloadable_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
+            else -> NewestPosterRow(items = items, onItemClick = onItemClick)
+        }
+    }
+}
+
+@Composable
+private fun NewestPosterRow(
+    items: List<NewestDownloadableItem>,
+    onItemClick: (NewestDownloadableItem) -> Unit,
+) {
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        items(
+            items = items,
+            key = { it.key },
+            contentType = { if (it.match != null) "poster" else "plain" },
+        ) { item ->
+            val match = item.match
+            if (match != null) {
+                PosterItem(
+                    item = match,
+                    modifier = Modifier.width(120.dp),
+                    onItemClick = { onItemClick(item) },
+                )
+            } else {
+                PlainReleaseCard(item = item)
             }
         }
     }
