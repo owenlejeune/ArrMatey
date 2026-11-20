@@ -1,0 +1,5 @@
+### Improvements
+* QR Code Scanning: Replaced ML Kit scanner with ZXing for barcode scanning.
+
+### Bug Fixes
+* Sonarr Integration: Fixed API version checking before executing API operations.
