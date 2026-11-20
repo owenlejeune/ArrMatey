@@ -286,7 +286,8 @@ private fun processImageProxy(
                 yBytes,
                 width,
                 height,
-                0, 0,
+                0,
+                0,
                 width,
                 height,
                 false,
@@ -309,84 +310,84 @@ private fun createLuminanceSource(
     width: Int,
     height: Int,
     rotationDegrees: Int,
-): PlanarYUVLuminanceSource {
-    return when (rotationDegrees % 360) {
-        90 -> {
-            val rotatedData = ByteArray(width * height)
-            for (y in 0 until height) {
-                val yWidth = y * width
-                for (x in 0 until width) {
-                    rotatedData[x * height + (height - 1 - y)] = yBytes[yWidth + x]
-                }
+): PlanarYUVLuminanceSource = when (rotationDegrees % 360) {
+    90 -> {
+        val rotatedData = ByteArray(width * height)
+        for (y in 0 until height) {
+            val yWidth = y * width
+            for (x in 0 until width) {
+                rotatedData[x * height + (height - 1 - y)] = yBytes[yWidth + x]
             }
-            PlanarYUVLuminanceSource(
-                rotatedData,
-                height,
-                width,
-                0, 0,
-                height,
-                width,
-                false,
-            )
         }
-        180 -> {
-            val rotatedData = ByteArray(width * height)
-            for (y in 0 until height) {
-                val yWidth = y * width
-                val targetYWidth = (height - 1 - y) * width
-                for (x in 0 until width) {
-                    rotatedData[targetYWidth + (width - 1 - x)] = yBytes[yWidth + x]
-                }
+        PlanarYUVLuminanceSource(
+            rotatedData,
+            height,
+            width,
+            0,
+            0,
+            height,
+            width,
+            false,
+        )
+    }
+    180 -> {
+        val rotatedData = ByteArray(width * height)
+        for (y in 0 until height) {
+            val yWidth = y * width
+            val targetYWidth = (height - 1 - y) * width
+            for (x in 0 until width) {
+                rotatedData[targetYWidth + (width - 1 - x)] = yBytes[yWidth + x]
             }
-            PlanarYUVLuminanceSource(
-                rotatedData,
-                width,
-                height,
-                0, 0,
-                width,
-                height,
-                false,
-            )
         }
-        270 -> {
-            val rotatedData = ByteArray(width * height)
-            for (y in 0 until height) {
-                val yWidth = y * width
-                for (x in 0 until width) {
-                    rotatedData[(width - 1 - x) * height + y] = yBytes[yWidth + x]
-                }
+        PlanarYUVLuminanceSource(
+            rotatedData,
+            width,
+            height,
+            0,
+            0,
+            width,
+            height,
+            false,
+        )
+    }
+    270 -> {
+        val rotatedData = ByteArray(width * height)
+        for (y in 0 until height) {
+            val yWidth = y * width
+            for (x in 0 until width) {
+                rotatedData[(width - 1 - x) * height + y] = yBytes[yWidth + x]
             }
-            PlanarYUVLuminanceSource(
-                rotatedData,
-                height,
-                width,
-                0, 0,
-                height,
-                width,
-                false,
-            )
         }
-        else -> {
-            PlanarYUVLuminanceSource(
-                yBytes,
-                width,
-                height,
-                0, 0,
-                width,
-                height,
-                false,
-            )
-        }
+        PlanarYUVLuminanceSource(
+            rotatedData,
+            height,
+            width,
+            0,
+            0,
+            height,
+            width,
+            false,
+        )
+    }
+    else -> {
+        PlanarYUVLuminanceSource(
+            yBytes,
+            width,
+            height,
+            0,
+            0,
+            width,
+            height,
+            false,
+        )
     }
 }
 
-private fun tryDecode(reader: QRCodeReader, source: LuminanceSource): String? {
-    return try {
-        val bitmap = BinaryBitmap(HybridBinarizer(source))
-        reader.decode(bitmap, qrCodeHints).text
-    } catch (_: Exception) {
-        null
-    } finally {
-        reader.reset()
-    }
+private fun tryDecode(reader: QRCodeReader, source: LuminanceSource): String? = try {
+    val bitmap = BinaryBitmap(HybridBinarizer(source))
+    reader.decode(bitmap, qrCodeHints).text
+} catch (_: Exception) {
+    null
+} finally {
+    reader.reset()
 }
