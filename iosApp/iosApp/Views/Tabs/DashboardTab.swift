@@ -2708,7 +2708,9 @@ struct DashboardDiscoverFeedSection: View {
     @State private var selectedCategory: DiscoverCategory? = nil
 
     private var activeCategories: [DiscoverCategory] {
-        visibleCategories.isEmpty ? DiscoverCategory.allCases : visibleCategories
+        // The dashboard feed shows Seerr data only.
+        let seerrVisible = visibleCategories.filter { !$0.isProwlarr }
+        return seerrVisible.isEmpty ? DiscoverCategory.allCases.filter { !$0.isProwlarr } : seerrVisible
     }
 
     private var currentSelectedCategory: DiscoverCategory {
