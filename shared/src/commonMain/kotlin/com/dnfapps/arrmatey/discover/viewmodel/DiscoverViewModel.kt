@@ -344,6 +344,8 @@ class DiscoverViewModel(
             initialValue = false,
         )
 
+    private val emptyState: StateFlow<PagedData<DiscoverResult>> = MutableStateFlow(PagedData<DiscoverResult>()).asStateFlow()
+
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
@@ -560,6 +562,8 @@ class DiscoverViewModel(
         DiscoverCategory.POPULAR_SERIES -> tvState
         DiscoverCategory.UPCOMING_MOVIES -> upcomingMoviesState
         DiscoverCategory.UPCOMING_SERIES -> upcomingTvState
+        // Prowlarr rows are drawn from NewestDownloadableViewModel.
+        DiscoverCategory.PROWLARR_MOVIES, DiscoverCategory.PROWLARR_SERIES -> emptyState
     }
 
     fun loadNextPageForCategory(category: DiscoverCategory) {
@@ -569,6 +573,7 @@ class DiscoverViewModel(
             DiscoverCategory.POPULAR_SERIES -> loadNextTvPage()
             DiscoverCategory.UPCOMING_MOVIES -> loadNextUpcomingMoviesPage()
             DiscoverCategory.UPCOMING_SERIES -> loadNextUpcomingTvPage()
+            DiscoverCategory.PROWLARR_MOVIES, DiscoverCategory.PROWLARR_SERIES -> Unit
         }
     }
 

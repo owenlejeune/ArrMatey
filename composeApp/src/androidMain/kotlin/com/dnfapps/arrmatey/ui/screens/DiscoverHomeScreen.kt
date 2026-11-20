@@ -266,6 +266,10 @@ fun DiscoverHomeScreen(
                         }
                     }
 
+                    val openNewest: (NewestDownloadableItem) -> Unit = { item ->
+                        item.match?.let { onItemClick(SearchResult.SeerrMediaResult(it)) }
+                    }
+
                     Column(
                         modifier =
                         Modifier
@@ -325,27 +329,29 @@ fun DiscoverHomeScreen(
                                         onSeeMore = { onSeeMore(DiscoverCategory.UPCOMING_SERIES) },
                                     )
                                 }
+                                DiscoverCategory.PROWLARR_MOVIES -> {
+                                    if (hasProwlarr) {
+                                        NewestDownloadableRow(
+                                            title = category.title,
+                                            icon = Icons.Default.Movie,
+                                            state = newestMoviesState,
+                                            onItemClick = openNewest,
+                                            onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Movie) },
+                                        )
+                                    }
+                                }
+                                DiscoverCategory.PROWLARR_SERIES -> {
+                                    if (hasProwlarr) {
+                                        NewestDownloadableRow(
+                                            title = category.title,
+                                            icon = Icons.Default.Tv,
+                                            state = newestTvState,
+                                            onItemClick = openNewest,
+                                            onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Tv) },
+                                        )
+                                    }
+                                }
                             }
-                        }
-
-                        val openNewest: (NewestDownloadableItem) -> Unit = { item ->
-                            item.match?.let { onItemClick(SearchResult.SeerrMediaResult(it)) }
-                        }
-                        if (hasProwlarr) {
-                            NewestDownloadableRow(
-                                title = MR.strings.movies_from_prowlarr,
-                                icon = Icons.Default.Movie,
-                                state = newestMoviesState,
-                                onItemClick = openNewest,
-                                onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Movie) },
-                            )
-                            NewestDownloadableRow(
-                                title = MR.strings.tv_from_prowlarr,
-                                icon = Icons.Default.Tv,
-                                state = newestTvState,
-                                onItemClick = openNewest,
-                                onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Tv) },
-                            )
                         }
 
                         Spacer(modifier = Modifier.height(LocalFloatingBarBottomPadding.current))
@@ -356,9 +362,14 @@ fun DiscoverHomeScreen(
     }
 
     if (showCustomizationSheet) {
+        // Without Prowlarr its rows are left out of the sheet, and kept as they were on save.
         DiscoverSectionCustomizationSheet(
-            preferences = sectionPreferences,
-            onUpdatePreferences = { viewModel.updateDiscoverSectionPreferences(it) },
+            preferences = if (hasProwlarr) sectionPreferences else sectionPreferences.withoutProwlarr(),
+            onUpdatePreferences = { updated ->
+                viewModel.updateDiscoverSectionPreferences(
+                    if (hasProwlarr) updated else updated.restoreProwlarrFrom(sectionPreferences),
+                )
+            },
             onResetPreferences = { viewModel.resetDiscoverSectionPreferences() },
             onDismissRequest = { showCustomizationSheet = false },
         )
