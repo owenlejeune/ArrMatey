@@ -196,7 +196,7 @@ fun NewestDownloadableList(
                 LoadingIndicator(modifier = Modifier.size(96.dp))
             }
             is NewestDownloadableState.Error -> {
-                Text(text = state.message, modifier = Modifier.padding(16.dp))
+                Text(text = state.message, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp))
             }
             is NewestDownloadableState.Success -> {
                 PullToRefreshBox(

@@ -91,7 +91,15 @@ class ProwlarrInstanceRepository(
         query: String,
         categories: List<Int> = emptyList(),
         indexerIds: List<Long> = emptyList(),
-    ): NetworkResult<List<ProwlarrSearchResult>> = prowlarrClient.search(query = query, categories = categories, indexerIds = indexerIds)
+        limit: Int? = null,
+        timeoutMillis: Long? = null,
+    ): NetworkResult<List<ProwlarrSearchResult>> = prowlarrClient.search(
+        query = query,
+        categories = categories,
+        indexerIds = indexerIds,
+        limit = limit,
+        timeoutMillis = timeoutMillis,
+    )
 
     suspend fun testIndexer(indexer: ProwlarrIndexer): NetworkResult<Unit> = prowlarrClient.testIndexer(indexer)
 
