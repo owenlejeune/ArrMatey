@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.screens.settings
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.util.Log
 import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,11 +53,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
-import com.google.mlkit.vision.barcode.BarcodeScanner
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.common.InputImage
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.BinaryBitmap
+import com.google.zxing.DecodeHintType
+import com.google.zxing.LuminanceSource
+import com.google.zxing.PlanarYUVLuminanceSource
+import com.google.zxing.common.HybridBinarizer
+import com.google.zxing.qrcode.QRCodeReader
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -197,6 +200,7 @@ private fun CameraQrScannerView(
             }
 
             val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+            val mainExecutor = ContextCompat.getMainExecutor(ctx)
             cameraProviderFuture.addListener({
                 val cameraProvider = cameraProviderFuture.get()
 
@@ -204,20 +208,17 @@ private fun CameraQrScannerView(
                     it.surfaceProvider = previewView.surfaceProvider
                 }
 
-                val options = BarcodeScannerOptions.Builder()
-                    .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-                    .build()
-                val scanner = BarcodeScanning.getClient(options)
-
                 val imageAnalysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
 
                 imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    processImageProxy(scanner, imageProxy) { qrValue ->
+                    processImageProxy(imageProxy) { qrValue ->
                         if (!isScanned) {
                             isScanned = true
-                            onQrCodeScanned(qrValue)
+                            mainExecutor.execute {
+                                onQrCodeScanned(qrValue)
+                            }
                         }
                     }
                 }
@@ -235,7 +236,7 @@ private fun CameraQrScannerView(
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-            }, ContextCompat.getMainExecutor(ctx))
+            }, mainExecutor)
 
             previewView
         },
@@ -243,28 +244,150 @@ private fun CameraQrScannerView(
     )
 }
 
+private val qrCodeHints = mapOf(
+    DecodeHintType.POSSIBLE_FORMATS to listOf(BarcodeFormat.QR_CODE),
+    DecodeHintType.TRY_HARDER to true,
+)
+
 @SuppressLint("UnsafeOptInUsageError")
 private fun processImageProxy(
-    scanner: BarcodeScanner,
     imageProxy: ImageProxy,
     onSuccess: (String) -> Unit,
 ) {
-    val mediaImage = imageProxy.image
-    if (mediaImage != null) {
-        val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-        scanner.process(image)
-            .addOnSuccessListener { barcodes ->
-                for (barcode in barcodes) {
-                    barcode.rawValue?.let { raw ->
-                        onSuccess(raw)
-                        break
-                    }
+    try {
+        val plane = imageProxy.planes[0]
+        val buffer = plane.buffer
+        val rowStride = plane.rowStride
+        val width = imageProxy.width
+        val height = imageProxy.height
+
+        val yBytes = ByteArray(width * height)
+        if (rowStride == width) {
+            buffer.get(yBytes, 0, width * height)
+        } else {
+            val initialPos = buffer.position()
+            for (y in 0 until height) {
+                buffer.position(initialPos + y * rowStride)
+                val lengthToCopy = minOf(width, buffer.remaining())
+                if (lengthToCopy > 0) {
+                    buffer.get(yBytes, y * width, lengthToCopy)
                 }
             }
-            .addOnCompleteListener {
-                imageProxy.close()
-            }
-    } else {
+        }
+
+        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+        val source = createLuminanceSource(yBytes, width, height, rotationDegrees)
+
+        val qrReader = QRCodeReader()
+        var decodedText: String? = tryDecode(qrReader, source)
+
+        if (decodedText == null && rotationDegrees != 0) {
+            val baseSource = PlanarYUVLuminanceSource(
+                yBytes,
+                width,
+                height,
+                0,
+                0,
+                width,
+                height,
+                false,
+            )
+            decodedText = tryDecode(qrReader, baseSource)
+        }
+
+        if (decodedText != null) {
+            onSuccess(decodedText)
+        }
+    } catch (e: Exception) {
+        Log.e("ScanQrCodeSheet", "Error processing image frame", e)
+    } finally {
         imageProxy.close()
     }
+}
+
+private fun createLuminanceSource(
+    yBytes: ByteArray,
+    width: Int,
+    height: Int,
+    rotationDegrees: Int,
+): PlanarYUVLuminanceSource = when (rotationDegrees % 360) {
+    90 -> {
+        val rotatedData = ByteArray(width * height)
+        for (y in 0 until height) {
+            val yWidth = y * width
+            for (x in 0 until width) {
+                rotatedData[x * height + (height - 1 - y)] = yBytes[yWidth + x]
+            }
+        }
+        PlanarYUVLuminanceSource(
+            rotatedData,
+            height,
+            width,
+            0,
+            0,
+            height,
+            width,
+            false,
+        )
+    }
+    180 -> {
+        val rotatedData = ByteArray(width * height)
+        for (y in 0 until height) {
+            val yWidth = y * width
+            val targetYWidth = (height - 1 - y) * width
+            for (x in 0 until width) {
+                rotatedData[targetYWidth + (width - 1 - x)] = yBytes[yWidth + x]
+            }
+        }
+        PlanarYUVLuminanceSource(
+            rotatedData,
+            width,
+            height,
+            0,
+            0,
+            width,
+            height,
+            false,
+        )
+    }
+    270 -> {
+        val rotatedData = ByteArray(width * height)
+        for (y in 0 until height) {
+            val yWidth = y * width
+            for (x in 0 until width) {
+                rotatedData[(width - 1 - x) * height + y] = yBytes[yWidth + x]
+            }
+        }
+        PlanarYUVLuminanceSource(
+            rotatedData,
+            height,
+            width,
+            0,
+            0,
+            height,
+            width,
+            false,
+        )
+    }
+    else -> {
+        PlanarYUVLuminanceSource(
+            yBytes,
+            width,
+            height,
+            0,
+            0,
+            width,
+            height,
+            false,
+        )
+    }
+}
+
+private fun tryDecode(reader: QRCodeReader, source: LuminanceSource): String? = try {
+    val bitmap = BinaryBitmap(HybridBinarizer(source))
+    reader.decode(bitmap, qrCodeHints).text
+} catch (_: Exception) {
+    null
+} finally {
+    reader.reset()
 }
