@@ -28,6 +28,8 @@ import com.dnfapps.arrmatey.arr.api.model.WantedPage
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
@@ -39,9 +41,7 @@ enum class SonarrApiVersion(val apiBase: String) {
     companion object {
         fun fromVersionString(version: String?): SonarrApiVersion = when {
             version?.startsWith("5.") == true -> V5
-            version?.startsWith("3.") == true -> V3
-            version?.startsWith("4.") == true -> V3
-            else -> V5
+            else -> V3
         }
     }
 }
@@ -54,11 +54,17 @@ private data class SonarrQueueBulkPayload(
 class SonarrClient(
     override val instance: Instance,
     httpClient: HttpClient,
-    initialApiVersion: SonarrApiVersion = SonarrApiVersion.V5,
+    initialApiVersion: SonarrApiVersion? = null,
 ) : BaseArrClient(httpClient),
     ArrClient {
 
-    var apiVersion: SonarrApiVersion = initialApiVersion
+    private var versionDetermined: Boolean = initialApiVersion != null
+
+    var apiVersion: SonarrApiVersion = initialApiVersion ?: SonarrApiVersion.V3
+        set(value) {
+            field = value
+            versionDetermined = true
+        }
 
     override val apiBase: String
         get() = apiVersion.apiBase
@@ -66,21 +72,42 @@ class SonarrClient(
     val isV5: Boolean
         get() = apiVersion == SonarrApiVersion.V5
 
+    private val versionMutex = Mutex()
+
+    suspend fun determineApiVersion(): SonarrApiVersion {
+        apiVersion = SonarrApiVersion.V5
+        val v5Result = getStatus()
+        if (v5Result is NetworkResult.Success) {
+            apiVersion = SonarrApiVersion.V5
+            versionDetermined = true
+            return SonarrApiVersion.V5
+        }
+
+        apiVersion = SonarrApiVersion.V3
+        val v3Result = getStatus()
+        if (v3Result is NetworkResult.Success) {
+            val detected = SonarrApiVersion.fromVersionString(v3Result.data.version)
+            apiVersion = detected
+            versionDetermined = true
+            return detected
+        }
+
+        apiVersion = SonarrApiVersion.V3
+        return SonarrApiVersion.V3
+    }
+
+    suspend fun ensureApiVersionDetermined() {
+        if (versionDetermined) return
+        versionMutex.withLock {
+            if (!versionDetermined) {
+                determineApiVersion()
+            }
+        }
+    }
+
     override suspend fun testConnection(): NetworkResult<Unit> {
-        val statusResult = getStatus()
-        if (statusResult is NetworkResult.Success) {
-            apiVersion = SonarrApiVersion.fromVersionString(statusResult.data.version)
-            return NetworkResult.Success(Unit)
-        }
-        val fallbackVersion = if (apiVersion == SonarrApiVersion.V5) SonarrApiVersion.V3 else SonarrApiVersion.V5
-        apiVersion = fallbackVersion
-        val fallbackResult = getStatus()
-        return if (fallbackResult is NetworkResult.Success) {
-            apiVersion = SonarrApiVersion.fromVersionString(fallbackResult.data.version)
-            NetworkResult.Success(Unit)
-        } else {
-            statusResult.map { }
-        }
+        determineApiVersion()
+        return getStatus().map { }
     }
 
     private fun buildSubresourceParams(
@@ -96,21 +123,31 @@ class SonarrClient(
         }
     }
 
-    override suspend fun getLibrary(): NetworkResult<List<ArrSeries>> = get<List<ArrSeries>>("series")
-        .map { shows ->
-            shows.map { series ->
-                series.withLocalImages(instance).copy(instanceId = instance.id)
+    override suspend fun getLibrary(): NetworkResult<List<ArrSeries>> {
+        ensureApiVersionDetermined()
+        return get<List<ArrSeries>>("series")
+            .map { shows ->
+                shows.map { series ->
+                    series.withLocalImages(instance).copy(instanceId = instance.id)
+                }
             }
-        }
+    }
 
-    override suspend fun getDetail(id: Long): NetworkResult<ArrSeries> = get("series/$id")
+    override suspend fun getDetail(id: Long): NetworkResult<ArrSeries> {
+        ensureApiVersionDetermined()
+        return get("series/$id")
+    }
 
-    override suspend fun update(item: ArrMedia): NetworkResult<ArrSeries> = put("series/${item.id}", item)
+    override suspend fun update(item: ArrMedia): NetworkResult<ArrSeries> {
+        ensureApiVersionDetermined()
+        return put("series/${item.id}", item)
+    }
 
     override suspend fun edit(
         item: ArrMedia,
         moveFiles: Boolean,
     ): NetworkResult<Unit> {
+        ensureApiVersionDetermined()
         val series =
             item as? ArrSeries
                 ?: return NetworkResult.Error(message = "Item must be an ArrSeries")
@@ -137,51 +174,67 @@ class SonarrClient(
         id: Long,
         deleteFiles: Boolean,
         addImportExclusion: Boolean,
-    ): NetworkResult<Unit> = delete(
-        endpoint = "series/$id",
-        params =
-        mapOf(
-            "deleteFiles" to deleteFiles,
-            "addImportListExclusion" to addImportExclusion,
-        ),
-    )
+    ): NetworkResult<Unit> {
+        ensureApiVersionDetermined()
+        return delete(
+            endpoint = "series/$id",
+            params =
+            mapOf(
+                "deleteFiles" to deleteFiles,
+                "addImportListExclusion" to addImportExclusion,
+            ),
+        )
+    }
 
-    override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrSeries>> = get("series/lookup", mapOf("term" to params.query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<ArrSeries>> {
+        ensureApiVersionDetermined()
+        return get("series/lookup", mapOf("term" to params.query))
+    }
 
-    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrSeries> = post<ArrMedia, ArrSeries>("series", item)
+    override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<ArrSeries> {
+        ensureApiVersionDetermined()
+        return post<ArrMedia, ArrSeries>("series", item)
+    }
 
     override suspend fun fetchActivityTasks(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<QueuePage> = get<QueuePage>(
-        "queue",
-        buildSubresourceParams(
-            v5Subresources = listOf("Series", "Episodes"),
-            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
-            additionalParams = mapOf("page" to page, "pageSize" to pageSize),
-        ),
-    ).map { it.setInstance(instance.id, instance.label, instance.type) }
+    ): NetworkResult<QueuePage> {
+        ensureApiVersionDetermined()
+        return get<QueuePage>(
+            "queue",
+            buildSubresourceParams(
+                v5Subresources = listOf("Series", "Episodes"),
+                v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+                additionalParams = mapOf("page" to page, "pageSize" to pageSize),
+            ),
+        ).map { it.setInstance(instance.id, instance.label, instance.type) }
+    }
 
     override suspend fun deleteActivityTask(
         id: Int,
         removeFromClient: Boolean,
         blocklist: Boolean,
         skipRedownload: Boolean,
-    ): NetworkResult<Unit> = if (isV5) {
-        delete(
-            endpoint = "queue/bulk",
-            body = SonarrQueueBulkPayload(ids = listOf(id)),
-            params = mapOf(
-                "removeFromClient" to removeFromClient,
-                "blocklist" to blocklist,
-                "skipRedownload" to skipRedownload,
-            ),
-        )
-    } else {
-        super.deleteActivityTask(id, removeFromClient, blocklist, skipRedownload)
+    ): NetworkResult<Unit> {
+        ensureApiVersionDetermined()
+        return if (isV5) {
+            delete(
+                endpoint = "queue/bulk",
+                body = SonarrQueueBulkPayload(ids = listOf(id)),
+                params = mapOf(
+                    "removeFromClient" to removeFromClient,
+                    "blocklist" to blocklist,
+                    "skipRedownload" to skipRedownload,
+                ),
+            )
+        } else {
+            super.deleteActivityTask(id, removeFromClient, blocklist, skipRedownload)
+        }
     }
 
     override suspend fun getReleases(params: ReleaseParams): NetworkResult<List<SeriesRelease>> {
+        ensureApiVersionDetermined()
         if (params !is ReleaseParams.Series) {
             return NetworkResult.Error(message = "Non-series params type: $params")
         }
@@ -200,217 +253,256 @@ class SonarrClient(
     override suspend fun setMonitorStatus(
         id: Long,
         monitorStatus: Boolean,
-    ): NetworkResult<List<MonitoredResponse>> = put(
-        "series/editor",
-        mapOf(
-            "monitored" to monitorStatus,
-            "seriesIds" to listOf(id),
-        ),
-    )
+    ): NetworkResult<List<MonitoredResponse>> {
+        ensureApiVersionDetermined()
+        return put(
+            "series/editor",
+            mapOf(
+                "monitored" to monitorStatus,
+                "seriesIds" to listOf(id),
+            ),
+        )
+    }
 
     override suspend fun getItemHistory(
         id: Long,
         page: Int,
         pageSize: Int,
         altId: Long?,
-    ): NetworkResult<List<SonarrHistoryItem>> = get<SonarrHistoryResponse>(
-        "history",
-        buildSubresourceParams(
-            v5Subresources = listOf("Series", "Episode"),
-            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
-            additionalParams = mapOf("page" to page, "pageSize" to pageSize, "episodeId" to id),
-        ),
-    ).map { response ->
-        response.records.map {
-            it.copy(
-                instanceId = instance.id,
-                instanceName = instance.label,
-                instanceType = instance.type,
-                series = it.series?.withLocalImages(instance),
-                episode = it.episode?.copy(series = it.series)?.withLocalImages(instance),
-            )
+    ): NetworkResult<List<SonarrHistoryItem>> {
+        ensureApiVersionDetermined()
+        return get<SonarrHistoryResponse>(
+            "history",
+            buildSubresourceParams(
+                v5Subresources = listOf("Series", "Episode"),
+                v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+                additionalParams = mapOf("page" to page, "pageSize" to pageSize, "episodeId" to id),
+            ),
+        ).map { response ->
+            response.records.map {
+                it.copy(
+                    instanceId = instance.id,
+                    instanceName = instance.label,
+                    instanceType = instance.type,
+                    series = it.series?.withLocalImages(instance),
+                    episode = it.episode?.copy(series = it.series)?.withLocalImages(instance),
+                )
+            }
         }
     }
 
     // Paged /history ignores seriesId (it only accepts seriesIds), so use the per-series endpoint.
-    suspend fun getSeriesHistory(seriesId: Long): NetworkResult<List<SonarrHistoryItem>> = get<List<SonarrHistoryItem>>(
-        "history/series",
-        buildSubresourceParams(
-            v5Subresources = listOf("Series", "Episode"),
-            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
-            additionalParams = mapOf("seriesId" to seriesId),
-        ),
-    ).map { list ->
-        list.map {
-            it.copy(
-                instanceId = instance.id,
-                instanceName = instance.label,
-                instanceType = instance.type,
-                series = it.series?.withLocalImages(instance),
-                episode = it.episode?.copy(series = it.series)?.withLocalImages(instance),
-            )
+    suspend fun getSeriesHistory(seriesId: Long): NetworkResult<List<SonarrHistoryItem>> {
+        ensureApiVersionDetermined()
+        return get<List<SonarrHistoryItem>>(
+            "history/series",
+            buildSubresourceParams(
+                v5Subresources = listOf("Series", "Episode"),
+                v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+                additionalParams = mapOf("seriesId" to seriesId),
+            ),
+        ).map { list ->
+            list.map {
+                it.copy(
+                    instanceId = instance.id,
+                    instanceName = instance.label,
+                    instanceType = instance.type,
+                    series = it.series?.withLocalImages(instance),
+                    episode = it.episode?.copy(series = it.series)?.withLocalImages(instance),
+                )
+            }
         }
     }
 
     override suspend fun getHistory(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<List<HistoryItem>> = get<SonarrHistoryResponse>(
-        "history",
-        buildSubresourceParams(
-            v5Subresources = listOf("Series", "Episode"),
-            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
-            additionalParams = mapOf("page" to page, "pageSize" to pageSize),
-        ),
-    ).map { response ->
-        response.records.map {
-            it.copy(
-                instanceId = instance.id,
-                instanceName = instance.label,
-                instanceType = instance.type,
-                series = it.series?.withLocalImages(instance),
-                episode = it.episode?.copy(series = it.series)?.withLocalImages(instance),
-            )
+    ): NetworkResult<List<HistoryItem>> {
+        ensureApiVersionDetermined()
+        return get<SonarrHistoryResponse>(
+            "history",
+            buildSubresourceParams(
+                v5Subresources = listOf("Series", "Episode"),
+                v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+                additionalParams = mapOf("page" to page, "pageSize" to pageSize),
+            ),
+        ).map { response ->
+            response.records.map {
+                it.copy(
+                    instanceId = instance.id,
+                    instanceName = instance.label,
+                    instanceType = instance.type,
+                    series = it.series?.withLocalImages(instance),
+                    episode = it.episode?.copy(series = it.series)?.withLocalImages(instance),
+                )
+            }
         }
     }
 
-    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> = post("command", CommandPayload.Series(id))
+    override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> {
+        ensureApiVersionDetermined()
+        return post("command", CommandPayload.Series(id))
+    }
 
     override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate,
-    ): NetworkResult<List<Episode>> = get<List<Episode>>(
-        "calendar",
-        buildSubresourceParams(
-            v5Subresources = listOf("Series", "EpisodeFile", "EpisodeImages"),
-            v3Params = mapOf(
-                "includeSeries" to true,
-                "includeEpisodeFile" to true,
-                "includeEpisodeImages" to true,
+    ): NetworkResult<List<Episode>> {
+        ensureApiVersionDetermined()
+        return get<List<Episode>>(
+            "calendar",
+            buildSubresourceParams(
+                v5Subresources = listOf("Series", "EpisodeFile", "EpisodeImages"),
+                v3Params = mapOf(
+                    "includeSeries" to true,
+                    "includeEpisodeFile" to true,
+                    "includeEpisodeImages" to true,
+                ),
+                additionalParams = mapOf(
+                    "start" to start.toString(),
+                    "end" to end.toString(),
+                    "unmonitored" to true,
+                ),
             ),
-            additionalParams = mapOf(
-                "start" to start.toString(),
-                "end" to end.toString(),
-                "unmonitored" to true,
-            ),
-        ),
-    ).map { it.map { ep -> ep.copy(instanceId = instance.id) } }
+        ).map { it.map { ep -> ep.copy(instanceId = instance.id) } }
+    }
 
     override suspend fun updateMonitoring(
         ids: List<Long>,
         monitor: Any,
-    ): NetworkResult<Unit> = post(
-        endpoint = "seasonPass",
-        body =
-        SeriesMonitoringBody(
-            series = ids.map { IdWrapper(it) },
-            monitoringOptions = SeriesMonitorOption(monitor as SeriesMonitorType),
-        ),
-    )
+    ): NetworkResult<Unit> {
+        ensureApiVersionDetermined()
+        return post(
+            endpoint = "seasonPass",
+            body =
+            SeriesMonitoringBody(
+                series = ids.map { IdWrapper(it) },
+                monitoringOptions = SeriesMonitorOption(monitor as SeriesMonitorType),
+            ),
+        )
+    }
 
-    suspend fun updateEpisode(item: Episode): NetworkResult<Episode> = put("episode/${item.id}", item)
+    suspend fun updateEpisode(item: Episode): NetworkResult<Episode> {
+        ensureApiVersionDetermined()
+        return put("episode/${item.id}", item)
+    }
 
     suspend fun getEpisodes(
         seriesId: Long,
         seasonNumber: Int? = null,
         includeEpisodeFile: Boolean = true,
         includeImages: Boolean = true,
-    ): NetworkResult<List<Episode>> = get(
-        "episode",
-        buildMap {
-            put("seriesId", seriesId)
-            seasonNumber?.let { put("seasonNumber", it) }
-            if (includeEpisodeFile) put("includeEpisodeFile", true)
-            if (includeImages) put("includeImages", true)
-        },
-    )
+    ): NetworkResult<List<Episode>> {
+        ensureApiVersionDetermined()
+        return get(
+            "episode",
+            buildMap {
+                put("seriesId", seriesId)
+                seasonNumber?.let { put("seasonNumber", it) }
+                if (includeEpisodeFile) put("includeEpisodeFile", true)
+                if (includeImages) put("includeImages", true)
+            },
+        )
+    }
 
-    suspend fun deleteEpisodes(fileIds: List<Long>): NetworkResult<Unit> = delete(
-        endpoint = "episodefile/bulk",
-        body = DeleteEpisodeBody(fileIds),
-    )
+    suspend fun deleteEpisodes(fileIds: List<Long>): NetworkResult<Unit> {
+        ensureApiVersionDetermined()
+        return delete(
+            endpoint = "episodefile/bulk",
+            body = DeleteEpisodeBody(fileIds),
+        )
+    }
 
-    suspend fun deleteEpisode(id: Long): NetworkResult<Unit> = delete("episodefile/$id")
+    suspend fun deleteEpisode(id: Long): NetworkResult<Unit> {
+        ensureApiVersionDetermined()
+        return delete("episodefile/$id")
+    }
 
     override suspend fun getWantedMissing(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<WantedPage> = get<SonarrWantedPage>(
-        "wanted/missing",
-        buildSubresourceParams(
-            v5Subresources = listOf("Series", "Episode"),
-            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
-            additionalParams = mapOf("page" to page, "pageSize" to pageSize),
-        ),
-    ).map { pageRes ->
-        WantedPage(
-            page = pageRes.page,
-            pageSize = pageRes.pageSize,
-            totalRecords = pageRes.totalRecords,
-            records = pageRes.records.map { ep ->
-                val series = ep.series?.withLocalImages(instance)
-                val episodeTitle = "${series?.title ?: "Series"} - S${ep.seasonNumber.toString().padStart(2, '0')}E${ep.episodeNumber.toString().padStart(2, '0')}${ep.title?.let { " - $it" } ?: ""}"
-                ArrSeries(
-                    id = ep.id,
-                    title = episodeTitle,
-                    originalLanguage = series?.originalLanguage ?: Language(1, "English"),
-                    year = ep.airDate?.year ?: series?.year ?: 2026,
-                    qualityProfileId = series?.qualityProfileId ?: 1,
-                    monitored = ep.monitored,
-                    runtime = ep.runtime ?: series?.runtime ?: 30,
-                    status = series?.status ?: MediaStatus.Continuing,
-                    overview = ep.overview ?: series?.overview,
-                    images = ep.images.ifEmpty { series?.images ?: emptyList() },
-                    tvdbId = ep.tvdbId ?: series?.tvdbId ?: 0L,
-                    ended = series?.ended ?: false,
-                    seasonFolder = series?.seasonFolder ?: true,
-                    monitorNewItems = series?.monitorNewItems ?: MonitorNewItems.All,
-                    useSceneNumbering = series?.useSceneNumbering ?: false,
-                    seriesType = series?.seriesType ?: SeriesType.Standard,
-                    instanceId = instance.id,
-                )
-            },
-        )
+    ): NetworkResult<WantedPage> {
+        ensureApiVersionDetermined()
+        return get<SonarrWantedPage>(
+            "wanted/missing",
+            buildSubresourceParams(
+                v5Subresources = listOf("Series", "Episode"),
+                v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+                additionalParams = mapOf("page" to page, "pageSize" to pageSize),
+            ),
+        ).map { pageRes ->
+            WantedPage(
+                page = pageRes.page,
+                pageSize = pageRes.pageSize,
+                totalRecords = pageRes.totalRecords,
+                records = pageRes.records.map { ep ->
+                    val series = ep.series?.withLocalImages(instance)
+                    val episodeTitle = "${series?.title ?: "Series"} - S${ep.seasonNumber.toString().padStart(2, '0')}E${ep.episodeNumber.toString().padStart(2, '0')}${ep.title?.let { " - $it" } ?: ""}"
+                    ArrSeries(
+                        id = ep.id,
+                        title = episodeTitle,
+                        originalLanguage = series?.originalLanguage ?: Language(1, "English"),
+                        year = ep.airDate?.year ?: series?.year ?: 2026,
+                        qualityProfileId = series?.qualityProfileId ?: 1,
+                        monitored = ep.monitored,
+                        runtime = ep.runtime ?: series?.runtime ?: 30,
+                        status = series?.status ?: MediaStatus.Continuing,
+                        overview = ep.overview ?: series?.overview,
+                        images = ep.images.ifEmpty { series?.images ?: emptyList() },
+                        tvdbId = ep.tvdbId ?: series?.tvdbId ?: 0L,
+                        ended = series?.ended ?: false,
+                        seasonFolder = series?.seasonFolder ?: true,
+                        monitorNewItems = series?.monitorNewItems ?: MonitorNewItems.All,
+                        useSceneNumbering = series?.useSceneNumbering ?: false,
+                        seriesType = series?.seriesType ?: SeriesType.Standard,
+                        instanceId = instance.id,
+                    )
+                },
+            )
+        }
     }
 
     override suspend fun getWantedCutoff(
         page: Int,
         pageSize: Int,
-    ): NetworkResult<WantedPage> = get<SonarrWantedPage>(
-        "wanted/cutoff",
-        buildSubresourceParams(
-            v5Subresources = listOf("Series", "Episode"),
-            v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
-            additionalParams = mapOf("page" to page, "pageSize" to pageSize),
-        ),
-    ).map { pageRes ->
-        WantedPage(
-            page = pageRes.page,
-            pageSize = pageRes.pageSize,
-            totalRecords = pageRes.totalRecords,
-            records = pageRes.records.map { ep ->
-                val series = ep.series?.withLocalImages(instance)
-                val episodeTitle = "${series?.title ?: "Series"} - S${ep.seasonNumber.toString().padStart(2, '0')}E${ep.episodeNumber.toString().padStart(2, '0')}${ep.title?.let { " - $it" } ?: ""}"
-                ArrSeries(
-                    id = ep.id,
-                    title = episodeTitle,
-                    originalLanguage = series?.originalLanguage ?: Language(1, "English"),
-                    year = ep.airDate?.year ?: series?.year ?: 2026,
-                    qualityProfileId = series?.qualityProfileId ?: 1,
-                    monitored = ep.monitored,
-                    runtime = ep.runtime ?: series?.runtime ?: 30,
-                    status = series?.status ?: MediaStatus.Continuing,
-                    overview = ep.overview ?: series?.overview,
-                    images = ep.images.ifEmpty { series?.images ?: emptyList() },
-                    tvdbId = ep.tvdbId ?: series?.tvdbId ?: 0L,
-                    ended = series?.ended ?: false,
-                    seasonFolder = series?.seasonFolder ?: true,
-                    monitorNewItems = series?.monitorNewItems ?: MonitorNewItems.All,
-                    useSceneNumbering = series?.useSceneNumbering ?: false,
-                    seriesType = series?.seriesType ?: SeriesType.Standard,
-                    instanceId = instance.id,
-                )
-            },
-        )
+    ): NetworkResult<WantedPage> {
+        ensureApiVersionDetermined()
+        return get<SonarrWantedPage>(
+            "wanted/cutoff",
+            buildSubresourceParams(
+                v5Subresources = listOf("Series", "Episode"),
+                v3Params = mapOf("includeSeries" to true, "includeEpisode" to true),
+                additionalParams = mapOf("page" to page, "pageSize" to pageSize),
+            ),
+        ).map { pageRes ->
+            WantedPage(
+                page = pageRes.page,
+                pageSize = pageRes.pageSize,
+                totalRecords = pageRes.totalRecords,
+                records = pageRes.records.map { ep ->
+                    val series = ep.series?.withLocalImages(instance)
+                    val episodeTitle = "${series?.title ?: "Series"} - S${ep.seasonNumber.toString().padStart(2, '0')}E${ep.episodeNumber.toString().padStart(2, '0')}${ep.title?.let { " - $it" } ?: ""}"
+                    ArrSeries(
+                        id = ep.id,
+                        title = episodeTitle,
+                        originalLanguage = series?.originalLanguage ?: Language(1, "English"),
+                        year = ep.airDate?.year ?: series?.year ?: 2026,
+                        qualityProfileId = series?.qualityProfileId ?: 1,
+                        monitored = ep.monitored,
+                        runtime = ep.runtime ?: series?.runtime ?: 30,
+                        status = series?.status ?: MediaStatus.Continuing,
+                        overview = ep.overview ?: series?.overview,
+                        images = ep.images.ifEmpty { series?.images ?: emptyList() },
+                        tvdbId = ep.tvdbId ?: series?.tvdbId ?: 0L,
+                        ended = series?.ended ?: false,
+                        seasonFolder = series?.seasonFolder ?: true,
+                        monitorNewItems = series?.monitorNewItems ?: MonitorNewItems.All,
+                        useSceneNumbering = series?.useSceneNumbering ?: false,
+                        seriesType = series?.seriesType ?: SeriesType.Standard,
+                        instanceId = instance.id,
+                    )
+                },
+            )
+        }
     }
 }
