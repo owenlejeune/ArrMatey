@@ -59,10 +59,14 @@ import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.newest.NewestDownloadableItem
+import com.dnfapps.arrmatey.newest.NewestDownloadableViewModel
+import com.dnfapps.arrmatey.newest.ReleaseKind
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.DiscoverSection
+import com.dnfapps.arrmatey.ui.components.NewestDownloadableRow
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction
 import com.dnfapps.arrmatey.ui.components.appbar.ProvideFloatingBarAction
@@ -73,6 +77,7 @@ import com.dnfapps.arrmatey.ui.sheets.DiscoverSectionCustomizationSheet
 import com.dnfapps.arrmatey.ui.tabs.DiscoverSearchOverlay
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -81,6 +86,8 @@ fun DiscoverHomeScreen(
     wideRailIsVisible: Boolean,
     onSeeMore: (DiscoverCategory) -> Unit,
     onItemClick: (SearchResult) -> Unit,
+    newestViewModel: NewestDownloadableViewModel = koinViewModel(),
+    onSeeMoreProwlarr: (ReleaseKind) -> Unit = {},
 ) {
     val isFloatingBarVisible = LocalFloatingBarVisible.current
 
@@ -97,6 +104,9 @@ fun DiscoverHomeScreen(
     val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
     val isInitialLoading by viewModel.isInitialLoading.collectAsStateWithLifecycle()
     val sectionPreferences by viewModel.discoverSectionPreferences.collectAsStateWithLifecycle()
+    val hasProwlarr by newestViewModel.hasProwlarr.collectAsStateWithLifecycle()
+    val newestMoviesState by newestViewModel.moviesState.collectAsStateWithLifecycle()
+    val newestTvState by newestViewModel.tvState.collectAsStateWithLifecycle()
 
     var showMenu by remember { mutableStateOf(false) }
     var showCustomizationSheet by remember { mutableStateOf(false) }
@@ -105,6 +115,10 @@ fun DiscoverHomeScreen(
     val searchBarState = rememberSearchBarState()
     val focusRequester = remember { FocusRequester() }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(hasProwlarr) {
+        if (hasProwlarr) newestViewModel.ensureLoaded()
+    }
 
     LaunchedEffect(textFieldState.text) {
         viewModel.updateSearchQuery(textFieldState.text.toString())
@@ -212,7 +226,7 @@ fun DiscoverHomeScreen(
                 .fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            if (selectedInstance == null) {
+            if (selectedInstance == null && !hasProwlarr) {
                 NoInstanceView(InstanceType.Seerr)
             } else if (searchBarState.isExpanded()) {
                 DiscoverSearchOverlay(
@@ -221,7 +235,7 @@ fun DiscoverHomeScreen(
                     onItemClick = onItemClick,
                     showBanners = searchShowBanners,
                 )
-            } else if (isInitialLoading) {
+            } else if (isInitialLoading && selectedInstance != null) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
@@ -231,7 +245,10 @@ fun DiscoverHomeScreen(
             } else {
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
-                    onRefresh = { viewModel.refresh() },
+                    onRefresh = {
+                        viewModel.refresh()
+                        newestViewModel.refresh()
+                    },
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     val handleDiscoverItemClick: (com.dnfapps.arrmatey.seerr.api.model.DiscoverResult) -> Unit = { item ->
@@ -247,6 +264,10 @@ fun DiscoverHomeScreen(
                         } else {
                             onItemClick(SearchResult.SeerrMediaResult(item))
                         }
+                    }
+
+                    val openNewest: (NewestDownloadableItem) -> Unit = { item ->
+                        item.match?.let { onItemClick(SearchResult.SeerrMediaResult(it)) }
                     }
 
                     Column(
@@ -308,6 +329,28 @@ fun DiscoverHomeScreen(
                                         onSeeMore = { onSeeMore(DiscoverCategory.UPCOMING_SERIES) },
                                     )
                                 }
+                                DiscoverCategory.PROWLARR_MOVIES -> {
+                                    if (hasProwlarr) {
+                                        NewestDownloadableRow(
+                                            title = category.title,
+                                            icon = Icons.Default.Movie,
+                                            state = newestMoviesState,
+                                            onItemClick = openNewest,
+                                            onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Movie) },
+                                        )
+                                    }
+                                }
+                                DiscoverCategory.PROWLARR_SERIES -> {
+                                    if (hasProwlarr) {
+                                        NewestDownloadableRow(
+                                            title = category.title,
+                                            icon = Icons.Default.Tv,
+                                            state = newestTvState,
+                                            onItemClick = openNewest,
+                                            onSeeMore = { onSeeMoreProwlarr(ReleaseKind.Tv) },
+                                        )
+                                    }
+                                }
                             }
                         }
 
@@ -319,9 +362,14 @@ fun DiscoverHomeScreen(
     }
 
     if (showCustomizationSheet) {
+        // Without Prowlarr its rows are left out of the sheet, and kept as they were on save.
         DiscoverSectionCustomizationSheet(
-            preferences = sectionPreferences,
-            onUpdatePreferences = { viewModel.updateDiscoverSectionPreferences(it) },
+            preferences = if (hasProwlarr) sectionPreferences else sectionPreferences.withoutProwlarr(),
+            onUpdatePreferences = { updated ->
+                viewModel.updateDiscoverSectionPreferences(
+                    if (hasProwlarr) updated else updated.restoreProwlarrFrom(sectionPreferences),
+                )
+            },
             onResetPreferences = { viewModel.resetDiscoverSectionPreferences() },
             onDismissRequest = { showCustomizationSheet = false },
         )

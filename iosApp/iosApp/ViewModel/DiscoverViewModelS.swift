@@ -80,6 +80,8 @@ class DiscoverViewModelS: ObservableObject {
         case .popularSeries: return tvState
         case .upcomingMovies: return upcomingMoviesState
         case .upcomingSeries: return upcomingTvState
+        // Prowlarr rows are not wired up on iOS yet.
+        case .prowlarrMovies, .prowlarrSeries: return PagedData<DiscoverResult>()
         }
     }
 

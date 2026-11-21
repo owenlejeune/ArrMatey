@@ -149,6 +149,7 @@ sealed interface CombinedDashboardState {
             DiscoverCategory.POPULAR_SERIES -> popularTv
             DiscoverCategory.UPCOMING_MOVIES -> upcomingMovies
             DiscoverCategory.UPCOMING_SERIES -> upcomingTv
+            DiscoverCategory.PROWLARR_MOVIES, DiscoverCategory.PROWLARR_SERIES -> emptyList()
         }
 
         fun isLoadingDiscoverFeed(category: DiscoverCategory): Boolean = isLoadingMoreDiscover[category] == true

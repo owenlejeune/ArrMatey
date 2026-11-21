@@ -970,6 +970,7 @@ class CombinedDashboardViewModel(
                             discoverHasMoreMap[category] = false
                         }
                     }
+                    DiscoverCategory.PROWLARR_MOVIES, DiscoverCategory.PROWLARR_SERIES -> Unit
                 }
             } catch (e: Exception) {
                 logger.error(e) { "Error loading next page for discover category $category" }
