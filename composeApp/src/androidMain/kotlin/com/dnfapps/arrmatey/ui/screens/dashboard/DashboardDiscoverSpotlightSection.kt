@@ -163,11 +163,9 @@ fun DashboardDiscoverSpotlightSection(
                             val spotlightItem = spotlightItems[page]
                             val title = spotlightItem.title ?: spotlightItem.name ?: mokoString(MR.strings.unknown)
 
-                            val mockCover = if (spotlightItem.mediaType == RequestType.Tv) InstanceType.Sonarr.mockCover else InstanceType.Radarr.mockCover
                             val imageModel: Any? =
                                 spotlightItem.fullBackdropPath
                                     ?: spotlightItem.fullPosterPath
-                                    ?: mockCover?.let { painterResource(it) }
 
                             Box(
                                 modifier =

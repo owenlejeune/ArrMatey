@@ -169,6 +169,7 @@ import com.dnfapps.arrmatey.seerr.usecase.CloseIssueUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetCurrentSeerrUserUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverMoviesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverTvUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetGenresUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetIssueDetailsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetIssuesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetPersonCreditsUseCase
@@ -400,6 +401,7 @@ val useCaseModule =
         factory { GetDiscoverTvUseCase() }
         factory { GetUpcomingMoviesUseCase() }
         factory { GetUpcomingTvUseCase() }
+        factory { GetGenresUseCase() }
         factory { GetRecommendationsUseCase() }
         factory { GetSimilarUseCase() }
         factory { SearchSeerrUseCase() }
@@ -480,6 +482,7 @@ val viewModelModule =
                 getDiscoverTvUseCase = get(),
                 getUpcomingMoviesUseCase = get(),
                 getUpcomingTvUseCase = get(),
+                getGenresUseCase = get(),
                 globalSearchUseCase = get(),
                 preferencesStore = get(),
                 mediaServerManager = getOrNull(),
