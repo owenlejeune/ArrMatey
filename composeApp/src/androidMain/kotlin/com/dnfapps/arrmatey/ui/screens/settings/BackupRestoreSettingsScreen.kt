@@ -3,6 +3,8 @@ package com.dnfapps.arrmatey.ui.screens.settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -28,6 +30,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -96,6 +101,32 @@ fun BackupRestoreSettingsScreen(
             },
         )
 
+    @OptIn(ExperimentalFoundationApi::class)
+    val dropTarget = remember {
+        object : DragAndDropTarget {
+            override fun onDrop(event: DragAndDropEvent): Boolean {
+                val clipData = event.toAndroidDragEvent().clipData
+                if (clipData != null && clipData.itemCount > 0) {
+                    val uri = clipData.getItemAt(0).uri
+                    if (uri != null) {
+                        val encryptedData =
+                            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                                inputStream.readBytes().decodeToString()
+                            }
+                        if (encryptedData != null) {
+                            backupViewModel.resetImportState()
+                            pendingImportData = encryptedData
+                            isQrImport = false
+                            showImportDialog = true
+                            return true
+                        }
+                    }
+                }
+                return false
+            }
+        }
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -112,6 +143,10 @@ fun BackupRestoreSettingsScreen(
             Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
+                .dragAndDropTarget(
+                    shouldStartDragAndDrop = { true },
+                    target = dropTarget,
+                )
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(bottom = navigationBarBottomInset() + 16.dp),
