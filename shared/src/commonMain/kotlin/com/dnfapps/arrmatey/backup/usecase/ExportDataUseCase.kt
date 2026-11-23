@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.backup.usecase
 
+import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
 import com.dnfapps.arrmatey.backup.TransportEncryptor
 import com.dnfapps.arrmatey.backup.model.BackupExport
 import com.dnfapps.arrmatey.backup.model.CustomWebpageExport
@@ -15,7 +16,9 @@ import com.dnfapps.arrmatey.downloadclient.database.DownloadClientDao
 import com.dnfapps.arrmatey.mediaserver.database.MediaServerIntegrationDao
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 class ExportDataUseCase(
     private val instanceDao: InstanceDao,
@@ -192,6 +195,9 @@ class ExportDataUseCase(
             encodeDefaults = false
             explicitNulls = false
             ignoreUnknownKeys = true
+            serializersModule = SerializersModule {
+                contextual(Instant::class, ListenarrInstantSerializer)
+            }
         }
 
         val jsonString = compactJson.encodeToString(backup)
