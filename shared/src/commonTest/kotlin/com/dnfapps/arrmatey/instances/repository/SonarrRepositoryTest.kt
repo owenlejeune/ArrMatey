@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.instances.repository
 import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
 import com.dnfapps.arrmatey.arr.api.client.SonarrApiVersion
 import com.dnfapps.arrmatey.arr.api.client.SonarrClient
+import com.dnfapps.arrmatey.arr.api.model.SeriesRelease
 import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -228,5 +229,46 @@ class SonarrRepositoryTest {
         client.deleteActivityTask(id = 99, removeFromClient = true, blocklist = false, skipRedownload = false)
 
         assertEquals("/api/v5/queue/bulk", requestedPath)
+    }
+
+    @Test
+    fun testSeriesReleaseDeserializationWithDateOnly() {
+        val releaseJson = """
+        {
+            "guid": "test-guid-123",
+            "title": "Series.Title.S01E01.1080p.WEB-DL",
+            "indexerId": 1,
+            "protocol": "torrent",
+            "seasonNumber": 1,
+            "airDate": "2026-11-15",
+            "publishDate": "2026-11-15"
+        }
+        """.trimIndent()
+
+        val release = testJson.decodeFromString<SeriesRelease>(releaseJson)
+        assertEquals("test-guid-123", release.guid)
+        assertEquals(Instant.parse("2026-11-15T00:00:00Z"), release.airDate)
+        assertEquals(Instant.parse("2026-11-15T00:00:00Z"), release.publishDate)
+    }
+
+    @Test
+    fun testInstantSerializerWithVariousFormats() {
+        val jsonWithFormats = """
+        [
+            {"guid": "g1", "title": "T1", "indexerId": 1, "protocol": "torrent", "seasonNumber": 1, "airDate": "2026-11-15"},
+            {"guid": "g2", "title": "T2", "indexerId": 1, "protocol": "torrent", "seasonNumber": 1, "airDate": "2026-11-15T12:00:00"},
+            {"guid": "g3", "title": "T3", "indexerId": 1, "protocol": "torrent", "seasonNumber": 1, "airDate": "2026-11-15T12:00:00Z"},
+            {"guid": "g4", "title": "T4", "indexerId": 1, "protocol": "torrent", "seasonNumber": 1, "airDate": "2026-11-15T12:00:00+02:00"},
+            {"guid": "g5", "title": "T5", "indexerId": 1, "protocol": "torrent", "seasonNumber": 1, "airDate": "2026-11-15T12:00:00-05:00"}
+        ]
+        """.trimIndent()
+
+        val releases = testJson.decodeFromString<List<SeriesRelease>>(jsonWithFormats)
+        assertEquals(5, releases.size)
+        assertEquals(Instant.parse("2026-11-15T00:00:00Z"), releases[0].airDate)
+        assertEquals(Instant.parse("2026-11-15T12:00:00Z"), releases[1].airDate)
+        assertEquals(Instant.parse("2026-11-15T12:00:00Z"), releases[2].airDate)
+        assertEquals(Instant.parse("2026-11-15T10:00:00Z"), releases[3].airDate)
+        assertEquals(Instant.parse("2026-11-15T17:00:00Z"), releases[4].airDate)
     }
 }

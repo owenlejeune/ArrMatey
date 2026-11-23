@@ -7,19 +7,23 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlin.time.Instant
 
+private fun formatInstantString(string: String): String {
+    if (!string.contains("T")) {
+        return "${string}T00:00:00Z"
+    }
+    val timePart = string.substringAfter("T")
+    if (!timePart.contains("Z") && !timePart.contains("+") && !timePart.contains("-")) {
+        return "${string}Z"
+    }
+    return string
+}
+
 object ListenarrInstantSerializer : KSerializer<Instant> {
     override val descriptor = PrimitiveSerialDescriptor("ListenarrInstant", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): Instant {
         val string = decoder.decodeString()
-
-        val formatted =
-            when {
-                !string.contains("T") -> "${string}T00:00:00Z"
-                !string.endsWith("Z") && !string.contains("+") -> "${string}Z"
-                else -> string
-            }
-
+        val formatted = formatInstantString(string)
         return Instant.parse(formatted)
     }
 
@@ -38,14 +42,12 @@ object ListenarrNullableInstantSerializer : KSerializer<Instant?> {
         val string = decoder.decodeString()
         if (string.isBlank()) return null
 
-        val formatted =
-            when {
-                !string.contains("T") -> "${string}T00:00:00Z"
-                !string.endsWith("Z") && !string.contains("+") -> "${string}Z"
-                else -> string
-            }
-
-        return Instant.parse(formatted)
+        return try {
+            val formatted = formatInstantString(string)
+            Instant.parse(formatted)
+        } catch (_: Exception) {
+            null
+        }
     }
 
     override fun serialize(

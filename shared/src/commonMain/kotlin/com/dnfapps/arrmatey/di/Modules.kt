@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.di
 
 import com.dnfapps.arrmatey.arr.api.client.GenericClient
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
+import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
 import com.dnfapps.arrmatey.arr.api.client.logging.DynamicLogger
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
@@ -230,10 +231,12 @@ import dev.shivathapaa.logger.core.LoggerConfig
 import dev.shivathapaa.logger.sink.DefaultLogSink
 import io.ktor.client.plugins.logging.Logger
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
+import kotlin.time.Instant
 import dev.shivathapaa.logger.api.Logger as FLogger
 
 val logging =
@@ -274,6 +277,9 @@ val networkModule =
                 // (e.g. Bazarr's language fields, which can be null for unrecognised codes) return
                 // null for properties our models treat as non-null with a default.
                 coerceInputValues = true
+                serializersModule = SerializersModule {
+                    contextual(Instant::class, ListenarrInstantSerializer)
+                }
             }
         }
 
