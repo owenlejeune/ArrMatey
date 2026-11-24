@@ -78,8 +78,9 @@ fun DashboardDiscoverFeedSection(
 
     val categories =
         remember(sectionPreferences.visibleCategories) {
-            val visible = sectionPreferences.visibleCategories
-            if (visible.isNotEmpty()) visible else DiscoverCategory.entries
+            // The dashboard feed shows Seerr data only.
+            val visible = sectionPreferences.visibleCategories.filterNot { it.isProwlarr }
+            if (visible.isNotEmpty()) visible else DiscoverCategory.seerrEntries
         }
 
     var selectedCategory by rememberSaveable { mutableStateOf<DiscoverCategory?>(null) }
@@ -169,6 +170,8 @@ fun DashboardDiscoverFeedSection(
                                         DiscoverCategory.UPCOMING_MOVIES,
                                         DiscoverCategory.UPCOMING_SERIES,
                                         -> Icons.Default.CalendarToday
+                                        DiscoverCategory.PROWLARR_MOVIES -> Icons.Default.Movie
+                                        DiscoverCategory.PROWLARR_SERIES -> Icons.Default.Tv
                                     }
                                 Icon(
                                     imageVector = icon,

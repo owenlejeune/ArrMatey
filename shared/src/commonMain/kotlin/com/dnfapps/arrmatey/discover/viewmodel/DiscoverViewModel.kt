@@ -136,6 +136,8 @@ class DiscoverViewModel(
     fun getGenresForCategory(category: DiscoverCategory): StateFlow<List<Genre>> = when (category) {
         DiscoverCategory.POPULAR_MOVIES, DiscoverCategory.UPCOMING_MOVIES -> movieGenres
         DiscoverCategory.POPULAR_SERIES, DiscoverCategory.UPCOMING_SERIES -> tvGenres
+        DiscoverCategory.PROWLARR_MOVIES -> movieGenres
+        DiscoverCategory.PROWLARR_SERIES -> tvGenres
         DiscoverCategory.TRENDING -> combine(movieGenres, tvGenres) { movies, tvs ->
             (movies + tvs).distinctBy { it.id }
         }.stateIn(
@@ -243,16 +245,8 @@ class DiscoverViewModel(
             true
         }
 
-        if (categoryFilter.selectedGenreId != null) {
-            filteredItems = filteredItems.filter { item ->
-                item.genreIds.contains(categoryFilter.selectedGenreId)
-            }
-        }
-
-        if (categoryFilter.selectedLanguage != null) {
-            filteredItems = filteredItems.filter { item ->
-                item.originalLanguage.equals(categoryFilter.selectedLanguage, ignoreCase = true)
-            }
+        filteredItems = filteredItems.filter { item ->
+            categoryFilter.matchesGenres(item.genreIds) && categoryFilter.matchesLanguage(item.originalLanguage)
         }
 
         filteredItems = sortDiscoverItems(filteredItems, categoryFilter.sortBy, categoryFilter.sortOrder)
@@ -271,6 +265,8 @@ class DiscoverViewModel(
             DiscoverCategory.POPULAR_SERIES -> _tvState
             DiscoverCategory.UPCOMING_MOVIES -> _upcomingMoviesState
             DiscoverCategory.UPCOMING_SERIES -> _upcomingTvState
+            // Prowlarr rows are filtered in NewestDownloadableViewModel.
+            DiscoverCategory.PROWLARR_MOVIES, DiscoverCategory.PROWLARR_SERIES -> emptyState
         }
         return combine(
             rawFlow,
@@ -343,6 +339,8 @@ class DiscoverViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = false,
         )
+
+    private val emptyState: StateFlow<PagedData<DiscoverResult>> = MutableStateFlow(PagedData<DiscoverResult>()).asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -560,6 +558,8 @@ class DiscoverViewModel(
         DiscoverCategory.POPULAR_SERIES -> tvState
         DiscoverCategory.UPCOMING_MOVIES -> upcomingMoviesState
         DiscoverCategory.UPCOMING_SERIES -> upcomingTvState
+        // Prowlarr rows are drawn from NewestDownloadableViewModel.
+        DiscoverCategory.PROWLARR_MOVIES, DiscoverCategory.PROWLARR_SERIES -> emptyState
     }
 
     fun loadNextPageForCategory(category: DiscoverCategory) {
@@ -569,6 +569,7 @@ class DiscoverViewModel(
             DiscoverCategory.POPULAR_SERIES -> loadNextTvPage()
             DiscoverCategory.UPCOMING_MOVIES -> loadNextUpcomingMoviesPage()
             DiscoverCategory.UPCOMING_SERIES -> loadNextUpcomingTvPage()
+            DiscoverCategory.PROWLARR_MOVIES, DiscoverCategory.PROWLARR_SERIES -> Unit
         }
     }
 

@@ -64,8 +64,8 @@ class DiscoverFilterAndSortTest {
     fun testFilterStateIsActiveWhenModified() {
         assertTrue(DiscoverFilterState(sortBy = DiscoverSortBy.RATING).isActive)
         assertTrue(DiscoverFilterState(sortOrder = DiscoverSortOrder.ASCENDING).isActive)
-        assertTrue(DiscoverFilterState(selectedGenreId = 28).isActive)
-        assertTrue(DiscoverFilterState(selectedLanguage = "en").isActive)
+        assertTrue(DiscoverFilterState(selectedGenreIds = setOf(28)).isActive)
+        assertTrue(DiscoverFilterState(selectedLanguages = setOf("en")).isActive)
         assertTrue(DiscoverFilterState(hideInLibrary = true).isActive)
     }
 

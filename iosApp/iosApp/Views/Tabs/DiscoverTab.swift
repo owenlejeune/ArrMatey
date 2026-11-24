@@ -115,6 +115,9 @@ private struct DiscoverTabContent: View {
                                                     navigationManager.goToDiscoverCategory(category: .upcomingSeries)
                                                 }
                                             )
+                                        case .prowlarrMovies, .prowlarrSeries:
+                                            // Prowlarr rows are not wired up on iOS yet.
+                                            EmptyView()
                                         }
                                     }
                                 }
