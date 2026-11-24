@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.hasDownloadedFiles
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
+import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
@@ -17,7 +18,6 @@ import com.dnfapps.arrmatey.discover.model.DiscoverFilterState
 import com.dnfapps.arrmatey.discover.model.DiscoverLibraryIndex
 import com.dnfapps.arrmatey.discover.model.DiscoverMediaServerIndex
 import com.dnfapps.arrmatey.discover.model.DiscoverSortBy
-import com.dnfapps.arrmatey.discover.model.DiscoverSortOrder
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.extensions.mergeWithLibrary
@@ -209,16 +209,16 @@ class DiscoverViewModel(
     private fun sortDiscoverItems(
         items: List<DiscoverResult>,
         sortBy: DiscoverSortBy,
-        sortOrder: DiscoverSortOrder,
+        sortOrder: SortOrder,
     ): List<DiscoverResult> {
         val comparator: Comparator<DiscoverResult> = when (sortBy) {
             DiscoverSortBy.POPULARITY -> compareBy { it.popularity }
             DiscoverSortBy.RATING -> compareBy<DiscoverResult> { it.voteAverage }.thenBy { it.voteCount }
-            DiscoverSortBy.RELEASE_DATE, DiscoverSortBy.UPLOAD_TIME -> compareBy { it.releaseDate ?: it.firstAirDate ?: "" }
-            DiscoverSortBy.SEEDERS -> compareBy { it.popularity }
+            DiscoverSortBy.RELEASE_DATE -> compareBy { it.releaseDate ?: it.firstAirDate ?: "" }
+            DiscoverSortBy.TITLE -> compareBy { it.title }
         }
 
-        return if (sortOrder == DiscoverSortOrder.DESCENDING) {
+        return if (sortOrder == SortOrder.Desc) {
             items.sortedWith(comparator.reversed())
         } else {
             items.sortedWith(comparator)
