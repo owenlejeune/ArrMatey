@@ -11,6 +11,7 @@ struct DiscoverCategoryScreen: View {
     @StateObject private var viewModel = DiscoverViewModelS()
     @EnvironmentObject private var navigationManager: NavigationManager
     @State private var viewType: ViewType = .grid
+    @State private var showFilterSheet: Bool = false
 
     private var gridColumns: [GridItem] {
         [GridItem(.adaptive(minimum: 120, maximum: 160), spacing: 12)]
@@ -18,6 +19,8 @@ struct DiscoverCategoryScreen: View {
 
     var body: some View {
         let data = viewModel.getStateForCategory(category)
+        let filterState = viewModel.getFilterStateForCategory(category)
+
         Group {
             if data.isLoading && data.items.isEmpty {
                 ProgressView()
@@ -95,18 +98,46 @@ struct DiscoverCategoryScreen: View {
                         .padding(16)
                     }
                 }
+            } else {
+                ContentUnavailableView(
+                    MR.strings().no_results_found.localized(),
+                    systemImage: "line.3.horizontal.decrease.circle",
+                    description: Text(MR.strings().no_results_found.localized())
+                )
             }
         }
         .navigationTitle(category.title.localized())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    viewType = viewType == .grid ? .list : .grid
-                }) {
-                    Image(systemName: viewType == .grid ? "rectangle.grid.1x2" : "rectangle.grid.2x2")
+                HStack(spacing: 12) {
+                    Button(action: {
+                        showFilterSheet = true
+                    }) {
+                        Image(systemName: filterState.isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                            .foregroundStyle(filterState.isActive ? Color.accentColor : Color.primary)
+                    }
+
+                    Button(action: {
+                        viewType = viewType == .grid ? .list : .grid
+                    }) {
+                        Image(systemName: viewType == .grid ? "rectangle.grid.1x2" : "rectangle.grid.2x2")
+                    }
                 }
             }
+        }
+        .sheet(isPresented: $showFilterSheet) {
+            DiscoverCategoryFilterSheet(
+                filterState: filterState,
+                rawItems: viewModel.getRawItemsForCategory(category),
+                genres: viewModel.getGenresForCategory(category),
+                onFilterStateChanged: { newFilter in
+                    viewModel.updateFilterStateForCategory(category, state: newFilter)
+                },
+                onResetFilterState: {
+                    viewModel.resetFilterStateForCategory(category)
+                }
+            )
         }
     }
 }

@@ -31,11 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.discover.model.DiscoverFilterState
 import com.dnfapps.arrmatey.discover.model.DiscoverGenres
 import com.dnfapps.arrmatey.discover.model.DiscoverLanguages
 import com.dnfapps.arrmatey.discover.model.DiscoverSortBy
-import com.dnfapps.arrmatey.discover.model.DiscoverSortOrder
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.Genre
 import com.dnfapps.arrmatey.shared.*
@@ -116,25 +116,21 @@ fun DiscoverCategoryFilterSheet(
                     FilterChip(
                         selected = true,
                         onClick = {
-                            val newOrder = if (filterState.sortOrder == DiscoverSortOrder.ASCENDING) {
-                                DiscoverSortOrder.DESCENDING
+                            val newOrder = if (filterState.sortOrder == SortOrder.Asc) {
+                                SortOrder.Desc
                             } else {
-                                DiscoverSortOrder.ASCENDING
+                                SortOrder.Asc
                             }
                             onFilterStateChanged(filterState.copy(sortOrder = newOrder))
                         },
                         label = {
                             Text(
-                                if (filterState.sortOrder == DiscoverSortOrder.ASCENDING) {
-                                    mokoString(MR.strings.sort_ascending)
-                                } else {
-                                    mokoString(MR.strings.sort_descending)
-                                },
+                                mokoString(filterState.sortOrder.resource),
                             )
                         },
                         leadingIcon = {
                             Icon(
-                                imageVector = if (filterState.sortOrder == DiscoverSortOrder.ASCENDING) {
+                                imageVector = if (filterState.sortOrder == SortOrder.Asc) {
                                     Icons.Default.ArrowUpward
                                 } else {
                                     Icons.Default.ArrowDownward
@@ -151,20 +147,12 @@ fun DiscoverCategoryFilterSheet(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
-                    val sortOptions = listOf(
-                        DiscoverSortBy.POPULARITY to MR.strings.popularity,
-                        DiscoverSortBy.RATING to MR.strings.rating,
-                        DiscoverSortBy.RELEASE_DATE to MR.strings.release_date,
-                        DiscoverSortBy.UPLOAD_TIME to MR.strings.upload_time,
-                        DiscoverSortBy.SEEDERS to MR.strings.seeders,
-                    )
-
-                    sortOptions.forEach { (option, stringRes) ->
+                    DiscoverSortBy.entries.forEach { option ->
                         val isSelected = filterState.sortBy == option
                         FilterChip(
                             selected = isSelected,
                             onClick = { onFilterStateChanged(filterState.copy(sortBy = option)) },
-                            label = { Text(mokoString(stringRes)) },
+                            label = { Text(mokoString(option.resource)) },
                             leadingIcon = if (isSelected) {
                                 { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
                             } else {

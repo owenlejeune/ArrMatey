@@ -1,10 +1,10 @@
 package com.dnfapps.arrmatey.discover
 
+import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.discover.model.DiscoverFilterState
 import com.dnfapps.arrmatey.discover.model.DiscoverGenres
 import com.dnfapps.arrmatey.discover.model.DiscoverLanguages
 import com.dnfapps.arrmatey.discover.model.DiscoverSortBy
-import com.dnfapps.arrmatey.discover.model.DiscoverSortOrder
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.MediaInfo
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -63,7 +63,7 @@ class DiscoverFilterAndSortTest {
     @Test
     fun testFilterStateIsActiveWhenModified() {
         assertTrue(DiscoverFilterState(sortBy = DiscoverSortBy.RATING).isActive)
-        assertTrue(DiscoverFilterState(sortOrder = DiscoverSortOrder.ASCENDING).isActive)
+        assertTrue(DiscoverFilterState(sortOrder = SortOrder.Asc).isActive)
         assertTrue(DiscoverFilterState(selectedGenreId = 28).isActive)
         assertTrue(DiscoverFilterState(selectedLanguage = "en").isActive)
         assertTrue(DiscoverFilterState(hideInLibrary = true).isActive)
