@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -50,6 +51,7 @@ import com.dnfapps.arrmatey.ui.components.ViewTypeMenuButton
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.MinColumnsAdaptiveGridCells
+import com.dnfapps.arrmatey.ui.sheets.DiscoverCategoryFilterSheet
 import com.dnfapps.arrmatey.ui.theme.ViewType
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -62,9 +64,14 @@ fun DiscoverCategoryScreen(
     onItemClick: (SearchResult) -> Unit,
 ) {
     val dataState by viewModel.getStateForCategory(category).collectAsStateWithLifecycle()
+    val filterState by viewModel.getFilterStateForCategory(category).collectAsStateWithLifecycle()
+    val rawItems by viewModel.getRawItemsForCategory(category).collectAsStateWithLifecycle()
+    val categoryGenres by viewModel.getGenresForCategory(category).collectAsStateWithLifecycle()
+
     val lazyGridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
     var viewType by rememberSaveable { mutableStateOf(ViewType.Grid) }
+    var showFilterSheet by remember { mutableStateOf(false) }
 
     val shouldLoadMore by remember {
         derivedStateOf {
@@ -100,6 +107,13 @@ fun DiscoverCategoryScreen(
                     BackButton(onClick = onBack)
                 },
                 actions = {
+                    IconButton(onClick = { showFilterSheet = true }) {
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = mokoString(MR.strings.filter_and_sort),
+                            tint = if (filterState.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                     ViewTypeMenuButton(
                         viewType = viewType,
                         onViewTypeChanged = { viewType = it },
@@ -252,5 +266,22 @@ fun DiscoverCategoryScreen(
                 }
             }
         }
+    }
+
+    if (showFilterSheet) {
+        DiscoverCategoryFilterSheet(
+            filterState = filterState,
+            rawItems = rawItems,
+            genres = categoryGenres,
+            onFilterStateChanged = { newFilter ->
+                viewModel.updateFilterStateForCategory(category, newFilter)
+            },
+            onResetFilterState = {
+                viewModel.resetFilterStateForCategory(category)
+            },
+            onDismissRequest = {
+                showFilterSheet = false
+            },
+        )
     }
 }

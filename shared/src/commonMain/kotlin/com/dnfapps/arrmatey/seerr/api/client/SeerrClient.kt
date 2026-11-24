@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResponse
+import com.dnfapps.arrmatey.seerr.api.model.Genre
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssueCount
@@ -103,6 +104,10 @@ interface SeerrClient {
         page: Int = 1,
         today: String,
     ): NetworkResult<DiscoverResponse>
+
+    suspend fun getMovieGenres(): NetworkResult<List<Genre>>
+
+    suspend fun getTvGenres(): NetworkResult<List<Genre>>
 
     suspend fun search(
         query: String,
@@ -302,6 +307,10 @@ class SeerrClientImpl(
         page: Int,
         today: String,
     ): NetworkResult<DiscoverResponse> = get("discover/tv", mapOf("page" to page, "firstAirDateGte" to today))
+
+    override suspend fun getMovieGenres(): NetworkResult<List<Genre>> = get("genres/movie")
+
+    override suspend fun getTvGenres(): NetworkResult<List<Genre>> = get("genres/tv")
 
     override suspend fun search(
         query: String,

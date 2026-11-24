@@ -21,10 +21,11 @@ val TracearrDarkBlue = Color(0xFF00507a)
 val TracearrNavy = Color(0xFF061019)
 val TracearrLightBlue = Color(0xFF48cae4)
 
-val PlexColor = Color(0xFFE5A00D)
-val TautulliOrange = PlexColor
-val JellyfinColor = Color(0xFFAA5CC3)
-val EmbyColor = Color(0xFF52B54B)
+val PlexOrange = Color(0xFFE5A00D)
+val PlexGray = Color(0xFF282a2d)
+val TautulliOrange = PlexOrange
+val JellyfinPurple = Color(0xFFAA5CC3)
+val EmbyGreen = Color(0xFF52B54B)
 
 val QBittorrentColor = Color(0xFF2F679E)
 val SABnzbdColor = Color(0xFFFFB300)
@@ -47,9 +48,9 @@ val DownloadClientType.associatedColor: Color
 val TracearrServerType?.brandColor: Color
     get() =
         when (this) {
-            TracearrServerType.Plex -> PlexColor
-            TracearrServerType.Jellyfin -> JellyfinColor
-            TracearrServerType.Emby -> EmbyColor
+            TracearrServerType.Plex -> PlexOrange
+            TracearrServerType.Jellyfin -> JellyfinPurple
+            TracearrServerType.Emby -> EmbyGreen
             null -> TracearrBlue
         }
 
@@ -60,9 +61,9 @@ fun getTracearrServerColor(
     if (type != null) return type.brandColor
     val lower = name?.lowercase() ?: ""
     return when {
-        lower.contains("plex") -> PlexColor
-        lower.contains("jellyfin") -> JellyfinColor
-        lower.contains("emby") -> EmbyColor
+        lower.contains("plex") -> PlexOrange
+        lower.contains("jellyfin") -> JellyfinPurple
+        lower.contains("emby") -> EmbyGreen
         else -> TracearrBlue
     }
 }

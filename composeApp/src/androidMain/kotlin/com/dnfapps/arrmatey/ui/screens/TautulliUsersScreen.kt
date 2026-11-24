@@ -64,7 +64,7 @@ import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.helpers.LocalFloatingBarBottomPadding
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
-import com.dnfapps.arrmatey.ui.theme.PlexColor
+import com.dnfapps.arrmatey.ui.theme.PlexOrange
 import com.dnfapps.arrmatey.ui.theme.TautulliOrange
 import com.dnfapps.arrmatey.utils.formatWatchTimeMs
 import com.dnfapps.arrmatey.utils.mokoPlural
@@ -351,26 +351,26 @@ private fun TautulliUserCard(
                                 text = item.serverName,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = PlexColor,
+                                color = PlexOrange,
                             )
                         },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Dns,
                                 contentDescription = null,
-                                tint = PlexColor,
+                                tint = PlexOrange,
                                 modifier = Modifier.size(12.dp),
                             )
                         },
                         border =
                         AssistChipDefaults.assistChipBorder(
                             enabled = true,
-                            borderColor = PlexColor.copy(alpha = 0.5f),
+                            borderColor = PlexOrange.copy(alpha = 0.5f),
                         ),
                         colors =
                         AssistChipDefaults.assistChipColors(
-                            containerColor = PlexColor.copy(alpha = 0.12f),
-                            labelColor = PlexColor,
+                            containerColor = PlexOrange.copy(alpha = 0.12f),
+                            labelColor = PlexOrange,
                         ),
                     )
 

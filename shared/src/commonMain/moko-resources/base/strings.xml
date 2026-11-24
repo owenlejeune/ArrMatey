@@ -173,6 +173,12 @@
     <string name="sort_by">Sort By</string>
     <string name="filter">Filter</string>
     <string name="filter_by">Filter By</string>
+    <string name="filter_and_sort">Filter &amp; Sort</string>
+    <string name="popularity">Popularity</string>
+    <string name="upload_time">Upload Time</string>
+    <string name="seeders">Seeders</string>
+    <string name="all_genres">All Genres</string>
+    <string name="all_languages">All Languages</string>
     <string name="title">Title</string>
     <string name="title_last_first">Name (Last, First)</string>
     <string name="year">Year</string>

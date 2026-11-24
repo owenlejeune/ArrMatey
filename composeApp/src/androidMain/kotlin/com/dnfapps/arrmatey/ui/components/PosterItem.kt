@@ -58,9 +58,9 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.SeerrMediaStatus
 import com.dnfapps.arrmatey.shared.*
-import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
+import com.dnfapps.arrmatey.ui.theme.PlexGray
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
@@ -242,8 +242,7 @@ fun PosterItem(
                         },
                     )
                 } else {
-                    val mockCover = if (item.mediaType == RequestType.Tv) InstanceType.Sonarr.mockCover else InstanceType.Radarr.mockCover
-                    mockCover?.let { painterResource(it) } ?: ""
+                    ""
                 }
 
         BasePosterItem(
@@ -379,8 +378,7 @@ fun PosterItem(
                     },
                 )
             } else {
-                val mockCover = if (item.requestType == RequestType.Tv) InstanceType.Sonarr.mockCover else InstanceType.Radarr.mockCover
-                mockCover?.let { painterResource(it) } ?: ""
+                ""
             }
 
     BasePosterItem(
@@ -455,12 +453,14 @@ fun MediaServerBadgeOverlay(
     modifier: Modifier = Modifier,
     iconSize: Dp = 16.dp,
     innerPadding: Dp = 4.dp,
-    borderWidth: Dp = 1.5.dp,
 ) {
     Surface(
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-        border = BorderStroke(borderWidth, serverType.brandColor),
+        color = if (serverType == MediaServerType.Plex) {
+            PlexGray
+        } else {
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+        },
         shadowElevation = 2.dp,
         modifier = modifier,
     ) {

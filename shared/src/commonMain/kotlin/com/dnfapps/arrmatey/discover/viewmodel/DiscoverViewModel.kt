@@ -13,8 +13,11 @@ import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.model.CLEAN_TITLE_REGEX
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
+import com.dnfapps.arrmatey.discover.model.DiscoverFilterState
 import com.dnfapps.arrmatey.discover.model.DiscoverLibraryIndex
 import com.dnfapps.arrmatey.discover.model.DiscoverMediaServerIndex
+import com.dnfapps.arrmatey.discover.model.DiscoverSortBy
+import com.dnfapps.arrmatey.discover.model.DiscoverSortOrder
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.extensions.mergeWithLibrary
@@ -26,13 +29,16 @@ import com.dnfapps.arrmatey.mediaserver.model.MediaType
 import com.dnfapps.arrmatey.mediaserver.model.UnifiedMediaItem
 import com.dnfapps.arrmatey.mediaserver.repository.MediaServerManager
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
+import com.dnfapps.arrmatey.seerr.api.model.Genre
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverMoviesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetDiscoverTvUseCase
+import com.dnfapps.arrmatey.seerr.usecase.GetGenresUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetTrendingUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetUpcomingMoviesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetUpcomingTvUseCase
 import com.dnfapps.networking.asSuccess
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -58,6 +64,7 @@ class DiscoverViewModel(
     private val getDiscoverTvUseCase: GetDiscoverTvUseCase,
     private val getUpcomingMoviesUseCase: GetUpcomingMoviesUseCase,
     private val getUpcomingTvUseCase: GetUpcomingTvUseCase,
+    private val getGenresUseCase: GetGenresUseCase,
     private val globalSearchUseCase: GlobalSearchUseCase,
     private val preferencesStore: PreferencesStore,
     private val mediaServerManager: MediaServerManager? = null,
@@ -116,17 +123,46 @@ class DiscoverViewModel(
         preferencesStore.discoverSectionPreferences
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DiscoverSectionPreferences())
 
-    private fun enrichAndFilter(
-        sourceFlow: StateFlow<PagedData<DiscoverResult>>,
-    ): StateFlow<PagedData<DiscoverResult>> = combine(
-        sourceFlow,
-        allMediaServerItems,
-        allLibraries,
-        discoverSectionPreferences,
-    ) { pagedData, mediaServerItems, arrLibraries, prefs ->
+    private val categoryFilterStates = DiscoverCategory.entries.associateWith {
+        MutableStateFlow(DiscoverFilterState())
+    }
+
+    private val _movieGenres = MutableStateFlow<List<Genre>>(emptyList())
+    val movieGenres: StateFlow<List<Genre>> = _movieGenres.asStateFlow()
+
+    private val _tvGenres = MutableStateFlow<List<Genre>>(emptyList())
+    val tvGenres: StateFlow<List<Genre>> = _tvGenres.asStateFlow()
+
+    fun getGenresForCategory(category: DiscoverCategory): StateFlow<List<Genre>> = when (category) {
+        DiscoverCategory.POPULAR_MOVIES, DiscoverCategory.UPCOMING_MOVIES -> movieGenres
+        DiscoverCategory.POPULAR_SERIES, DiscoverCategory.UPCOMING_SERIES -> tvGenres
+        DiscoverCategory.TRENDING -> combine(movieGenres, tvGenres) { movies, tvs ->
+            (movies + tvs).distinctBy { it.id }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
+    }
+
+    fun getFilterStateForCategory(category: DiscoverCategory): StateFlow<DiscoverFilterState> = categoryFilterStates[category]?.asStateFlow() ?: MutableStateFlow(DiscoverFilterState()).asStateFlow()
+
+    fun updateFilterStateForCategory(category: DiscoverCategory, state: DiscoverFilterState) {
+        categoryFilterStates[category]?.value = state
+    }
+
+    fun resetFilterStateForCategory(category: DiscoverCategory) {
+        categoryFilterStates[category]?.value = DiscoverFilterState()
+    }
+
+    private fun enrichItems(
+        items: List<DiscoverResult>,
+        mediaServerItems: List<UnifiedMediaItem>,
+        arrLibraries: List<ArrMedia>,
+    ): List<DiscoverResult> {
         val libraryIndex = DiscoverLibraryIndex(arrLibraries)
         val serverIndex = DiscoverMediaServerIndex(mediaServerItems)
-        val enrichedItems = pagedData.items.map { item ->
+        return items.map { item ->
             val expectedMediaType = when (item.mediaType) {
                 RequestType.Movie -> MediaType.MOVIE
                 RequestType.Tv -> MediaType.SHOW
@@ -168,12 +204,58 @@ class DiscoverViewModel(
                 hasArrFiles = arrMatch?.hasDownloadedFiles == true,
             )
         }
+    }
 
-        val filteredItems = if (prefs.hideInLibraryContent) {
-            enrichedItems.filter { !it.isAvailableInLibrary }
-        } else {
-            enrichedItems
+    private fun sortDiscoverItems(
+        items: List<DiscoverResult>,
+        sortBy: DiscoverSortBy,
+        sortOrder: DiscoverSortOrder,
+    ): List<DiscoverResult> {
+        val comparator: Comparator<DiscoverResult> = when (sortBy) {
+            DiscoverSortBy.POPULARITY -> compareBy { it.popularity }
+            DiscoverSortBy.RATING -> compareBy<DiscoverResult> { it.voteAverage }.thenBy { it.voteCount }
+            DiscoverSortBy.RELEASE_DATE, DiscoverSortBy.UPLOAD_TIME -> compareBy { it.releaseDate ?: it.firstAirDate ?: "" }
+            DiscoverSortBy.SEEDERS -> compareBy { it.popularity }
         }
+
+        return if (sortOrder == DiscoverSortOrder.DESCENDING) {
+            items.sortedWith(comparator.reversed())
+        } else {
+            items.sortedWith(comparator)
+        }
+    }
+
+    private fun enrichAndFilter(
+        sourceFlow: StateFlow<PagedData<DiscoverResult>>,
+        category: DiscoverCategory,
+    ): StateFlow<PagedData<DiscoverResult>> = combine(
+        sourceFlow,
+        allMediaServerItems,
+        allLibraries,
+        discoverSectionPreferences,
+        getFilterStateForCategory(category),
+    ) { pagedData, mediaServerItems, arrLibraries, prefs, categoryFilter ->
+        val enrichedItems = enrichItems(pagedData.items, mediaServerItems, arrLibraries)
+
+        var filteredItems = enrichedItems.filter { item ->
+            val shouldHide = prefs.hideInLibraryContent || categoryFilter.hideInLibrary
+            if (shouldHide && item.isAvailableInLibrary) return@filter false
+            true
+        }
+
+        if (categoryFilter.selectedGenreId != null) {
+            filteredItems = filteredItems.filter { item ->
+                item.genreIds.contains(categoryFilter.selectedGenreId)
+            }
+        }
+
+        if (categoryFilter.selectedLanguage != null) {
+            filteredItems = filteredItems.filter { item ->
+                item.originalLanguage.equals(categoryFilter.selectedLanguage, ignoreCase = true)
+            }
+        }
+
+        filteredItems = sortDiscoverItems(filteredItems, categoryFilter.sortBy, categoryFilter.sortOrder)
 
         pagedData.copy(items = filteredItems)
     }.stateIn(
@@ -182,20 +264,41 @@ class DiscoverViewModel(
         initialValue = PagedData(),
     )
 
+    fun getRawItemsForCategory(category: DiscoverCategory): StateFlow<List<DiscoverResult>> {
+        val rawFlow = when (category) {
+            DiscoverCategory.TRENDING -> _trendingState
+            DiscoverCategory.POPULAR_MOVIES -> _moviesState
+            DiscoverCategory.POPULAR_SERIES -> _tvState
+            DiscoverCategory.UPCOMING_MOVIES -> _upcomingMoviesState
+            DiscoverCategory.UPCOMING_SERIES -> _upcomingTvState
+        }
+        return combine(
+            rawFlow,
+            allMediaServerItems,
+            allLibraries,
+        ) { pagedData, mediaServerItems, arrLibraries ->
+            enrichItems(pagedData.items, mediaServerItems, arrLibraries)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
+    }
+
     private val _trendingState = MutableStateFlow(PagedData<DiscoverResult>())
-    val trendingState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_trendingState)
+    val trendingState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_trendingState, DiscoverCategory.TRENDING)
 
     private val _moviesState = MutableStateFlow(PagedData<DiscoverResult>())
-    val moviesState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_moviesState)
+    val moviesState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_moviesState, DiscoverCategory.POPULAR_MOVIES)
 
     private val _tvState = MutableStateFlow(PagedData<DiscoverResult>())
-    val tvState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_tvState)
+    val tvState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_tvState, DiscoverCategory.POPULAR_SERIES)
 
     private val _upcomingMoviesState = MutableStateFlow(PagedData<DiscoverResult>())
-    val upcomingMoviesState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_upcomingMoviesState)
+    val upcomingMoviesState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_upcomingMoviesState, DiscoverCategory.UPCOMING_MOVIES)
 
     private val _upcomingTvState = MutableStateFlow(PagedData<DiscoverResult>())
-    val upcomingTvState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_upcomingTvState)
+    val upcomingTvState: StateFlow<PagedData<DiscoverResult>> = enrichAndFilter(_upcomingTvState, DiscoverCategory.UPCOMING_SERIES)
 
     val isInitialLoading: StateFlow<Boolean> =
         combine(
@@ -321,6 +424,14 @@ class DiscoverViewModel(
         viewModelScope.launch {
             seerrRepository.collectLatest { repo ->
                 if (repo != null) {
+                    this@launch.launch {
+                        getGenresUseCase.getMovieGenres(repo).onSuccess { genres ->
+                            _movieGenres.value = genres
+                        }
+                        getGenresUseCase.getTvGenres(repo).onSuccess { genres ->
+                            _tvGenres.value = genres
+                        }
+                    }
                     this@launch.launch {
                         val controller =
                             getTrendingUseCase.createPagingController(repo, viewModelScope)

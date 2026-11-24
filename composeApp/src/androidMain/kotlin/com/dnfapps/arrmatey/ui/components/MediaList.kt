@@ -413,7 +413,6 @@ fun <T : ArrMedia> MediaItem(
                                         .padding(4.dp),
                                     iconSize = 12.dp,
                                     innerPadding = 3.dp,
-                                    borderWidth = 1.dp,
                                 )
                             }
                         },
@@ -643,7 +642,6 @@ fun MediaServerSearchResultItem(
                                     .padding(4.dp),
                                 iconSize = 12.dp,
                                 innerPadding = 3.dp,
-                                borderWidth = 1.dp,
                             )
                             if (item.played) {
                                 Surface(
