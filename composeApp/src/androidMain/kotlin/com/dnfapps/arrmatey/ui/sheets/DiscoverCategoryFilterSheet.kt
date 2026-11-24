@@ -190,10 +190,10 @@ fun DiscoverCategoryFilterSheet(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(0.dp),
                     ) {
-                        val isAllGenresSelected = filterState.selectedGenreId == null
+                        val isAllGenresSelected = filterState.selectedGenreIds.isEmpty()
                         FilterChip(
                             selected = isAllGenresSelected,
-                            onClick = { onFilterStateChanged(filterState.copy(selectedGenreId = null)) },
+                            onClick = { onFilterStateChanged(filterState.copy(selectedGenreIds = emptySet())) },
                             label = { Text(mokoString(MR.strings.all_genres)) },
                             leadingIcon = if (isAllGenresSelected) {
                                 { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
@@ -204,13 +204,10 @@ fun DiscoverCategoryFilterSheet(
                         )
 
                         displayGenres.forEach { (genreId, genreName) ->
-                            val isSelected = filterState.selectedGenreId == genreId
+                            val isSelected = genreId in filterState.selectedGenreIds
                             FilterChip(
                                 selected = isSelected,
-                                onClick = {
-                                    val newGenre = if (isSelected) null else genreId
-                                    onFilterStateChanged(filterState.copy(selectedGenreId = newGenre))
-                                },
+                                onClick = { onFilterStateChanged(filterState.toggleGenre(genreId)) },
                                 label = { Text(genreName) },
                                 leadingIcon = if (isSelected) {
                                     { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
@@ -237,10 +234,10 @@ fun DiscoverCategoryFilterSheet(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(0.dp),
                     ) {
-                        val isAllLangsSelected = filterState.selectedLanguage == null
+                        val isAllLangsSelected = filterState.selectedLanguages.isEmpty()
                         FilterChip(
                             selected = isAllLangsSelected,
-                            onClick = { onFilterStateChanged(filterState.copy(selectedLanguage = null)) },
+                            onClick = { onFilterStateChanged(filterState.copy(selectedLanguages = emptySet())) },
                             label = { Text(mokoString(MR.strings.all_languages)) },
                             leadingIcon = if (isAllLangsSelected) {
                                 { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
@@ -251,13 +248,10 @@ fun DiscoverCategoryFilterSheet(
                         )
 
                         displayLanguages.forEach { (langCode, langName) ->
-                            val isSelected = filterState.selectedLanguage.equals(langCode, ignoreCase = true)
+                            val isSelected = langCode.lowercase() in filterState.selectedLanguages
                             FilterChip(
                                 selected = isSelected,
-                                onClick = {
-                                    val newLang = if (isSelected) null else langCode
-                                    onFilterStateChanged(filterState.copy(selectedLanguage = newLang))
-                                },
+                                onClick = { onFilterStateChanged(filterState.toggleLanguage(langCode)) },
                                 label = { Text(langName) },
                                 leadingIcon = if (isSelected) {
                                     { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }

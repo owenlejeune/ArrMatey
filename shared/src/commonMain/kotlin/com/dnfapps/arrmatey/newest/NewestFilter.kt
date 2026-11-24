@@ -36,8 +36,8 @@ object NewestFilter {
             when {
                 filter.hideInLibrary && match?.isAvailableInLibrary == true -> false
                 !hasSeerr -> true
-                filter.selectedGenreId != null && match?.genreIds?.contains(filter.selectedGenreId) != true -> false
-                filter.selectedLanguage != null && !match?.originalLanguage.equals(filter.selectedLanguage, ignoreCase = true) -> false
+                !filter.matchesGenres(match?.genreIds.orEmpty()) -> false
+                !filter.matchesLanguage(match?.originalLanguage) -> false
                 else -> true
             }
         }

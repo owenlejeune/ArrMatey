@@ -85,9 +85,9 @@ class NewestFilterTest {
             item("Comedy", match = movie(2, genres = listOf(35), language = "en")),
             item("Unmatched"),
         )
-        assertEquals(listOf("Horror"), titles(NewestFilter.apply(list, NewestFilter.DEFAULT.copy(selectedGenreId = 27), hasSeerr = true)))
-        assertEquals(listOf("Horror"), titles(NewestFilter.apply(list, NewestFilter.DEFAULT.copy(selectedLanguage = "KO"), hasSeerr = true)))
-        assertEquals(3, NewestFilter.apply(list, NewestFilter.DEFAULT.copy(selectedGenreId = 27), hasSeerr = false).size)
+        assertEquals(listOf("Horror"), titles(NewestFilter.apply(list, NewestFilter.DEFAULT.toggleGenre(27), hasSeerr = true)))
+        assertEquals(listOf("Horror"), titles(NewestFilter.apply(list, NewestFilter.DEFAULT.toggleLanguage("KO"), hasSeerr = true)))
+        assertEquals(3, NewestFilter.apply(list, NewestFilter.DEFAULT.toggleGenre(27), hasSeerr = false).size)
     }
 
     @Test

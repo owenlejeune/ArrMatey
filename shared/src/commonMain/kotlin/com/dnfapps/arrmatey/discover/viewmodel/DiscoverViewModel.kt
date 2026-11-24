@@ -245,16 +245,8 @@ class DiscoverViewModel(
             true
         }
 
-        if (categoryFilter.selectedGenreId != null) {
-            filteredItems = filteredItems.filter { item ->
-                item.genreIds.contains(categoryFilter.selectedGenreId)
-            }
-        }
-
-        if (categoryFilter.selectedLanguage != null) {
-            filteredItems = filteredItems.filter { item ->
-                item.originalLanguage.equals(categoryFilter.selectedLanguage, ignoreCase = true)
-            }
+        filteredItems = filteredItems.filter { item ->
+            categoryFilter.matchesGenres(item.genreIds) && categoryFilter.matchesLanguage(item.originalLanguage)
         }
 
         filteredItems = sortDiscoverItems(filteredItems, categoryFilter.sortBy, categoryFilter.sortOrder)
