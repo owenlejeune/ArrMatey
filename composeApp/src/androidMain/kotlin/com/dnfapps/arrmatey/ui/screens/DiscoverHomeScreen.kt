@@ -105,8 +105,8 @@ fun DiscoverHomeScreen(
     val isInitialLoading by viewModel.isInitialLoading.collectAsStateWithLifecycle()
     val sectionPreferences by viewModel.discoverSectionPreferences.collectAsStateWithLifecycle()
     val hasProwlarr by newestViewModel.hasProwlarr.collectAsStateWithLifecycle()
-    val newestMoviesState by newestViewModel.moviesState.collectAsStateWithLifecycle()
-    val newestTvState by newestViewModel.tvState.collectAsStateWithLifecycle()
+    val newestMoviesState by newestViewModel.filteredStateFor(ReleaseKind.Movie).collectAsStateWithLifecycle()
+    val newestTvState by newestViewModel.filteredStateFor(ReleaseKind.Tv).collectAsStateWithLifecycle()
 
     var showMenu by remember { mutableStateOf(false) }
     var showCustomizationSheet by remember { mutableStateOf(false) }

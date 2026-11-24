@@ -27,8 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.mediaserver.usecase.ResolveSonarrEpisodeUseCase
@@ -40,6 +42,7 @@ import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.newest.NewestDownloadableViewModel
+import com.dnfapps.arrmatey.newest.ReleaseKind
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.MediaInstanceFilterRow
@@ -129,8 +132,11 @@ fun DiscoverTab(
                 )
             }
             entry<DiscoverScreen.Prowlarr> { entry ->
+                val category = if (entry.kind == ReleaseKind.Movie) DiscoverCategory.PROWLARR_MOVIES else DiscoverCategory.PROWLARR_SERIES
+                val genres by viewModel.getGenresForCategory(category).collectAsStateWithLifecycle()
                 NewestDownloadableGridScreen(
                     kind = entry.kind,
+                    genres = genres,
                     viewModel = newestViewModel,
                     onBack = { navigation.popBackStack() },
                     onItemClick = { item ->

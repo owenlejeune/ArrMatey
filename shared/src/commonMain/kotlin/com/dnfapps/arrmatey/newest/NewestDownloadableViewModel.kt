@@ -2,17 +2,20 @@ package com.dnfapps.arrmatey.newest
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.discover.model.DiscoverFilterState
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class NewestDownloadableViewModel(
@@ -30,6 +33,36 @@ class NewestDownloadableViewModel(
 
     private val _hasSeerr = MutableStateFlow(false)
     val hasSeerr: StateFlow<Boolean> = _hasSeerr.asStateFlow()
+
+    private val filters = ReleaseKind.entries.associateWith { MutableStateFlow(NewestFilter.DEFAULT) }
+
+    /** The See More filter and sort for [kind], shared by its Discover row and Prowlarr sub-tab. */
+    fun filterFor(kind: ReleaseKind): StateFlow<DiscoverFilterState> = filters.getValue(kind).asStateFlow()
+
+    fun updateFilter(
+        kind: ReleaseKind,
+        filter: DiscoverFilterState,
+    ) {
+        filters.getValue(kind).value = filter
+    }
+
+    fun resetFilter(kind: ReleaseKind) {
+        filters.getValue(kind).value = NewestFilter.DEFAULT
+    }
+
+    /** [moviesState] or [tvState] with [filterFor] applied. */
+    fun filteredStateFor(kind: ReleaseKind): StateFlow<NewestDownloadableState> = filteredStates.getValue(kind)
+
+    private val filteredStates = ReleaseKind.entries.associateWith { kind ->
+        val source = if (kind == ReleaseKind.Movie) _moviesState else _tvState
+        combine(source, filters.getValue(kind), _hasSeerr) { state, filter, seerr ->
+            if (state is NewestDownloadableState.Success) {
+                NewestDownloadableState.Success(NewestFilter.apply(state.items, filter, seerr))
+            } else {
+                state
+            }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, source.value)
+    }
 
     private val jobs = mutableMapOf<ReleaseKind, Job>()
     private var prowlarr: ProwlarrInstanceRepository? = null

@@ -136,6 +136,8 @@ class DiscoverViewModel(
     fun getGenresForCategory(category: DiscoverCategory): StateFlow<List<Genre>> = when (category) {
         DiscoverCategory.POPULAR_MOVIES, DiscoverCategory.UPCOMING_MOVIES -> movieGenres
         DiscoverCategory.POPULAR_SERIES, DiscoverCategory.UPCOMING_SERIES -> tvGenres
+        DiscoverCategory.PROWLARR_MOVIES -> movieGenres
+        DiscoverCategory.PROWLARR_SERIES -> tvGenres
         DiscoverCategory.TRENDING -> combine(movieGenres, tvGenres) { movies, tvs ->
             (movies + tvs).distinctBy { it.id }
         }.stateIn(
@@ -271,6 +273,8 @@ class DiscoverViewModel(
             DiscoverCategory.POPULAR_SERIES -> _tvState
             DiscoverCategory.UPCOMING_MOVIES -> _upcomingMoviesState
             DiscoverCategory.UPCOMING_SERIES -> _upcomingTvState
+            // Prowlarr rows are filtered in NewestDownloadableViewModel.
+            DiscoverCategory.PROWLARR_MOVIES, DiscoverCategory.PROWLARR_SERIES -> emptyState
         }
         return combine(
             rawFlow,

@@ -49,6 +49,7 @@ fun DiscoverCategoryFilterSheet(
     filterState: DiscoverFilterState,
     rawItems: List<DiscoverResult> = emptyList(),
     genres: List<Genre> = emptyList(),
+    sortOptions: List<DiscoverSortBy> = DiscoverSortBy.entries,
     onFilterStateChanged: (DiscoverFilterState) -> Unit,
     onResetFilterState: () -> Unit,
     onDismissRequest: () -> Unit,
@@ -151,15 +152,15 @@ fun DiscoverCategoryFilterSheet(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
-                    val sortOptions = listOf(
+                    val sortLabels = listOf(
                         DiscoverSortBy.POPULARITY to MR.strings.popularity,
                         DiscoverSortBy.RATING to MR.strings.rating,
                         DiscoverSortBy.RELEASE_DATE to MR.strings.release_date,
                         DiscoverSortBy.UPLOAD_TIME to MR.strings.upload_time,
                         DiscoverSortBy.SEEDERS to MR.strings.seeders,
-                    )
+                    ).filter { (option, _) -> option in sortOptions }
 
-                    sortOptions.forEach { (option, stringRes) ->
+                    sortLabels.forEach { (option, stringRes) ->
                         val isSelected = filterState.sortBy == option
                         FilterChip(
                             selected = isSelected,
