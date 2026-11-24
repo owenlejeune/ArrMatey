@@ -1,20 +1,32 @@
 package com.dnfapps.arrmatey.arr.api.client
 
 import com.dnfapps.arrmatey.arr.api.model.ApplyTags
+import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
+import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
+import com.dnfapps.arrmatey.arr.api.model.ArrUpdate
+import com.dnfapps.arrmatey.arr.api.model.BlocklistPage
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
+import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.api.model.DeleteEpisodeBody
+import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.FilesystemItem
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.Language
+import com.dnfapps.arrmatey.arr.api.model.ManualImportFile
 import com.dnfapps.arrmatey.arr.api.model.MediaStatus
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
+import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueuePage
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
+import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SeriesEditorBody
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorOption
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
@@ -24,9 +36,11 @@ import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.SonarrWantedPage
+import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.api.model.WantedPage
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeGet
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -36,14 +50,6 @@ import kotlinx.serialization.Serializable
 enum class SonarrApiVersion(val apiBase: String) {
     V3("api/v3"),
     V5("api/v5"),
-    ;
-
-    companion object {
-        fun fromVersionString(version: String?): SonarrApiVersion = when {
-            version?.startsWith("5.") == true -> V5
-            else -> V3
-        }
-    }
 }
 
 @Serializable
@@ -60,9 +66,12 @@ class SonarrClient(
 
     private var versionDetermined: Boolean = initialApiVersion != null
 
-    var apiVersion: SonarrApiVersion = initialApiVersion ?: SonarrApiVersion.V3
+    private var _apiVersion: SonarrApiVersion = initialApiVersion ?: SonarrApiVersion.V3
+
+    var apiVersion: SonarrApiVersion
+        get() = _apiVersion
         set(value) {
-            field = value
+            _apiVersion = value
             versionDetermined = true
         }
 
@@ -74,25 +83,23 @@ class SonarrClient(
 
     private val versionMutex = Mutex()
 
+    private suspend fun fetchStatusForVersion(version: SonarrApiVersion): NetworkResult<ArrSoftwareStatus> {
+        val url = "${instance.getEffectiveBaseUrl().trimEnd('/')}/${version.apiBase}/system/status"
+        return httpClient.safeGet<ArrSoftwareStatus>(url) {
+            appendInstanceApiKey()
+        }
+    }
+
     suspend fun determineApiVersion(): SonarrApiVersion {
-        apiVersion = SonarrApiVersion.V5
-        val v5Result = getStatus()
+        val v5Result = fetchStatusForVersion(SonarrApiVersion.V5)
         if (v5Result is NetworkResult.Success) {
-            apiVersion = SonarrApiVersion.V5
+            _apiVersion = SonarrApiVersion.V5
             versionDetermined = true
             return SonarrApiVersion.V5
         }
 
-        apiVersion = SonarrApiVersion.V3
-        val v3Result = getStatus()
-        if (v3Result is NetworkResult.Success) {
-            val detected = SonarrApiVersion.fromVersionString(v3Result.data.version)
-            apiVersion = detected
-            versionDetermined = true
-            return detected
-        }
-
-        apiVersion = SonarrApiVersion.V3
+        versionDetermined = true
+        _apiVersion = SonarrApiVersion.V3
         return SonarrApiVersion.V3
     }
 
@@ -108,6 +115,88 @@ class SonarrClient(
     override suspend fun testConnection(): NetworkResult<Unit> {
         determineApiVersion()
         return getStatus().map { }
+    }
+
+    override suspend fun getStatus(): NetworkResult<ArrSoftwareStatus> {
+        ensureApiVersionDetermined()
+        return super.getStatus()
+    }
+
+    override suspend fun getQualityProfiles(): NetworkResult<List<QualityProfile>> {
+        ensureApiVersionDetermined()
+        return super.getQualityProfiles()
+    }
+
+    override suspend fun getMetadataProfiles(): NetworkResult<List<MetadataProfile>> {
+        ensureApiVersionDetermined()
+        return super.getMetadataProfiles()
+    }
+
+    override suspend fun getRootFolders(): NetworkResult<List<RootFolder>> {
+        ensureApiVersionDetermined()
+        return super.getRootFolders()
+    }
+
+    override suspend fun getTags(): NetworkResult<List<Tag>> {
+        ensureApiVersionDetermined()
+        return super.getTags()
+    }
+
+    override suspend fun getCustomFilters(): NetworkResult<List<CustomFilter>> {
+        ensureApiVersionDetermined()
+        return super.getCustomFilters()
+    }
+
+    override suspend fun command(payload: CommandPayload): NetworkResult<Any> {
+        ensureApiVersionDetermined()
+        return super.command(payload)
+    }
+
+    override suspend fun getBlocklist(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<BlocklistPage> {
+        ensureApiVersionDetermined()
+        return super.getBlocklist(page, pageSize)
+    }
+
+    override suspend fun deleteBlocklistItem(id: Long): NetworkResult<Unit> {
+        ensureApiVersionDetermined()
+        return super.deleteBlocklistItem(id)
+    }
+
+    override suspend fun getFilesystem(path: String?): NetworkResult<List<FilesystemItem>> {
+        ensureApiVersionDetermined()
+        return super.getFilesystem(path)
+    }
+
+    override suspend fun downloadRelease(payload: DownloadReleasePayload): NetworkResult<Any> {
+        ensureApiVersionDetermined()
+        return super.downloadRelease(payload)
+    }
+
+    override suspend fun getDiskSpace(): NetworkResult<List<ArrDiskSpace>> {
+        ensureApiVersionDetermined()
+        return super.getDiskSpace()
+    }
+
+    override suspend fun getHealth(): NetworkResult<List<ArrHealth>> {
+        ensureApiVersionDetermined()
+        return super.getHealth()
+    }
+
+    override suspend fun getUpdates(): NetworkResult<List<ArrUpdate>> {
+        ensureApiVersionDetermined()
+        return super<BaseArrClient>.getUpdates()
+    }
+
+    override suspend fun getManualImportFiles(
+        downloadId: String?,
+        folder: String?,
+        filterExistingFiles: Boolean,
+    ): NetworkResult<List<ManualImportFile>> {
+        ensureApiVersionDetermined()
+        return super.getManualImportFiles(downloadId, folder, filterExistingFiles)
     }
 
     private fun buildSubresourceParams(
