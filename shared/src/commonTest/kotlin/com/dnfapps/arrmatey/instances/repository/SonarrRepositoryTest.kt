@@ -8,6 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.LoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -17,6 +18,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -270,5 +272,46 @@ class SonarrRepositoryTest {
         assertEquals(Instant.parse("2026-11-15T12:00:00Z"), releases[2].airDate)
         assertEquals(Instant.parse("2026-11-15T10:00:00Z"), releases[3].airDate)
         assertEquals(Instant.parse("2026-11-15T17:00:00Z"), releases[4].airDate)
+    }
+
+    @Test
+    fun testConcurrentVersionDeterminationOnV3Server() = runTest {
+        val requests = mutableListOf<Url>()
+        val httpClient = HttpClient(
+            MockEngine { request ->
+                requests += request.url
+                when {
+                    request.url.encodedPath.endsWith("/api/v5/system/status") -> {
+                        respond("Not Found", HttpStatusCode.NotFound)
+                    }
+                    request.url.encodedPath.endsWith("/api/v3/system/status") -> {
+                        respond("""{"version": "3.0.10.1567"}""", HttpStatusCode.OK, headersOf("Content-Type", "application/json"))
+                    }
+                    request.url.encodedPath.endsWith("/api/v3/series") -> {
+                        respond("[]", HttpStatusCode.OK, headersOf("Content-Type", "application/json"))
+                    }
+                    request.url.encodedPath.endsWith("/api/v3/qualityprofile") -> {
+                        respond("[]", HttpStatusCode.OK, headersOf("Content-Type", "application/json"))
+                    }
+                    else -> respond("Error", HttpStatusCode.NotFound)
+                }
+            },
+        ) {
+            install(ContentNegotiation) {
+                json(testJson)
+            }
+        }
+
+        val client = SonarrClient(fakeInstance, httpClient, initialApiVersion = null)
+
+        val deferredLibrary = async { client.getLibrary() }
+        val deferredProfiles = async { client.getQualityProfiles() }
+
+        val libraryResult = deferredLibrary.await()
+        val profilesResult = deferredProfiles.await()
+
+        assertTrue(libraryResult is NetworkResult.Success, "Library result should be Success on V3 server")
+        assertTrue(profilesResult is NetworkResult.Success, "Quality profiles result should be Success on V3 server")
+        assertEquals(SonarrApiVersion.V3, client.apiVersion)
     }
 }
