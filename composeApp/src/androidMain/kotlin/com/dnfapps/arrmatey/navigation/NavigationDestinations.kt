@@ -199,7 +199,15 @@ sealed interface DashboardScreen : NavKey {
 
     data object Prowlarr : DashboardScreen
 
+    data object ProwlarrIndexers : DashboardScreen
+
     data object Bazarr : DashboardScreen
+}
+
+sealed interface ProwlarrScreen : NavKey {
+    data object Home : ProwlarrScreen
+
+    data object Indexers : ProwlarrScreen
 }
 
 sealed interface BazarrScreen : NavKey {

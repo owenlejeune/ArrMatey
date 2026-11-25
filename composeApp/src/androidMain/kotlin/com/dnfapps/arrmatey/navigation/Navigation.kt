@@ -112,6 +112,8 @@ class DashboardTabNavigator : BaseNavigator<NavKey>(DashboardScreen.Main)
 
 class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
 
+class ProwlarrTabNavigator : BaseNavigator<NavKey>(ProwlarrScreen.Home)
+
 class TracearrTabNavigator : BaseNavigator<NavKey>(TracearrScreen.Main)
 
 class MediaServerLibraryTabNavigator : BaseNavigator<NavKey>(MediaServerLibraryScreen.Library)

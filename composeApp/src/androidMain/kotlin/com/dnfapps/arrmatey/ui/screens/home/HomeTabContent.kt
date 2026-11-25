@@ -15,7 +15,7 @@ import com.dnfapps.arrmatey.ui.tabs.DiscoverTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
 import com.dnfapps.arrmatey.ui.tabs.MediaLibraryTab
 import com.dnfapps.arrmatey.ui.tabs.MonitoringTab
-import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
+import com.dnfapps.arrmatey.ui.tabs.ProwlarrTabHost
 import com.dnfapps.arrmatey.ui.tabs.SeerrTab
 import com.dnfapps.arrmatey.ui.tabs.SettingsTabNavHost
 import com.dnfapps.arrmatey.ui.tabs.UnifiedLibraryTab
@@ -59,7 +59,7 @@ fun StandardTabContent(
         TabItem.Standard.DOWNLOADS -> DownloadsTab(wideRailIsVisible)
         TabItem.Standard.CALENDAR -> CalendarTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.REQUESTS -> SeerrTab(windowSizeClass, wideRailIsVisible)
-        TabItem.Standard.PROWLARR -> ProwlarrTab(wideRailIsVisible)
+        TabItem.Standard.PROWLARR -> ProwlarrTabHost(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.DASHBOARD -> DashboardTab(windowSizeClass)
         TabItem.Standard.BAZARR -> BazarrTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.DISCOVER -> DiscoverTab(windowSizeClass, wideRailIsVisible)

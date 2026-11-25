@@ -37,4 +37,24 @@ sealed interface NewestDownloadableState {
     data class Error(
         val message: String,
     ) : NewestDownloadableState
+
+    companion object {
+        /**
+         * Two lists as one, newest upload first. Whatever has loaded shows while the other
+         * list is still loading, and an error only shows when neither list loaded.
+         */
+        fun merge(
+            first: NewestDownloadableState,
+            second: NewestDownloadableState,
+        ): NewestDownloadableState {
+            val loaded = listOf(first, second).filterIsInstance<Success>()
+            return when {
+                loaded.isNotEmpty() -> Success(loaded.flatMap { it.items }.sortedByDescending { it.release.publishDate ?: "" })
+                first is Error -> first
+                second is Error -> second
+                first is Loading || second is Loading -> Loading
+                else -> Initial
+            }
+        }
+    }
 }

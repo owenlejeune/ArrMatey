@@ -7,7 +7,7 @@ import dev.icerock.moko.resources.StringResource
 enum class ProwlarrTabSegment(
     val resource: StringResource,
 ) {
-    Indexers(MR.strings.indexers),
+    All(MR.strings.all),
     Movies(MR.strings.movies),
     Tv(MR.strings.prowlarr_tv),
 }

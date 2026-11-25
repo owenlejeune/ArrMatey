@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.navigation.MoviesTabNavigator
 import com.dnfapps.arrmatey.navigation.MusicTabNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.navigation.ProwlarrTabNavigator
 import com.dnfapps.arrmatey.navigation.RequestsTabNavigator
 import com.dnfapps.arrmatey.navigation.SeriesTabNavigator
 import com.dnfapps.arrmatey.navigation.SettingsTabNavigator
@@ -50,6 +51,7 @@ val androidModule =
         single { AudiobooksTabNavigator() }
         single { DashboardTabNavigator() }
         single { BazarrTabNavigator() }
+        single { ProwlarrTabNavigator() }
         single { TracearrTabNavigator() }
         single { ComicsTabNavigator() }
         single { ActivityTabNavigator() }
@@ -72,6 +74,7 @@ val androidModule =
                     TabItem.Standard.COMICS to get<ComicsTabNavigator>(),
                     TabItem.Standard.DASHBOARD to get<DashboardTabNavigator>(),
                     TabItem.Standard.BAZARR to get<BazarrTabNavigator>(),
+                    TabItem.Standard.PROWLARR to get<ProwlarrTabNavigator>(),
                     TabItem.Standard.MONITORING to get<TracearrTabNavigator>(),
                     TabItem.Standard.MEDIA_LIBRARY to get<MediaServerLibraryTabNavigator>(),
                     TabItem.Settings to get<SettingsTabNavigator>(),

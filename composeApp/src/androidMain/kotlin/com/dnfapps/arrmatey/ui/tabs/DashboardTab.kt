@@ -104,7 +104,12 @@ fun DashboardTab(
                 ProwlarrTab(
                     wideRailIsVisible = wideRailIsVisible,
                     onBack = { navigation.popBackStack() },
+                    onOpenDetails = { tmdbId, type -> navigation.toDetails(tmdbId = tmdbId, requestType = type) },
+                    onOpenIndexers = { navigation.navigateTo(DashboardScreen.ProwlarrIndexers) },
                 )
+            }
+            entry<DashboardScreen.ProwlarrIndexers> {
+                ProwlarrIndexersPage(onBack = { navigation.popBackStack() })
             }
             entry<DashboardScreen.Bazarr> {
                 BazarrScreen(

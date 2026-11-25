@@ -28,6 +28,11 @@ class NewestDownloadableViewModel(
     private val _tvState = MutableStateFlow<NewestDownloadableState>(NewestDownloadableState.Initial)
     val tvState: StateFlow<NewestDownloadableState> = _tvState.asStateFlow()
 
+    /** Movies and TV together, newest upload first, for the Prowlarr tab's All list. */
+    val allState: StateFlow<NewestDownloadableState> = combine(_moviesState, _tvState) { movies, tv ->
+        NewestDownloadableState.merge(movies, tv)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, NewestDownloadableState.Initial)
+
     private val _hasProwlarr = MutableStateFlow(false)
     val hasProwlarr: StateFlow<Boolean> = _hasProwlarr.asStateFlow()
 
