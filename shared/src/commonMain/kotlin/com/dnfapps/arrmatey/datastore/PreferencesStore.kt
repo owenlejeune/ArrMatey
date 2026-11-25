@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.state.ContentFilter
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
+import com.dnfapps.arrmatey.discover.model.DiscoverFilterState
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueSortState
 import com.dnfapps.arrmatey.features.ReleaseNotes
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -123,6 +124,15 @@ interface PreferencesStore {
     fun saveDiscoverSectionPreferences(prefs: DiscoverSectionPreferences)
 
     fun resetDiscoverSectionPreferences()
+
+    /** Each See More screen's saved filter and sort, by [SeeMoreFilterSerializer] key. */
+    val seeMoreFilters: Flow<Map<String, DiscoverFilterState>>
+
+    /** Saves [filter] for the See More screen [key], or forgets it when null. */
+    fun saveSeeMoreFilter(
+        key: String,
+        filter: DiscoverFilterState?,
+    )
 
     fun markReleaseNotesAsSeen()
 
@@ -510,6 +520,24 @@ class DefaultPreferencesStore(
             dataStore.edit { preferences ->
                 preferences[PreferenceKeys.DISCOVER_SECTION_PREFERENCES] =
                     DiscoverSectionPreferencesSerializer.serialize(prefs)
+            }
+        }
+    }
+
+    override val seeMoreFilters: Flow<Map<String, DiscoverFilterState>> =
+        dataStore.data.map { preferences ->
+            SeeMoreFilterSerializer.deserialize(preferences[PreferenceKeys.SEE_MORE_FILTERS])
+        }
+
+    override fun saveSeeMoreFilter(
+        key: String,
+        filter: DiscoverFilterState?,
+    ) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = SeeMoreFilterSerializer.deserialize(preferences[PreferenceKeys.SEE_MORE_FILTERS])
+                val updated = if (filter == null) current - key else current + (key to filter)
+                preferences[PreferenceKeys.SEE_MORE_FILTERS] = SeeMoreFilterSerializer.serialize(updated)
             }
         }
     }

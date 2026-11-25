@@ -35,6 +35,7 @@ internal object PreferenceKeys {
     val APP_COLOR = stringPreferencesKey("appColor")
     val TAB_PREFERENCES = stringPreferencesKey("tabPreferences")
     val DISCOVER_SECTION_PREFERENCES = stringPreferencesKey("discoverSectionPreferences")
+    val SEE_MORE_FILTERS = stringPreferencesKey("seeMoreFilters")
 
     val LAST_RELEASE_NOTES = intPreferencesKey("lastReleaseNotes")
     val IS_FIRST_LAUNCH = booleanPreferencesKey("isFirstLaunch")

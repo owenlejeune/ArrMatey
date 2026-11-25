@@ -1,5 +1,8 @@
 package com.dnfapps.arrmatey.discover.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class DiscoverSortBy {
     POPULARITY,
     RATING,
@@ -8,11 +11,13 @@ enum class DiscoverSortBy {
     SEEDERS,
 }
 
+@Serializable
 enum class DiscoverSortOrder {
     ASCENDING,
     DESCENDING,
 }
 
+@Serializable
 data class DiscoverFilterState(
     val sortBy: DiscoverSortBy = DiscoverSortBy.POPULARITY,
     val sortOrder: DiscoverSortOrder = DiscoverSortOrder.DESCENDING,

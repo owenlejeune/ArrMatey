@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.datastore.SeeMoreFilterSerializer
 import com.dnfapps.arrmatey.discover.model.CLEAN_TITLE_REGEX
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.discover.model.DiscoverFilterState
@@ -50,6 +51,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -151,10 +153,22 @@ class DiscoverViewModel(
 
     fun updateFilterStateForCategory(category: DiscoverCategory, state: DiscoverFilterState) {
         categoryFilterStates[category]?.value = state
+        preferencesStore.saveSeeMoreFilter(SeeMoreFilterSerializer.discoverKey(category.name), state)
     }
 
     fun resetFilterStateForCategory(category: DiscoverCategory) {
         categoryFilterStates[category]?.value = DiscoverFilterState()
+        preferencesStore.saveSeeMoreFilter(SeeMoreFilterSerializer.discoverKey(category.name), null)
+    }
+
+    /** Restores each See More screen's saved filter and sort. */
+    private fun restoreFilterStates() {
+        viewModelScope.launch {
+            val saved = preferencesStore.seeMoreFilters.first()
+            categoryFilterStates.forEach { (category, state) ->
+                saved[SeeMoreFilterSerializer.discoverKey(category.name)]?.let { state.value = it }
+            }
+        }
     }
 
     private fun enrichItems(
@@ -414,6 +428,7 @@ class DiscoverViewModel(
             )
 
     init {
+        restoreFilterStates()
         observeRepository()
         observeSearchQuery()
     }

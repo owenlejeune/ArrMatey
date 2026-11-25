@@ -195,11 +195,6 @@ fun DiscoverCategoryFilterSheet(
                             selected = isAllGenresSelected,
                             onClick = { onFilterStateChanged(filterState.copy(selectedGenreIds = emptySet())) },
                             label = { Text(mokoString(MR.strings.all_genres)) },
-                            leadingIcon = if (isAllGenresSelected) {
-                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                            } else {
-                                null
-                            },
                             shape = MaterialTheme.shapes.small,
                         )
 
@@ -209,11 +204,6 @@ fun DiscoverCategoryFilterSheet(
                                 selected = isSelected,
                                 onClick = { onFilterStateChanged(filterState.toggleGenre(genreId)) },
                                 label = { Text(genreName) },
-                                leadingIcon = if (isSelected) {
-                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                } else {
-                                    null
-                                },
                                 shape = MaterialTheme.shapes.small,
                             )
                         }
@@ -239,11 +229,6 @@ fun DiscoverCategoryFilterSheet(
                             selected = isAllLangsSelected,
                             onClick = { onFilterStateChanged(filterState.copy(selectedLanguages = emptySet())) },
                             label = { Text(mokoString(MR.strings.all_languages)) },
-                            leadingIcon = if (isAllLangsSelected) {
-                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                            } else {
-                                null
-                            },
                             shape = MaterialTheme.shapes.small,
                         )
 
@@ -253,11 +238,6 @@ fun DiscoverCategoryFilterSheet(
                                 selected = isSelected,
                                 onClick = { onFilterStateChanged(filterState.toggleLanguage(langCode)) },
                                 label = { Text(langName) },
-                                leadingIcon = if (isSelected) {
-                                    { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                                } else {
-                                    null
-                                },
                                 shape = MaterialTheme.shapes.small,
                             )
                         }

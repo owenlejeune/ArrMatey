@@ -2,6 +2,8 @@ package com.dnfapps.arrmatey.newest
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.datastore.SeeMoreFilterSerializer
 import com.dnfapps.arrmatey.discover.model.DiscoverFilterState
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
@@ -15,12 +17,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class NewestDownloadableViewModel(
     private val instanceManager: InstanceManager,
     private val getNewestDownloadableUseCase: GetNewestDownloadableUseCase,
+    private val preferencesStore: PreferencesStore,
 ) : ViewModel() {
     private val _moviesState = MutableStateFlow<NewestDownloadableState>(NewestDownloadableState.Initial)
     val moviesState: StateFlow<NewestDownloadableState> = _moviesState.asStateFlow()
@@ -49,10 +53,12 @@ class NewestDownloadableViewModel(
         filter: DiscoverFilterState,
     ) {
         filters.getValue(kind).value = filter
+        preferencesStore.saveSeeMoreFilter(SeeMoreFilterSerializer.newestKey(kind.name), filter)
     }
 
     fun resetFilter(kind: ReleaseKind) {
         filters.getValue(kind).value = NewestFilter.DEFAULT
+        preferencesStore.saveSeeMoreFilter(SeeMoreFilterSerializer.newestKey(kind.name), null)
     }
 
     /** [moviesState] or [tvState] with [filterFor] applied. */
@@ -74,6 +80,12 @@ class NewestDownloadableViewModel(
     private var seerr: SeerrInstanceRepository? = null
 
     init {
+        viewModelScope.launch {
+            val saved = preferencesStore.seeMoreFilters.first()
+            filters.forEach { (kind, state) ->
+                saved[SeeMoreFilterSerializer.newestKey(kind.name)]?.let { state.value = it }
+            }
+        }
         viewModelScope.launch {
             combine(
                 instanceManager.getSelectedProwlarrRepository(),
